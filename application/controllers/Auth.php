@@ -26,15 +26,26 @@ class Auth extends Public_Controller
     public function register()
     {
         if ($this->currentUser) redirect('dashboard');
-        $data = array('pageTitle' => 'Daftar Akun | SmartDesa Warga', 'demoMode' => warga_demo_mode());
+        $data = array(
+            'pageTitle' => 'Daftar Akun | SmartDesa Warga',
+            'demoMode' => warga_demo_mode(),
+            'registrationRegions' => $this->Auth_model->registration_regions()
+        );
         if ($this->input->method(TRUE) === 'POST') {
             $this->form_validation->set_rules('name', 'Nama lengkap', 'trim|required|min_length[3]|max_length[120]');
             $this->form_validation->set_rules('contact', 'Email atau nomor telepon', 'trim|required|max_length[160]');
-            $this->form_validation->set_rules('village_code', 'Kode desa', 'trim|required|max_length[30]');
+            $this->form_validation->set_rules('district_code', 'Distrik/Kecamatan', 'trim|required|max_length[20]');
+            $this->form_validation->set_rules('village_code', 'Kampung/Desa', 'trim|required|max_length[30]');
             $this->form_validation->set_rules('password', 'Kata sandi', 'required|min_length[8]|max_length[200]');
             $this->form_validation->set_rules('password_confirm', 'Konfirmasi kata sandi', 'required|matches[password]');
             if ($this->form_validation->run()) {
-                $result = $this->Auth_model->register_citizen(array('name' => $this->input->post('name', TRUE), 'contact' => $this->input->post('contact', TRUE), 'village_code' => $this->input->post('village_code', TRUE), 'password' => (string) $this->input->post('password')));
+                $result = $this->Auth_model->register_citizen(array(
+                    'name' => $this->input->post('name', TRUE),
+                    'contact' => $this->input->post('contact', TRUE),
+                    'district_code' => $this->input->post('district_code', TRUE),
+                    'village_code' => $this->input->post('village_code', TRUE),
+                    'password' => (string) $this->input->post('password')
+                ));
                 if (!empty($result['success'])) {
                     $this->session->set_flashdata('success', 'Pendaftaran berhasil. Silakan masuk menggunakan akun Anda.');
                     redirect('login');

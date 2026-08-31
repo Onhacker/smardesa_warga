@@ -9,7 +9,7 @@
     <?= csrf_field() ?>
     <section class="card card-style warga-form-card"><div class="content">
         <div class="warga-form-title"><span>1</span><div><h2>Jenis Layanan</h2><p>Pilih surat yang akan diajukan.</p></div></div>
-        <div class="input-style has-borders no-icon input-style-always-active mb-0"><label for="service-type" class="color-highlight">Jenis Surat</label><select name="service_type" id="service-type" required data-service-select><option value="">Pilih jenis surat</option><?php foreach ($services as $service): ?><option value="<?= e($service['slug']) ?>" <?= (string) $selectedService === (string) $service['slug'] ? 'selected' : '' ?>><?= e($service['name']) ?></option><?php endforeach; ?></select><span><i class="fa fa-chevron-down"></i></span><em>*</em></div>
+        <div class="input-style has-borders no-icon input-style-always-active mb-0"><label for="service-type" class="color-highlight">Jenis Surat</label><select name="service_type" id="service-type" required data-service-select><option value="">Pilih jenis surat</option><?php foreach ($services as $service): ?><option value="<?= e($service['slug']) ?>" <?= (string) $selectedService === (string) $service['slug'] ? 'selected' : '' ?>><?= e($service['name']) ?></option><?php endforeach; ?></select><span><i class="fa fa-chevron-down"></i></span><i class="fa fa-check disabled valid color-green-dark"></i><i class="fa fa-times disabled invalid color-red-dark"></i><em>*</em></div>
         <div class="warga-service-requirements d-none" data-service-requirements><div class="warga-requirement-head"><i class="fa fa-clipboard-check"></i><strong>Dokumen yang diperlukan</strong></div><ul data-requirement-list></ul></div>
     </div></section>
 

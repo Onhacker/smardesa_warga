@@ -45,14 +45,44 @@ class Auth_model extends CI_Model
         return $this->lastError;
     }
 
+    /**
+     * Daftar wilayah aktif untuk formulir pendaftaran warga.
+     * Kode wilayah tetap berasal dari server; warga hanya memilih nama wilayah.
+     */
+    public function registration_regions()
+    {
+        if (warga_demo_mode()) {
+            return array(array(
+                'district_code' => '95.01.03',
+                'district_name' => 'Asologaima',
+                'village_code' => '95.01.03.2003',
+                'village_name' => 'Kampung Araboda',
+                'regency_name' => 'Jayawijaya',
+                'province_name' => 'Papua Pegunungan'
+            ));
+        }
+
+        if (!warga_database_available() || !$this->db->table_exists('village_tenants')) {
+            return array();
+        }
+
+        return $this->db
+            ->select('district_code, district_name, village_code, name AS village_name, regency_name, province_name')
+            ->where('status', 'active')
+            ->order_by('district_name', 'ASC')
+            ->order_by('name', 'ASC')
+            ->get('village_tenants')
+            ->result_array();
+    }
+
     private function demo_users()
     {
         $scope = array(
             'village_id' => '00000000-0000-4000-8000-000000000001',
-            'village_code' => 'DEMO-ARABODA',
+            'village_code' => '95.01.03.2003',
             'village_name' => 'Kampung Araboda',
-            'district_name' => 'Asolagama',
-            'regency_code' => '9102',
+            'district_name' => 'Asologaima',
+            'regency_code' => '95.01',
             'regency_name' => 'Jayawijaya'
         );
         return array(
@@ -127,13 +157,17 @@ class Auth_model extends CI_Model
 
         $name = trim((string) $data['name']);
         $contact = trim((string) $data['contact']);
+        $districtCode = strtoupper(trim((string) (isset($data['district_code']) ? $data['district_code'] : '')));
         $villageCode = strtoupper(trim((string) $data['village_code']));
         $email = filter_var($contact, FILTER_VALIDATE_EMAIL) ? strtolower($contact) : NULL;
         $phone = $email === NULL ? preg_replace('/[^0-9+]/', '', $contact) : NULL;
         if ($email === NULL && strlen($phone) < 8) return array('success' => FALSE, 'message' => 'Email atau nomor telepon belum valid.');
 
         $village = $this->db->where('village_code', $villageCode)->where('status', 'active')->get('village_tenants')->row_array();
-        if (!$village) return array('success' => FALSE, 'message' => 'Kode desa belum terdaftar. Pastikan kode sesuai informasi desa.');
+        if (!$village) return array('success' => FALSE, 'message' => 'Kampung/Desa yang dipilih belum terdaftar atau tidak aktif.');
+        if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
+            return array('success' => FALSE, 'message' => 'Pilihan distrik dan kampung/desa tidak sesuai. Silakan pilih ulang.');
+        }
         $role = $this->db->where('slug', 'warga')->get('roles')->row_array();
         if (!$role) return array('success' => FALSE, 'message' => 'Peran warga belum disiapkan pada server.');
 

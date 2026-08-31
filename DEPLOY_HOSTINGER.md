@@ -66,7 +66,9 @@ smartdesa-warga/database/schema.sql
 smartdesa-warga/database/seed.sql
 ```
 
-Jika database sudah pernah dibuat sebelum API dipisahkan, impor juga `database/migrations/001_sync_auth.sql` satu kali.
+Jika database sudah pernah dibuat sebelum API dipisahkan, impor juga
+`database/migrations/001_sync_auth.sql` dan
+`database/migrations/002_set_araboda_official.sql` satu kali sesuai urutan.
 
 ## 4. Konfigurasi API
 
@@ -134,10 +136,16 @@ Set permission `.env` menjadi `600`. Pastikan folder `PRIVATE_STORAGE_PATH` writ
 
 ## 6. Daftarkan instalasi desa
 
+Tenant awal Kampung Araboda memakai kode wilayah resmi `95.01.03.2003`. Warga memilih
+distrik/kecamatan dan kampung/desa pada formulir; mereka tidak perlu mengetik kode ini.
+Untuk desa berikutnya, tambahkan tenant aktif dengan kode wilayah resminya pada
+`village_tenants`, lalu jalankan provisioning untuk desa tersebut. Setiap perintah
+provisioning hanya membuat kredensial untuk satu instalasi desa.
+
 Setelah tenant desa resmi ada di `village_tenants`, jalankan dari root API:
 
 ```bash
-php tools/provision_installation.php --village=KODE-DESA --write
+php tools/provision_installation.php --village=95.01.03.2003 --write
 ```
 
 Simpan `installation_code` dan `secret` yang dicetak. Secret hanya ditampilkan saat provisioning dan dipakai oleh konektor SmartDesa lokal. Jangan masukkan secret ke JavaScript PWA atau commit ke repository.
