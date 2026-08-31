@@ -155,7 +155,7 @@ class Request_model extends CI_Model
 
     public function service_types()
     {
-        if (warga_demo_mode() || !isset($this->db)) return $this->demo_services();
+        if (warga_demo_mode() || !warga_database_available()) return $this->demo_services();
         $rows = $this->db->where('is_active', 1)->order_by('sort_order', 'ASC')->order_by('name', 'ASC')->get('service_types')->result_array();
         foreach ($rows as &$row) {
             $row['requirements'] = json_decode((string) $row['requirements_json'], TRUE);
@@ -168,7 +168,7 @@ class Request_model extends CI_Model
 
     public function for_user($userId)
     {
-        if (warga_demo_mode() || !isset($this->db)) return array_values(array_filter($this->demo_requests(), function ($row) use ($userId) { return isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId; }));
+        if (warga_demo_mode() || !warga_database_available()) return array_values(array_filter($this->demo_requests(), function ($row) use ($userId) { return isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId; }));
         $rows = $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, v.name AS village_name')
             ->from('service_requests sr')->join('service_types st', 'st.id=sr.service_type_id')->join('village_tenants v', 'v.id=sr.village_id', 'left')
             ->where('sr.citizen_user_id', (int) $userId)->order_by('sr.submitted_at', 'DESC')->get()->result_array();
@@ -191,7 +191,7 @@ class Request_model extends CI_Model
 
     public function find_for_user($id, $userId)
     {
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             foreach ($this->demo_requests() as $row) if ((string) $row['id'] === (string) $id && isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId) return $row;
             return NULL;
         }
@@ -203,7 +203,7 @@ class Request_model extends CI_Model
 
     public function for_staff(array $user, $status = NULL)
     {
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             $rows = $this->demo_staff_request_rows();
             if ($status !== NULL && $status !== '') $rows = array_values(array_filter($rows, function ($row) use ($status) { return $row['status'] === $status; }));
             return $rows;
@@ -237,7 +237,7 @@ class Request_model extends CI_Model
 
     public function find_for_staff($id, array $user)
     {
-        if (warga_demo_mode() || !isset($this->db)) return $this->find_demo_request($id);
+        if (warga_demo_mode() || !warga_database_available()) return $this->find_demo_request($id);
         $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name');
         $this->db->from('service_requests sr');
         $this->db->join('service_types st', 'st.id=sr.service_type_id');
@@ -277,7 +277,7 @@ class Request_model extends CI_Model
         if (in_array($action, array('revision', 'reject'), TRUE) && trim((string) $note) === '') return array('success' => FALSE, 'message' => 'Alasan wajib diisi untuk perbaikan atau penolakan.');
         $note = trim((string) $note) !== '' ? trim((string) $note) : $next['default_note'];
         $now = date('Y-m-d H:i:s');
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             $historyMap = $this->session->userdata('warga_demo_history');
             if (!is_array($historyMap)) $historyMap = array();
             $history = isset($historyMap[(string) $id]) && is_array($historyMap[(string) $id]) ? $historyMap[(string) $id] : $this->history($id);
@@ -313,7 +313,7 @@ class Request_model extends CI_Model
 
     public function documents_for_staff($requestId, array $user)
     {
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             $request = $this->find_demo_request($requestId);
             return !empty($request['documents']) ? $request['documents'] : array();
         }
@@ -324,7 +324,7 @@ class Request_model extends CI_Model
 
     public function document_for_staff($documentId, array $user)
     {
-        if (warga_demo_mode() || !isset($this->db)) return NULL;
+        if (warga_demo_mode() || !warga_database_available()) return NULL;
         $this->db->select('d.*, r.id AS request_id')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')->where('d.id', (string) $documentId);
         $request = $this->db->get()->row_array();
         if (!$request || !$this->find_for_staff($request['request_id'], $user)) return NULL;
@@ -333,7 +333,7 @@ class Request_model extends CI_Model
 
     public function history($requestId)
     {
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             $historyMap = $this->session->userdata('warga_demo_history');
             if (is_array($historyMap) && isset($historyMap[(string) $requestId]) && is_array($historyMap[(string) $requestId])) return $historyMap[(string) $requestId];
             $request = $this->find_demo_request($requestId);
@@ -367,7 +367,7 @@ class Request_model extends CI_Model
         $serviceSlug = trim((string) $data['service_type']);
         $purpose = trim((string) $data['purpose']);
         $note = trim((string) $data['note']);
-        if (warga_demo_mode() || !isset($this->db)) {
+        if (warga_demo_mode() || !warga_database_available()) {
             $service = NULL;
             foreach ($this->demo_services() as $candidate) if ($candidate['slug'] === $serviceSlug) $service = $candidate;
             if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak ditemukan.');
@@ -434,14 +434,14 @@ class Request_model extends CI_Model
 
     public function documents_for_user($requestId, $userId)
     {
-        if (warga_demo_mode() || !isset($this->db)) return array();
+        if (warga_demo_mode() || !warga_database_available()) return array();
         return $this->db->select('d.id,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')
             ->where(array('d.request_id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId))->order_by('d.created_at', 'ASC')->get()->result_array();
     }
 
     public function official_document_for_user($requestId, $userId)
     {
-        if (warga_demo_mode() || !isset($this->db)) return NULL;
+        if (warga_demo_mode() || !warga_database_available()) return NULL;
         return $this->db->select('r.document_path')->from('service_requests r')->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued'))->get()->row_array();
     }
 }

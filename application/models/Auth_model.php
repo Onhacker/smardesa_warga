@@ -20,7 +20,7 @@ class Auth_model extends CI_Model
 
     private function is_login_throttled($identity)
     {
-        if (warga_demo_mode() || !isset($this->db)) return FALSE;
+        if (warga_demo_mode() || !warga_database_available()) return FALSE;
         $since = date('Y-m-d H:i:s', time() - 900);
         $identityCount = $this->db->where('identity_hash', $this->identity_hash($identity))->where('attempted_at >=', $since)->count_all_results('login_failures');
         $ipCount = $this->db->where('ip_address', $this->client_ip())->where('attempted_at >=', $since)->count_all_results('login_failures');
@@ -29,14 +29,14 @@ class Auth_model extends CI_Model
 
     private function record_login_failure($identity)
     {
-        if (warga_demo_mode() || !isset($this->db)) return;
+        if (warga_demo_mode() || !warga_database_available()) return;
         if (mt_rand(1, 20) === 1) $this->db->where('attempted_at <', date('Y-m-d H:i:s', time() - 86400))->delete('login_failures');
         $this->db->insert('login_failures', array('identity_hash' => $this->identity_hash($identity), 'ip_address' => $this->client_ip()));
     }
 
     private function clear_login_failures($identity)
     {
-        if (warga_demo_mode() || !isset($this->db)) return;
+        if (warga_demo_mode() || !warga_database_available()) return;
         $this->db->where('identity_hash', $this->identity_hash($identity))->delete('login_failures');
     }
 
@@ -85,7 +85,7 @@ class Auth_model extends CI_Model
             return FALSE;
         }
 
-        if (!isset($this->db)) return FALSE;
+        if (!warga_database_available()) return FALSE;
         if ($this->is_login_throttled($identity)) {
             $this->lastError = 'Terlalu banyak percobaan masuk. Silakan tunggu 15 menit lalu coba lagi.';
             return FALSE;
@@ -113,7 +113,7 @@ class Auth_model extends CI_Model
     {
         if (!$this->session->userdata('warga_logged_in') || !$this->session->userdata('warga_user_id')) return NULL;
         if (warga_demo_mode()) return $this->demo_user((int) $this->session->userdata('warga_user_id'));
-        if (!isset($this->db)) return NULL;
+        if (!warga_database_available()) return NULL;
         return $this->db->select('u.id,u.role_id,u.name,u.username,u.email,u.phone,u.is_active,u.last_login_at,u.village_id,r.name AS role_name,r.slug AS role_slug,v.village_code,v.name AS village_name,v.district_name,v.regency_code,v.regency_name')
             ->from('users u')->join('roles r', 'r.id=u.role_id')->join('village_tenants v', 'v.id=u.village_id', 'left')
             ->where(array('u.id' => (int) $this->session->userdata('warga_user_id'), 'u.is_active' => 1))
@@ -123,7 +123,7 @@ class Auth_model extends CI_Model
     public function register_citizen(array $data)
     {
         if (warga_demo_mode()) return array('success' => TRUE);
-        if (!isset($this->db)) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
 
         $name = trim((string) $data['name']);
         $contact = trim((string) $data['contact']);

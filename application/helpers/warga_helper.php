@@ -9,6 +9,14 @@ if (!function_exists('warga_demo_mode')) {
     function warga_demo_mode() { return getenv('WARGA_DEMO_MODE') === '1'; }
 }
 
+if (!function_exists('warga_database_available')) {
+    function warga_database_available()
+    {
+        $CI =& get_instance();
+        return isset($CI->db) && is_object($CI->db) && !empty($CI->db->conn_id);
+    }
+}
+
 if (!function_exists('csrf_field')) {
     function csrf_field()
     {
