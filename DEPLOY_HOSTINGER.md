@@ -19,6 +19,10 @@ cd smardesa_warga
 composer install --no-dev --prefer-dist --optimize-autoloader
 ```
 
+Gunakan `GIT_SSH_COMMAND` dengan path kunci tertentu hanya jika file kunci tersebut
+memang sudah ada di server. Jika tidak, perintah clone di atas akan memakai kunci SSH
+default atau SSH agent yang tersedia.
+
 Salin source ke document root tanpa membawa konfigurasi runtime:
 
 ```bash
