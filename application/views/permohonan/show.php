@@ -1,0 +1,29 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<section class="warga-detail-head">
+    <span class="warga-detail-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
+    <div><p><?= e($request['request_code']) ?></p><h1><?= e($request['service_name']) ?></h1><?= warga_status_label($request['status']) ?></div>
+</section>
+
+<section class="card card-style warga-detail-card"><div class="content mb-2">
+    <div class="warga-detail-row"><span>Tanggal pengajuan</span><strong><?= e(tanggal_id($request['submitted_at'], TRUE)) ?></strong></div>
+    <div class="warga-detail-row"><span>Keperluan</span><strong><?= e($request['purpose']) ?></strong></div>
+    <?php if (!empty($request['note'])): ?><div class="warga-detail-row"><span>Catatan</span><strong><?= e($request['note']) ?></strong></div><?php endif; ?>
+    <?php if (!empty($request['local_reference'])): ?><div class="warga-detail-row"><span>Nomor surat</span><strong><?= e($request['local_reference']) ?></strong></div><?php endif; ?>
+    <?php if (!empty($request['documents'])): ?><div class="warga-detail-row"><span>Berkas dikirim</span><strong><?= e(count($request['documents'])) ?> berkas</strong></div><?php endif; ?>
+</div></section>
+
+<?php if ($request['status'] === 'issued'): ?>
+<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Dokumen resmi tersedia setelah hasil sinkronisasi diterima.</p></div><?php if (!empty($request['document_path'])): ?><a href="<?= site_url('permohonan/' . rawurlencode($request['id']) . '/surat') ?>" class="btn btn-s bg-green-dark color-white rounded-s"><i class="fa fa-download"></i></a><?php endif; ?></section>
+<?php endif; ?>
+
+<section class="content warga-section-head mt-4"><div><p class="font-600 color-highlight mb-n1">Perjalanan layanan</p><h2 class="font-22 mb-0">Status Permohonan</h2></div></section>
+<section class="warga-timeline">
+    <?php foreach ($history as $index => $item): ?>
+        <article class="warga-timeline-item <?= $index + 1 === count($history) ? 'is-current' : '' ?>">
+            <span class="warga-timeline-marker"><i class="fa <?= $item['status'] === 'verified' ? 'fa-user-check' : ($item['status'] === 'issued' ? 'fa-file-download' : 'fa-paper-plane') ?>"></i></span>
+            <div><strong><?= e(isset($item['label']) ? $item['label'] : ucwords(str_replace('_', ' ', $item['to_status']))) ?></strong><time><?= e(tanggal_id($item['occurred_at'], TRUE)) ?></time><p><?= e($item['note']) ?></p></div>
+        </article>
+    <?php endforeach; ?>
+</section>
+
+<section class="warga-home-notice"><i class="fa fa-info-circle"></i><div><strong>Pembaruan status</strong><p>Verifikasi Sekdes, persetujuan Kepala Desa, dan penerbitan surat akan tampil pada halaman ini.</p></div></section>

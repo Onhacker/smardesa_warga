@@ -1,0 +1,52 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<!DOCTYPE HTML>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+    <meta name="theme-color" content="#167b78">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="SmartDesa Warga">
+    <title><?= e($pageTitle) ?></title>
+    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
+    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=1">
+    <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
+    <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
+    <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
+</head>
+<body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
+<div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
+<div id="page">
+    <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title">SmartDesa Warga</a><a href="#" data-toggle-theme class="header-icon header-icon-4" aria-label="Ubah tema"><i class="fas fa-moon"></i></a></header>
+    <main class="page-content header-clear-medium warga-auth-page">
+        <section class="warga-auth-brand">
+            <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
+            <div><p>LAYANAN DIGITAL WARGA</p><h1>SmartDesa Warga</h1><span>Kampung terhubung, layanan lebih dekat.</span></div>
+        </section>
+        <section class="card card-style warga-auth-card">
+            <div class="content">
+                <p class="font-600 color-highlight mb-n1">Selamat datang</p>
+                <h2 class="font-28 mb-2">Masuk</h2>
+                <p class="mb-4">Gunakan akun warga yang telah terdaftar.</p>
+                <?php $loginSuccess = $this->session->flashdata('success'); ?>
+                <?php if ($loginSuccess): ?><div class="alert alert-small rounded-s bg-green-dark" role="alert"><span><i class="fa fa-check color-white"></i></span><strong class="color-white"><?= e($loginSuccess) ?></strong></div><?php endif; ?>
+                <?php if (!empty($error) || validation_errors()): ?><div class="alert alert-small rounded-s bg-red-dark" role="alert"><span><i class="fa fa-times color-white"></i></span><strong class="color-white"><?= !empty($error) ? e($error) : validation_errors('<span class="d-block">', '</span>') ?></strong></div><?php endif; ?>
+                <form method="post" action="<?= site_url('login') ?>" autocomplete="on" data-disable-submit>
+                    <?= csrf_field() ?>
+                    <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="login-identity" name="identity" value="<?= e(old('identity', $demoMode ? 'warga' : '')) ?>" placeholder="Email atau Nomor Telepon" required autocomplete="username"><label for="login-identity" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
+                    <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-lock"></i><input type="password" class="form-control" id="login-password" name="password" value="<?= $demoMode ? 'demo12345' : '' ?>" placeholder="Kata Sandi" required autocomplete="current-password"><label for="login-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
+                    <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
+                </form>
+                <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>
+                <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="color-highlight font-600" href="<?= site_url('register') ?>">Daftar warga</a></p>
+            </div>
+        </section>
+        <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install'); ?></div>
+    </main>
+</div>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=1"></script>
+</body>
+</html>

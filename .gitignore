@@ -1,0 +1,16 @@
+.env
+/application/cache/*
+!/application/cache/index.html
+/application/logs/*
+!/application/logs/index.html
+/application/sessions/*
+!/application/sessions/index.html
+/storage/*
+!/storage/index.html
+/uploads/requests/*
+!/uploads/requests/index.html
+/vendor/
+auth.json
+composer.phar
+.phpunit.result.cache
+.DS_Store

@@ -1,0 +1,149 @@
+# Deployment Hostinger
+
+Dokumen ini memasang PWA warga dan API sinkronisasi pada dua subdomain terpisah:
+
+- `warga-smartdesa.mediaverse.co.id` -> `/home/USER/domains/warga-smartdesa.mediaverse.co.id/public_html`
+- `api-warga-smartdesa.mediaverse.co.id` -> `/home/USER/domains/api-warga-smartdesa.mediaverse.co.id/public_html`
+
+Ganti `USER` dengan nama akun Hostinger. Link hPanel bukan URL aplikasi; gunakan URL subdomain di atas setelah SSL aktif.
+
+## 1. Deploy source PWA dari Git
+
+Clone repository ke folder repository privat akun Hostinger, lalu pasang dependensi:
+
+```bash
+mkdir -p "$HOME/repositories"
+cd "$HOME/repositories"
+git clone git@github.com:Onhacker/smardesa_warga.git
+cd smardesa_warga
+composer install --no-dev --prefer-dist --optimize-autoloader
+```
+
+Salin source ke document root tanpa membawa konfigurasi runtime:
+
+```bash
+PWA_ROOT="$HOME/domains/warga-smartdesa.mediaverse.co.id/public_html"
+mkdir -p "$PWA_ROOT"
+rsync -a --delete \
+  --exclude='.git/' \
+  --exclude='.env' \
+  --exclude='application/cache/*' \
+  --exclude='application/logs/*' \
+  --exclude='application/sessions/*' \
+  --exclude='storage/*' \
+  --exclude='uploads/requests/*' \
+  ./ "$PWA_ROOT/"
+```
+
+Untuk deployment berikutnya, jalankan `git pull --ff-only`, `composer install`, lalu perintah
+`rsync` yang sama. File `.env` produksi dibuat langsung pada document root dan tidak pernah
+disimpan dalam Git.
+
+## 2. Upload source API
+
+Upload atau clone source `/Users/onhacker/htdocs/smartdesa-warga-api` ke root API. Jangan
+menggabungkan PWA dan API dalam satu document root. Repository pada panduan ini hanya berisi
+PWA; source API akan memakai repository/deployment terpisah. `.env` dibuat langsung melalui
+SSH dan tidak diunggah melalui browser.
+
+Buat penyimpanan berkas di luar web root:
+
+```bash
+mkdir -p "$HOME/smartdesa-private/warga"
+chmod 750 "$HOME/smartdesa-private" "$HOME/smartdesa-private/warga"
+```
+
+## 3. Database pusat
+
+Buat satu database `smartdesa_warga` dan dua user database bila panel mendukungnya. Beri hak minimal yang diperlukan kepada PWA dan API. Impor sekali:
+
+```text
+smartdesa-warga/database/schema.sql
+smartdesa-warga/database/seed.sql
+```
+
+Jika database sudah pernah dibuat sebelum API dipisahkan, impor juga `database/migrations/001_sync_auth.sql` satu kali.
+
+## 4. Konfigurasi API
+
+Pada root API, salin `.env.example` menjadi `.env`, lalu isi:
+
+```text
+APP_ENV=production
+APP_URL=https://api-warga-smartdesa.mediaverse.co.id/
+APP_KEY=<hasil random_bytes, minimal 32 karakter>
+API_DEMO_MODE=0
+WARGA_ALLOWED_ORIGIN=https://warga-smartdesa.mediaverse.co.id
+DB_HOST=<host database dari Hostinger>
+DB_USER=<user API>
+DB_PASS=<password API>
+DB_NAME=smartdesa_warga
+```
+
+API membutuhkan `PRIVATE_STORAGE_PATH` yang sama-sama dapat dibaca oleh PHP API:
+
+```text
+PRIVATE_STORAGE_PATH=/home/USER/smartdesa-private/warga
+```
+
+Path ini berada di luar `public_html`. Jangan membuat symlink berkas ke document root.
+
+Buat kunci acak di server:
+
+```bash
+php -r 'echo bin2hex(random_bytes(32)), PHP_EOL;'
+```
+
+Kunci API ini tidak boleh sama dengan kunci PWA. Set permission:
+
+```bash
+chmod 600 .env
+```
+
+Uji dari server atau komputer Anda:
+
+```bash
+curl -fsS https://api-warga-smartdesa.mediaverse.co.id/v1/health
+curl -i https://api-warga-smartdesa.mediaverse.co.id/v1/unknown
+```
+
+Health produksi harus mengembalikan `success: true` dan database `ready`. Endpoint yang tidak dikenal harus mengembalikan JSON 404.
+
+## 5. Konfigurasi PWA
+
+Pada root PWA, salin `.env.example` menjadi `.env`, lalu isi:
+
+```text
+APP_ENV=production
+APP_URL=https://warga-smartdesa.mediaverse.co.id/
+APP_KEY=<kunci acak berbeda dari API>
+WARGA_DEMO_MODE=0
+WARGA_CENTRAL_API_URL=https://api-warga-smartdesa.mediaverse.co.id/v1/
+PRIVATE_STORAGE_PATH=/home/USER/smartdesa-private/warga
+DB_HOST=<host database dari Hostinger>
+DB_USER=<user PWA>
+DB_PASS=<password PWA>
+DB_NAME=smartdesa_warga
+```
+
+Set permission `.env` menjadi `600`. Pastikan folder `PRIVATE_STORAGE_PATH` writable oleh PHP. Folder `application/sessions` juga harus writable.
+
+## 6. Daftarkan instalasi desa
+
+Setelah tenant desa resmi ada di `village_tenants`, jalankan dari root API:
+
+```bash
+php tools/provision_installation.php --village=KODE-DESA --write
+```
+
+Simpan `installation_code` dan `secret` yang dicetak. Secret hanya ditampilkan saat provisioning dan dipakai oleh konektor SmartDesa lokal. Jangan masukkan secret ke JavaScript PWA atau commit ke repository.
+
+## 7. Checklist sebelum dibuka
+
+- DNS kedua subdomain mengarah ke hosting dan SSL aktif.
+- `API_DEMO_MODE=0` dan `WARGA_DEMO_MODE=0`.
+- `.env` kedua aplikasi berada di root masing-masing dan permission `600`.
+- `PRIVATE_STORAGE_PATH` berada di luar `public_html`.
+- Database API dan PWA terhubung, tetapi user database tetap terpisah bila memungkinkan.
+- Akun demo tidak digunakan di produksi.
+- Backup database dan folder privat dibuat sebelum onboarding desa pertama.

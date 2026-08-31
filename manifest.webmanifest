@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "SmartDesa Warga",
+  "short_name": "SmartDesa Warga",
+  "description": "Layanan permohonan surat warga dari desa.",
+  "lang": "id-ID",
+  "dir": "ltr",
+  "start_url": "./dashboard",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#eef3f5",
+  "theme_color": "#167b78",
+  "categories": ["government", "productivity"],
+  "prefer_related_applications": false,
+  "icons": [
+    {"src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "assets/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "assets/pwa/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Ajukan Surat", "short_name": "Ajukan", "url": "./permohonan/baru", "icons": [{"src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png"}]},
+    {"name": "Permohonan Saya", "short_name": "Riwayat", "url": "./permohonan", "icons": [{"src": "assets/pwa/icon-192.png", "sizes": "192x192", "type": "image/png"}]}
+  ]
+}
