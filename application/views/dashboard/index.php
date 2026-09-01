@@ -2,30 +2,44 @@
 <section class="warga-home-head">
     <div class="warga-home-identity">
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
-        <div><p>Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
+        <div><p class="color-white">Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span class="color-white"><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
     </div>
     <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka notifikasi"><i class="fa fa-bell"></i></a>
 </section>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">
-    <div><strong><?= number_format($summary['total']) ?></strong><span>Total</span></div>
-    <div><strong><?= number_format($summary['active']) ?></strong><span>Diproses</span></div>
-    <div><strong><?= number_format($summary['issued']) ?></strong><span>Selesai</span></div>
-    <div><strong><?= number_format($summary['revision']) ?></strong><span>Perbaikan</span></div>
+    <div class="warga-summary-card is-total">
+        <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-file-alt"></i></span>
+        <strong><?= number_format($summary['total']) ?></strong><span class="warga-summary-label">Total</span>
+    </div>
+    <div class="warga-summary-card is-active">
+        <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-clock"></i></span>
+        <strong><?= number_format($summary['active']) ?></strong><span class="warga-summary-label">Diproses</span>
+    </div>
+    <div class="warga-summary-card is-issued">
+        <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-check-circle"></i></span>
+        <strong><?= number_format($summary['issued']) ?></strong><span class="warga-summary-label">Selesai</span>
+    </div>
+    <div class="warga-summary-card is-revision">
+        <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-wrench"></i></span>
+        <strong><?= number_format($summary['revision']) ?></strong><span class="warga-summary-label">Perbaikan</span>
+    </div>
 </section>
 
-<section class="content warga-section-head">
-    <div><p class="font-600 color-highlight mb-n1">Pelayanan desa</p><h2 class="font-22 mb-0">Ajukan Surat</h2></div>
-    <a href="<?= site_url('permohonan/baru') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
-</section>
-<section class="warga-service-grid" aria-label="Jenis layanan">
-    <?php $serviceColors = array('teal', 'blue', 'orange', 'green', 'red'); ?>
-    <?php foreach (array_slice($services, 0, 5) as $index => $service): ?>
-        <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item">
-            <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
-            <strong><?= e($service['short_name']) ?></strong>
-        </a>
-    <?php endforeach; ?>
+<section class="warga-service-card" aria-labelledby="warga-service-title">
+    <div class="content warga-section-head warga-service-heading-card">
+        <div><p class="font-600 color-highlight mb-n1">Pelayanan desa</p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
+        <a href="<?= site_url('permohonan/baru') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
+    </div>
+    <div class="warga-service-grid" aria-label="Jenis layanan">
+        <?php $serviceColors = array('teal', 'blue', 'orange', 'green', 'red'); ?>
+        <?php foreach (array_slice($services, 0, 5) as $index => $service): ?>
+            <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item">
+                <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
+                <strong><?= e($service['short_name']) ?></strong>
+            </a>
+        <?php endforeach; ?>
+    </div>
 </section>
 
 <section class="content warga-section-head mt-4">
