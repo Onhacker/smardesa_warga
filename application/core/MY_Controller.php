@@ -17,6 +17,14 @@ class MY_Controller extends CI_Controller
         $data['currentUser'] = $this->currentUser;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);
+        // The compact AppKit header is navigation-only on primary screens.
+        // Reserve a back action for secondary flows and specific records.
+        $data['showBackButton'] = array_key_exists('showBackButton', $data)
+            ? (bool) $data['showBackButton']
+            : in_array($view, array('permohonan/create', 'permohonan/show', 'staff/show'), TRUE);
+        if (!isset($data['backUrl'])) {
+            $data['backUrl'] = $view === 'staff/show' ? site_url('petugas') : site_url('permohonan');
+        }
         $data['contentView'] = $view;
         $this->load->view('layouts/app', $data);
     }

@@ -4,6 +4,38 @@
   var body = document.body;
   var config = window.SDW || {};
 
+  /*
+   * AppKit's theme handler is normally initialised by its dynamic menu
+   * loader. SmartDesa renders the menu server-side, so that loader does not
+   * run and the theme controls would otherwise be inert. Keep the handler
+   * here with the application script that is loaded on every page.
+   */
+  function applyTheme(theme) {
+    var dark = theme === 'dark';
+    body.classList.toggle('theme-dark', dark);
+    body.classList.toggle('theme-light', !dark);
+    document.querySelectorAll('input[data-toggle-theme]').forEach(function (input) {
+      input.checked = dark;
+    });
+  }
+
+  var savedTheme = '';
+  try { savedTheme = localStorage.getItem('SIMP-Theme') || ''; } catch (error) { savedTheme = ''; }
+  if (savedTheme === 'dark-mode') applyTheme('dark');
+  else if (savedTheme === 'light-mode') applyTheme('light');
+
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    var themeControl = target && typeof target.closest === 'function'
+      ? target.closest('[data-toggle-theme]')
+      : null;
+    if (!themeControl) return;
+    event.preventDefault();
+    var nextTheme = body.classList.contains('theme-dark') ? 'light' : 'dark';
+    applyTheme(nextTheme);
+    try { localStorage.setItem('SIMP-Theme', nextTheme + '-mode'); } catch (error) {}
+  });
+
   function updateConnectivity() {
     var online = navigator.onLine;
     document.querySelectorAll('[data-connectivity]').forEach(function (element) {

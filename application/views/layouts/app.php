@@ -1,4 +1,10 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+$showBackButton = !empty($showBackButton);
+$backUrl = isset($backUrl) && trim((string) $backUrl) !== ''
+    ? (string) $backUrl
+    : site_url(!empty($staffMode) ? 'petugas' : 'permohonan');
+$themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
+?>
 <!DOCTYPE HTML>
 <html lang="id">
 <head>
@@ -14,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=12">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=28">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -23,11 +29,15 @@
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
 <div id="page">
     <header class="header header-fixed header-logo-center header-auto-show">
+        <?php if ($showBackButton): ?>
+            <a href="<?= e($backUrl) ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fas fa-chevron-left"></i></a>
+        <?php else: ?>
+            <a href="#" data-menu="menu-main" class="header-icon header-icon-1" aria-label="Buka menu"><i class="fas fa-bars"></i></a>
+        <?php endif; ?>
         <a href="<?= site_url(warga_home_route($currentUser)) ?>" class="header-title"><?= e($pageTitle) ?></a>
-        <a href="#" data-back-button class="header-icon header-icon-1" aria-label="Kembali"><i class="fas fa-chevron-left"></i></a>
-        <a href="#" data-menu="menu-main" class="header-icon header-icon-4" aria-label="Buka menu"><i class="fas fa-bars"></i></a>
-        <a href="#" data-toggle-theme class="header-icon header-icon-3 show-on-theme-dark" aria-label="Gunakan mode terang"><i class="fas fa-sun"></i></a>
-        <a href="#" data-toggle-theme class="header-icon header-icon-3 show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fas fa-moon"></i></a>
+        <?php if ($showBackButton): ?><a href="#" data-menu="menu-main" class="header-icon header-icon-4" aria-label="Buka menu"><i class="fas fa-bars"></i></a><?php endif; ?>
+        <a href="#" data-toggle-theme class="header-icon <?= $themeHeaderClass ?> show-on-theme-dark" aria-label="Gunakan mode terang"><i class="fas fa-sun"></i></a>
+        <a href="#" data-toggle-theme class="header-icon <?= $themeHeaderClass ?> show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fas fa-moon"></i></a>
     </header>
 
     <nav id="footer-bar" class="footer-bar-6 <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
@@ -46,7 +56,16 @@
         <?php endif; ?>
     </nav>
 
-    <main class="page-content header-clear-medium">
+    <section class="page-title page-title-fixed warga-page-title" aria-label="Judul halaman">
+        <?php if ($showBackButton): ?><a href="<?= e($backUrl) ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-back" aria-label="Kembali"><i class="fa fa-arrow-left"></i></a><?php endif; ?>
+        <h1><?= e($pageTitle) ?></h1>
+        <a href="#" data-toggle-theme class="page-title-icon shadow-xl bg-theme color-theme show-on-theme-dark" aria-label="Gunakan mode terang"><i class="fa fa-sun"></i></a>
+        <a href="#" data-toggle-theme class="page-title-icon shadow-xl bg-theme color-theme show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fa fa-moon"></i></a>
+        <a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme" aria-label="Buka menu"><i class="fa fa-bars"></i></a>
+    </section>
+    <div class="page-title-clear" aria-hidden="true"></div>
+
+    <main class="page-content">
         <div class="warga-connectivity" data-connectivity role="status" aria-live="polite">
             <span class="warga-connectivity-dot"></span><span data-connectivity-label>Memeriksa jaringan</span>
         </div>
@@ -69,6 +88,6 @@
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
-<script src="<?= base_url('assets/js/warga.min.js') ?>?v=1"></script>
+<script src="<?= base_url('assets/js/warga.min.js') ?>?v=2"></script>
 </body>
 </html>
