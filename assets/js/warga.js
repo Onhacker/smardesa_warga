@@ -290,24 +290,128 @@
     });
   }
 
-  var filterButtons = Array.prototype.slice.call(document.querySelectorAll('[data-request-filter]'));
-  if (filterButtons.length) {
-    var items = Array.prototype.slice.call(document.querySelectorAll('[data-request-item]'));
-    var empty = document.querySelector('[data-filter-empty]');
-    filterButtons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        var filter = button.getAttribute('data-request-filter');
-        var visible = 0;
-        filterButtons.forEach(function (candidate) { candidate.classList.toggle('active', candidate === button); });
-        items.forEach(function (item) {
-          var show = filter === 'all' || item.getAttribute('data-filter-group') === filter;
-          item.classList.toggle('d-none', !show);
-          if (show) visible += 1;
-        });
-        if (empty) empty.classList.toggle('d-none', visible !== 0);
+  document.querySelectorAll('[data-paged-list]').forEach(function (listing) {
+    if (!window.fetch || !window.URL || !window.FormData) return;
+    var form = listing.querySelector('[data-list-search]');
+    var results = listing.querySelector('[data-list-results]');
+    var feedback = listing.querySelector('[data-list-feedback]');
+    var errorBox = listing.querySelector('[data-list-error]');
+    var errorMessage = listing.querySelector('[data-list-error-message]');
+    var retry = listing.querySelector('[data-list-retry]');
+    var login = listing.querySelector('[data-list-login]');
+    var filterLinks = listing.querySelectorAll('[data-list-filter]');
+    var pendingController = null;
+    var sequence = 0;
+    var lastAttempt = null;
+
+    function searchUrl(status) {
+      var url = new URL(form.action, window.location.href);
+      new FormData(form).forEach(function (value, key) {
+        if (String(value).trim()) url.searchParams.set(key, String(value).trim());
       });
+      if (status) url.searchParams.set('status', status);
+      url.searchParams.set('page', '1');
+      return url;
+    }
+
+    function syncFilters(url) {
+      ['q', 'date', 'status'].forEach(function (name) {
+        var field = form.elements.namedItem(name);
+        if (field) field.value = url.searchParams.get(name) || (name === 'status' ? 'all' : '');
+      });
+      var status = url.searchParams.get('status') || 'all';
+      filterLinks.forEach(function (link) {
+        var value = link.getAttribute('data-list-filter');
+        var active = value === status;
+        link.classList.toggle('active', active);
+        if (active) link.setAttribute('aria-current', 'true');
+        else link.removeAttribute('aria-current');
+        link.href = searchUrl(value).href;
+      });
+    }
+
+    function loadPage(url, scrollToResults) {
+      var requestNumber = ++sequence;
+      if (pendingController) pendingController.abort();
+      pendingController = window.AbortController ? new AbortController() : null;
+      lastAttempt = { url: url, scroll: scrollToResults };
+      errorBox.hidden = true;
+      feedback.classList.remove('visually-hidden');
+      feedback.textContent = 'Memuat data…';
+      results.setAttribute('aria-busy', 'true');
+      listing.classList.add('is-loading');
+      var options = {
+        method: 'GET', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+      };
+      if (pendingController) options.signal = pendingController.signal;
+      fetch(url.href, options).then(function (response) {
+        if (response.redirected || response.status === 401 || response.status === 403) {
+          var authError = new Error('Sesi Anda telah berakhir. Silakan masuk kembali.');
+          authError.sessionExpired = true;
+          throw authError;
+        }
+        if (!response.ok || (response.headers.get('Content-Type') || '').indexOf('application/json') === -1) {
+          throw new Error('Data belum dapat dimuat. Silakan coba lagi.');
+        }
+        return response.json();
+      }).then(function (data) {
+        if (requestNumber !== sequence) return;
+        if (!data || typeof data.html !== 'string' || !Number.isFinite(Number(data.page))) {
+          throw new Error('Data belum dapat dimuat. Silakan coba lagi.');
+        }
+        // The same escaped, authenticated partial renders initial and AJAX results.
+        results.innerHTML = data.html;
+        url.searchParams.set('page', String(data.page));
+        if (data.filters) {
+          ['q', 'date', 'status'].forEach(function (name) {
+            if (!form.elements.namedItem(name)) return;
+            if (data.filters[name]) url.searchParams.set(name, data.filters[name]);
+            else url.searchParams.delete(name);
+          });
+        }
+        syncFilters(url);
+        try { window.history.replaceState(window.history.state, '', url.href); } catch (ignore) {}
+        var summary = results.querySelector('[data-list-summary]');
+        feedback.classList.add('visually-hidden');
+        feedback.textContent = (summary ? summary.textContent : 'Data diperbarui.') + '. Halaman ' + data.page + ' dari ' + data.pages + '.';
+        if (scrollToResults) {
+          results.setAttribute('tabindex', '-1');
+          results.focus({ preventScroll: true });
+          results.scrollIntoView({ block: 'start', behavior: 'auto' });
+        }
+      }).catch(function (error) {
+        if (requestNumber !== sequence || error.name === 'AbortError') return;
+        feedback.textContent = '';
+        errorMessage.textContent = error.sessionExpired ? error.message : 'Data belum dapat dimuat. Periksa koneksi internet lalu coba lagi.';
+        retry.hidden = !!error.sessionExpired;
+        login.hidden = !error.sessionExpired;
+        errorBox.hidden = false;
+      }).finally(function () {
+        if (requestNumber !== sequence) return;
+        results.setAttribute('aria-busy', 'false');
+        listing.classList.remove('is-loading');
+        pendingController = null;
+      });
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      loadPage(searchUrl(), false);
     });
-  }
+    listing.addEventListener('click', function (event) {
+      var control = event.target.closest('[data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]');
+      if (!control || !listing.contains(control) || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
+      event.preventDefault();
+      if (control.hasAttribute('data-list-retry')) {
+        if (lastAttempt) loadPage(lastAttempt.url, lastAttempt.scroll);
+      } else if (control.hasAttribute('data-list-filter')) {
+        loadPage(searchUrl(control.getAttribute('data-list-filter')), false);
+      } else {
+        loadPage(new URL(control.href, window.location.href), control.hasAttribute('data-list-page'));
+      }
+    });
+  });
 
   var staffActionForm = document.querySelector('[data-staff-action-form]');
   if (staffActionForm) {

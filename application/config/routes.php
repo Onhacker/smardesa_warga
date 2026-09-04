@@ -8,6 +8,7 @@ $route['login'] = 'auth/login';
 $route['register'] = 'auth/register';
 $route['logout'] = 'auth/logout';
 $route['dashboard'] = 'dashboard/index';
+$route['layanan'] = 'layanan/index';
 $route['permohonan'] = 'permohonan/index';
 $route['permohonan/baru'] = 'permohonan/create';
 $route['permohonan/simpan'] = 'permohonan/store';

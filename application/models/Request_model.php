@@ -514,6 +514,100 @@ class Request_model extends CI_Model
         return $rows;
     }
 
+    public function paginated_for_user($userId, array $filters = array(), $dateField = 'submitted_at')
+    {
+        $dateField = $dateField === 'updated_at' ? 'updated_at' : 'submitted_at';
+        $filters = $this->normalize_list_filters($filters);
+        $requestedPage = $filters['page'];
+        unset($filters['page']);
+        $perPage = 10;
+        $total = 0;
+        $rows = array();
+
+        if ((int) $userId > 0 && warga_demo_mode()) {
+            $rows = array_values(array_filter($this->demo_requests(), function ($row) use ($userId, $filters, $dateField) {
+                if (!isset($row['citizen_user_id']) || (int) $row['citizen_user_id'] !== (int) $userId) return FALSE;
+                if ($filters['q'] !== '') {
+                    $name = isset($row['service_name']) ? (string) $row['service_name'] : '';
+                    $match = function_exists('mb_stripos')
+                        ? mb_stripos($name, $filters['q'], 0, 'UTF-8')
+                        : stripos($name, $filters['q']);
+                    if ($match === FALSE) return FALSE;
+                }
+                if ($filters['date'] !== '' && substr((string) ($row[$dateField] ?? ''), 0, 10) !== $filters['date']) return FALSE;
+                if ($filters['status'] === 'issued' && $row['status'] !== 'issued') return FALSE;
+                if ($filters['status'] === 'active' && !in_array($row['status'], array('submitted', 'verified', 'approved', 'syncing', 'revision'), TRUE)) return FALSE;
+                return TRUE;
+            }));
+            usort($rows, function ($left, $right) use ($dateField) {
+                $dateOrder = strcmp((string) ($right[$dateField] ?? ''), (string) ($left[$dateField] ?? ''));
+                return $dateOrder !== 0 ? $dateOrder : strcmp((string) $right['id'], (string) $left['id']);
+            });
+            $total = count($rows);
+        } elseif ((int) $userId > 0 && warga_database_available()) {
+            $this->ensure_catalog_schema();
+            $this->apply_user_list_query($userId, $filters, $dateField);
+            $total = (int) $this->db->count_all_results();
+        }
+
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($requestedPage, $pages);
+        $offset = ($page - 1) * $perPage;
+        if (warga_demo_mode()) {
+            $rows = array_slice($rows, $offset, $perPage);
+        } elseif ($total > 0) {
+            $this->apply_user_list_query($userId, $filters, $dateField);
+            $rows = $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, v.name AS village_name', FALSE)
+                ->order_by('sr.' . $dateField, 'DESC')->order_by('sr.id', 'DESC')
+                ->limit($perPage, $offset)->get()->result_array();
+            foreach ($rows as &$row) $row = $this->normalize_row($row);
+            unset($row);
+        }
+
+        return array(
+            'items' => $rows,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => $perPage,
+            'from' => $total > 0 ? $offset + 1 : 0,
+            'to' => min($offset + count($rows), $total),
+            'filters' => $filters
+        );
+    }
+
+    private function normalize_list_filters(array $filters)
+    {
+        $query = isset($filters['q']) && is_scalar($filters['q']) ? trim((string) $filters['q']) : '';
+        $query = function_exists('mb_substr') ? mb_substr($query, 0, 180, 'UTF-8') : substr($query, 0, 180);
+        $date = isset($filters['date']) && is_scalar($filters['date']) ? trim((string) $filters['date']) : '';
+        if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/D', $date, $parts)
+            || !checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
+            $date = '';
+        }
+        $status = isset($filters['status']) && is_scalar($filters['status']) ? (string) $filters['status'] : 'all';
+        if (!in_array($status, array('all', 'active', 'issued'), TRUE)) $status = 'all';
+        $page = isset($filters['page']) && is_scalar($filters['page']) ? (string) $filters['page'] : '1';
+        $page = ctype_digit($page) ? max(1, (int) $page) : 1;
+        return array('q' => $query, 'date' => $date, 'status' => $status, 'page' => $page);
+    }
+
+    private function apply_user_list_query($userId, array $filters, $dateField)
+    {
+        $this->db->from('service_requests sr')
+            ->join('service_types st', 'st.id=sr.service_type_id')
+            ->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE)
+            ->join('village_tenants v', 'v.id=sr.village_id', 'left')
+            ->where('sr.citizen_user_id', (int) $userId);
+        if ($filters['q'] !== '') $this->db->like('COALESCE(vc.name, st.name)', $filters['q'], 'both');
+        if ($filters['date'] !== '') {
+            $this->db->where('sr.' . $dateField . ' >=', $filters['date'] . ' 00:00:00')
+                ->where('sr.' . $dateField . ' <=', $filters['date'] . ' 23:59:59');
+        }
+        if ($filters['status'] === 'issued') $this->db->where('sr.status', 'issued');
+        if ($filters['status'] === 'active') $this->db->where_in('sr.status', array('submitted', 'verified', 'approved', 'syncing', 'revision'));
+    }
+
     public function summary($userId)
     {
         $rows = $this->for_user($userId);

@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=45">
+    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=50">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -31,8 +31,14 @@
                 <h2 class="font-28 mb-2">Masuk</h2>
                 <p class="mb-4">Gunakan akun warga yang telah terdaftar.</p>
                 <?php $loginSuccess = $this->session->flashdata('success'); ?>
-                <?php if ($loginSuccess): ?><div class="alert alert-small rounded-s bg-green-dark" role="alert"><span><i class="fa fa-check color-white"></i></span><strong class="color-white"><?= e($loginSuccess) ?></strong></div><?php endif; ?>
-                <?php if (!empty($error) || validation_errors()): ?><div class="alert alert-small rounded-s bg-red-dark" role="alert"><span><i class="fa fa-times color-white"></i></span><strong class="color-white"><?= !empty($error) ? e($error) : validation_errors('<span class="d-block">', '</span>') ?></strong></div><?php endif; ?>
+                <?php if ($loginSuccess): ?>
+                    <?php $this->load->view('layouts/flash_alert', array('flashType' => 'success', 'flashTitle' => 'Pendaftaran berhasil', 'flashMessage' => $loginSuccess)); ?>
+                <?php endif; ?>
+                <?php if (!empty($error)): ?>
+                    <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Tidak dapat masuk', 'flashMessage' => $error)); ?>
+                <?php elseif (validation_errors()): ?>
+                    <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Periksa data Anda', 'flashMessage' => validation_errors('<span class="warga-flash-line">', '</span>'), 'flashAllowHtml' => TRUE)); ?>
+                <?php endif; ?>
                 <form method="post" action="<?= site_url('login') ?>" autocomplete="on" data-disable-submit>
                     <?= csrf_field() ?>
                     <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="login-identity" name="identity" value="<?= e(old('identity', $demoMode ? 'warga' : '')) ?>" placeholder="Email atau Nomor Telepon" required autocomplete="username"><label for="login-identity" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
@@ -47,6 +53,6 @@
     </main>
 </div>
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=7"></script>
+<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=8"></script>
 </body>
 </html>

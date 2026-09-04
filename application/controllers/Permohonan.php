@@ -6,7 +6,24 @@ class Permohonan extends Citizen_Controller
     public function index()
     {
         $this->load->model('Request_model');
-        $this->render('permohonan/index', array('pageTitle' => 'Permohonan Saya', 'requests' => $this->Request_model->for_user($this->currentUser['id'])));
+        $listing = $this->Request_model->paginated_for_user($this->currentUser['id'], array(
+            'q' => $this->input->get('q', TRUE),
+            'date' => $this->input->get('date', TRUE),
+            'status' => $this->input->get('status', TRUE),
+            'page' => $this->input->get('page', TRUE)
+        ));
+        $data = array('pageTitle' => 'Permohonan Saya', 'requests' => $listing['items'], 'listing' => $listing, 'listUrl' => site_url('permohonan'));
+        $this->output->set_header('Cache-Control: no-store, private');
+        if ($this->input->is_ajax_request()) {
+            return $this->json(array(
+                'html' => $this->load->view('permohonan/results', $data, TRUE),
+                'page' => $listing['page'],
+                'pages' => $listing['pages'],
+                'total' => $listing['total'],
+                'filters' => $listing['filters']
+            ));
+        }
+        $this->render('permohonan/index', $data);
     }
 
     public function create()

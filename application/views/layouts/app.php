@@ -20,7 +20,7 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=45">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=50">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -48,7 +48,7 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
             <a class="<?= $this->input->get('status', TRUE) === 'issued' ? 'active-nav' : '' ?>" href="<?= site_url('petugas?status=issued') ?>"><i class="fa fa-file-pdf"></i><span>Terbit</span></a>
             <a class="<?= nav_is('account') ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user"></i><span>Akun</span></a>
         <?php else: ?>
-            <a class="<?= nav_is('dashboard') ? 'active-nav' : '' ?>" href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
+            <a class="<?= nav_is('dashboard') || nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
             <a class="<?= nav_is('permohonan') && $this->router->fetch_method() !== 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt"></i><span>Riwayat</span></a>
             <a class="circle-nav <?= nav_is('permohonan') && $this->router->fetch_method() === 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-envelope"></i><span>Ajukan</span></a>
             <a class="<?= nav_is('notifications') ? 'active-nav' : '' ?>" href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell"></i><span>Notifikasi</span></a>
@@ -56,7 +56,7 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
         <?php endif; ?>
     </nav>
 
-    <section class="page-title page-title-fixed warga-page-title" aria-label="Judul halaman">
+    <section class="page-title page-title-fixed warga-page-title<?= $showBackButton ? ' has-back' : '' ?>" aria-label="Judul halaman">
         <?php if ($showBackButton): ?><a href="<?= e($backUrl) ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-back" aria-label="Kembali"><i class="fa fa-arrow-left"></i></a><?php endif; ?>
         <h1><?= e($pageTitle) ?></h1>
         <a href="#" data-toggle-theme class="page-title-icon shadow-xl bg-theme color-theme show-on-theme-dark" aria-label="Gunakan mode terang"><i class="fa fa-sun"></i></a>
@@ -69,10 +69,10 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
         <?php $flashSuccess = $this->session->flashdata('success'); ?>
         <?php $flashError = $this->session->flashdata('error'); ?>
         <?php if ($flashSuccess): ?>
-            <div class="ms-3 me-3 alert alert-small rounded-s shadow-xl bg-green-dark" role="alert"><span><i class="fa fa-check color-white"></i></span><strong class="color-white"><?= e($flashSuccess) ?></strong><button type="button" class="close color-white font-16" data-bs-dismiss="alert" aria-label="Tutup">&times;</button></div>
+            <?php $this->load->view('layouts/flash_alert', array('flashType' => 'success', 'flashTitle' => 'Berhasil', 'flashMessage' => $flashSuccess)); ?>
         <?php endif; ?>
         <?php if ($flashError): ?>
-            <div class="ms-3 me-3 alert alert-small rounded-s shadow-xl bg-red-dark" role="alert"><span><i class="fa fa-times color-white"></i></span><strong class="color-white"><?= e($flashError) ?></strong><button type="button" class="close color-white font-16" data-bs-dismiss="alert" aria-label="Tutup">&times;</button></div>
+            <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Perlu diperbaiki', 'flashMessage' => $flashError)); ?>
         <?php endif; ?>
         <?php $this->load->view($contentView); ?>
         <div class="warga-connectivity" data-connectivity role="status" aria-live="polite">
@@ -88,6 +88,6 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
-<script src="<?= base_url('assets/js/warga.min.js') ?>?v=7"></script>
+<script src="<?= base_url('assets/js/warga.min.js') ?>?v=8"></script>
 </body>
 </html>

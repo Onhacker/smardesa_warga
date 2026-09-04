@@ -6,9 +6,13 @@ class Notifications extends Citizen_Controller
     public function index()
     {
         $this->load->model('Request_model');
-        $requests = $this->Request_model->for_user($this->currentUser['id']);
+        $listing = $this->Request_model->paginated_for_user($this->currentUser['id'], array(
+            'q' => $this->input->get('q', TRUE),
+            'date' => $this->input->get('date', TRUE),
+            'page' => $this->input->get('page', TRUE)
+        ), 'updated_at');
         $notifications = array();
-        foreach (array_slice($requests, 0, 8) as $row) {
+        foreach ($listing['items'] as $row) {
             $notifications[] = array(
                 'title' => $row['service_name'],
                 'message' => $row['status'] === 'issued' ? 'Surat Anda sudah diterbitkan.' : 'Status terakhir permohonan: ' . warga_status_text($row['status']) . '.',
@@ -17,6 +21,17 @@ class Notifications extends Citizen_Controller
                 'status' => $row['status']
             );
         }
-        $this->render('notifications/index', array('pageTitle' => 'Notifikasi', 'notifications' => $notifications));
+        $data = array('pageTitle' => 'Notifikasi', 'notifications' => $notifications, 'listing' => $listing, 'listUrl' => site_url('notifikasi'));
+        $this->output->set_header('Cache-Control: no-store, private');
+        if ($this->input->is_ajax_request()) {
+            return $this->json(array(
+                'html' => $this->load->view('notifications/results', $data, TRUE),
+                'page' => $listing['page'],
+                'pages' => $listing['pages'],
+                'total' => $listing['total'],
+                'filters' => $listing['filters']
+            ));
+        }
+        $this->render('notifications/index', $data);
     }
 }

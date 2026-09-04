@@ -51,7 +51,7 @@ class Auth extends Public_Controller
                     'password' => (string) $this->input->post('password')
                 ));
                 if (!empty($result['success'])) {
-                    $this->session->set_flashdata('success', 'Pendaftaran berhasil. Silakan masuk menggunakan akun Anda.');
+                    $this->session->set_flashdata('success', 'Silakan masuk menggunakan akun yang baru Anda buat.');
                     redirect('login');
                 }
                 $data['error'] = isset($result['message']) ? $result['message'] : 'Pendaftaran belum dapat diproses.';
