@@ -915,6 +915,15 @@ class Request_model extends CI_Model
             ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
     }
 
+    public function official_html_for_user($requestId, $userId)
+    {
+        if (warga_demo_mode() || !warga_database_available()) return NULL;
+        if (!$this->db->field_exists('document_format', 'service_requests')) return NULL;
+        return $this->db->select('r.document_path, r.document_sha256, r.local_reference, r.document_format')->from('service_requests r')
+            ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued', 'r.document_format' => 'html'))
+            ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
+    }
+
     private function ensure_field($table, $field, $sql)
     {
         if (!$this->db->field_exists($field, $table)) $this->db->query($sql);

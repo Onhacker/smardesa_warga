@@ -109,6 +109,32 @@ class MY_Controller extends CI_Controller
         return TRUE;
     }
 
+    protected function stream_private_html($path, $originalName = '', $disposition = 'inline', $expectedSha256 = '')
+    {
+        $configured = trim((string) getenv('PRIVATE_STORAGE_PATH'));
+        if (ENVIRONMENT === 'production' && $configured === '') return FALSE;
+        $root = realpath($configured !== '' ? $configured : FCPATH . 'storage');
+        $real = realpath((string) $path);
+        $prefix = $root !== FALSE ? rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : '';
+        if ($root === FALSE || $real === FALSE || !is_file($real) || !is_readable($real)
+            || ($real !== $root && strpos($real, $prefix) !== 0) || is_link((string) $path)) return FALSE;
+        $size = @filesize($real);
+        if ($size === FALSE || $size < 1 || $size > 8 * 1024 * 1024) return FALSE;
+        $body = @file_get_contents($real);
+        if (!is_string($body) || ($expectedSha256 !== '' && (!preg_match('/^[a-f0-9]{64}$/', $expectedSha256) || !hash_equals($expectedSha256, hash('sha256', $body))))) return FALSE;
+        require_once APPPATH . 'libraries/Official_letter_html.php';
+        if (!Official_letter_html::valid($body)) return FALSE;
+        $name = $this->private_file_name($originalName, 'html', $real);
+        $disposition = in_array($disposition, array('inline', 'attachment'), TRUE) ? $disposition : 'inline';
+        $this->output->set_status_header(200)->set_content_type('text/html', 'utf-8')
+            ->set_header('Content-Disposition: ' . $disposition . '; filename="' . $name . '"')
+            ->set_header('Content-Length: ' . (int) $size)->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private')
+            ->set_header('X-Content-Type-Options: nosniff')
+            ->set_header("Content-Security-Policy: default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'")
+            ->set_output($body);
+        return TRUE;
+    }
+
     private function private_file_mime($path)
     {
         if (function_exists('finfo_open')) {

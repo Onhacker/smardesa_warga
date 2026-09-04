@@ -435,6 +435,106 @@
     if (staffNote) staffNote.addEventListener('input', function () { staffNote.classList.remove('is-invalid'); });
   }
 
+  (function initOfficialLetterModal() {
+    var opener = document.querySelector('[data-warga-letter-open]');
+    var modal = document.getElementById('warga-letter-modal');
+    if (!opener || !modal) return;
+    if (modal.parentNode !== document.body) document.body.appendChild(modal);
+    var frame = modal.querySelector('[data-warga-letter-frame]');
+    var status = modal.querySelector('[data-warga-letter-status]');
+    var download = modal.querySelector('[data-warga-letter-download]');
+    var activeOpener = null;
+    var currentHtml = '';
+    var currentName = 'surat-resmi.html';
+    var controller = null;
+    var sequence = 0;
+    var pageContent = document.getElementById('page');
+    var pageWasInert = false;
+
+    function close() {
+      sequence++;
+      if (controller) controller.abort();
+      controller = null;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('warga-letter-modal-open');
+      if (pageContent) pageContent.inert = pageWasInert;
+      if (frame) { frame.hidden = true; frame.srcdoc = ''; }
+      currentHtml = '';
+      if (download) download.disabled = true;
+      if (activeOpener && typeof activeOpener.focus === 'function') activeOpener.focus();
+      activeOpener = null;
+    }
+
+    function open(button) {
+      var url = button.getAttribute('data-html-url');
+      if (!url || !frame || !status) return;
+      if (new URL(url, window.location.href).origin !== window.location.origin) return;
+      var requestNumber = ++sequence;
+      activeOpener = button;
+      currentHtml = '';
+      currentName = (button.getAttribute('data-html-name') || 'surat-resmi.html').replace(/[\\/:*?"<>|]+/g, '-');
+      if (!/\.html?$/i.test(currentName)) currentName += '.html';
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('warga-letter-modal-open');
+      if (pageContent) { pageWasInert = pageContent.inert; pageContent.inert = true; }
+      modal.querySelector('.warga-letter-icon-button').focus();
+      frame.hidden = true;
+      frame.srcdoc = '';
+      status.classList.remove('is-error');
+      status.hidden = false;
+      status.textContent = 'Memuat surat...';
+      if (download) download.disabled = true;
+      if (controller) controller.abort();
+      controller = window.AbortController ? new AbortController() : null;
+      var options = { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'text/html' } };
+      if (controller) options.signal = controller.signal;
+      fetch(url, options).then(function (response) {
+        if (response.redirected || response.status === 401 || response.status === 403) throw new Error('Sesi Anda telah berakhir. Silakan masuk kembali.');
+        if (!response.ok || (response.headers.get('Content-Type') || '').toLowerCase().indexOf('text/html') === -1) throw new Error('Surat belum dapat dimuat.');
+        return response.text();
+      }).then(function (html) {
+        if (requestNumber !== sequence || modal.hidden) return;
+        if (!html || html.length > 8 * 1024 * 1024) throw new Error('Ukuran surat tidak dapat ditampilkan.');
+        currentHtml = html;
+        frame.srcdoc = html;
+        frame.hidden = false;
+        status.hidden = true;
+        if (download) download.disabled = false;
+      }).catch(function (error) {
+        if (error.name === 'AbortError' || requestNumber !== sequence || modal.hidden) return;
+        status.hidden = false;
+        status.classList.add('is-error');
+        status.textContent = error.message || 'Surat belum dapat dimuat. Coba lagi.';
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest('[data-warga-letter-open], [data-warga-letter-close], [data-warga-letter-download]');
+      if (!button) return;
+      if (button.hasAttribute('data-warga-letter-open')) { event.preventDefault(); open(button); }
+      else if (button.hasAttribute('data-warga-letter-close')) { event.preventDefault(); close(); }
+      else if (button.hasAttribute('data-warga-letter-download') && currentHtml) {
+        event.preventDefault();
+        var blobUrl = URL.createObjectURL(new Blob([currentHtml], { type: 'text/html;charset=utf-8' }));
+        var link = document.createElement('a');
+        link.href = blobUrl; link.download = currentName; link.rel = 'noopener';
+        document.body.appendChild(link); link.click(); link.remove();
+        window.setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
+      }
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !modal.hidden) { event.preventDefault(); close(); }
+      if (event.key === 'Tab' && !modal.hidden) {
+        var buttons = Array.prototype.slice.call(modal.querySelectorAll('.warga-letter-modal-panel button:not(:disabled)'));
+        var first = buttons[0], last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
+    });
+  }());
+
   var deferredInstall = null;
   var installPanels = Array.prototype.slice.call(document.querySelectorAll('[data-pwa-install-panel]'));
   function updateInstallStatus(message, installed) {

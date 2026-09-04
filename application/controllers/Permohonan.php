@@ -68,20 +68,22 @@ class Permohonan extends Citizen_Controller
         $request = $this->Request_model->find_for_user($id, $this->currentUser['id']);
         if (!$request) show_404();
         $request['documents'] = $this->Request_model->documents_for_user($id, $this->currentUser['id']);
+        $request['official_html_available'] = (bool) $this->Request_model->official_html_for_user($id, $this->currentUser['id']);
         $this->render('permohonan/show', array('pageTitle' => 'Detail Permohonan', 'request' => $request, 'history' => $this->Request_model->history($id)));
+    }
+
+    public function document_html($id)
+    {
+        $this->load->model('Request_model');
+        $document = $this->Request_model->official_html_for_user($id, $this->currentUser['id']);
+        if (!$document || empty($document['document_path'])) show_404();
+        $disposition = (string) $this->input->get('download', TRUE) === '1' ? 'attachment' : 'inline';
+        if (!$this->stream_private_html($document['document_path'], 'surat-' . (string) $document['local_reference'], $disposition, (string) $document['document_sha256'])) show_404();
     }
 
     public function document($id)
     {
-        $this->load->model('Request_model');
-        $document = $this->Request_model->official_document_for_user($id, $this->currentUser['id']);
-        if (!$document || empty($document['document_path'])) show_404();
-        $disposition = (string) $this->input->get('download', TRUE) === '1'
-            ? 'attachment'
-            : 'inline';
-        if (!$this->stream_private_file($document['document_path'], 'surat-' . (string) $document['local_reference'], $disposition, (string) $document['document_sha256'])) {
-            show_404();
-        }
+        return $this->document_html($id);
     }
 
     private function verified_citizen()

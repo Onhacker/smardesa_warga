@@ -486,6 +486,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   .warga-pwa-install [data-pwa-install] { grid-column: 1 / -1; width: 100%; }
 }
 
+
 @media (max-width: 575.98px) {
   .warga-region-grid { grid-template-columns: 1fr; gap: 0; }
   .warga-region-field { margin-bottom: 18px !important; }
@@ -4276,4 +4277,33 @@ body.theme-dark #page .warga-service-catalog-copy small { color: #9cd9d2 !import
   #page .warga-service-catalog-head h2 { font-size: 19px; }
   .warga-service-catalog-item { grid-template-columns: 44px minmax(0, 1fr) 12px; gap: 10px; padding: 14px 10px; }
   .warga-service-catalog-item .warga-service-icon { width: 44px; height: 44px; font-size: 20px; border-radius: 13px; }
+}
+/* Official letter preview stays inside the PWA; the paper itself remains A4. */
+.warga-letter-modal[hidden], .warga-letter-modal [hidden] { display: none !important; }
+.warga-letter-modal { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 12px; background: rgba(15,23,42,.72); }
+.warga-letter-modal-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; cursor: default; }
+.warga-letter-modal-panel { position: relative; z-index: 1; display: flex; flex-direction: column; width: min(1100px,100%); max-width: 100%; height: min(94vh,980px); overflow: hidden; background: #fff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 24px 80px rgba(15,23,42,.3); }
+.warga-letter-modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 18px; border-bottom: 1px solid #e5e7eb; background: #fff; }
+.warga-letter-modal-header > div { min-width: 0; }
+.warga-letter-modal-header span { display: block; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
+.warga-letter-modal-header h2 { margin: 3px 0 0; color: #0f172a; font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
+.warga-letter-icon-button { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid #cbd5e1; border-radius: 50%; background: #fff; color: #334155; cursor: pointer; }
+.warga-letter-icon-button:hover, .warga-letter-icon-button:focus-visible { border-color: #167b78; background: #ecfdf5; color: #167b78; }
+.warga-letter-modal-frame-wrap { position: relative; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; background: #e5e7eb; padding: 14px; }
+.warga-letter-modal-frame { display: block; width: 100%; min-width: 794px; height: 100%; min-height: 1123px; border: 0; background: #fff; }
+.warga-letter-modal-status { display: grid; place-items: center; min-height: 180px; color: #475569; font-size: 15px; text-align: center; }
+.warga-letter-modal-status.is-error { color: #b91c1c; }
+.warga-letter-modal-footer { display: flex; flex-shrink: 0; justify-content: flex-end; gap: 10px; padding: 12px 18px; border-top: 1px solid #e5e7eb; background: #fff; }
+.warga-letter-modal-footer .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; }
+.warga-letter-secondary { border: 1px solid #cbd5e1; background: #fff; color: #334155; }
+.warga-result-pending { display: flex; align-items: center; gap: 8px; color: #92400e; font-size: 13px; }
+.warga-letter-modal-open { overflow: hidden; }
+@media (max-width: 600px) {
+  .warga-letter-modal { padding: 6px; }
+  .warga-letter-modal-panel { height: calc(100vh - 12px); height: calc(100dvh - 12px); }
+  .warga-letter-modal-header { padding: 12px 14px; }
+  .warga-letter-modal-header h2 { font-size: 17px; }
+  .warga-letter-modal-frame-wrap { padding: 8px; }
+  .warga-letter-modal-footer { padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+  .warga-letter-modal-footer .btn { flex: 1; justify-content: center; }
 }

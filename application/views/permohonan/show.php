@@ -38,7 +38,15 @@
 <?php endif; ?>
 
 <?php if ($request['status'] === 'issued'): ?>
-<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi siap dilihat atau diunduh dalam format PDF.</p></div><?php if (!empty($request['document_path'])): ?><?php $officialDocumentUrl = site_url('permohonan/' . rawurlencode($request['id']) . '/surat'); ?><div class="warga-result-actions"><a href="<?= e($officialDocumentUrl) ?>" target="_blank" rel="noopener" class="btn btn-s bg-green-dark color-white rounded-s"><i class="fa fa-eye"></i><span>Lihat Surat</span></a><a href="<?= e($officialDocumentUrl . '?download=1') ?>" class="btn btn-s warga-result-download rounded-s"><i class="fa fa-download"></i><span>Unduh PDF</span></a></div><?php endif; ?></section>
+<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi mengikuti tampilan surat desa dan siap dilihat di sini.</p></div><?php if (!empty($request['official_html_available'])): ?><div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-warga-letter-open data-html-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat-html')) ?>" data-html-name="<?= e('surat-' . $request['local_reference'] . '.html') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div><?php else: ?><div class="warga-result-pending"><i class="fa fa-info-circle"></i> Tampilan surat sedang disiapkan oleh desa.</div><?php endif; ?></section>
+<div id="warga-letter-modal" class="warga-letter-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="warga-letter-modal-title">
+    <button type="button" class="warga-letter-modal-backdrop" data-warga-letter-close aria-label="Tutup surat"></button>
+    <section class="warga-letter-modal-panel" role="document">
+        <header class="warga-letter-modal-header"><div><span>Surat Resmi</span><h2 id="warga-letter-modal-title"><?= e($request['service_name']) ?></h2></div><button type="button" class="warga-letter-icon-button" data-warga-letter-close aria-label="Tutup surat"><i class="fa fa-times"></i></button></header>
+        <div class="warga-letter-modal-frame-wrap"><div class="warga-letter-modal-status" data-warga-letter-status role="status">Memuat surat...</div><iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="" hidden></iframe></div>
+        <footer class="warga-letter-modal-footer"><button type="button" class="btn btn-s warga-letter-secondary" data-warga-letter-close><i class="fa fa-times"></i><span>Tutup</span></button><button type="button" class="btn btn-s bg-green-dark color-white" data-warga-letter-download disabled><i class="fa fa-download"></i><span>Unduh Surat</span></button></footer>
+    </section>
+</div>
 <?php endif; ?>
 
 <section class="content warga-section-head mt-4"><div><p class="font-600 color-highlight mb-n1">Perjalanan layanan</p><h2 class="font-22 mb-0">Status Permohonan</h2></div></section>
