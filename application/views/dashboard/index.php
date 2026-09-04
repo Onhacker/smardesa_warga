@@ -35,17 +35,16 @@ $citizenVerified = !empty($citizenVerified);
         <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
     </div>
     <div class="warga-service-grid" id="wargaServiceGrid" aria-label="Jenis layanan">
-        <?php $serviceColors = array('teal', 'blue', 'orange', 'green', 'red'); ?>
         <?php foreach ($services as $index => $service): ?>
-            <?php $dashboardServiceName = !empty($service['short_name']) ? $service['short_name'] : $service['name']; ?>
+            <?php $dashboardServiceName = !empty($service['short_name']) ? $service['short_name'] : $service['name']; $serviceIcon = warga_service_icon($service); ?>
             <?php if ($citizenVerified): ?>
                 <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item" title="<?= e($service['name']) ?>">
-                    <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
+                    <span class="warga-service-icon <?= e($serviceIcon['class']) ?>"><i class="<?= e($serviceIcon['icon']) ?>"></i></span>
                     <strong><?= e($dashboardServiceName) ?></strong>
                 </a>
             <?php else: ?>
                 <span class="warga-service-item is-locked" aria-disabled="true" title="<?= e($service['name']) ?>">
-                    <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
+                    <span class="warga-service-icon <?= e($serviceIcon['class']) ?>"><i class="<?= e($serviceIcon['icon']) ?>"></i></span>
                     <strong><?= e($dashboardServiceName) ?></strong>
                 </span>
             <?php endif; ?>

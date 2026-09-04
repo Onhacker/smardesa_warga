@@ -1,12 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 $citizenVerified = !empty($citizenVerified);
-$serviceColors = array('teal', 'blue', 'orange', 'green', 'red');
 ?>
 <div class="warga-services-page">
     <section class="warga-page-intro warga-services-intro">
         <div><p>PELAYANAN DESA</p><h1>Semua Jenis Surat</h1><span>Temukan layanan administrasi yang Anda perlukan.</span></div>
-        <span class="warga-intro-icon"><i class="fa fa-th-large" aria-hidden="true"></i></span>
+        <span class="warga-intro-icon"><i class="ti ti-mail" aria-hidden="true"></i></span>
     </section>
 
     <section class="warga-service-catalog" aria-labelledby="warga-catalog-title">
@@ -33,13 +32,14 @@ $serviceColors = array('teal', 'blue', 'orange', 'green', 'red');
                 $serviceShortName = isset($service['short_name']) ? $service['short_name'] : '';
                 $serviceSearch = $service['name'] . ' ' . $serviceShortName . ' ' . $service['slug'] . ' ' . $serviceDescription;
                 $requirementCount = isset($service['requirements']) && is_array($service['requirements']) ? count($service['requirements']) : 0;
+                $serviceIcon = warga_service_icon($service);
                 ?>
                 <?php if ($citizenVerified): ?>
                     <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-catalog-item" data-service-name="<?= e($serviceSearch) ?>">
                 <?php else: ?>
                     <div class="warga-service-catalog-item is-locked" data-service-name="<?= e($serviceSearch) ?>" aria-disabled="true">
                 <?php endif; ?>
-                    <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>" aria-hidden="true"></i></span>
+                    <span class="warga-service-icon <?= e($serviceIcon['class']) ?>"><i class="<?= e($serviceIcon['icon']) ?>" aria-hidden="true"></i></span>
                     <span class="warga-service-catalog-copy">
                         <strong><?= e($service['name']) ?></strong>
                         <span class="warga-service-description"><?= e($serviceDescription !== '' ? $serviceDescription : 'Layanan administrasi untuk kebutuhan warga.') ?></span>
