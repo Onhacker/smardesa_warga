@@ -207,6 +207,21 @@ if (!function_exists('warga_service_icon')) {
     }
 }
 
+if (!function_exists('warga_request_service_icon')) {
+    /**
+     * Adapt a stored request/notification row to the same icon catalogue used
+     * by the service dashboard and the Semua Jenis Surat page.
+     */
+    function warga_request_service_icon(array $request)
+    {
+        return warga_service_icon(array(
+            'slug' => isset($request['service_slug']) ? (string) $request['service_slug'] : '',
+            'name' => isset($request['service_name']) ? (string) $request['service_name'] : '',
+            'short_name' => isset($request['service_short_name']) ? (string) $request['service_short_name'] : ''
+        ));
+    }
+}
+
 if (!function_exists('warga_uuid')) {
     function warga_uuid()
     {

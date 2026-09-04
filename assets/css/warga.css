@@ -187,19 +187,19 @@ a { color: inherit; }
 .warga-service-icon.is-green { background: #e4f1e6; color: var(--warga-green); }
 .warga-service-icon.is-red { background: #f8e4e6; color: var(--warga-red); }
 /* AppKit v22 component palette, keeping the admin_surat category mapping. */
-.warga-service-icon.surat-icon-blue { --warga-service-color: #4a89dc; }
-.warga-service-icon.surat-icon-cyan { --warga-service-color: #5d9cec; }
-.warga-service-icon.surat-icon-green { --warga-service-color: #8cc152; }
-.warga-service-icon.surat-icon-orange { --warga-service-color: #e9573f; }
-.warga-service-icon.surat-icon-slate { --warga-service-color: #434a54; }
-.warga-service-icon.surat-icon-indigo { --warga-service-color: #967adc; }
-.warga-service-icon.surat-icon-red { --warga-service-color: #da4453; }
-.warga-service-icon.surat-icon-rose { --warga-service-color: #ed5565; }
-.warga-service-icon.surat-icon-amber { --warga-service-color: #f6bb42; }
-.warga-service-icon.surat-icon-pink { --warga-service-color: #d770ad; }
-.warga-service-icon.surat-icon-teal { --warga-service-color: #7db1b1; }
-.warga-service-icon.surat-icon-purple { --warga-service-color: #ac92ec; }
-.warga-service-icon.surat-icon-neutral { --warga-service-color: #656d78; }
+.surat-icon-blue { --warga-service-color: #4a89dc; }
+.surat-icon-cyan { --warga-service-color: #5d9cec; }
+.surat-icon-green { --warga-service-color: #8cc152; }
+.surat-icon-orange { --warga-service-color: #e9573f; }
+.surat-icon-slate { --warga-service-color: #434a54; }
+.surat-icon-indigo { --warga-service-color: #967adc; }
+.surat-icon-red { --warga-service-color: #da4453; }
+.surat-icon-rose { --warga-service-color: #ed5565; }
+.surat-icon-amber { --warga-service-color: #f6bb42; }
+.surat-icon-pink { --warga-service-color: #d770ad; }
+.surat-icon-teal { --warga-service-color: #7db1b1; }
+.surat-icon-purple { --warga-service-color: #ac92ec; }
+.surat-icon-neutral { --warga-service-color: #656d78; }
 
 #page .warga-service-icon[class*="surat-icon-"] {
   background: var(--warga-service-color, #656d78);
@@ -4278,6 +4278,34 @@ body.theme-dark #page .warga-service-catalog-copy small { color: #9cd9d2 !import
   .warga-service-catalog-item { grid-template-columns: 44px minmax(0, 1fr) 12px; gap: 10px; padding: 14px 10px; }
   .warga-service-catalog-item .warga-service-icon { width: 44px; height: 44px; font-size: 20px; border-radius: 13px; }
 }
+
+/* Use the same coloured service tile everywhere a request is represented. */
+body #page .page-content :is(
+  .warga-service-icon,
+  .warga-request-icon,
+  .warga-notification-icon,
+  .warga-detail-icon
+)[class*="surat-icon"] {
+  background: var(--warga-service-color, #656d78) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, .11), 0 5px 15px rgba(0, 0, 0, .02);
+}
+
+body #page .page-content :is(
+  .warga-service-icon,
+  .warga-request-icon,
+  .warga-notification-icon,
+  .warga-detail-icon
+)[class*="surat-icon"] > i {
+  color: #fff !important;
+  line-height: 1;
+}
+
+body.theme-light #page .page-content .warga-detail-head > .warga-detail-icon[class*="surat-icon"] > i,
+body.theme-dark #page .page-content .warga-detail-head > .warga-detail-icon[class*="surat-icon"] > i {
+  color: #fff !important;
+}
+
 /* Official letter preview stays inside the PWA; the paper itself remains A4. */
 .warga-letter-modal[hidden], .warga-letter-modal [hidden] { display: none !important; }
 .warga-letter-modal { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 12px; background: rgba(15,23,42,.72); }

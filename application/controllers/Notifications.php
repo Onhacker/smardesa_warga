@@ -18,7 +18,9 @@ class Notifications extends Citizen_Controller
                 'message' => $row['status'] === 'issued' ? 'Surat Anda sudah diterbitkan.' : 'Status terakhir permohonan: ' . warga_status_text($row['status']) . '.',
                 'occurred_at' => $row['updated_at'],
                 'request_id' => $row['id'],
-                'status' => $row['status']
+                'status' => $row['status'],
+                'service_slug' => $row['service_slug'],
+                'service_name' => $row['service_name']
             );
         }
         $data = array('pageTitle' => 'Notifikasi', 'notifications' => $notifications, 'listing' => $listing, 'listUrl' => site_url('notifikasi'));

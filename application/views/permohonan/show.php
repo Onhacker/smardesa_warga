@@ -1,8 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $formRows = warga_request_form_rows($request); $fileLabels = warga_request_file_labels($request); ?>
+<?php $formRows = warga_request_form_rows($request); $fileLabels = warga_request_file_labels($request); $requestIcon = warga_request_service_icon($request); ?>
 <div class="warga-request-detail">
 <section class="warga-detail-head">
-    <span class="warga-detail-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
+    <span class="warga-detail-icon <?= e($requestIcon['class']) ?>"><i class="<?= e($requestIcon['icon']) ?>" aria-hidden="true"></i></span>
     <div><p><?= e($request['request_code']) ?></p><h1><?= e($request['service_name']) ?></h1><?= warga_status_label($request['status']) ?></div>
 </section>
 

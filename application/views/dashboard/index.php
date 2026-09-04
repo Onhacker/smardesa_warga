@@ -62,8 +62,9 @@ $citizenVerified = !empty($citizenVerified);
         <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><?php if ($citizenVerified): ?><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?></div>
     <?php endif; ?>
     <?php foreach (array_slice($requests, 0, 3) as $request): ?>
+        <?php $requestIcon = warga_request_service_icon($request); ?>
         <a href="<?= site_url('permohonan/' . rawurlencode($request['id'])) ?>" class="warga-request-card">
-            <span class="warga-request-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
+            <span class="warga-request-icon <?= e($requestIcon['class']) ?>"><i class="<?= e($requestIcon['icon']) ?>" aria-hidden="true"></i></span>
             <span class="warga-request-copy"><strong><?= e($request['service_name']) ?></strong><small><?= e($request['request_code']) ?> · <?= e(tanggal_id($request['submitted_at'])) ?></small></span>
             <span class="warga-request-status"><?= warga_status_label($request['status']) ?><i class="fa fa-chevron-right"></i></span>
         </a>
