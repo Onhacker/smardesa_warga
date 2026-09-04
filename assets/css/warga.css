@@ -4843,3 +4843,183 @@ body.theme-dark #page .page-content .warga-resident-status.is-muted {
     font-size: 14px;
   }
 }
+
+/* Filter refinement: keep the two search criteria together and make the
+ * actions/statuses read like compact, semantic controls on every viewport. */
+.warga-list-search-fields {
+  grid-template-columns: minmax(0, 1.35fr) minmax(150px, .8fr) auto;
+  gap: 12px;
+}
+
+#page .warga-list-input {
+  background: var(--warga-page);
+}
+
+#page .warga-list-search-actions {
+  gap: 8px;
+}
+
+#page .warga-list-search-submit,
+#page .warga-list-reset {
+  min-height: 38px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+#page .warga-list-reset {
+  border: 1px solid var(--warga-line);
+  background: var(--warga-page);
+  color: var(--warga-muted) !important;
+}
+
+#page .warga-list-reset:hover {
+  border-color: var(--warga-teal);
+  background: #e7f3f1;
+  color: var(--warga-teal-dark) !important;
+}
+
+.warga-list-status {
+  align-items: stretch;
+  gap: 8px;
+}
+
+#page .warga-list-status a {
+  flex: 1 1 0;
+  border-color: transparent;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+/* Keep status colours visible before selection. Yellow uses dark text;
+ * the darker teal and green selected states use white text. */
+#page .warga-list-status a[data-list-filter="all"] {
+  border-color: #c6dfdc;
+  background: #eaf6f4;
+  color: var(--warga-teal-dark) !important;
+}
+
+#page .warga-list-status a[data-list-filter="all"].active {
+  border-color: var(--warga-teal-dark);
+  background: var(--warga-teal-dark);
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(15, 94, 91, .16);
+}
+
+#page .warga-list-status a[data-list-filter="active"] {
+  border-color: #efd49a;
+  background: #fff4d6;
+  color: #765000 !important;
+}
+
+#page .warga-list-status a[data-list-filter="active"].active {
+  border-color: #d7a12e;
+  background: #f6bb42;
+  color: #493000 !important;
+  box-shadow: 0 4px 10px rgba(118, 80, 0, .18);
+}
+
+#page .warga-list-status a[data-list-filter="issued"] {
+  border-color: #b8d9c1;
+  background: #eaf6e8;
+  color: #256b2a !important;
+}
+
+#page .warga-list-status a[data-list-filter="issued"].active {
+  border-color: #256b2a;
+  background: #256b2a;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(37, 107, 42, .18);
+}
+
+#page .warga-list-status a[data-list-filter="all"]:hover {
+  border-color: var(--warga-teal);
+}
+
+#page .warga-list-status a[data-list-filter="active"]:hover {
+  border-color: #c99b36;
+}
+
+#page .warga-list-status a[data-list-filter="issued"]:hover {
+  border-color: #4f9254;
+}
+
+body.theme-dark #page .warga-list-input {
+  border-color: #41525d;
+  background: #202b32;
+}
+
+body.theme-dark #page .warga-list-reset {
+  border-color: #41525d;
+  background: #202b32;
+  color: #c0cbd2 !important;
+}
+
+body.theme-dark #page .warga-list-reset:hover {
+  border-color: #5faea7;
+  background: #193b3a;
+  color: #b8e3df !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="all"] {
+  border-color: #286462;
+  background: #173b3b;
+  color: #9cd9d2 !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="active"] {
+  border-color: #6d5529;
+  background: #49391f;
+  color: #f1c778 !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="issued"] {
+  border-color: #28613a;
+  background: #203d2a;
+  color: #9bcf9f !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="all"].active {
+  border-color: #0f5e5b;
+  background: #0f5e5b;
+  color: #fff !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="active"].active {
+  border-color: #d7a12e;
+  background: #f6bb42;
+  color: #493000 !important;
+}
+
+body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
+  border-color: #256b2a;
+  background: #256b2a;
+  color: #fff !important;
+}
+
+@media (max-width: 600px) {
+  .warga-list-search-fields {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  #page .warga-list-search-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  #page .warga-list-search-actions > * {
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 340px) {
+  .warga-list-search-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #page .warga-list-search-actions {
+    grid-column: auto;
+  }
+}
