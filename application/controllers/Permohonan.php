@@ -76,7 +76,10 @@ class Permohonan extends Citizen_Controller
         $this->load->model('Request_model');
         $document = $this->Request_model->official_document_for_user($id, $this->currentUser['id']);
         if (!$document || empty($document['document_path'])) show_404();
-        if (!$this->stream_private_file($document['document_path'], 'surat-' . (string) $document['local_reference'], 'attachment', (string) $document['document_sha256'])) {
+        $disposition = (string) $this->input->get('download', TRUE) === '1'
+            ? 'attachment'
+            : 'inline';
+        if (!$this->stream_private_file($document['document_path'], 'surat-' . (string) $document['local_reference'], $disposition, (string) $document['document_sha256'])) {
             show_404();
         }
     }

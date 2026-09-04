@@ -38,7 +38,7 @@
 <?php endif; ?>
 
 <?php if ($request['status'] === 'issued'): ?>
-<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Dokumen resmi tersedia setelah hasil sinkronisasi diterima.</p></div><?php if (!empty($request['document_path'])): ?><a href="<?= site_url('permohonan/' . rawurlencode($request['id']) . '/surat') ?>" class="btn btn-s bg-green-dark color-white rounded-s"><i class="fa fa-download"></i></a><?php endif; ?></section>
+<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi siap dilihat atau diunduh dalam format PDF.</p></div><?php if (!empty($request['document_path'])): ?><?php $officialDocumentUrl = site_url('permohonan/' . rawurlencode($request['id']) . '/surat'); ?><div class="warga-result-actions"><a href="<?= e($officialDocumentUrl) ?>" target="_blank" rel="noopener" class="btn btn-s bg-green-dark color-white rounded-s"><i class="fa fa-eye"></i><span>Lihat Surat</span></a><a href="<?= e($officialDocumentUrl . '?download=1') ?>" class="btn btn-s warga-result-download rounded-s"><i class="fa fa-download"></i><span>Unduh PDF</span></a></div><?php endif; ?></section>
 <?php endif; ?>
 
 <section class="content warga-section-head mt-4"><div><p class="font-600 color-highlight mb-n1">Perjalanan layanan</p><h2 class="font-22 mb-0">Status Permohonan</h2></div></section>

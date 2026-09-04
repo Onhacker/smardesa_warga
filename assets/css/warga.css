@@ -330,7 +330,10 @@ a { color: inherit; }
 .warga-detail-row strong { color: var(--warga-ink); font-size: 12px; text-align: right; overflow-wrap: anywhere; }
 .warga-result-band { border-color: #b9daba; background: #edf8ee; color: #235e2e; }
 .warga-result-band > span { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; border-radius: 50%; background: var(--warga-green); color: #fff; }
-.warga-result-band > a { margin-left: auto; }
+.warga-result-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 8px; margin-left: auto; }
+#page .warga-result-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; margin: 0; white-space: nowrap; }
+#page .warga-result-actions .warga-result-download { border: 1px solid var(--warga-green); background: var(--warga-surface); color: #235e2e !important; }
+body.theme-dark #page .warga-result-actions .warga-result-download { border-color: #91d69a; background: #1e2d23; color: #bfe6c5 !important; }
 .warga-detail-head.is-staff-detail { background: var(--warga-blue); }
 .warga-inline-empty { display: flex; align-items: center; gap: 9px; padding: 13px; border-radius: 7px; background: #f1f5f7; color: var(--warga-muted); font-size: 11px; }
 .warga-document-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--warga-line); }
@@ -2935,6 +2938,27 @@ body.theme-dark #page .warga-request-document strong {
 @media (max-width: 460px) {
   #page .warga-request-detail .warga-detail-head h1 {
     font-size: 24px;
+  }
+
+  .warga-request-detail .warga-result-band {
+    flex-wrap: wrap;
+  }
+
+  .warga-request-detail .warga-result-band > div:not(.warga-result-actions) {
+    flex: 1 1 calc(100% - 50px);
+  }
+
+  .warga-request-detail .warga-result-actions {
+    display: grid;
+    flex: 1 0 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-left: 0;
+  }
+
+  #page .warga-request-detail .warga-result-actions .btn {
+    width: 100%;
+    padding-right: 10px !important;
+    padding-left: 10px !important;
   }
 }
 
