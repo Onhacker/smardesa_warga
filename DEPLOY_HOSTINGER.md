@@ -76,9 +76,10 @@ smartdesa-warga/database/seed.sql
 ```
 
 Jika database sudah pernah dibuat, impor semua berkas pada `database/migrations` dari
-`001_*.sql` sampai `010_*.sql` sesuai urutan. Rangkaian ini menambahkan autentikasi sinkron,
+`001_*.sql` sampai `012_*.sql` sesuai urutan. Rangkaian ini menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
-pengaman satu akun per penduduk, metadata PDF resmi, dan kunci snapshot sepanjang 120 karakter.
+pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
+serta penyimpanan terenkripsi NIK dan No. KK untuk ditampilkan kepada pemilik akun.
 
 ## 4. Konfigurasi API
 

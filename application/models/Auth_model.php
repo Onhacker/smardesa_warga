@@ -161,6 +161,90 @@ class Auth_model extends CI_Model
             ->get()->row_array();
     }
 
+    /**
+     * Return the authenticated citizen's own profile details.
+     *
+     * Identity documents are deliberately not part of current_user(), which
+     * is used throughout the application.  They are read only on the account
+     * screen and decrypted after the user id has been matched to the current
+     * session.  This keeps NIK/No. KK out of unrelated views and staff flows.
+     */
+    public function citizen_profile_for_user($userId)
+    {
+        $userId = (int) $userId;
+        // CI_Model exposes loaded libraries through its magic __get(); using
+        // isset($this->session) would therefore incorrectly reject a valid
+        // session on production requests.
+        $session = $this->session;
+        if (!is_object($session) || !method_exists($session, 'userdata')) return NULL;
+        $sessionUserId = (int) $session->userdata('warga_user_id');
+        if ($userId < 1 || $sessionUserId < 1 || $userId !== $sessionUserId) return NULL;
+
+        $empty = array(
+            'nik' => '',
+            'kk' => '',
+            'birth_date' => '',
+            'gender' => '',
+            'address' => '',
+            'verification_status' => 'unverified',
+            'identity_stored' => FALSE,
+            'identity_note' => ''
+        );
+        if (warga_demo_mode()) {
+            $empty['nik'] = '950103••••••0001';
+            $empty['kk'] = '950103••••••0001';
+            $empty['birth_date'] = '1992-06-12';
+            $empty['gender'] = 'Laki-laki';
+            $empty['address'] = 'Kampung Araboda, Distrik Asologaima';
+            $empty['verification_status'] = 'verified';
+            $empty['identity_stored'] = TRUE;
+            $empty['identity_note'] = 'Data identitas pada mode demo disamarkan.';
+            return $empty;
+        }
+        if (!warga_database_available() || !$this->ensure_identity_schema()) {
+            $empty['identity_note'] = 'Profil kependudukan belum tersedia pada server.';
+            return $empty;
+        }
+
+        $profileFields = array();
+        foreach (array('birth_date', 'gender', 'address_snapshot', 'verification_status', 'nik_encrypted', 'kk_encrypted') as $field) {
+            if ($this->db->field_exists($field, 'citizen_profiles')) $profileFields[] = 'cp.' . $field;
+        }
+        if (!$profileFields) {
+            $empty['identity_note'] = 'Profil kependudukan belum tersedia pada server.';
+            return $empty;
+        }
+
+        $this->db->select(implode(',', $profileFields), FALSE)->from('citizen_profiles cp');
+        $hasDirectory = $this->db->table_exists('village_resident_directory')
+            && $this->db->field_exists('local_citizen_key', 'citizen_profiles');
+        if ($hasDirectory && $this->db->field_exists('birth_date', 'village_resident_directory')
+            && $this->db->field_exists('gender', 'village_resident_directory')) {
+            $this->db->select('d.birth_date AS directory_birth_date,d.gender AS directory_gender', FALSE)
+                ->join('village_resident_directory d', 'd.village_id=cp.village_id AND d.local_citizen_key=cp.local_citizen_key', 'left');
+        }
+        $row = $this->db->where('cp.user_id', $userId)->limit(1)->get()->row_array();
+        if (!$row) {
+            $empty['identity_note'] = 'Profil kependudukan belum tersedia.';
+            return $empty;
+        }
+
+        $profile = $empty;
+        $profile['nik'] = isset($row['nik_encrypted']) ? $this->decrypt_identity($row['nik_encrypted']) : '';
+        $profile['kk'] = isset($row['kk_encrypted']) ? $this->decrypt_identity($row['kk_encrypted']) : '';
+        $profile['birth_date'] = !empty($row['birth_date']) ? (string) $row['birth_date']
+            : (!empty($row['directory_birth_date']) ? (string) $row['directory_birth_date'] : '');
+        $profile['gender'] = trim((string) (!empty($row['gender']) ? $row['gender']
+            : (!empty($row['directory_gender']) ? $row['directory_gender'] : '')));
+        $profile['address'] = trim((string) (isset($row['address_snapshot']) ? $row['address_snapshot'] : ''));
+        $profile['verification_status'] = trim((string) (isset($row['verification_status']) ? $row['verification_status'] : 'unverified')) ?: 'unverified';
+        $profile['identity_stored'] = $profile['nik'] !== '' || $profile['kk'] !== '';
+        if (!$profile['identity_stored']) {
+            $profile['identity_note'] = 'NIK dan No. KK belum tersimpan pada akun ini.';
+        }
+        return $profile;
+    }
+
     public function register_citizen(array $data)
     {
         if (warga_demo_mode()) return array('success' => TRUE);
@@ -242,6 +326,19 @@ class Auth_model extends CI_Model
             'created_at' => $now,
             'updated_at' => $now
         );
+        // Keep the documents available to the account owner without putting
+        // plaintext identity values in the database.  Older installations
+        // may not have the optional columns yet; ensure_identity_schema()
+        // adds them lazily and the conditional checks keep registration
+        // compatible with a read-only/legacy schema.
+        $encryptedNik = $this->encrypt_identity($nik);
+        $encryptedKk = $this->encrypt_identity($kk);
+        if ($encryptedNik !== NULL && $this->db->field_exists('nik_encrypted', 'citizen_profiles')) {
+            $profile['nik_encrypted'] = $encryptedNik;
+        }
+        if ($encryptedKk !== NULL && $this->db->field_exists('kk_encrypted', 'citizen_profiles')) {
+            $profile['kk_encrypted'] = $encryptedKk;
+        }
         if (!$this->db->insert('citizen_profiles', $profile) || !$this->db->trans_status()) {
             $this->db->trans_rollback();
             return array('success' => FALSE, 'message' => 'Profil penduduk belum dapat disimpan.');
@@ -278,6 +375,21 @@ class Auth_model extends CI_Model
         }
         if (!$this->db->field_exists('verification_status', 'citizen_profiles')) {
             $this->db->query("ALTER TABLE `citizen_profiles` ADD `verification_status` VARCHAR(30) NOT NULL DEFAULT 'unverified'");
+        }
+        if (!$this->db->field_exists('nik_encrypted', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `nik_encrypted` VARBINARY(512) DEFAULT NULL");
+        }
+        if (!$this->db->field_exists('kk_encrypted', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `kk_encrypted` VARBINARY(512) DEFAULT NULL AFTER `nik_encrypted`");
+        }
+        if (!$this->db->field_exists('birth_date', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `birth_date` DATE DEFAULT NULL");
+        }
+        if (!$this->db->field_exists('gender', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `gender` VARCHAR(20) DEFAULT NULL");
+        }
+        if (!$this->db->field_exists('address_snapshot', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `address_snapshot` TEXT DEFAULT NULL");
         }
         $query = $this->db->query('SHOW INDEX FROM `citizen_profiles`');
         $hasUniqueIndex = FALSE;
@@ -352,6 +464,37 @@ class Auth_model extends CI_Model
     private function profile_identity_hash($value)
     {
         return hash_hmac('sha256', (string) $value, (string) $this->config->item('encryption_key'));
+    }
+
+    /**
+     * Encrypt a 16-digit identity value for the account owner's profile.
+     * AES-256-GCM provides confidentiality and tamper detection; the binary
+     * payload starts with a small version marker for future key migrations.
+     */
+    private function encrypt_identity($value)
+    {
+        if (!function_exists('openssl_encrypt') || !function_exists('random_bytes')) return NULL;
+        $value = $this->identity_digits($value);
+        if (!preg_match('/^[0-9]{16}$/', $value)) return NULL;
+        $key = hash('sha256', 'smartdesa-warga:citizen-profile:v1|' . (string) $this->config->item('encryption_key'), TRUE);
+        $iv = random_bytes(12);
+        $tag = '';
+        $ciphertext = openssl_encrypt($value, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '');
+        if ($ciphertext === FALSE || strlen($tag) !== 16) return NULL;
+        return 'v1' . $iv . $tag . $ciphertext;
+    }
+
+    private function decrypt_identity($value)
+    {
+        if (!function_exists('openssl_decrypt') || !is_string($value) || strlen($value) < 30) return '';
+        if (substr($value, 0, 2) !== 'v1') return '';
+        $iv = substr($value, 2, 12);
+        $tag = substr($value, 14, 16);
+        $ciphertext = substr($value, 30);
+        if (strlen($iv) !== 12 || strlen($tag) !== 16 || $ciphertext === '') return '';
+        $key = hash('sha256', 'smartdesa-warga:citizen-profile:v1|' . (string) $this->config->item('encryption_key'), TRUE);
+        $plain = openssl_decrypt($ciphertext, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, '');
+        return is_string($plain) && preg_match('/^[0-9]{16}$/', $plain) ? $plain : '';
     }
 
     public function logout()

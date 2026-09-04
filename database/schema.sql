@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS citizen_profiles (
   nik_hash CHAR(64) NULL,
   name_hash CHAR(64) NULL,
   nik_encrypted VARBINARY(512) NULL,
+  kk_encrypted VARBINARY(512) NULL,
   kk_hash CHAR(64) NULL,
   birth_date DATE NULL,
   gender VARCHAR(20) NULL,

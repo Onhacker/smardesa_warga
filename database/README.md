@@ -23,4 +23,6 @@ Jalankan `migrations/009_official_documents.sql` untuk menambahkan hash dan ukur
 
 Jalankan `migrations/010_sync_aggregate_keys.sql` untuk memperpanjang kunci katalog/snapshot pada `sync_messages.aggregate_id` menjadi 120 karakter. Berkas migrasi PWA dan API sama; cukup dijalankan sekali pada database pusat yang dipakai bersama.
 
+Jalankan `migrations/012_citizen_identity_details.sql` untuk menambahkan kolom terenkripsi NIK dan No. KK pada profil warga. Kolom ini hanya dibaca pada halaman akun milik warga yang sedang masuk; direktori penduduk dan riwayat sinkronisasi tetap hanya menyimpan HMAC.
+
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.
