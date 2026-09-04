@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "id.co.mediaverse.smartkampung",
+      "sha256_cert_fingerprints": [
+        "09:84:AF:5A:7B:20:25:2B:00:C2:E7:FE:87:EA:8D:D1:16:1C:4D:8F:FC:CF:C2:1C:42:51:17:91:9F:76:F8:A4"
+      ]
+    }
+  }
+]
