@@ -11,7 +11,8 @@ class Dashboard extends Citizen_Controller
             'pageTitle' => 'Beranda',
             'requests' => $requests,
             'summary' => $this->Request_model->summary($this->currentUser['id']),
-            'services' => $this->Request_model->service_types()
+            'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : ''),
+            'citizenVerified' => $this->Auth_model->citizen_is_verified((int) $this->currentUser['id'])
         ));
     }
 }

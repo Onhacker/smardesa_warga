@@ -1,4 +1,7 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+$citizenVerified = !empty($citizenVerified);
+?>
 <section class="warga-home-head">
     <div class="warga-home-identity">
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
@@ -29,15 +32,26 @@
 <section class="warga-service-card" aria-labelledby="warga-service-title">
     <div class="content warga-section-head warga-service-heading-card">
         <div><p class="font-600 color-highlight mb-n1">Pelayanan desa</p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
-        <a href="<?= site_url('permohonan/baru') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
+        <?php if ($citizenVerified): ?>
+            <a href="<?= site_url('permohonan/baru') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
+        <?php else: ?>
+            <span class="warga-service-locked" aria-label="Layanan terkunci"><i class="fa fa-lock"></i></span>
+        <?php endif; ?>
     </div>
     <div class="warga-service-grid" aria-label="Jenis layanan">
         <?php $serviceColors = array('teal', 'blue', 'orange', 'green', 'red'); ?>
         <?php foreach (array_slice($services, 0, 5) as $index => $service): ?>
-            <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item">
-                <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
-                <strong><?= e($service['short_name']) ?></strong>
-            </a>
+            <?php if ($citizenVerified): ?>
+                <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item">
+                    <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
+                    <strong><?= e($service['short_name']) ?></strong>
+                </a>
+            <?php else: ?>
+                <span class="warga-service-item is-locked" aria-disabled="true">
+                    <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
+                    <strong><?= e($service['short_name']) ?></strong>
+                </span>
+            <?php endif; ?>
         <?php endforeach; ?>
     </div>
 </section>
@@ -48,7 +62,7 @@
 </section>
 <section class="warga-request-list">
     <?php if (!$requests): ?>
-        <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a></div>
+        <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><?php if ($citizenVerified): ?><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?></div>
     <?php endif; ?>
     <?php foreach (array_slice($requests, 0, 3) as $request): ?>
         <a href="<?= site_url('permohonan/' . rawurlencode($request['id'])) ?>" class="warga-request-card">
@@ -58,6 +72,13 @@
         </a>
     <?php endforeach; ?>
 </section>
+
+<?php if (!$citizenVerified): ?>
+<section class="warga-verification-notice" role="status">
+    <i class="fa fa-user-shield"></i>
+    <div><strong>Akun belum terverifikasi</strong><p>Akun lama ini belum cocok dengan Data Penduduk kampung/desa. Hubungi operator desa agar data penduduk disinkronkan, lalu daftarkan akun warga menggunakan NIK, No. KK, dan nama yang sesuai.</p></div>
+</section>
+<?php endif; ?>
 
 <section class="warga-home-notice">
     <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi desa</strong><p>Status permohonan diperbarui otomatis saat perangkat SmartDesa desa terhubung.</p></div>

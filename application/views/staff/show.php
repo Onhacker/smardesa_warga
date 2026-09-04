@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php $formRows = warga_request_form_rows($request); $fileLabels = warga_request_file_labels($request); ?>
 <section class="warga-detail-head is-staff-detail">
     <span class="warga-detail-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
     <div><p><?= e($request['request_code']) ?></p><h1><?= e($request['service_name']) ?></h1><?= warga_status_label($request['status']) ?></div>
@@ -12,6 +13,17 @@
     <div class="warga-detail-row"><span>Tanggal pengajuan</span><strong><?= e(tanggal_id($request['submitted_at'], TRUE)) ?></strong></div>
 </div></section>
 
+<?php if (!empty($formRows)): ?>
+<section class="card card-style warga-detail-card"><div class="content mb-2">
+    <div class="warga-form-title"><span><i class="fa fa-list-alt"></i></span><div><h2>Data Tambahan Warga</h2><p>Isian mengikuti formulir layanan yang dipublikasikan dari Master Surat.</p></div></div>
+    <div class="warga-form-data-grid">
+        <?php foreach ($formRows as $formRow): ?>
+            <div class="warga-form-data-item"><span><?= e($formRow['label']) ?></span><strong><?= e($formRow['value']) ?></strong></div>
+        <?php endforeach; ?>
+    </div>
+</div></section>
+<?php endif; ?>
+
 <section class="card card-style warga-detail-card"><div class="content mb-2">
     <div class="warga-form-title"><span><i class="fa fa-file-alt"></i></span><div><h2>Isi Permohonan</h2><p>Tujuan dan catatan yang dikirim warga.</p></div></div>
     <div class="warga-detail-row"><span>Keperluan</span><strong><?= e($request['purpose']) ?></strong></div>
@@ -23,7 +35,8 @@
     <?php if (!$documents): ?><div class="warga-inline-empty"><i class="fa fa-folder-open"></i><span>Tidak ada berkas pendukung.</span></div><?php endif; ?>
     <?php foreach ($documents as $document): ?>
         <?php $documentId = isset($document['id']) ? $document['id'] : ''; ?>
-        <div class="warga-document-row"><i class="fa <?= $document['mime_type'] === 'application/pdf' ? 'fa-file-pdf color-red-dark' : 'fa-file-image color-blue-dark' ?>"></i><span><strong><?= e($document['original_name']) ?></strong><small><?= number_format(((int) $document['file_size']) / 1024, 0) ?> KB</small></span><?php if ($documentId !== ''): ?><a href="<?= site_url('petugas/berkas/' . rawurlencode($documentId)) ?>" class="btn btn-xxs bg-teal-dark color-white"><i class="fa fa-download"></i></a><?php endif; ?></div>
+        <?php $fieldKey = isset($document['field_key']) ? (string) $document['field_key'] : ''; $fileLabel = $fieldKey !== '' && isset($fileLabels[$fieldKey]) ? $fileLabels[$fieldKey] : 'Berkas pendukung'; ?>
+        <div class="warga-document-row"><i class="fa <?= $document['mime_type'] === 'application/pdf' ? 'fa-file-pdf color-red-dark' : 'fa-file-image color-blue-dark' ?>"></i><span><strong><?= e($fileLabel) ?></strong><small><?= e($document['original_name']) ?> · <?= number_format(((int) $document['file_size']) / 1024, 0) ?> KB</small></span><?php if ($documentId !== ''): ?><a href="<?= site_url('petugas/berkas/' . rawurlencode($documentId)) ?>" class="btn btn-xxs bg-teal-dark color-white"><i class="fa fa-download"></i></a><?php endif; ?></div>
     <?php endforeach; ?>
 </div></section>
 

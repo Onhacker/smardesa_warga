@@ -134,3 +134,91 @@ if (!function_exists('warga_json')) {
         return e(json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
     }
 }
+
+if (!function_exists('warga_request_schema')) {
+    /**
+     * Return only the small, display-safe part of a request form schema.
+     * The schema is supplied by a village administrator, so views must never
+     * assume that every field or option has the expected shape.
+     */
+    function warga_request_schema(array $request)
+    {
+        $schema = isset($request['form_schema']) && is_array($request['form_schema']) ? $request['form_schema'] : array();
+        $fields = isset($schema['fields']) && is_array($schema['fields']) ? $schema['fields'] : array();
+        $safe = array();
+        foreach ($fields as $field) {
+            if (!is_array($field)) continue;
+            $key = trim((string) (isset($field['key']) ? $field['key'] : ''));
+            $label = trim((string) (isset($field['label']) ? $field['label'] : ''));
+            $type = strtolower(trim((string) (isset($field['type']) ? $field['type'] : 'text')));
+            if ($key === '' || $label === '' || !preg_match('/^[a-z][a-z0-9_]{0,49}$/', $key)) continue;
+            if (!in_array($type, array('text', 'textarea', 'date', 'select', 'number', 'tel', 'email', 'file'), TRUE)) continue;
+            $options = array();
+            if (isset($field['options']) && is_array($field['options'])) {
+                foreach ($field['options'] as $option) {
+                    if (is_array($option)) {
+                        $value = isset($option['value']) && is_scalar($option['value']) ? (string) $option['value'] : '';
+                        $optionLabel = isset($option['label']) && is_scalar($option['label']) ? (string) $option['label'] : $value;
+                    } elseif (is_scalar($option)) {
+                        $value = (string) $option;
+                        $optionLabel = $value;
+                    } else {
+                        continue;
+                    }
+                    if ($value !== '') $options[$value] = $optionLabel !== '' ? $optionLabel : $value;
+                }
+            }
+            $safe[] = array(
+                'key' => $key,
+                'label' => $label,
+                'type' => $type,
+                'options' => $options
+            );
+        }
+        return array('version' => max(1, (int) (isset($schema['version']) ? $schema['version'] : 1)), 'fields' => $safe);
+    }
+}
+
+if (!function_exists('warga_request_form_rows')) {
+    function warga_request_form_rows(array $request)
+    {
+        $schema = warga_request_schema($request);
+        $values = isset($request['form_data']) && is_array($request['form_data']) ? $request['form_data'] : array();
+        $rows = array();
+        foreach ($schema['fields'] as $field) {
+            if ($field['type'] === 'file') continue;
+            $key = $field['key'];
+            $value = array_key_exists($key, $values) ? $values[$key] : '';
+            if (is_array($value)) {
+                $parts = array();
+                foreach ($value as $part) if (is_scalar($part)) $parts[] = trim((string) $part);
+                $value = implode(', ', array_filter($parts, function ($part) { return $part !== ''; }));
+            } elseif (is_scalar($value)) {
+                $value = trim((string) $value);
+            } else {
+                $value = '';
+            }
+            if ($field['type'] === 'select' && $value !== '' && isset($field['options'][$value])) {
+                $value = $field['options'][$value];
+            }
+            if ($field['type'] === 'date' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+                $formatted = tanggal_id($value);
+                if ($formatted !== '-') $value = $formatted;
+            }
+            $rows[] = array('key' => $key, 'label' => $field['label'], 'value' => $value !== '' ? $value : '-');
+        }
+        return $rows;
+    }
+}
+
+if (!function_exists('warga_request_file_labels')) {
+    function warga_request_file_labels(array $request)
+    {
+        $schema = warga_request_schema($request);
+        $labels = array();
+        foreach ($schema['fields'] as $field) {
+            if ($field['type'] === 'file') $labels[$field['key']] = $field['label'];
+        }
+        return $labels;
+    }
+}

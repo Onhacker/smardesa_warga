@@ -3,18 +3,97 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Request_model extends CI_Model
 {
+    private $catalog_schema_ready = false;
+
     private function normalize_row(array $row)
     {
+        $payloadSchema = NULL;
         if (isset($row['payload_json'])) {
             $payload = json_decode((string) $row['payload_json'], TRUE);
             if (is_array($payload)) {
                 $row['purpose'] = isset($payload['purpose']) ? $payload['purpose'] : '';
                 $row['note'] = isset($payload['note']) ? $payload['note'] : '';
+                $row['form_data'] = isset($payload['form_data']) && is_array($payload['form_data']) ? $payload['form_data'] : array();
+                if (isset($payload['form_schema_version'])) {
+                    $row['form_schema_version'] = (int) $payload['form_schema_version'];
+                }
+                if (isset($payload['form_schema']) && is_array($payload['form_schema'])
+                    && isset($payload['form_schema']['fields']) && is_array($payload['form_schema']['fields'])) {
+                    $payloadSchema = $payload['form_schema'];
+                }
             }
         }
         if (!isset($row['purpose'])) $row['purpose'] = '';
         if (!isset($row['note'])) $row['note'] = '';
+        if (!isset($row['form_data'])) $row['form_data'] = array();
+        if (!isset($row['form_schema_version'])) $row['form_schema_version'] = 0;
+        // Keep historical requests readable after the current catalogue is
+        // edited. The schema snapshot sent with the request wins.
+        if ($payloadSchema !== NULL) {
+            $row['form_schema'] = $payloadSchema;
+        } elseif (isset($row['catalog_form_schema_json'])) {
+            $catalogSchema = json_decode((string) $row['catalog_form_schema_json'], TRUE);
+            if (is_array($catalogSchema) && isset($catalogSchema['fields']) && is_array($catalogSchema['fields'])) {
+                $row['form_schema'] = $catalogSchema;
+            }
+        }
+        if (!isset($row['form_schema']) || !is_array($row['form_schema'])) {
+            $row['form_schema'] = array('version' => (int) $row['form_schema_version'] ?: 1, 'fields' => array());
+        }
+        if (!isset($row['catalog_template_key'])) $row['catalog_template_key'] = '';
         return $row;
+    }
+
+    private function ensure_catalog_schema()
+    {
+        if ($this->catalog_schema_ready || !warga_database_available()) return;
+        if (!$this->db->table_exists('village_service_catalog')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `village_service_catalog` (
+                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `village_id` CHAR(36) NOT NULL,
+                `service_key` VARCHAR(80) NOT NULL,
+                `name` VARCHAR(180) NOT NULL,
+                `short_name` VARCHAR(100) NOT NULL,
+                `icon` VARCHAR(80) NOT NULL DEFAULT 'fa-file-alt',
+                `description` VARCHAR(1000) DEFAULT NULL,
+                `requirements_json` LONGTEXT NULL,
+                `form_schema_json` LONGTEXT NULL,
+                `template_key` VARCHAR(120) DEFAULT NULL,
+                `schema_version` INT UNSIGNED NOT NULL DEFAULT 1,
+                `sort_order` INT NOT NULL DEFAULT 0,
+                `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                `source_updated_at` DATETIME NULL,
+                `published_at` DATETIME NULL,
+                `source_hash` CHAR(64) DEFAULT NULL,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_village_service_key` (`village_id`, `service_key`),
+                KEY `idx_village_service_active` (`village_id`, `is_active`, `sort_order`),
+                CONSTRAINT `fk_village_service_village` FOREIGN KEY (`village_id`) REFERENCES `village_tenants` (`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        } else {
+            $this->ensure_field('village_service_catalog', 'description', "ALTER TABLE `village_service_catalog` ADD `description` VARCHAR(1000) DEFAULT NULL");
+            $this->ensure_field('village_service_catalog', 'requirements_json', "ALTER TABLE `village_service_catalog` ADD `requirements_json` LONGTEXT NULL");
+            $this->ensure_field('village_service_catalog', 'form_schema_json', "ALTER TABLE `village_service_catalog` ADD `form_schema_json` LONGTEXT NULL");
+            $this->ensure_field('village_service_catalog', 'template_key', "ALTER TABLE `village_service_catalog` ADD `template_key` VARCHAR(120) DEFAULT NULL");
+            $this->ensure_field('village_service_catalog', 'schema_version', "ALTER TABLE `village_service_catalog` ADD `schema_version` INT UNSIGNED NOT NULL DEFAULT 1");
+            $this->ensure_field('village_service_catalog', 'sort_order', "ALTER TABLE `village_service_catalog` ADD `sort_order` INT NOT NULL DEFAULT 0");
+            $this->ensure_field('village_service_catalog', 'is_active', "ALTER TABLE `village_service_catalog` ADD `is_active` TINYINT(1) NOT NULL DEFAULT 1");
+            $this->ensure_field('village_service_catalog', 'source_updated_at', "ALTER TABLE `village_service_catalog` ADD `source_updated_at` DATETIME NULL");
+            $this->ensure_field('village_service_catalog', 'published_at', "ALTER TABLE `village_service_catalog` ADD `published_at` DATETIME NULL");
+            $this->ensure_field('village_service_catalog', 'source_hash', "ALTER TABLE `village_service_catalog` ADD `source_hash` CHAR(64) DEFAULT NULL");
+        }
+        if ($this->db->table_exists('service_requests')) {
+            $this->ensure_field('service_requests', 'catalog_service_id', "ALTER TABLE `service_requests` ADD `catalog_service_id` BIGINT UNSIGNED NULL");
+            $this->ensure_field('service_requests', 'form_schema_version', "ALTER TABLE `service_requests` ADD `form_schema_version` INT UNSIGNED NULL");
+            $this->ensure_index('service_requests', 'idx_requests_catalog', 'KEY `idx_requests_catalog` (`catalog_service_id`)');
+        }
+        if ($this->db->table_exists('request_documents')) {
+            $this->ensure_field('request_documents', 'field_key', "ALTER TABLE `request_documents` ADD `field_key` VARCHAR(100) NULL");
+            $this->ensure_index('request_documents', 'idx_request_documents_field', 'KEY `idx_request_documents_field` (`request_id`, `field_key`)');
+        }
+        $this->catalog_schema_ready = true;
     }
 
     private function private_storage_path()
@@ -32,57 +111,160 @@ class Request_model extends CI_Model
         return rtrim($real, DIRECTORY_SEPARATOR);
     }
 
-    private function collect_uploaded_documents($requestId)
+    private function collect_uploaded_documents($requestId, array $schema = array())
     {
-        if (empty($_FILES['supporting_files']) || !is_array($_FILES['supporting_files']['name'])) return array('files' => array(), 'error' => NULL);
+        $fields = isset($schema['fields']) && is_array($schema['fields']) ? $schema['fields'] : array();
+        $fileFields = array();
+        foreach ($fields as $field) {
+            if (is_array($field) && ($field['type'] ?? '') === 'file' && !empty($field['key'])) {
+                $fileFields[(string) $field['key']] = $field;
+            }
+        }
+
+        $entries = array();
+        $appendEntries = function ($fieldKey, $names, $types, $tmpNames, $errors, $sizes, $path = '') use (&$appendEntries, &$entries) {
+            if (is_array($names)) {
+                foreach ($names as $index => $name) {
+                    $childPath = $path === '' ? (string) $index : $path . '.' . $index;
+                    $appendEntries(
+                        $fieldKey,
+                        $name,
+                        is_array($types) && array_key_exists($index, $types) ? $types[$index] : '',
+                        is_array($tmpNames) && array_key_exists($index, $tmpNames) ? $tmpNames[$index] : '',
+                        is_array($errors) && array_key_exists($index, $errors) ? $errors[$index] : UPLOAD_ERR_NO_FILE,
+                        is_array($sizes) && array_key_exists($index, $sizes) ? $sizes[$index] : 0,
+                        $childPath
+                    );
+                }
+                return;
+            }
+            $entries[] = array(
+                'field_key' => (string) $fieldKey,
+                'name' => is_scalar($names) ? (string) $names : '',
+                'type' => is_scalar($types) ? (string) $types : '',
+                'tmp_name' => is_scalar($tmpNames) ? (string) $tmpNames : '',
+                'error' => (int) $errors,
+                'size' => (int) $sizes,
+                'path' => $path
+            );
+        };
+
+        if (isset($_FILES['supporting_files']) && is_array($_FILES['supporting_files'])) {
+            $bucket = $_FILES['supporting_files'];
+            $appendEntries('', $bucket['name'] ?? array(), $bucket['type'] ?? array(), $bucket['tmp_name'] ?? array(), $bucket['error'] ?? array(), $bucket['size'] ?? array());
+        }
+        if (isset($_FILES['warga_files']) && is_array($_FILES['warga_files'])) {
+            $bucket = $_FILES['warga_files'];
+            $names = isset($bucket['name']) && is_array($bucket['name']) ? $bucket['name'] : array();
+            foreach ($names as $fieldKey => $fieldNames) {
+                $appendEntries(
+                    $fieldKey,
+                    $fieldNames,
+                    isset($bucket['type'][$fieldKey]) ? $bucket['type'][$fieldKey] : array(),
+                    isset($bucket['tmp_name'][$fieldKey]) ? $bucket['tmp_name'][$fieldKey] : array(),
+                    isset($bucket['error'][$fieldKey]) ? $bucket['error'][$fieldKey] : array(),
+                    isset($bucket['size'][$fieldKey]) ? $bucket['size'][$fieldKey] : array()
+                );
+            }
+        }
+
+        $uploadedEntries = array_values(array_filter($entries, function ($entry) {
+            return (int) $entry['error'] !== UPLOAD_ERR_NO_FILE;
+        }));
+        $counts = array();
+        $genericCount = 0;
+        foreach ($uploadedEntries as $entry) {
+            $fieldKey = trim((string) $entry['field_key']);
+            if ($fieldKey === '') {
+                $genericCount++;
+                continue;
+            }
+            if (!isset($fileFields[$fieldKey])) {
+                return array('files' => array(), 'error' => 'Berkas formulir tidak dikenali. Muat ulang halaman lalu coba lagi.');
+            }
+            if (!isset($counts[$fieldKey])) $counts[$fieldKey] = 0;
+            $counts[$fieldKey]++;
+            if (empty($fileFields[$fieldKey]['multiple']) && $counts[$fieldKey] > 1) {
+                return array('files' => array(), 'error' => 'Isian berkas "' . $fileFields[$fieldKey]['label'] . '" hanya menerima satu berkas.');
+            }
+        }
+        if ($genericCount > 5) return array('files' => array(), 'error' => 'Maksimal lima berkas pendukung umum dapat dikirim.');
+        if (count($uploadedEntries) > 10) return array('files' => array(), 'error' => 'Maksimal sepuluh berkas dapat dikirim dalam satu permohonan.');
+        foreach ($fileFields as $fieldKey => $field) {
+            if (!empty($field['required']) && empty($counts[$fieldKey])) {
+                return array('files' => array(), 'error' => 'Berkas "' . $field['label'] . '" wajib diunggah.');
+            }
+        }
+        if (!$uploadedEntries) return array('files' => array(), 'error' => NULL, 'paths' => array());
+
         $storage = $this->private_storage_path();
         if ($storage === NULL) return array('files' => array(), 'error' => 'Penyimpanan berkas belum siap.');
         $allowed = array('image/jpeg' => 'jpg', 'image/png' => 'png', 'application/pdf' => 'pdf');
         $files = array();
         $paths = array();
-        $count = count($_FILES['supporting_files']['name']);
-        if ($count > 5) return array('files' => array(), 'error' => 'Maksimal lima berkas dapat dikirim.');
         $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : NULL;
-        for ($index = 0; $index < $count; $index++) {
-            $errorCode = (int) $_FILES['supporting_files']['error'][$index];
-            if ($errorCode === UPLOAD_ERR_NO_FILE) continue;
-            if ($errorCode !== UPLOAD_ERR_OK) {
-                if ($finfo) finfo_close($finfo);
-                $this->cleanup_paths($paths);
-                return array('files' => array(), 'error' => 'Salah satu berkas gagal diunggah.');
+        $fail = function ($message) use (&$finfo, &$paths) {
+            if ($finfo) {
+                finfo_close($finfo);
+                $finfo = NULL;
             }
-            $tmp = $_FILES['supporting_files']['tmp_name'][$index];
-            $size = (int) $_FILES['supporting_files']['size'][$index];
-            if ($size < 1 || $size > 5 * 1024 * 1024 || !is_uploaded_file($tmp)) {
-                if ($finfo) finfo_close($finfo);
-                $this->cleanup_paths($paths);
-                return array('files' => array(), 'error' => 'Setiap berkas harus berukuran maksimal 5 MB.');
+            $this->cleanup_paths($paths);
+            return array('files' => array(), 'error' => $message, 'paths' => array());
+        };
+        if (!$finfo) return $fail('Pemeriksaan jenis berkas belum tersedia pada server.');
+
+        foreach ($uploadedEntries as $entry) {
+            $fieldKey = trim((string) $entry['field_key']);
+            $field = $fieldKey !== '' && isset($fileFields[$fieldKey]) ? $fileFields[$fieldKey] : array();
+            $maxMb = $field ? max(1, min(10, (int) ($field['max_size_mb'] ?? 5))) : 5;
+            $size = (int) $entry['size'];
+            $tmp = (string) $entry['tmp_name'];
+            if ((int) $entry['error'] !== UPLOAD_ERR_OK) return $fail('Salah satu berkas gagal diunggah.');
+            if ($size < 1 || $size > $maxMb * 1024 * 1024 || !is_uploaded_file($tmp)) {
+                return $fail($field ? 'Berkas "' . $field['label'] . '" melebihi batas ' . $maxMb . ' MB.' : 'Setiap berkas harus berukuran maksimal 5 MB.');
             }
-            $mime = $finfo ? finfo_file($finfo, $tmp) : (string) $_FILES['supporting_files']['type'][$index];
-            if (!isset($allowed[$mime])) {
-                if ($finfo) finfo_close($finfo);
-                $this->cleanup_paths($paths);
-                return array('files' => array(), 'error' => 'Jenis berkas hanya boleh JPG, PNG, atau PDF.');
+            $mime = finfo_file($finfo, $tmp);
+            $mime = strtolower(trim((string) $mime));
+            if (!isset($allowed[$mime])) return $fail('Jenis berkas hanya boleh JPG, PNG, atau PDF.');
+            if ($field && !$this->file_accepts_mime($mime, (string) ($field['accept'] ?? ''))) {
+                return $fail('Jenis berkas "' . $field['label'] . '" tidak sesuai dengan ketentuan layanan.');
             }
             $name = $requestId . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
             $destination = $storage . DIRECTORY_SEPARATOR . 'requests' . DIRECTORY_SEPARATOR . $name;
             $directory = dirname($destination);
-            if (!is_dir($directory) && !@mkdir($directory, 0750, TRUE) && !is_dir($directory)) {
-                if ($finfo) finfo_close($finfo);
-                $this->cleanup_paths($paths);
-                return array('files' => array(), 'error' => 'Folder berkas belum dapat dibuat.');
-            }
-            if (!move_uploaded_file($tmp, $destination)) {
-                if ($finfo) finfo_close($finfo);
-                $this->cleanup_paths($paths);
-                return array('files' => array(), 'error' => 'Berkas belum dapat disimpan.');
-            }
+            if (!is_dir($directory) && !@mkdir($directory, 0750, TRUE) && !is_dir($directory)) return $fail('Folder berkas belum dapat dibuat.');
+            if (!move_uploaded_file($tmp, $destination)) return $fail('Berkas belum dapat disimpan.');
             @chmod($destination, 0640);
             $paths[] = $destination;
-            $files[] = array('original_name' => substr((string) $_FILES['supporting_files']['name'][$index], 0, 180), 'stored_name' => $name, 'storage_path' => $destination, 'mime_type' => $mime, 'file_size' => $size);
+            $files[] = array(
+                'field_key' => $fieldKey !== '' ? $fieldKey : NULL,
+                'original_name' => substr((string) $entry['name'], 0, 180),
+                'stored_name' => $name,
+                'storage_path' => $destination,
+                'mime_type' => $mime,
+                'file_size' => $size
+            );
         }
         if ($finfo) finfo_close($finfo);
         return array('files' => $files, 'error' => NULL, 'paths' => $paths);
+    }
+
+    private function file_accepts_mime($mime, $accept)
+    {
+        $mime = strtolower(trim((string) $mime));
+        $accept = trim((string) $accept);
+        if ($accept === '') return TRUE;
+        $parts = preg_split('/\s*,\s*/', strtolower($accept));
+        if (!$parts) return TRUE;
+        $extensionMimes = array('.jpg' => 'image/jpeg', '.jpeg' => 'image/jpeg', '.png' => 'image/png', '.pdf' => 'application/pdf');
+        foreach ($parts as $part) {
+            $part = trim($part);
+            if ($part === '') continue;
+            if ($part === $mime) return TRUE;
+            if (substr($part, -2) === '/*' && strpos($mime, substr($part, 0, -1)) === 0) return TRUE;
+            if (isset($extensionMimes[$part]) && $extensionMimes[$part] === $mime) return TRUE;
+        }
+        return FALSE;
     }
 
     private function cleanup_paths(array $paths)
@@ -93,9 +275,9 @@ class Request_model extends CI_Model
     private function demo_services()
     {
         return array(
-            array('id' => 1, 'slug' => 'domisili', 'name' => 'Surat Keterangan Domisili', 'short_name' => 'Domisili', 'icon' => 'fa-home', 'description' => 'Keterangan tempat tinggal warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk')),
-            array('id' => 2, 'slug' => 'tidak-mampu', 'name' => 'Surat Keterangan Tidak Mampu', 'short_name' => 'Tidak Mampu', 'icon' => 'fa-hands-helping', 'description' => 'Keterangan kondisi sosial ekonomi warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk')),
-            array('id' => 3, 'slug' => 'usaha', 'name' => 'Surat Keterangan Usaha', 'short_name' => 'Keterangan Usaha', 'icon' => 'fa-store', 'description' => 'Keterangan kegiatan usaha warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk', 'Keterangan lokasi usaha'))
+            array('id' => 1, 'catalog_id' => 0, 'slug' => 'domisili', 'name' => 'Surat Keterangan Domisili', 'short_name' => 'Domisili', 'icon' => 'fa-home', 'description' => 'Keterangan tempat tinggal warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk'), 'form_schema' => array('version' => 1, 'fields' => array()), 'schema_version' => 1, 'template_key' => 'domisili', 'is_catalog' => false),
+            array('id' => 2, 'catalog_id' => 0, 'slug' => 'tidak-mampu', 'name' => 'Surat Keterangan Tidak Mampu', 'short_name' => 'Tidak Mampu', 'icon' => 'fa-hands-helping', 'description' => 'Keterangan kondisi sosial ekonomi warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk'), 'form_schema' => array('version' => 1, 'fields' => array()), 'schema_version' => 1, 'template_key' => 'tidak-mampu', 'is_catalog' => false),
+            array('id' => 3, 'catalog_id' => 0, 'slug' => 'usaha', 'name' => 'Surat Keterangan Usaha', 'short_name' => 'Keterangan Usaha', 'icon' => 'fa-store', 'description' => 'Keterangan kegiatan usaha warga.', 'requirements' => array('Kartu Keluarga', 'Kartu Tanda Penduduk', 'Keterangan lokasi usaha'), 'form_schema' => array('version' => 1, 'fields' => array()), 'schema_version' => 1, 'template_key' => 'usaha', 'is_catalog' => false)
         );
     }
 
@@ -153,24 +335,179 @@ class Request_model extends CI_Model
         return $rows;
     }
 
-    public function service_types()
+    public function service_types($villageId = '')
     {
-        if (warga_demo_mode() || !warga_database_available()) return $this->demo_services();
+        if (warga_demo_mode()) return $this->demo_services();
+        if (!warga_database_available()) return array();
+        $this->ensure_catalog_schema();
+        $villageId = trim((string) $villageId);
+        if ($villageId !== '' && $this->db->table_exists('village_service_catalog')) {
+            $rows = $this->db->select('c.*, st.id AS legacy_service_type_id')
+                ->from('village_service_catalog c')
+                ->join('service_types st', 'st.slug=c.service_key', 'left')
+                ->where(array('c.village_id' => $villageId, 'c.is_active' => 1))
+                ->order_by('c.sort_order', 'ASC')->order_by('c.name', 'ASC')->get()->result_array();
+            foreach ($rows as &$row) $this->ensure_legacy_service_type($row);
+            unset($row);
+            return array_map(array($this, 'normalise_catalog_row'), $rows);
+        }
+
         $rows = $this->db->where('is_active', 1)->order_by('sort_order', 'ASC')->order_by('name', 'ASC')->get('service_types')->result_array();
         foreach ($rows as &$row) {
             $row['requirements'] = json_decode((string) $row['requirements_json'], TRUE);
             if (!is_array($row['requirements'])) $row['requirements'] = array();
+            $row['form_schema'] = array('version' => 1, 'fields' => array());
+            $row['schema_version'] = 1;
+            $row['catalog_id'] = 0;
+            $row['is_catalog'] = false;
             $row['icon'] = $row['icon'] ?: 'fa-file-alt';
         }
         unset($row);
         return $rows;
     }
 
+    private function normalise_catalog_row(array $row)
+    {
+        $requirements = json_decode((string) (isset($row['requirements_json']) ? $row['requirements_json'] : ''), TRUE);
+        $schema = json_decode((string) (isset($row['form_schema_json']) ? $row['form_schema_json'] : ''), TRUE);
+        if (!is_array($requirements)) $requirements = array();
+        if (!is_array($schema) || !isset($schema['fields']) || !is_array($schema['fields'])) $schema = array('version' => 1, 'fields' => array());
+        $legacyId = isset($row['legacy_service_type_id']) ? (int) $row['legacy_service_type_id'] : 0;
+        $catalogId = isset($row['id']) ? (int) $row['id'] : 0;
+        return array(
+            // service_requests.service_type_id references service_types.id;
+            // a per-village catalog ID must never be used in that column.
+            'id' => $legacyId,
+            'legacy_service_type_id' => $legacyId,
+            'catalog_id' => $catalogId,
+            'slug' => (string) (isset($row['service_key']) ? $row['service_key'] : ''),
+            'name' => (string) (isset($row['name']) ? $row['name'] : ''),
+            'short_name' => (string) (isset($row['short_name']) ? $row['short_name'] : ''),
+            'icon' => !empty($row['icon']) ? (string) $row['icon'] : 'fa-file-alt',
+            'description' => (string) (isset($row['description']) ? $row['description'] : ''),
+            'requirements' => $requirements,
+            'form_schema' => $schema,
+            'schema_version' => (int) $schema['version'],
+            'template_key' => (string) (isset($row['template_key']) ? $row['template_key'] : ''),
+            'is_catalog' => true
+        );
+    }
+
+    /**
+     * Resolve the legacy service_types row required by the existing foreign
+     * key. Catalog rows are per-village and their IDs are not interchangeable.
+     */
+    private function ensure_legacy_service_type(array &$row)
+    {
+        $legacyId = isset($row['legacy_service_type_id']) ? (int) $row['legacy_service_type_id'] : 0;
+        if ($legacyId > 0) return $legacyId;
+        if (!$this->db->table_exists('service_types')) return 0;
+
+        $slug = strtolower(trim((string) (isset($row['service_key']) ? $row['service_key'] : '')));
+        if ($slug === '') return 0;
+        $existing = $this->db->where('slug', $slug)->limit(1)->get('service_types')->row_array();
+        if ($existing && !empty($existing['id'])) {
+            $row['legacy_service_type_id'] = (int) $existing['id'];
+            return (int) $existing['id'];
+        }
+
+        $limit = function ($value, $length) {
+            $value = trim((string) $value);
+            return function_exists('mb_substr') ? mb_substr($value, 0, (int) $length, 'UTF-8') : substr($value, 0, (int) $length);
+        };
+        $legacy = array(
+            'slug' => $slug,
+            'name' => $limit(isset($row['name']) ? $row['name'] : $slug, 180),
+            'short_name' => $limit(isset($row['short_name']) ? $row['short_name'] : $slug, 100),
+            'icon' => !empty($row['icon']) ? $limit($row['icon'], 80) : 'fa-file-alt',
+            'description' => !empty($row['description']) ? $limit($row['description'], 500) : NULL,
+            'requirements_json' => !empty($row['requirements_json']) ? (string) $row['requirements_json'] : json_encode(array()),
+            'template_key' => !empty($row['template_key']) ? $limit($row['template_key'], 100) : $slug,
+            'sort_order' => isset($row['sort_order']) ? (int) $row['sort_order'] : 0,
+            'is_active' => 1
+        );
+        if (!$this->db->insert('service_types', $legacy)) {
+            // A concurrent request may have created the same unique slug.
+            $existing = $this->db->where('slug', $slug)->limit(1)->get('service_types')->row_array();
+            if (!$existing || empty($existing['id'])) return 0;
+            $row['legacy_service_type_id'] = (int) $existing['id'];
+            return (int) $existing['id'];
+        }
+        $legacyId = (int) $this->db->insert_id();
+        $row['legacy_service_type_id'] = $legacyId;
+        return $legacyId;
+    }
+
+    private function service_for_user($slug, $villageId)
+    {
+        $slug = strtolower(trim((string) $slug));
+        $villageId = trim((string) $villageId);
+        $this->ensure_catalog_schema();
+        if ($villageId !== '' && $this->db->table_exists('village_service_catalog')) {
+            $row = $this->db->select('c.*, st.id AS legacy_service_type_id')
+                ->from('village_service_catalog c')->join('service_types st', 'st.slug=c.service_key', 'left')
+                ->where(array('c.village_id' => $villageId, 'c.service_key' => $slug, 'c.is_active' => 1))
+                ->limit(1)->get()->row_array();
+            if ($row) {
+                $legacyId = $this->ensure_legacy_service_type($row);
+                if ($legacyId < 1) return NULL;
+                return $this->normalise_catalog_row($row);
+            }
+            return NULL;
+        }
+        $row = $this->db->where(array('slug' => $slug, 'is_active' => 1))->limit(1)->get('service_types')->row_array();
+        if (!$row) return NULL;
+        $row['requirements'] = json_decode((string) $row['requirements_json'], TRUE);
+        if (!is_array($row['requirements'])) $row['requirements'] = array();
+        $row['form_schema'] = array('version' => 1, 'fields' => array());
+        $row['schema_version'] = 1;
+        $row['catalog_id'] = 0;
+        $row['is_catalog'] = false;
+        return $row;
+    }
+
+    private function validate_dynamic_fields(array $service, array $submitted)
+    {
+        $schema = isset($service['form_schema']) && is_array($service['form_schema']) ? $service['form_schema'] : array();
+        $fields = isset($schema['fields']) && is_array($schema['fields']) ? $schema['fields'] : array();
+        $submitted = is_array($submitted) ? $submitted : array();
+        $known = array();
+        foreach ($fields as $field) if (is_array($field) && !empty($field['key'])) $known[(string) $field['key']] = $field;
+        foreach ($submitted as $key => $value) {
+            if (!isset($known[$key]) && (is_array($value) || trim((string) $value) !== '')) return array('success' => false, 'message' => 'Isian formulir tidak dikenali. Muat ulang formulir lalu coba lagi.');
+        }
+        $values = array();
+        foreach ($known as $key => $field) {
+            if (($field['type'] ?? '') === 'file') continue;
+            $value = isset($submitted[$key]) && is_scalar($submitted[$key]) ? trim((string) $submitted[$key]) : '';
+            $type = (string) ($field['type'] ?? 'text');
+            $max = max(1, min(5000, (int) ($field['max_length'] ?? 500)));
+            if (function_exists('mb_strlen') ? mb_strlen($value, 'UTF-8') > $max : strlen($value) > $max) return array('success' => false, 'message' => 'Isian "' . $field['label'] . '" terlalu panjang.');
+            if (!empty($field['required']) && $value === '') return array('success' => false, 'message' => 'Isian "' . $field['label'] . '" wajib diisi.');
+            if ($value !== '' && $type === 'select') {
+                $allowed = array();
+                foreach (isset($field['options']) && is_array($field['options']) ? $field['options'] : array() as $option) if (is_array($option)) $allowed[] = (string) ($option['value'] ?? '');
+                if (!in_array($value, $allowed, true)) return array('success' => false, 'message' => 'Pilihan pada isian "' . $field['label'] . '" tidak valid.');
+            }
+            if ($value !== '' && $type === 'date') {
+                $date = DateTime::createFromFormat('Y-m-d', $value);
+                if (!$date || $date->format('Y-m-d') !== $value) return array('success' => false, 'message' => 'Tanggal pada isian "' . $field['label'] . '" tidak valid.');
+            }
+            if ($value !== '' && $type === 'email' && !filter_var($value, FILTER_VALIDATE_EMAIL)) return array('success' => false, 'message' => 'Email pada isian "' . $field['label'] . '" tidak valid.');
+            if ($value !== '' && $type === 'number' && !is_numeric($value)) return array('success' => false, 'message' => 'Angka pada isian "' . $field['label'] . '" tidak valid.');
+            if ($value !== '' && $type === 'tel' && !preg_match('/^[0-9+() .-]{3,40}$/', $value)) return array('success' => false, 'message' => 'Nomor telepon pada isian "' . $field['label'] . '" tidak valid.');
+            $values[$key] = $value;
+        }
+        return array('success' => true, 'values' => $values, 'schema_version' => (int) ($schema['version'] ?? 1));
+    }
+
     public function for_user($userId)
     {
-        if (warga_demo_mode() || !warga_database_available()) return array_values(array_filter($this->demo_requests(), function ($row) use ($userId) { return isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId; }));
-        $rows = $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, v.name AS village_name')
-            ->from('service_requests sr')->join('service_types st', 'st.id=sr.service_type_id')->join('village_tenants v', 'v.id=sr.village_id', 'left')
+        if (warga_demo_mode()) return array_values(array_filter($this->demo_requests(), function ($row) use ($userId) { return isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId; }));
+        if (!warga_database_available()) return array();
+        $this->ensure_catalog_schema();
+        $rows = $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, v.name AS village_name', FALSE)
+            ->from('service_requests sr')->join('service_types st', 'st.id=sr.service_type_id')->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE)->join('village_tenants v', 'v.id=sr.village_id', 'left')
             ->where('sr.citizen_user_id', (int) $userId)->order_by('sr.submitted_at', 'DESC')->get()->result_array();
         foreach ($rows as &$row) $row = $this->normalize_row($row);
         unset($row);
@@ -191,26 +528,31 @@ class Request_model extends CI_Model
 
     public function find_for_user($id, $userId)
     {
-        if (warga_demo_mode() || !warga_database_available()) {
+        if (warga_demo_mode()) {
             foreach ($this->demo_requests() as $row) if ((string) $row['id'] === (string) $id && isset($row['citizen_user_id']) && (int) $row['citizen_user_id'] === (int) $userId) return $row;
             return NULL;
         }
-        $row = $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, v.name AS village_name')
-            ->from('service_requests sr')->join('service_types st', 'st.id=sr.service_type_id')->join('village_tenants v', 'v.id=sr.village_id', 'left')
+        if (!warga_database_available()) return NULL;
+        $this->ensure_catalog_schema();
+        $row = $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, v.name AS village_name', FALSE)
+            ->from('service_requests sr')->join('service_types st', 'st.id=sr.service_type_id')->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE)->join('village_tenants v', 'v.id=sr.village_id', 'left')
             ->where(array('sr.id' => (string) $id, 'sr.citizen_user_id' => (int) $userId))->get()->row_array();
         return $row ? $this->normalize_row($row) : NULL;
     }
 
     public function for_staff(array $user, $status = NULL)
     {
-        if (warga_demo_mode() || !warga_database_available()) {
+        if (warga_demo_mode()) {
             $rows = $this->demo_staff_request_rows();
             if ($status !== NULL && $status !== '') $rows = array_values(array_filter($rows, function ($row) use ($status) { return $row['status'] === $status; }));
             return $rows;
         }
-        $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name');
+        if (!warga_database_available()) return array();
+        $this->ensure_catalog_schema();
+        $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name', FALSE);
         $this->db->from('service_requests sr');
         $this->db->join('service_types st', 'st.id=sr.service_type_id');
+        $this->db->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE);
         $this->db->join('users u', 'u.id=sr.citizen_user_id');
         $this->db->join('village_tenants v', 'v.id=sr.village_id');
         $this->apply_staff_scope($user);
@@ -237,10 +579,13 @@ class Request_model extends CI_Model
 
     public function find_for_staff($id, array $user)
     {
-        if (warga_demo_mode() || !warga_database_available()) return $this->find_demo_request($id);
-        $this->db->select('sr.*, st.slug AS service_slug, st.name AS service_name, st.icon AS service_icon, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name');
+        if (warga_demo_mode()) return $this->find_demo_request($id);
+        if (!warga_database_available()) return NULL;
+        $this->ensure_catalog_schema();
+        $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name', FALSE);
         $this->db->from('service_requests sr');
         $this->db->join('service_types st', 'st.id=sr.service_type_id');
+        $this->db->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE);
         $this->db->join('users u', 'u.id=sr.citizen_user_id');
         $this->db->join('village_tenants v', 'v.id=sr.village_id');
         $this->db->where('sr.id', (string) $id);
@@ -277,7 +622,7 @@ class Request_model extends CI_Model
         if (in_array($action, array('revision', 'reject'), TRUE) && trim((string) $note) === '') return array('success' => FALSE, 'message' => 'Alasan wajib diisi untuk perbaikan atau penolakan.');
         $note = trim((string) $note) !== '' ? trim((string) $note) : $next['default_note'];
         $now = date('Y-m-d H:i:s');
-        if (warga_demo_mode() || !warga_database_available()) {
+        if (warga_demo_mode()) {
             $historyMap = $this->session->userdata('warga_demo_history');
             if (!is_array($historyMap)) $historyMap = array();
             $history = isset($historyMap[(string) $id]) && is_array($historyMap[(string) $id]) ? $historyMap[(string) $id] : $this->history($id);
@@ -291,6 +636,7 @@ class Request_model extends CI_Model
             $this->session->set_userdata('warga_demo_history', $historyMap);
             return array('success' => TRUE, 'status' => $next['status']);
         }
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
 
         $payload = json_encode(array('request_id' => $request['id'], 'request_code' => $request['request_code'], 'status' => $next['status'], 'note' => $note, 'actor_name' => $user['name']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $this->db->trans_begin();
@@ -313,13 +659,14 @@ class Request_model extends CI_Model
 
     public function documents_for_staff($requestId, array $user)
     {
-        if (warga_demo_mode() || !warga_database_available()) {
+        if (warga_demo_mode()) {
             $request = $this->find_demo_request($requestId);
             return !empty($request['documents']) ? $request['documents'] : array();
         }
+        if (!warga_database_available()) return array();
         $request = $this->find_for_staff($requestId, $user);
         if (!$request) return array();
-        return $this->db->select('d.id,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->where('d.request_id', (string) $requestId)->order_by('d.created_at', 'ASC')->get()->result_array();
+        return $this->db->select('d.id,d.field_key,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->where('d.request_id', (string) $requestId)->order_by('d.created_at', 'ASC')->get()->result_array();
     }
 
     public function document_for_staff($documentId, array $user)
@@ -333,7 +680,7 @@ class Request_model extends CI_Model
 
     public function history($requestId)
     {
-        if (warga_demo_mode() || !warga_database_available()) {
+        if (warga_demo_mode()) {
             $historyMap = $this->session->userdata('warga_demo_history');
             if (is_array($historyMap) && isset($historyMap[(string) $requestId]) && is_array($historyMap[(string) $requestId])) return $historyMap[(string) $requestId];
             $request = $this->find_demo_request($requestId);
@@ -355,6 +702,7 @@ class Request_model extends CI_Model
             if (in_array($request['status'], array('revision', 'rejected'), TRUE)) $history[] = array('status' => $request['status'], 'label' => $steps[$request['status']]['label'], 'note' => $steps[$request['status']]['note'], 'occurred_at' => $request['updated_at']);
             return $history;
         }
+        if (!warga_database_available()) return array();
         $rows = $this->db->select('h.*, h.to_status AS status, u.name AS actor_name')->from('request_status_history h')->join('users u', 'u.id=h.actor_id', 'left')
             ->where('h.request_id', (string) $requestId)->order_by('h.occurred_at', 'ASC')->get()->result_array();
         foreach ($rows as &$row) $row['label'] = warga_status_text($row['status']);
@@ -364,18 +712,22 @@ class Request_model extends CI_Model
 
     public function create(array $user, array $data)
     {
-        $serviceSlug = trim((string) $data['service_type']);
-        $purpose = trim((string) $data['purpose']);
-        $note = trim((string) $data['note']);
-        if (warga_demo_mode() || !warga_database_available()) {
+        $serviceSlug = strtolower(trim((string) ($data['service_type'] ?? '')));
+        $purpose = trim((string) ($data['purpose'] ?? ''));
+        $note = trim((string) ($data['note'] ?? ''));
+        $formFields = isset($data['form_fields']) && is_array($data['form_fields']) ? $data['form_fields'] : array();
+        if (warga_demo_mode()) {
             $service = NULL;
             foreach ($this->demo_services() as $candidate) if ($candidate['slug'] === $serviceSlug) $service = $candidate;
             if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak ditemukan.');
+            $validated = $this->validate_dynamic_fields($service, $formFields);
+            if (empty($validated['success'])) return array('success' => FALSE, 'message' => $validated['message']);
             $id = warga_uuid();
-            $created = array('id' => $id, 'request_code' => 'SDW-' . date('Y') . '-' . strtoupper(substr(str_replace('-', '', $id), 0, 6)), 'citizen_user_id' => (int) $user['id'], 'service_slug' => $service['slug'], 'service_name' => $service['name'], 'service_icon' => $service['icon'], 'status' => 'submitted', 'submitted_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'), 'purpose' => $purpose, 'note' => $note, 'local_reference' => NULL, 'document_path' => NULL, 'citizen_name' => $user['name'], 'citizen_phone' => $user['phone'], 'village_name' => $user['village_name']);
-            $uploaded = $this->collect_uploaded_documents($id);
+            $now = date('Y-m-d H:i:s');
+            $created = array('id' => $id, 'request_code' => 'SDW-' . date('Y') . '-' . strtoupper(substr(str_replace('-', '', $id), 0, 6)), 'citizen_user_id' => (int) $user['id'], 'service_slug' => $service['slug'], 'service_name' => $service['name'], 'service_icon' => $service['icon'], 'status' => 'submitted', 'submitted_at' => $now, 'updated_at' => $now, 'purpose' => $purpose, 'note' => $note, 'form_data' => $validated['values'], 'form_schema' => $service['form_schema'], 'form_schema_version' => $validated['schema_version'], 'local_reference' => NULL, 'document_path' => NULL, 'citizen_name' => $user['name'], 'citizen_phone' => $user['phone'], 'village_name' => $user['village_name']);
+            $uploaded = $this->collect_uploaded_documents($id, $service['form_schema']);
             if (!empty($uploaded['error'])) return array('success' => FALSE, 'message' => $uploaded['error']);
-            $created['documents'] = array_map(function ($file) { return array('original_name' => $file['original_name'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size']); }, $uploaded['files']);
+            $created['documents'] = array_map(function ($file) { return array('field_key' => isset($file['field_key']) ? $file['field_key'] : NULL, 'original_name' => $file['original_name'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size']); }, $uploaded['files']);
             $saved = $this->session->userdata('warga_demo_requests');
             if (!is_array($saved)) $saved = array();
             array_unshift($saved, $created);
@@ -383,12 +735,21 @@ class Request_model extends CI_Model
             return array('success' => TRUE, 'id' => $id);
         }
 
-        $service = $this->db->where(array('slug' => $serviceSlug, 'is_active' => 1))->get('service_types')->row_array();
-        if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak ditemukan.');
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
+        $this->load->model('Auth_model');
+        if (empty($user['id']) || !$this->Auth_model->citizen_is_verified((int) $user['id'], isset($user['village_id']) ? $user['village_id'] : '')) {
+            return array('success' => FALSE, 'message' => 'Akun belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan belum dapat dikirim.');
+        }
         if (empty($user['village_id'])) return array('success' => FALSE, 'message' => 'Akun belum terhubung ke desa.');
+        $service = $this->service_for_user($serviceSlug, $user['village_id']);
+        if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak tersedia untuk kampung/desa Anda.');
+        $validated = $this->validate_dynamic_fields($service, $formFields);
+        if (empty($validated['success'])) return array('success' => FALSE, 'message' => $validated['message']);
+        $serviceTypeId = (int) $service['id'];
+        if ($serviceTypeId < 1) return array('success' => FALSE, 'message' => 'Relasi layanan belum siap. Sinkronkan katalog lalu coba lagi.');
         $id = warga_uuid();
         $requestCode = 'SDW-' . date('Y') . '-' . strtoupper(substr(str_replace('-', '', $id), 0, 8));
-        $uploaded = $this->collect_uploaded_documents($id);
+        $uploaded = $this->collect_uploaded_documents($id, $service['form_schema']);
         if (!empty($uploaded['error'])) return array('success' => FALSE, 'message' => $uploaded['error']);
         $now = date('Y-m-d H:i:s');
         $documentMeta = array();
@@ -396,6 +757,7 @@ class Request_model extends CI_Model
             $file['id'] = warga_uuid();
             $documentMeta[] = array(
                 'id' => $file['id'],
+                'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL,
                 'original_name' => $file['original_name'],
                 'mime_type' => $file['mime_type'],
                 'file_size' => (int) $file['file_size']
@@ -407,22 +769,33 @@ class Request_model extends CI_Model
         $payload = json_encode(array(
             'request_id' => $id,
             'request_code' => $requestCode,
-            'service_type_id' => (int) $service['id'],
+            'service_type_id' => $serviceTypeId,
             'service_slug' => $service['slug'],
             'service_name' => $service['name'],
+            'catalog_service_id' => !empty($service['catalog_id']) ? (int) $service['catalog_id'] : NULL,
+            'template_key' => !empty($service['template_key']) ? $service['template_key'] : $service['slug'],
+            'form_data' => $validated['values'],
+            'form_schema' => $service['form_schema'],
+            'form_schema_version' => (int) $validated['schema_version'],
             'status' => 'submitted',
             'purpose' => $purpose,
             'note' => $note,
-            'citizen_name' => $user['name'],
-            'citizen_phone' => $user['phone'],
+            'citizen_name' => isset($user['name']) ? $user['name'] : '',
+            'citizen_phone' => isset($user['phone']) ? $user['phone'] : '',
+            'citizen_local_key' => isset($user['local_citizen_key']) ? (string) $user['local_citizen_key'] : '',
             'document_count' => count($documentMeta),
             'documents' => $documentMeta,
             'submitted_at' => $now
         ), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($payload)) {
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Data permohonan belum dapat diproses.');
+        }
+        $requestRow = array('id' => $id, 'request_code' => $requestCode, 'citizen_user_id' => (int) $user['id'], 'village_id' => $user['village_id'], 'service_type_id' => $serviceTypeId, 'catalog_service_id' => !empty($service['catalog_id']) ? (int) $service['catalog_id'] : NULL, 'form_schema_version' => (int) $validated['schema_version'], 'status' => 'submitted', 'payload_json' => $payload, 'local_sync_status' => 'pending', 'submitted_at' => $now);
         $this->db->trans_start();
-        $this->db->insert('service_requests', array('id' => $id, 'request_code' => $requestCode, 'citizen_user_id' => (int) $user['id'], 'village_id' => $user['village_id'], 'service_type_id' => (int) $service['id'], 'status' => 'submitted', 'payload_json' => $payload, 'local_sync_status' => 'pending', 'submitted_at' => $now));
+        $this->db->insert('service_requests', $requestRow);
         $this->db->insert('request_status_history', array('request_id' => $id, 'to_status' => 'submitted', 'note' => 'Permohonan diajukan warga.', 'actor_id' => (int) $user['id']));
-        foreach ($uploaded['files'] as $file) $this->db->insert('request_documents', array('id' => $file['id'], 'request_id' => $id, 'original_name' => $file['original_name'], 'stored_name' => $file['stored_name'], 'storage_path' => $file['storage_path'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size'], 'uploaded_by' => (int) $user['id']));
+        foreach ($uploaded['files'] as $file) $this->db->insert('request_documents', array('id' => $file['id'], 'request_id' => $id, 'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL, 'original_name' => $file['original_name'], 'stored_name' => $file['stored_name'], 'storage_path' => $file['storage_path'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size'], 'uploaded_by' => (int) $user['id']));
         $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $user['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => $id, 'direction' => 'cloud_to_local', 'operation' => 'upsert', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request:' . $id));
         $this->db->trans_complete();
         if (!$this->db->trans_status()) {
@@ -435,13 +808,32 @@ class Request_model extends CI_Model
     public function documents_for_user($requestId, $userId)
     {
         if (warga_demo_mode() || !warga_database_available()) return array();
-        return $this->db->select('d.id,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')
+        return $this->db->select('d.id,d.field_key,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')
             ->where(array('d.request_id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId))->order_by('d.created_at', 'ASC')->get()->result_array();
     }
 
     public function official_document_for_user($requestId, $userId)
     {
         if (warga_demo_mode() || !warga_database_available()) return NULL;
-        return $this->db->select('r.document_path')->from('service_requests r')->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued'))->get()->row_array();
+        if (!$this->db->field_exists('document_sha256', 'service_requests')) return NULL;
+        return $this->db->select('r.document_path, r.document_sha256, r.local_reference')->from('service_requests r')
+            ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued'))
+            ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
+    }
+
+    private function ensure_field($table, $field, $sql)
+    {
+        if (!$this->db->field_exists($field, $table)) $this->db->query($sql);
+    }
+
+    private function ensure_index($table, $name, $definition)
+    {
+        $query = $this->db->query('SHOW INDEX FROM `' . $table . '`');
+        if ($query) {
+            foreach ($query->result_array() as $row) {
+                if (isset($row['Key_name']) && (string) $row['Key_name'] === $name) return;
+            }
+        }
+        $this->db->query('ALTER TABLE `' . $table . '` ADD ' . $definition);
     }
 }

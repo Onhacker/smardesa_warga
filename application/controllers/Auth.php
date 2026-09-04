@@ -33,6 +33,8 @@ class Auth extends Public_Controller
         );
         if ($this->input->method(TRUE) === 'POST') {
             $this->form_validation->set_rules('name', 'Nama lengkap', 'trim|required|min_length[3]|max_length[120]');
+            $this->form_validation->set_rules('nik', 'NIK', 'trim|required|max_length[25]');
+            $this->form_validation->set_rules('kk', 'No. KK', 'trim|required|max_length[25]');
             $this->form_validation->set_rules('contact', 'Email atau nomor telepon', 'trim|required|max_length[160]');
             $this->form_validation->set_rules('district_code', 'Distrik/Kecamatan', 'trim|required|max_length[20]');
             $this->form_validation->set_rules('village_code', 'Kampung/Desa', 'trim|required|max_length[30]');
@@ -41,6 +43,8 @@ class Auth extends Public_Controller
             if ($this->form_validation->run()) {
                 $result = $this->Auth_model->register_citizen(array(
                     'name' => $this->input->post('name', TRUE),
+                    'nik' => $this->input->post('nik', TRUE),
+                    'kk' => $this->input->post('kk', TRUE),
                     'contact' => $this->input->post('contact', TRUE),
                     'district_code' => $this->input->post('district_code', TRUE),
                     'village_code' => $this->input->post('village_code', TRUE),

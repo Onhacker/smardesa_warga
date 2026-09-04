@@ -11,13 +11,21 @@ class Permohonan extends Citizen_Controller
 
     public function create()
     {
+        if (!$this->verified_citizen()) {
+            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan baru belum dapat dibuat.');
+            redirect('dashboard');
+        }
         $this->load->model('Request_model');
-        $this->render('permohonan/create', array('pageTitle' => 'Permohonan Baru', 'services' => $this->Request_model->service_types()));
+        $this->render('permohonan/create', array('pageTitle' => 'Permohonan Baru', 'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : '')));
     }
 
     public function store()
     {
         $this->require_post();
+        if (!$this->verified_citizen()) {
+            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan belum dapat dikirim.');
+            redirect('dashboard');
+        }
         $this->load->model('Request_model');
         $this->form_validation->set_rules('service_type', 'Jenis layanan', 'trim|required|max_length[80]');
         $this->form_validation->set_rules('purpose', 'Keperluan', 'trim|required|min_length[5]|max_length[500]');
@@ -26,7 +34,9 @@ class Permohonan extends Citizen_Controller
             $this->session->set_flashdata('error', trim(strip_tags(validation_errors())) ?: 'Form permohonan belum lengkap.');
             redirect('permohonan/baru');
         }
-        $result = $this->Request_model->create($this->currentUser, array('service_type' => $this->input->post('service_type', TRUE), 'purpose' => $this->input->post('purpose', TRUE), 'note' => $this->input->post('note', TRUE)));
+        $formFields = $this->input->post('warga_fields', FALSE);
+        if (!is_array($formFields)) $formFields = array();
+        $result = $this->Request_model->create($this->currentUser, array('service_type' => $this->input->post('service_type', TRUE), 'purpose' => $this->input->post('purpose', TRUE), 'note' => $this->input->post('note', TRUE), 'form_fields' => $formFields));
         if (empty($result['success'])) {
             $this->session->set_flashdata('error', isset($result['message']) ? $result['message'] : 'Permohonan belum dapat disimpan.');
             redirect('permohonan/baru');
@@ -49,8 +59,14 @@ class Permohonan extends Citizen_Controller
         $this->load->model('Request_model');
         $document = $this->Request_model->official_document_for_user($id, $this->currentUser['id']);
         if (!$document || empty($document['document_path'])) show_404();
-        if (!$this->stream_private_file($document['document_path'], 'surat-' . (string) $id, 'attachment')) {
+        if (!$this->stream_private_file($document['document_path'], 'surat-' . (string) $document['local_reference'], 'attachment', (string) $document['document_sha256'])) {
             show_404();
         }
+    }
+
+    private function verified_citizen()
+    {
+        return !empty($this->currentUser['id'])
+            && $this->Auth_model->citizen_is_verified((int) $this->currentUser['id']);
     }
 }

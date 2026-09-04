@@ -52,7 +52,7 @@ class MY_Controller extends CI_Controller
      * traversal path, ukuran, dan MIME aktual. Browser tidak pernah menerima
      * lokasi fisik berkas.
      */
-    protected function stream_private_file($path, $originalName = '', $disposition = 'attachment')
+    protected function stream_private_file($path, $originalName = '', $disposition = 'attachment', $expectedSha256 = '')
     {
         $configured = trim((string) getenv('PRIVATE_STORAGE_PATH'));
         if (ENVIRONMENT === 'production' && $configured === '') {
@@ -87,6 +87,10 @@ class MY_Controller extends CI_Controller
 
         $body = @file_get_contents($real);
         if (!is_string($body) || $body === '') {
+            return FALSE;
+        }
+        if ($expectedSha256 !== '' && (!preg_match('/^[a-f0-9]{64}$/', (string) $expectedSha256)
+            || !hash_equals((string) $expectedSha256, hash('sha256', $body)))) {
             return FALSE;
         }
 

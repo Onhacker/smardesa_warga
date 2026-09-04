@@ -43,6 +43,15 @@ Untuk deployment berikutnya, jalankan `git pull --ff-only`, `composer install`, 
 `rsync` yang sama. File `.env` produksi dibuat langsung pada document root dan tidak pernah
 disimpan dalam Git.
 
+Setelah API dan PWA selesai dipasang pertama kali, deployment rutin keduanya dapat dijalankan
+dari repository API dengan satu perintah. Skrip tersebut juga membuat backup dan menjalankan
+migrasi database yang aman diulang:
+
+```bash
+cd "$HOME/repositories/api_warga"
+bash scripts/deploy-hostinger.sh
+```
+
 ## 2. Upload source API
 
 Upload atau clone source `/Users/onhacker/htdocs/smartdesa-warga-api` ke root API. Jangan
@@ -66,11 +75,10 @@ smartdesa-warga/database/schema.sql
 smartdesa-warga/database/seed.sql
 ```
 
-Jika database sudah pernah dibuat sebelum API dipisahkan, impor juga
-`database/migrations/001_sync_auth.sql` dan
-`database/migrations/002_set_araboda_official.sql` satu kali sesuai urutan. Setelah itu,
-impor `database/migrations/003_seed_jayawijaya_villages.sql` untuk menambahkan seluruh
-332 kampung/kelurahan pada 40 distrik di Kabupaten Jayawijaya.
+Jika database sudah pernah dibuat, impor semua berkas pada `database/migrations` dari
+`001_*.sql` sampai `010_*.sql` sesuai urutan. Rangkaian ini menambahkan autentikasi sinkron,
+seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
+pengaman satu akun per penduduk, metadata PDF resmi, dan kunci snapshot sepanjang 120 karakter.
 
 ## 4. Konfigurasi API
 
@@ -136,21 +144,29 @@ DB_NAME=smartdesa_warga
 
 Set permission `.env` menjadi `600`. Pastikan folder `PRIVATE_STORAGE_PATH` writable oleh PHP. Folder `application/sessions` juga harus writable.
 
-## 6. Daftarkan instalasi desa
+## 6. Hubungkan instalasi desa secara otomatis
 
 Seed dan migrasi wilayah sudah memuat seluruh 332 kampung/kelurahan Kabupaten Jayawijaya.
 Warga memilih distrik dan kampung/kelurahan pada formulir; mereka tidak perlu mengetik kode
-wilayah. Provisioning hanya diperlukan ketika instalasi SmartDesa lokal pada desa tersebut
-akan dihubungkan ke API. Setiap perintah provisioning membuat kredensial untuk satu instalasi
-desa, bukan membatasi daftar desa yang dapat dipilih warga.
+wilayah. Desa juga tidak menerima kode atau mengatur API secara manual. Konfigurasikan satu
+bootstrap universal pada API pusat, lalu bawa hanya konfigurasi builder privat ke komputer
+yang membangun installer SmartDesa.
 
 Setelah tenant desa resmi ada di `village_tenants`, jalankan dari root API:
 
 ```bash
-php tools/provision_installation.php --village=95.01.03.2003 --write
+API_ENV="$HOME/domains/api-warga-smartdesa.mediaverse.co.id/public_html/.env"
+php tools/configure_auto_enrollment.php \
+  --env="$API_ENV" \
+  --builder-output="$HOME/smartdesa-private/warga-builder.env" \
+  --write
 ```
 
-Simpan `installation_code` dan `secret` yang dicetak. Secret hanya ditampilkan saat provisioning dan dipakai oleh konektor SmartDesa lokal. Jangan masukkan secret ke JavaScript PWA atau commit ke repository.
+File `warga-builder.env` tidak boleh masuk Git atau `public_html`. Impor nilainya ke
+`.env.build` pada workstation builder. Saat Administrator pertama kali membuka aplikasi
+dengan internet tersedia, SmartDesa membaca kode desa dari Identitas Desa, meminta
+kredensial instalasi unik, menyimpannya lokal, lalu menghapus bootstrap dari `.env` lokal.
+Tool provisioning dan kode sekali pakai hanya dipakai sebagai pemulihan instalasi lama.
 
 ## 7. Checklist sebelum dibuka
 
@@ -158,6 +174,8 @@ Simpan `installation_code` dan `secret` yang dicetak. Secret hanya ditampilkan s
 - `API_DEMO_MODE=0` dan `WARGA_DEMO_MODE=0`.
 - `.env` kedua aplikasi berada di root masing-masing dan permission `600`.
 - `PRIVATE_STORAGE_PATH` berada di luar `public_html`.
+- Nilai `PRIVATE_STORAGE_PATH` API dan PWA sama persis dan writable oleh kedua aplikasi.
 - Database API dan PWA terhubung, tetapi user database tetap terpisah bila memungkinkan.
+- Migrasi `001` sampai `010` sudah selesai.
 - Akun demo tidak digunakan di produksi.
 - Backup database dan folder privat dibuat sebelum onboarding desa pertama.

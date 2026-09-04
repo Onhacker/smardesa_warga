@@ -68,10 +68,25 @@
     var select = requestForm.querySelector('[data-service-select]');
     var requirementBox = requestForm.querySelector('[data-service-requirements]');
     var requirementList = requestForm.querySelector('[data-requirement-list]');
-    function updateRequirements() {
-      var selected = services.find(function (service) { return String(service.slug) === String(select.value); });
-      var requirements = selected && Array.isArray(selected.requirements) ? selected.requirements : [];
-      requirementList.innerHTML = '';
+    var dynamicSection = requestForm.querySelector('[data-dynamic-form-section]');
+    var dynamicFields = requestForm.querySelector('[data-form-fields]');
+    var dynamicDescription = requestForm.querySelector('[data-dynamic-form-description]');
+    var supportingStep = requestForm.querySelector('[data-supporting-step]');
+
+    function selectedService() {
+      if (!select) return null;
+      return services.find(function (service) { return String(service.slug) === String(select.value); }) || null;
+    }
+
+    function serviceFields(service) {
+      var schema = service && service.form_schema && typeof service.form_schema === 'object' ? service.form_schema : {};
+      return Array.isArray(schema.fields) ? schema.fields : [];
+    }
+
+    function updateRequirements(service) {
+      var requirements = service && Array.isArray(service.requirements) ? service.requirements.slice(0) : [];
+      if (!requirementList || !requirementBox) return;
+      requirementList.textContent = '';
       requirements.forEach(function (requirement) {
         var item = document.createElement('li');
         item.textContent = String(requirement);
@@ -79,23 +94,144 @@
       });
       requirementBox.classList.toggle('d-none', requirements.length === 0);
     }
+
+    function createTextControl(field, id) {
+      var control;
+      if (field.type === 'textarea') {
+        control = document.createElement('textarea');
+        control.rows = 4;
+      } else if (field.type === 'select') {
+        control = document.createElement('select');
+        var placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = 'Pilih ' + String(field.label || 'jawaban').toLowerCase();
+        control.appendChild(placeholder);
+        (Array.isArray(field.options) ? field.options : []).forEach(function (option) {
+          if (!option || typeof option !== 'object') return;
+          var item = document.createElement('option');
+          item.value = String(option.value || '');
+          item.textContent = String(option.label || option.value || '');
+          control.appendChild(item);
+        });
+      } else {
+        control = document.createElement('input');
+        control.type = ['date', 'number', 'tel', 'email'].indexOf(String(field.type || '')) !== -1 ? field.type : 'text';
+      }
+      control.id = id;
+      control.name = 'warga_fields[' + String(field.key || '') + ']';
+      control.className = 'form-control';
+      control.required = !!field.required;
+      if (field.placeholder && field.type !== 'select') control.placeholder = String(field.placeholder);
+      if (field.max_length && field.type !== 'date' && field.type !== 'number' && field.type !== 'select') {
+        control.maxLength = Math.max(1, Math.min(5000, Number(field.max_length) || 500));
+      }
+      return control;
+    }
+
+    function createFileControl(field, id) {
+      var fragment = document.createDocumentFragment();
+      var uploadLabel = document.createElement('label');
+      uploadLabel.className = 'warga-dynamic-upload';
+      uploadLabel.htmlFor = id;
+      var icon = document.createElement('i');
+      icon.className = 'fa fa-paperclip';
+      var title = document.createElement('strong');
+      title.textContent = field.multiple ? 'Pilih Berkas' : 'Pilih Satu Berkas';
+      var hint = document.createElement('span');
+      hint.textContent = 'JPG, PNG, atau PDF · maksimal ' + Math.max(1, Math.min(10, Number(field.max_size_mb) || 5)) + ' MB';
+      uploadLabel.appendChild(icon);
+      uploadLabel.appendChild(title);
+      uploadLabel.appendChild(hint);
+
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.id = id;
+      input.name = 'warga_files[' + String(field.key || '') + '][]';
+      // Keep required inputs focusable so native validation can lead the user
+      // back to the matching upload zone instead of failing silently.
+      input.className = 'warga-file-input-native';
+      input.accept = String(field.accept || 'image/jpeg,image/png,application/pdf');
+      input.multiple = !!field.multiple;
+      input.required = !!field.required;
+      input.setAttribute('data-dynamic-file-input', '');
+      input.setAttribute('data-max-files', field.multiple ? '5' : '1');
+      input.setAttribute('data-max-size-mb', String(Math.max(1, Math.min(10, Number(field.max_size_mb) || 5))));
+
+      var list = document.createElement('div');
+      list.className = 'warga-file-list';
+      list.setAttribute('data-dynamic-file-list', '');
+      var empty = document.createElement('span');
+      empty.textContent = 'Belum ada berkas dipilih.';
+      list.appendChild(empty);
+      fragment.appendChild(uploadLabel);
+      fragment.appendChild(input);
+      fragment.appendChild(list);
+      return fragment;
+    }
+
+    function renderDynamicForm(service) {
+      if (!dynamicFields || !dynamicSection) return;
+      var fields = serviceFields(service);
+      dynamicFields.textContent = '';
+      fields.forEach(function (field, index) {
+        if (!field || typeof field !== 'object' || !field.key || !field.label) return;
+        var id = 'warga-field-' + String(field.key).replace(/[^a-z0-9_-]/gi, '-') + '-' + index;
+        var wrapper = document.createElement('div');
+        wrapper.className = 'warga-dynamic-field' + (field.type === 'file' || field.type === 'textarea' ? ' is-wide' : '');
+        var label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = String(field.label);
+        if (field.required) {
+          var required = document.createElement('em');
+          required.textContent = '*';
+          label.appendChild(required);
+        }
+        wrapper.appendChild(label);
+        wrapper.appendChild(field.type === 'file' ? createFileControl(field, id) : createTextControl(field, id));
+        if (field.help) {
+          var help = document.createElement('small');
+          help.textContent = String(field.help);
+          wrapper.appendChild(help);
+        }
+        dynamicFields.appendChild(wrapper);
+      });
+      var hasFields = dynamicFields.children.length > 0;
+      dynamicSection.classList.toggle('d-none', !hasFields);
+      if (supportingStep) supportingStep.textContent = hasFields ? '4' : '3';
+      if (dynamicDescription) dynamicDescription.textContent = service && service.description ? String(service.description) : 'Lengkapi isian yang dibutuhkan untuk layanan ini.';
+    }
+
+    function updateSelectedService() {
+      var service = selectedService();
+      updateRequirements(service);
+      renderDynamicForm(service);
+    }
     if (select) {
-      select.addEventListener('change', updateRequirements);
-      updateRequirements();
+      select.addEventListener('change', updateSelectedService);
+      updateSelectedService();
     }
   }
 
-  var fileInput = document.querySelector('[data-file-input]');
-  var fileList = document.querySelector('[data-file-list]');
-  if (fileInput && fileList) {
-    fileInput.addEventListener('change', function () {
-      fileList.innerHTML = '';
-      var files = Array.prototype.slice.call(fileInput.files || []);
+  function updateFileList(input, list, maxFiles, maxSizeMb) {
+      list.textContent = '';
+      var files = Array.prototype.slice.call(input.files || []);
       if (!files.length) {
-        fileList.innerHTML = '<span>Belum ada berkas dipilih.</span>';
-        return;
+        var empty = document.createElement('span');
+        empty.textContent = 'Belum ada berkas dipilih.';
+        list.appendChild(empty);
+        return true;
       }
-      files.slice(0, 5).forEach(function (file) {
+      if (files.length > maxFiles) {
+        var countWarning = document.createElement('span');
+        countWarning.className = 'color-red-dark';
+        countWarning.textContent = 'Maksimal ' + maxFiles + ' berkas dapat dipilih.';
+        list.appendChild(countWarning);
+        input.value = '';
+        return false;
+      }
+      var oversized = false;
+      files.forEach(function (file) {
+        if (file.size < 1 || file.size > maxSizeMb * 1024 * 1024) oversized = true;
         var row = document.createElement('div');
         row.className = 'warga-file-item';
         var icon = document.createElement('i');
@@ -104,15 +240,31 @@
         label.textContent = file.name + ' · ' + Math.max(1, Math.round(file.size / 1024)) + ' KB';
         row.appendChild(icon);
         row.appendChild(label);
-        fileList.appendChild(row);
+        list.appendChild(row);
       });
-      if (files.length > 5) {
-        var warning = document.createElement('span');
-        warning.className = 'color-red-dark';
-        warning.textContent = 'Maksimal lima berkas dapat dikirim.';
-        fileList.appendChild(warning);
-        fileInput.value = '';
+      if (oversized) {
+        var sizeWarning = document.createElement('span');
+        sizeWarning.className = 'color-red-dark';
+        sizeWarning.textContent = 'Setiap berkas maksimal ' + maxSizeMb + ' MB.';
+        list.appendChild(sizeWarning);
+        input.value = '';
+        return false;
       }
+      return true;
+  }
+
+  var fileInput = document.querySelector('[data-file-input]');
+  var fileList = document.querySelector('[data-file-list]');
+  if (fileInput && fileList) {
+    fileInput.addEventListener('change', function () { updateFileList(fileInput, fileList, 5, 5); });
+  }
+  if (requestForm) {
+    requestForm.addEventListener('change', function (event) {
+      var input = event.target;
+      if (!input || !input.hasAttribute('data-dynamic-file-input')) return;
+      var list = input.parentNode.querySelector('[data-dynamic-file-list]');
+      if (!list) return;
+      updateFileList(input, list, Math.max(1, Number(input.getAttribute('data-max-files')) || 1), Math.max(1, Number(input.getAttribute('data-max-size-mb')) || 5));
     });
   }
 

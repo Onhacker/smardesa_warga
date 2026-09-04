@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php $formRows = warga_request_form_rows($request); $fileLabels = warga_request_file_labels($request); ?>
 <section class="warga-detail-head">
     <span class="warga-detail-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
     <div><p><?= e($request['request_code']) ?></p><h1><?= e($request['service_name']) ?></h1><?= warga_status_label($request['status']) ?></div>
@@ -11,6 +12,29 @@
     <?php if (!empty($request['local_reference'])): ?><div class="warga-detail-row"><span>Nomor surat</span><strong><?= e($request['local_reference']) ?></strong></div><?php endif; ?>
     <?php if (!empty($request['documents'])): ?><div class="warga-detail-row"><span>Berkas dikirim</span><strong><?= e(count($request['documents'])) ?> berkas</strong></div><?php endif; ?>
 </div></section>
+
+<?php if (!empty($formRows)): ?>
+<section class="card card-style warga-detail-card"><div class="content mb-2">
+    <div class="warga-form-title"><span><i class="fa fa-list-alt"></i></span><div><h2>Data Tambahan</h2><p>Data yang diisi mengikuti formulir layanan desa.</p></div></div>
+    <div class="warga-form-data-grid">
+        <?php foreach ($formRows as $formRow): ?>
+            <div class="warga-form-data-item"><span><?= e($formRow['label']) ?></span><strong><?= e($formRow['value']) ?></strong></div>
+        <?php endforeach; ?>
+    </div>
+</div></section>
+<?php endif; ?>
+
+<?php if (!empty($request['documents'])): ?>
+<section class="card card-style warga-detail-card"><div class="content mb-2">
+    <div class="warga-form-title"><span><i class="fa fa-paperclip"></i></span><div><h2>Berkas yang Dikirim</h2><p>Daftar berkas pendukung pada permohonan ini.</p></div></div>
+    <div class="warga-request-document-list">
+        <?php foreach ($request['documents'] as $document): ?>
+            <?php $fieldKey = isset($document['field_key']) ? (string) $document['field_key'] : ''; $fileLabel = $fieldKey !== '' && isset($fileLabels[$fieldKey]) ? $fileLabels[$fieldKey] : 'Berkas pendukung'; ?>
+            <div class="warga-request-document"><i class="fa fa-file-alt"></i><div><strong><?= e($fileLabel) ?></strong><span><?= e(isset($document['original_name']) ? $document['original_name'] : 'Berkas') ?></span></div></div>
+        <?php endforeach; ?>
+    </div>
+</div></section>
+<?php endif; ?>
 
 <?php if ($request['status'] === 'issued'): ?>
 <section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Dokumen resmi tersedia setelah hasil sinkronisasi diterima.</p></div><?php if (!empty($request['document_path'])): ?><a href="<?= site_url('permohonan/' . rawurlencode($request['id']) . '/surat') ?>" class="btn btn-s bg-green-dark color-white rounded-s"><i class="fa fa-download"></i></a><?php endif; ?></section>
