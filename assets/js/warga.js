@@ -41,7 +41,7 @@
     document.querySelectorAll('[data-connectivity]').forEach(function (element) {
       element.classList.toggle('is-offline', !online);
       var label = element.querySelector('[data-connectivity-label]');
-      if (label) label.textContent = online ? 'Terhubung' : 'Tidak terhubung';
+      if (label) label.textContent = online ? 'Online' : 'Offline';
     });
   }
   window.addEventListener('online', updateConnectivity);
@@ -60,6 +60,28 @@
       if (icon) icon.className = 'fa fa-spinner fa-spin ms-2';
     });
   });
+
+  var serviceSearch = document.querySelector('[data-service-search]');
+  if (serviceSearch) {
+    var serviceItems = document.querySelectorAll('[data-service-name]');
+    var serviceEmpty = document.querySelector('[data-service-empty]');
+    var serviceCount = document.querySelector('[data-service-count]');
+    function filterServices() {
+      var words = serviceSearch.value.toLocaleLowerCase('id').trim().split(/\s+/).filter(Boolean);
+      var visible = 0;
+      serviceItems.forEach(function (item) {
+        var name = item.getAttribute('data-service-name').toLocaleLowerCase('id').replace(/-/g, ' ');
+        var matches = words.every(function (word) { return name.indexOf(word) !== -1; });
+        item.hidden = !matches;
+        if (matches) visible++;
+      });
+      if (serviceEmpty) serviceEmpty.hidden = visible !== 0;
+      if (serviceCount) serviceCount.textContent = visible + ' layanan';
+    }
+    serviceSearch.addEventListener('input', filterServices);
+    serviceSearch.addEventListener('search', filterServices);
+    filterServices();
+  }
 
   var requestForm = document.querySelector('[data-request-form]');
   if (requestForm) {

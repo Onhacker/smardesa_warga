@@ -1,10 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <div class="warga-menu-head">
-    <button type="button" class="close-menu warga-menu-close" aria-label="Tutup menu"><i class="fa fa-times"></i></button>
-    <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo SmartDesa">
-    <div>
+    <div class="warga-menu-brand-row">
+        <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo SmartDesa" width="56" height="56">
+        <button type="button" class="close-menu warga-menu-close" aria-label="Tutup menu"><i class="fa fa-times" aria-hidden="true"></i></button>
+    </div>
+    <div class="warga-menu-brand-copy">
         <h2>SmartDesa Warga</h2>
-        <p><?= e($currentUser['village_name']) ?></p>
+        <p><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($currentUser['village_name']) ?></span></p>
     </div>
 </div>
 
@@ -33,4 +35,7 @@
     </form>
 </div>
 
-<p class="warga-menu-user">Masuk sebagai <strong><?= e($currentUser['name']) ?></strong></p>
+<div class="warga-menu-user">
+    <span class="warga-menu-user-avatar" aria-hidden="true"><?= e(warga_initials($currentUser['name'])) ?></span>
+    <div><small>Masuk sebagai</small><strong><?= e($currentUser['name']) ?></strong></div>
+</div>

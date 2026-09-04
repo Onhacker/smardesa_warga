@@ -449,7 +449,6 @@ a { color: inherit; }
 
 @media (max-width: 460px) {
   .warga-service-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 16px; }
-  .warga-service-grid .warga-service-item:nth-child(n+5) { display: none; }
   .warga-request-card { grid-template-columns: 43px minmax(0, 1fr); }
   .warga-staff-request { grid-template-columns: 43px minmax(0, 1fr); }
   .warga-request-status { grid-column: 2; justify-content: space-between; }
@@ -990,8 +989,8 @@ body {
 }
 
 .warga-service-card > .warga-service-grid {
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-  max-width: 620px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  max-width: 900px;
   gap: 17px;
   margin-right: auto;
   margin-left: auto;
@@ -1014,6 +1013,17 @@ body {
   font-size: 12px;
   font-weight: 750;
 }
+
+.warga-service-search { max-width: 900px; margin: 16px auto 0; padding: 0 20px; }
+.warga-service-search label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; }
+.warga-service-search-input { display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid #cbd5dc; border-radius: 6px; background: #fff; color: #5c6d77; }
+.warga-service-search-input:focus-within { outline: 2px solid var(--warga-teal-dark); outline-offset: 2px; }
+.warga-service-search-input input { width: 100%; min-width: 0; height: 44px; border: 0; outline: 0; background: transparent; color: var(--warga-ink); font-size: 14px; }
+.warga-service-count { display: block; margin-top: 6px; font-size: 12px; color: #5c6d77; }
+.warga-service-empty { margin: 0; padding: 20px; text-align: center; }
+.warga-service-item[hidden], .warga-service-empty[hidden] { display: none !important; }
+.theme-dark .warga-service-search-input { background: #222; border-color: #555; color: #ddd; }
+.theme-dark .warga-service-search-input input, .theme-dark .warga-service-count { color: #ddd; }
 
 #page .warga-section-head {
   margin: 0 19px 13px;
@@ -1085,6 +1095,36 @@ body {
   border-radius: 7px;
   font-size: 10px;
   font-weight: 800;
+}
+
+/* Larger history text without changing the shared dashboard cards. */
+.warga-request-list[data-request-list] .warga-request-copy strong {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.warga-request-list[data-request-list] .warga-request-copy small {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#page .warga-request-list[data-request-list] .warga-status-badge {
+  font-size: 13px !important;
+  line-height: 1.3;
+}
+
+@media (max-width: 460px) {
+  .warga-request-list[data-request-list] .warga-request-card {
+    grid-template-columns: 45px minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .warga-request-list[data-request-list] .warga-request-status {
+    grid-column: 2;
+    justify-content: space-between;
+  }
 }
 
 .warga-empty-state {
@@ -1356,6 +1396,27 @@ body {
   font-size: 18px;
 }
 
+/* Keep notification copy readable at every viewport size. */
+.warga-notification-list .warga-notification-item strong {
+  font-size: 16px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.warga-notification-list .warga-notification-item p {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.warga-notification-list .warga-notification-item time {
+  display: block;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .warga-account-head {
   justify-content: flex-start;
 }
@@ -1389,27 +1450,308 @@ body {
 }
 
 .warga-menu-head {
-  min-height: 158px;
-  padding: 40px 20px 20px;
+  display: block;
+  min-height: 0;
+  padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 22px;
+  overflow: hidden;
+  border-bottom-right-radius: 28px;
+  background: linear-gradient(135deg, #167b78, #0f5e5b 65%, #084c49);
+  isolation: isolate;
 }
 
-.warga-menu-head img {
-  width: 62px;
-  height: 62px;
+.warga-menu-head::after {
+  position: absolute;
+  z-index: -1;
+  right: -55px;
+  bottom: -80px;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 50%;
+  box-shadow: 0 0 0 28px rgba(255, 255, 255, .035), 0 0 0 56px rgba(255, 255, 255, .025);
+  content: '';
+  pointer-events: none;
+}
+
+#menu-main .warga-menu-brand-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+#menu-main .warga-menu-head img {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, .85);
   border-radius: 16px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .12);
 }
 
-.warga-menu-head h2 {
-  font-size: 19px;
+#menu-main .warga-menu-head h2 {
+  margin: 0 0 10px;
+  padding: 0;
+  color: #fff !important;
+  font-size: 23px;
   font-weight: 800;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.warga-menu-head p {
+#menu-main .warga-menu-head p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .09);
+  color: #fff !important;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#menu-main .warga-menu-head p span {
+  min-width: 0;
+  color: #fff !important;
+  overflow-wrap: anywhere;
+}
+
+#menu-main .warga-menu-head p i {
+  flex: 0 0 auto;
+  color: #fff !important;
   font-size: 12px;
 }
 
+#menu-main .warga-menu-close {
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff !important;
+  font-size: 19px;
+  line-height: 1;
+}
+
+#menu-main .warga-menu-close i {
+  color: #fff !important;
+}
+
 #menu-main {
+  max-width: calc(100vw - 16px);
+  overflow-x: hidden;
+  background: var(--warga-surface) !important;
   box-shadow: 12px 0 34px rgba(31, 45, 56, .18);
+}
+
+#menu-main .menu-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 23px 22px 10px !important;
+  padding: 0;
+  color: var(--warga-muted) !important;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+#menu-main .menu-divider::after {
+  flex: 1;
+  height: 1px;
+  background: var(--warga-line);
+  content: '';
+}
+
+#menu-main .warga-menu-list {
+  gap: 4px;
+  margin: 0;
+  padding: 0 12px;
+}
+
+#menu-main .warga-menu-list > a,
+#menu-main .warga-logout-form > button {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 56px;
+  margin: 0;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 13px;
+  background: transparent;
+  color: var(--warga-ink) !important;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+#menu-main .warga-menu-list > a > span,
+#menu-main .warga-logout-form > button > span {
+  float: none;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  color: var(--warga-ink) !important;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+#menu-main .warga-menu-list > a > i:first-child,
+#menu-main .warga-logout-form > button > i:first-child {
+  display: grid;
+  place-items: center;
+  float: none;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  padding: 0;
+  border-radius: 12px;
+  color: #fff !important;
+  font-size: 15px;
+  line-height: 1 !important;
+  box-shadow: none;
+}
+
+#menu-main .warga-menu-list > a > i:last-child,
+#menu-main .warga-logout-form > button > i:last-child {
+  float: none;
+  width: 12px;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  color: #8b98a5 !important;
+  font-size: 12px;
+  line-height: 1;
+  opacity: 1;
+}
+
+#menu-main .warga-menu-list > a.active-nav {
+  background: #e7f4f2;
+  box-shadow: inset 3px 0 0 var(--warga-teal);
+}
+
+#menu-main .warga-menu-list > a.active-nav > span,
+#menu-main .warga-menu-list > a.active-nav > i:last-child {
+  color: var(--warga-teal-dark) !important;
+  font-weight: 800;
+}
+
+#menu-main .warga-menu-list > a:hover,
+#menu-main .warga-logout-form > button:hover {
+  background: #f0f5f6;
+}
+
+#menu-main .warga-menu-list .ios-switch {
+  position: relative;
+  top: auto;
+  right: auto;
+  float: none;
+  width: 42px;
+  height: 26px;
+  margin: 0 !important;
+  padding: 0;
+  transform: none;
+}
+
+#menu-main .warga-menu-list .ios-switch label {
+  margin: 0;
+}
+
+#menu-main .warga-logout-form {
+  margin: 0;
+  padding: 0;
+}
+
+#menu-main .warga-logout-form > button > span {
+  color: var(--warga-red) !important;
+}
+
+#menu-main .warga-menu-user {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 22px 16px calc(22px + env(safe-area-inset-bottom, 0px));
+  padding: 13px;
+  border: 1px solid var(--warga-line);
+  border-radius: 15px;
+  background: #f7fafb;
+  line-height: 1.4;
+}
+
+#menu-main .warga-menu-user-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #e1f1ef;
+  color: var(--warga-teal-dark) !important;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+#menu-main .warga-menu-user > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+#menu-main .warga-menu-user small {
+  color: var(--warga-muted) !important;
+  font-size: 12px;
+}
+
+#menu-main .warga-menu-user strong {
+  color: var(--warga-ink) !important;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+#menu-main :is(.warga-menu-close, .warga-menu-list > a, .warga-logout-form > button):focus-visible {
+  outline: 2px solid var(--warga-teal) !important;
+  outline-offset: -2px;
+}
+
+#menu-main .warga-menu-close:focus-visible {
+  outline-color: #fff !important;
+}
+
+.theme-dark #menu-main .warga-menu-list > a.active-nav {
+  background: #173b3b;
+}
+
+.theme-dark #menu-main .warga-menu-list > a.active-nav > span,
+.theme-dark #menu-main .warga-menu-list > a.active-nav > i:last-child {
+  color: #8ed1cb !important;
+}
+
+.theme-dark #menu-main .warga-menu-list > a:hover,
+.theme-dark #menu-main .warga-logout-form > button:hover,
+.theme-dark #menu-main .warga-menu-user {
+  background: #202b32;
+}
+
+.theme-dark #menu-main .warga-logout-form > button > span {
+  color: #ff929c !important;
 }
 
 .warga-auth-brand {
@@ -1449,6 +1791,68 @@ body {
 .warga-auth-card .content {
   margin: 0;
   padding: 24px 20px;
+}
+
+.warga-auth-error {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 14px;
+  border: 1px solid #e5a8b0;
+  border-radius: 12px;
+  background: #fff1f3;
+  color: #7a2230;
+  overflow: hidden;
+}
+
+.warga-auth-error-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #b42335 !important;
+  color: #fff !important;
+}
+
+.warga-auth-error-icon i {
+  color: #fff !important;
+}
+
+.warga-auth-error-content {
+  min-width: 0;
+}
+
+.warga-auth-error-content > strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.warga-auth-error-list {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.warga-auth-error-item {
+  display: block;
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+body #page .page-content .warga-auth-error-content > strong,
+body #page .page-content .warga-auth-error-item {
+  color: inherit !important;
+}
+
+.theme-dark .warga-auth-error {
+  border-color: #794350;
+  background: #351c24;
+  color: #ffe4e8;
 }
 
 .warga-auth-card .content > h2 {
@@ -1852,7 +2256,7 @@ body #page .page-content .warga-action-buttons .btn i {
   }
 
   .warga-service-card > .warga-service-grid {
-    grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
     padding: 17px 14px 21px;
   }
@@ -2418,5 +2822,961 @@ body.theme-dark #page .warga-request-document strong {
 @media (max-width: 575.98px) {
   .warga-form-data-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Request detail typography: keep the full record readable on mobile while
+ * leaving the staff detail view and shared cards unchanged. */
+#page .warga-request-detail .warga-detail-head > div > p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#page .warga-request-detail .warga-detail-head h1 {
+  font-size: 26px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+#page .warga-request-detail .warga-status-badge {
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+.warga-request-detail .warga-detail-row span {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warga-request-detail .warga-detail-row strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.warga-request-detail .warga-form-title h2 {
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+.warga-request-detail .warga-form-title p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.warga-request-detail .warga-form-data-item span {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.warga-request-detail .warga-form-data-item strong {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.warga-request-detail .warga-request-document strong {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.warga-request-detail .warga-request-document span {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#page .warga-request-detail .warga-section-head p {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#page .warga-request-detail .warga-section-head h2 {
+  font-size: 24px !important;
+  line-height: 1.25;
+}
+
+.warga-request-detail .warga-timeline-item strong {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.warga-request-detail .warga-timeline-item time {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warga-request-detail .warga-timeline-item p {
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.warga-request-detail :is(.warga-home-notice, .warga-result-band) strong {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.warga-request-detail :is(.warga-home-notice, .warga-result-band) p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (max-width: 460px) {
+  #page .warga-request-detail .warga-detail-head h1 {
+    font-size: 24px;
+  }
+}
+
+/* Dashboard activity typography, scoped so other request lists keep their
+ * own hierarchy. */
+#page .warga-activity-head p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+#page .warga-activity-head h2 {
+  font-size: 24px !important;
+  line-height: 1.25;
+}
+
+#page .warga-activity-head > a {
+  font-size: 16px !important;
+  line-height: 1.4;
+}
+
+.warga-activity-list .warga-request-copy strong {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.warga-activity-list .warga-request-copy small {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+#page .warga-activity-list .warga-status-badge {
+  font-size: 13px !important;
+  line-height: 1.3 !important;
+}
+
+@media (max-width: 460px) {
+  .warga-activity-list .warga-request-card {
+    grid-template-columns: 45px minmax(0, 1fr);
+    row-gap: 10px;
+  }
+
+  .warga-activity-list .warga-request-status {
+    grid-column: 2;
+    justify-content: space-between;
+  }
+}
+
+/* Icons on solid status surfaces must remain visible after the global theme
+ * colour rules are applied. */
+body #page .page-content .warga-request-detail .warga-timeline-item.is-current > .warga-timeline-marker > i,
+body #page .page-content .warga-request-detail .warga-result-band > span > i {
+  color: #fff !important;
+}
+
+/* Account page: give profile data and application preferences the same clear
+ * visual hierarchy used by the refreshed request and notification screens. */
+#page .warga-account-page .warga-account-head {
+  min-height: 132px;
+  gap: 17px;
+  padding: 22px;
+}
+
+#page .warga-account-page > .card-style {
+  border-radius: var(--warga-radius-card);
+}
+
+body #page .page-content .warga-account-page .warga-account-avatar {
+  flex: 0 0 66px;
+  width: 66px;
+  height: 66px;
+  border-width: 3px;
+  color: var(--warga-teal-dark) !important;
+  font-size: 22px !important;
+  line-height: 1 !important;
+}
+
+#page .warga-account-page .warga-account-head > div > p {
+  margin-bottom: 4px;
+  font-size: 12px !important;
+  line-height: 1.3;
+}
+
+#page .warga-account-page .warga-account-head > div > h1 {
+  margin-bottom: 7px;
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+body #page .page-content .warga-account-page .warga-account-village {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #effaf8 !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+}
+
+body #page .page-content .warga-account-page .warga-account-village > i {
+  color: #fff !important;
+  font-size: 13px;
+}
+
+#page .warga-account-page .warga-account-card .content,
+#page .warga-account-page .warga-settings-list .content {
+  padding: 0 18px;
+}
+
+.warga-account-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px 0 15px;
+  border-bottom: 1px solid var(--warga-line);
+}
+
+.warga-account-card-title > div {
+  min-width: 0;
+}
+
+body #page .page-content .warga-account-page .warga-account-card-title p {
+  margin: 0 0 3px;
+  color: var(--warga-teal-dark) !important;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+#page .warga-account-card-title h2 {
+  margin: 0;
+  color: var(--warga-ink) !important;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+body #page .page-content .warga-account-page .warga-account-card-title > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: #e1f1ef;
+  color: var(--warga-teal-dark) !important;
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+body #page .page-content .warga-account-page .warga-settings-list .warga-account-card-title > span {
+  background: #e6eef9;
+  color: var(--warga-blue) !important;
+}
+
+body #page .page-content .warga-account-card-title > span > i {
+  color: inherit !important;
+}
+
+.warga-account-page .warga-account-row {
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 14px;
+  min-height: 78px;
+  padding: 14px 0;
+}
+
+body #page .page-content .warga-account-row-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+body #page .page-content .warga-account-row-icon.is-phone {
+  background: #e1f1ef;
+  color: var(--warga-teal-dark) !important;
+}
+
+body #page .page-content .warga-account-row-icon.is-email {
+  background: #e6eef9;
+  color: var(--warga-blue) !important;
+}
+
+body #page .page-content .warga-account-row-icon.is-location {
+  background: #f8eade;
+  color: var(--warga-orange) !important;
+}
+
+body #page .page-content .warga-account-row-icon > i {
+  color: inherit !important;
+}
+
+.warga-account-page .warga-account-row > div {
+  gap: 3px;
+}
+
+body #page .page-content .warga-account-page .warga-account-row > div > span,
+body #page .page-content .warga-account-page .warga-account-row > div > small {
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#page .warga-account-page .warga-account-row > div > strong {
+  margin: 0;
+  color: var(--warga-ink) !important;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.warga-account-page .warga-settings-list a {
+  grid-template-columns: 48px minmax(0, 1fr) 14px;
+  gap: 14px;
+  min-height: 80px;
+  padding: 15px 0;
+  line-height: 1.4;
+}
+
+.warga-account-page .warga-setting-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+body #page .page-content .warga-account-page .warga-setting-icon,
+body #page .page-content .warga-account-page .warga-setting-icon > i {
+  color: #fff !important;
+}
+
+#page .warga-account-page .warga-settings-list strong {
+  color: var(--warga-ink) !important;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+body #page .page-content .warga-account-page .warga-settings-list small {
+  margin-top: 3px;
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+#page .warga-account-page .warga-settings-list a > i {
+  color: #8b98a5 !important;
+  font-size: 12px;
+}
+
+#page .warga-account-page .warga-install-card .content {
+  padding: 18px;
+}
+
+.warga-account-page .warga-pwa-install {
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 14px;
+}
+
+body #page .page-content .warga-account-page .warga-pwa-install-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  color: var(--warga-teal-dark) !important;
+  font-size: 19px;
+}
+
+#page .warga-account-page .warga-pwa-install-copy h3 {
+  color: var(--warga-ink) !important;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+body #page .page-content .warga-account-page .warga-pwa-install-copy p {
+  margin-top: 4px;
+  color: var(--warga-muted) !important;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+#page .warga-account-page .warga-pwa-install [data-pwa-install] {
+  min-height: 44px !important;
+  padding-right: 15px;
+  padding-left: 15px;
+  font-size: 14px !important;
+  font-weight: 800;
+}
+
+#page .warga-account-page .warga-account-logout {
+  margin: 0 15px 24px;
+  padding: 0;
+}
+
+#page .warga-account-page .warga-account-logout > button {
+  min-height: 52px;
+  border-width: 1.5px;
+  border-radius: 13px !important;
+  font-size: 15px !important;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+#page .warga-account-page :is(.warga-settings-list a, [data-pwa-install], .warga-account-logout > button):focus-visible {
+  outline: 3px solid var(--warga-teal) !important;
+  outline-offset: 3px;
+}
+
+body.theme-dark #page .warga-account-card-title {
+  border-bottom-color: #34444e;
+}
+
+body.theme-dark #page .page-content .warga-account-page .warga-account-card-title p {
+  color: #8ed1cb !important;
+}
+
+body.theme-dark #page .warga-account-card-title h2,
+body.theme-dark #page .warga-account-page .warga-account-row > div > strong,
+body.theme-dark #page .warga-account-page .warga-settings-list strong,
+body.theme-dark #page .warga-account-page .warga-pwa-install-copy h3 {
+  color: #f1f5f7 !important;
+}
+
+body.theme-dark #page .page-content .warga-account-page .warga-account-row > div > span,
+body.theme-dark #page .page-content .warga-account-page .warga-account-row > div > small,
+body.theme-dark #page .page-content .warga-account-page .warga-settings-list small,
+body.theme-dark #page .page-content .warga-account-page .warga-pwa-install-copy p {
+  color: #aebbc4 !important;
+}
+
+body.theme-dark #page .page-content .warga-account-row-icon.is-phone,
+body.theme-dark #page .page-content .warga-account-page .warga-account-card-title > span {
+  background: #173b3b;
+  color: #8ed1cb !important;
+}
+
+body.theme-dark #page .page-content .warga-account-row-icon.is-email,
+body.theme-dark #page .page-content .warga-account-page .warga-settings-list .warga-account-card-title > span {
+  background: #1c344f;
+  color: #8bb6ea !important;
+}
+
+body.theme-dark #page .page-content .warga-account-row-icon.is-location {
+  background: #422d22;
+  color: #e5a276 !important;
+}
+
+@media (max-width: 410px) {
+  #page .warga-account-page .warga-account-head {
+    min-height: 124px;
+    gap: 14px;
+    padding: 19px;
+  }
+
+  body #page .page-content .warga-account-page .warga-account-avatar {
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
+    font-size: 20px !important;
+  }
+
+  #page .warga-account-page .warga-account-head > div > h1 {
+    font-size: 23px;
+  }
+
+  #page .warga-account-page .warga-account-card .content,
+  #page .warga-account-page .warga-settings-list .content {
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .warga-account-page .warga-account-row,
+  .warga-account-page .warga-settings-list a {
+    grid-template-columns: 46px minmax(0, 1fr) 12px;
+    gap: 12px;
+  }
+
+  .warga-account-page .warga-account-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  #page .warga-account-page .warga-account-row > div > strong,
+  #page .warga-account-page .warga-settings-list strong {
+    font-size: 15px;
+  }
+
+  #page .warga-account-page .warga-install-card .content {
+    padding: 16px 15px;
+  }
+
+  #page .warga-account-page .warga-account-logout {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+}
+
+@media (max-width: 460px) {
+  .warga-account-page .warga-pwa-install {
+    grid-template-columns: 48px minmax(0, 1fr);
+    row-gap: 14px;
+  }
+
+  .warga-account-page .warga-pwa-install [data-pwa-install] {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+/* New request page: keep every step visually consistent, including controls
+ * generated from the village service catalogue after a service is selected. */
+#page .warga-request-create .warga-page-intro {
+  min-height: 132px;
+  padding: 22px;
+}
+
+#page .warga-request-create .warga-page-intro > div {
+  min-width: 0;
+}
+
+#page .warga-request-create .warga-page-intro h1 {
+  margin-bottom: 6px;
+  font-size: 26px;
+}
+
+#page .warga-request-create .warga-page-intro > div > p {
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+body #page .page-content .warga-request-create .warga-page-intro > div > span {
+  color: #fff !important;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+body #page .page-content .warga-request-create .warga-intro-icon,
+body #page .page-content .warga-request-create .warga-intro-icon > i {
+  color: #fff !important;
+}
+
+.warga-request-form-hint {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 15px 13px;
+  padding: 11px 13px;
+  border: 1px solid #cfe0e3;
+  border-radius: 12px;
+  background: #f8fbfc;
+  color: var(--warga-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.warga-request-form-hint > i {
+  flex: 0 0 auto;
+  color: var(--warga-blue);
+  font-size: 15px;
+}
+
+body #page .page-content .warga-request-form-hint > span {
+  color: var(--warga-muted) !important;
+}
+
+.warga-request-form-hint em,
+.warga-request-field > label > em {
+  color: var(--warga-red) !important;
+  font-style: normal;
+  font-weight: 800;
+}
+
+#page .warga-request-create .warga-form-card {
+  border-radius: var(--warga-radius-card);
+}
+
+#page .warga-request-create .warga-form-card .content {
+  padding: 20px;
+}
+
+.warga-request-create .warga-form-title {
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 20px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--warga-line);
+}
+
+body #page .page-content .warga-request-create .warga-form-title > span {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  color: #fff !important;
+  font-size: 15px;
+  line-height: 1;
+}
+
+#page .warga-request-create .warga-form-title h2 {
+  font-size: 21px;
+  line-height: 1.3;
+}
+
+body #page .page-content .warga-request-create .warga-form-title p {
+  margin-top: 3px;
+  color: var(--warga-muted) !important;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.warga-request-field {
+  min-width: 0;
+  margin-bottom: 22px;
+}
+
+.warga-request-field:last-child {
+  margin-bottom: 0;
+}
+
+.warga-request-field > label,
+.warga-request-create .warga-dynamic-field > label:not(.warga-dynamic-upload) {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  margin: 0 0 9px !important;
+  color: var(--warga-ink) !important;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  transform: none !important;
+}
+
+body #page .page-content .warga-request-field > label > small {
+  margin-left: auto;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #edf2f4;
+  color: var(--warga-muted) !important;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.warga-request-field > .form-control,
+.warga-request-select > .form-control,
+.warga-request-create .warga-dynamic-field > :is(input, select, textarea).form-control {
+  width: 100%;
+  min-height: 54px;
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid #cdd9df !important;
+  border-radius: 13px !important;
+  background: #fff !important;
+  color: var(--warga-ink) !important;
+  font-size: 16px !important;
+  line-height: 1.45 !important;
+  outline: 0;
+  box-shadow: none;
+}
+
+.warga-request-field > textarea.form-control,
+.warga-request-create .warga-dynamic-field > textarea.form-control {
+  height: 112px !important;
+  min-height: 112px !important;
+  resize: vertical;
+}
+
+.warga-request-field > #request-note.form-control {
+  height: 98px !important;
+  min-height: 98px !important;
+}
+
+.warga-request-field > .form-control:focus,
+.warga-request-select > .form-control:focus,
+.warga-request-create .warga-dynamic-field > :is(input, select, textarea).form-control:focus {
+  border-color: var(--warga-teal) !important;
+  outline: 3px solid rgba(22, 123, 120, .14) !important;
+  outline-offset: 1px;
+}
+
+.warga-request-field > .form-control::placeholder,
+.warga-request-create .warga-dynamic-field > .form-control::placeholder {
+  color: #6b7785 !important;
+  opacity: 1;
+}
+
+body #page .page-content .warga-request-create .warga-request-field > small,
+body #page .page-content .warga-request-create .warga-dynamic-field > small {
+  display: block;
+  margin-top: 8px;
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.warga-request-select {
+  position: relative;
+}
+
+.warga-request-select > select {
+  padding-right: 42px !important;
+  appearance: none !important;
+}
+
+.warga-request-select > i {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  color: var(--warga-teal-dark);
+  font-size: 12px;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.warga-request-create .warga-service-requirements {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 14px;
+}
+
+.warga-request-create .warga-requirement-head {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.warga-request-create .warga-service-requirements ul {
+  gap: 9px;
+  margin-top: 12px;
+}
+
+body #page .page-content .warga-request-create .warga-service-requirements li {
+  padding-left: 21px;
+  color: #42515d !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.warga-request-create .warga-dynamic-fields {
+  gap: 20px;
+}
+
+.warga-request-create .warga-dynamic-field {
+  padding-bottom: 20px;
+}
+
+.warga-request-create .warga-dynamic-field > select.form-control {
+  padding-right: 14px;
+  appearance: auto !important;
+}
+
+.warga-request-create .warga-dynamic-field > label:not(.warga-dynamic-upload) em {
+  color: var(--warga-red) !important;
+  font-size: 14px;
+}
+
+.warga-request-create .warga-dynamic-field > label.warga-dynamic-upload,
+.warga-request-create .warga-upload-zone {
+  display: flex;
+  min-height: 148px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  border: 1.5px dashed #78aaa5;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f8fcfb, #eef8f6);
+  color: var(--warga-teal-dark);
+  cursor: pointer;
+  text-align: center;
+}
+
+.warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > i {
+  margin-bottom: 9px;
+  color: var(--warga-teal-dark) !important;
+  font-size: 30px;
+}
+
+.warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > strong {
+  color: var(--warga-ink) !important;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+body #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > span {
+  margin-top: 5px;
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.warga-supporting-upload {
+  position: relative;
+}
+
+.warga-request-create :is(.warga-supporting-upload, .warga-dynamic-field):focus-within :is(.warga-upload-zone, .warga-dynamic-upload) {
+  border-color: var(--warga-teal);
+  outline: 3px solid rgba(22, 123, 120, .14);
+  outline-offset: 2px;
+}
+
+body #page .page-content .warga-request-create .warga-file-list {
+  gap: 8px;
+  margin-top: 12px;
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+body #page .page-content .warga-request-create .warga-file-list > span {
+  color: var(--warga-muted) !important;
+}
+
+.warga-request-create .warga-file-list .warga-file-item {
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.warga-request-create .warga-file-list .warga-file-item span {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+#page .warga-request-create .warga-submit-panel {
+  margin-bottom: 26px;
+  padding: 20px;
+  border-radius: var(--warga-radius-card);
+}
+
+body #page .page-content .warga-request-create .warga-consent {
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 17px;
+  color: #44515c !important;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.warga-request-create .warga-consent input {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+body #page .page-content .warga-request-create .warga-consent > span {
+  color: inherit !important;
+}
+
+#page .warga-request-create .warga-submit-panel .btn {
+  min-height: 54px;
+  border-radius: 13px !important;
+  font-size: 16px !important;
+  line-height: 1.35;
+}
+
+#page .warga-request-create .warga-submit-panel .btn:focus-visible {
+  outline: 3px solid var(--warga-teal) !important;
+  outline-offset: 3px;
+}
+
+body.theme-dark #page .page-content .warga-request-form-hint {
+  border-color: #34444e;
+  background: #202b32;
+}
+
+body.theme-dark #page .page-content .warga-request-field > label,
+body.theme-dark #page .page-content .warga-request-create .warga-dynamic-field > label:not(.warga-dynamic-upload),
+body.theme-dark #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > strong {
+  color: #f1f5f7 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-create :is(.warga-request-field, .warga-dynamic-field) > small,
+body.theme-dark #page .page-content .warga-request-create .warga-file-list > span {
+  color: #aeb9c2 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-field > label > small {
+  background: #26353f;
+  color: #aeb9c2 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-field > .form-control,
+body.theme-dark #page .page-content .warga-request-select > .form-control,
+body.theme-dark #page .page-content .warga-request-create .warga-dynamic-field > :is(input, select, textarea).form-control {
+  border-color: #41525d !important;
+  background: #202b32 !important;
+  color: #f1f5f7 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-field > .form-control::placeholder,
+body.theme-dark #page .page-content .warga-request-create .warga-dynamic-field > .form-control::placeholder {
+  color: #9caab4 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-create .warga-service-requirements li {
+  color: #c6d0d6 !important;
+}
+
+body.theme-dark #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) {
+  border-color: #467672;
+  background: #172b2a;
+}
+
+body.theme-dark #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > i,
+body.theme-dark #page .page-content .warga-request-select > i {
+  color: #8ed1cb !important;
+}
+
+body.theme-dark #page .page-content .warga-request-create .warga-file-list .warga-file-item {
+  background: #202b32;
+  color: #d6e0e5;
+}
+
+body.theme-dark #page .page-content .warga-request-create .warga-consent {
+  color: #c6d0d6 !important;
+}
+
+@media (max-width: 460px) {
+  #page .warga-request-create .warga-page-intro {
+    min-height: 124px;
+    padding: 19px;
+  }
+
+  #page .warga-request-create .warga-page-intro h1 {
+    font-size: 23px;
+  }
+
+  #page .warga-request-create .warga-form-card .content {
+    padding: 18px 15px;
+  }
+
+  .warga-request-create .warga-form-title {
+    margin-bottom: 18px;
+    padding-bottom: 15px;
+  }
+
+  #page .warga-request-create .warga-form-title h2 {
+    font-size: 20px;
+  }
+
+  .warga-request-create .warga-dynamic-field > label.warga-dynamic-upload,
+  .warga-request-create .warga-upload-zone {
+    min-height: 138px;
+    padding: 19px 14px;
+  }
+
+  #page .warga-request-create .warga-submit-panel {
+    padding: 17px 15px;
   }
 }

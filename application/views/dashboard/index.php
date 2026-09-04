@@ -38,29 +38,41 @@ $citizenVerified = !empty($citizenVerified);
             <span class="warga-service-locked" aria-label="Layanan terkunci"><i class="fa fa-lock"></i></span>
         <?php endif; ?>
     </div>
-    <div class="warga-service-grid" aria-label="Jenis layanan">
+    <?php if ($services): ?>
+    <div class="warga-service-search">
+        <label for="wargaServiceSearch">Cari surat</label>
+        <div class="warga-service-search-input">
+            <i class="fa fa-search" aria-hidden="true"></i>
+            <input type="search" id="wargaServiceSearch" placeholder="Nama atau jenis surat" data-service-search aria-controls="wargaServiceGrid" autocomplete="off">
+        </div>
+        <span class="warga-service-count" data-service-count aria-live="polite"><?= count($services) ?> layanan</span>
+    </div>
+    <?php endif; ?>
+    <div class="warga-service-grid" id="wargaServiceGrid" aria-label="Jenis layanan">
         <?php $serviceColors = array('teal', 'blue', 'orange', 'green', 'red'); ?>
-        <?php foreach (array_slice($services, 0, 5) as $index => $service): ?>
+        <?php foreach ($services as $index => $service): ?>
+            <?php $serviceSearch = $service['name'] . ' ' . $service['short_name'] . ' ' . $service['slug']; ?>
             <?php if ($citizenVerified): ?>
-                <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item">
+                <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-item" data-service-name="<?= e($serviceSearch) ?>" title="<?= e($service['name']) ?>">
                     <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
-                    <strong><?= e($service['short_name']) ?></strong>
+                    <strong><?= e($service['name']) ?></strong>
                 </a>
             <?php else: ?>
-                <span class="warga-service-item is-locked" aria-disabled="true">
+                <span class="warga-service-item is-locked" aria-disabled="true" data-service-name="<?= e($serviceSearch) ?>">
                     <span class="warga-service-icon is-<?= e($serviceColors[$index % count($serviceColors)]) ?>"><i class="fa <?= e($service['icon']) ?>"></i></span>
-                    <strong><?= e($service['short_name']) ?></strong>
+                    <strong><?= e($service['name']) ?></strong>
                 </span>
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
+    <p class="warga-service-empty" data-service-empty <?= $services ? 'hidden' : '' ?>><?= $services ? 'Surat tidak ditemukan.' : 'Belum ada layanan dari desa.' ?></p>
 </section>
 
-<section class="content warga-section-head mt-4">
+<section class="content warga-section-head warga-activity-head mt-4">
     <div><p class="font-600 color-highlight mb-n1">Aktivitas terbaru</p><h2 class="font-22 mb-0">Permohonan Saya</h2></div>
     <a href="<?= site_url('permohonan') ?>" class="font-12 color-highlight font-600">Lihat semua</a>
 </section>
-<section class="warga-request-list">
+<section class="warga-request-list warga-activity-list">
     <?php if (!$requests): ?>
         <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><?php if ($citizenVerified): ?><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?></div>
     <?php endif; ?>

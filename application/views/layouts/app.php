@@ -20,7 +20,7 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=33">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=45">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -66,9 +66,6 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
     <div class="page-title-clear" aria-hidden="true"></div>
 
     <main class="page-content">
-        <div class="warga-connectivity" data-connectivity role="status" aria-live="polite">
-            <span class="warga-connectivity-dot"></span><span data-connectivity-label>Memeriksa jaringan</span>
-        </div>
         <?php $flashSuccess = $this->session->flashdata('success'); ?>
         <?php $flashError = $this->session->flashdata('error'); ?>
         <?php if ($flashSuccess): ?>
@@ -78,6 +75,9 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
             <div class="ms-3 me-3 alert alert-small rounded-s shadow-xl bg-red-dark" role="alert"><span><i class="fa fa-times color-white"></i></span><strong class="color-white"><?= e($flashError) ?></strong><button type="button" class="close color-white font-16" data-bs-dismiss="alert" aria-label="Tutup">&times;</button></div>
         <?php endif; ?>
         <?php $this->load->view($contentView); ?>
+        <div class="warga-connectivity" data-connectivity role="status" aria-live="polite">
+            <span class="warga-connectivity-dot"></span><span data-connectivity-label>Memeriksa jaringan</span>
+        </div>
     </main>
 
     <aside id="menu-main" class="menu menu-box-left rounded-0" data-menu-width="300">
@@ -88,6 +88,6 @@ $themeHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
-<script src="<?= base_url('assets/js/warga.min.js') ?>?v=5"></script>
+<script src="<?= base_url('assets/js/warga.min.js') ?>?v=7"></script>
 </body>
 </html>

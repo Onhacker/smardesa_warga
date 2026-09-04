@@ -9,13 +9,17 @@ foreach ($registrationRegions as $region) {
     }
 }
 $registrationRegionsJson = json_encode($registrationRegions, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+$registrationValidationErrors = validation_errors('<span class="warga-auth-error-item">', '</span>');
+$registrationErrorHtml = !empty($error)
+    ? '<span class="warga-auth-error-item">' . e($error) . '</span>'
+    : $registrationValidationErrors;
 ?>
 <!DOCTYPE HTML>
 <html lang="id">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"><meta name="theme-color" content="#167b78">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=33"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=45"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div><div id="page">
@@ -23,7 +27,15 @@ $registrationRegionsJson = json_encode($registrationRegions, JSON_HEX_TAG | JSON
 <main class="page-content header-clear-medium warga-auth-page">
     <section class="warga-auth-brand compact"><img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan desa.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">
-        <?php if (!empty($error) || validation_errors()): ?><div class="alert alert-small rounded-s bg-red-dark" role="alert"><span><i class="fa fa-times color-white"></i></span><strong class="color-white"><?= !empty($error) ? e($error) : validation_errors('<span class="d-block">', '</span>') ?></strong></div><?php endif; ?>
+        <?php if ($registrationErrorHtml !== ''): ?>
+            <div class="warga-auth-error" role="alert" aria-live="assertive">
+                <span class="warga-auth-error-icon" aria-hidden="true"><i class="fa fa-exclamation"></i></span>
+                <div class="warga-auth-error-content">
+                    <strong>Pendaftaran belum berhasil</strong>
+                    <div class="warga-auth-error-list"><?= $registrationErrorHtml ?></div>
+                </div>
+            </div>
+        <?php endif; ?>
         <?php if ($demoMode): ?><div class="warga-demo-credentials mb-4"><i class="fa fa-info-circle"></i><span>Mode demo aktif. Data pendaftaran tidak disimpan permanen.</span></div><?php endif; ?>
         <form method="post" action="<?= site_url('register') ?>" data-disable-submit>
             <?= csrf_field() ?>
@@ -62,7 +74,7 @@ $registrationRegionsJson = json_encode($registrationRegions, JSON_HEX_TAG | JSON
         <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="color-highlight font-600" href="<?= site_url('login') ?>">Masuk</a></p>
     </div></section>
 </main></div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=5"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=7"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;
