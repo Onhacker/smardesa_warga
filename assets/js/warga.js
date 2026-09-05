@@ -94,6 +94,18 @@
     var dynamicFields = requestForm.querySelector('[data-form-fields]');
     var dynamicDescription = requestForm.querySelector('[data-dynamic-form-description]');
     var supportingStep = requestForm.querySelector('[data-supporting-step]');
+    var availability = requestForm.querySelector('[data-service-availability]');
+    var initialFields = {};
+    var existingDocuments = [];
+    var editMode = requestForm.getAttribute('data-edit-mode') === '1';
+    try {
+      var initialValue = JSON.parse(requestForm.getAttribute('data-initial-fields') || '{}');
+      if (initialValue && typeof initialValue === 'object' && !Array.isArray(initialValue)) initialFields = initialValue;
+    } catch (ignoreInitialFields) { initialFields = {}; }
+    try {
+      var existingValue = JSON.parse(requestForm.getAttribute('data-existing-documents') || '[]');
+      if (Array.isArray(existingValue)) existingDocuments = existingValue;
+    } catch (ignoreExistingDocuments) { existingDocuments = []; }
 
     function selectedService() {
       if (!select) return null;
@@ -174,7 +186,13 @@
       input.className = 'warga-file-input-native';
       input.accept = String(field.accept || 'image/jpeg,image/png,application/pdf');
       input.multiple = !!field.multiple;
-      input.required = !!field.required;
+      var existingForField = existingDocuments.filter(function (document) {
+        return document && String(document.field_key || '') === String(field.key || '');
+      });
+      // A revision may retain an existing required file. The server still
+      // validates the requirement; the browser should not force a needless
+      // re-upload unless the citizen chooses to replace it.
+      input.required = !!field.required && existingForField.length === 0;
       input.setAttribute('data-dynamic-file-input', '');
       input.setAttribute('data-max-files', field.multiple ? '5' : '1');
       input.setAttribute('data-max-size-mb', String(Math.max(1, Math.min(10, Number(field.max_size_mb) || 5))));
@@ -183,7 +201,9 @@
       list.className = 'warga-file-list';
       list.setAttribute('data-dynamic-file-list', '');
       var empty = document.createElement('span');
-      empty.textContent = 'Belum ada berkas dipilih.';
+      empty.textContent = existingForField.length
+        ? 'Berkas tersimpan akan tetap digunakan jika tidak diganti.'
+        : 'Belum ada berkas dipilih.';
       list.appendChild(empty);
       fragment.appendChild(uploadLabel);
       fragment.appendChild(input);
@@ -209,7 +229,12 @@
           label.appendChild(required);
         }
         wrapper.appendChild(label);
-        wrapper.appendChild(field.type === 'file' ? createFileControl(field, id) : createTextControl(field, id));
+        var control = field.type === 'file' ? createFileControl(field, id) : createTextControl(field, id);
+        wrapper.appendChild(control);
+        if (field.type !== 'file' && Object.prototype.hasOwnProperty.call(initialFields, field.key)
+          && control && typeof control.value !== 'undefined') {
+          control.value = String(initialFields[field.key] == null ? '' : initialFields[field.key]);
+        }
         if (field.help) {
           var help = document.createElement('small');
           help.textContent = String(field.help);
@@ -227,6 +252,11 @@
       var service = selectedService();
       updateRequirements(service);
       renderDynamicForm(service);
+      if (availability) {
+        var enabled = !service || service.submission_enabled !== false;
+        availability.textContent = enabled ? '' : (service.availability_note || 'Layanan ini belum dapat diajukan melalui aplikasi warga.');
+        availability.classList.toggle('d-none', enabled);
+      }
     }
     if (select) {
       select.addEventListener('change', updateSelectedService);

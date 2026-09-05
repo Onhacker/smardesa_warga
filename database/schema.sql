@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS village_resident_snapshots (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   village_id CHAR(36) NOT NULL,
   snapshot_id CHAR(64) NOT NULL,
+  directory_version BIGINT UNSIGNED NOT NULL DEFAULT 1,
+  directory_hash CHAR(64) NULL,
   snapshot_created_at DATETIME NOT NULL,
   batch_total INT UNSIGNED NOT NULL DEFAULT 1,
   finalized TINYINT(1) NOT NULL DEFAULT 0,
@@ -109,6 +111,7 @@ CREATE TABLE IF NOT EXISTS village_resident_snapshots (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uniq_resident_snapshot (village_id, snapshot_id),
   KEY idx_resident_snapshot_latest (village_id, snapshot_created_at),
+  KEY idx_resident_snapshot_version (village_id, directory_version, finalized),
   CONSTRAINT fk_resident_snapshot_village FOREIGN KEY (village_id) REFERENCES village_tenants(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -118,6 +121,7 @@ CREATE TABLE IF NOT EXISTS village_resident_snapshot_batches (
   snapshot_id CHAR(64) NOT NULL,
   batch_index INT UNSIGNED NOT NULL,
   batch_total INT UNSIGNED NOT NULL,
+  batch_hash CHAR(64) NOT NULL,
   resident_count INT UNSIGNED NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uniq_resident_snapshot_batch (village_id, snapshot_id, batch_index),
@@ -268,6 +272,8 @@ CREATE TABLE IF NOT EXISTS sync_messages (
   aggregate_id VARCHAR(120) NOT NULL,
   direction VARCHAR(30) NOT NULL,
   operation VARCHAR(30) NOT NULL,
+  event_version BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  payload_fingerprint CHAR(64) NULL,
   payload_json JSON NOT NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'pending',
   attempts INT UNSIGNED NOT NULL DEFAULT 0,

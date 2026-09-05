@@ -78,9 +78,12 @@ class Request_model extends CI_Model
                 `schema_version` INT UNSIGNED NOT NULL DEFAULT 1,
                 `sort_order` INT NOT NULL DEFAULT 0,
                 `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                `submission_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+                `availability_note` VARCHAR(500) DEFAULT NULL,
                 `source_updated_at` DATETIME NULL,
                 `published_at` DATETIME NULL,
                 `source_hash` CHAR(64) DEFAULT NULL,
+                `source_revision` BIGINT UNSIGNED NOT NULL DEFAULT 0,
                 `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 PRIMARY KEY (`id`),
@@ -99,11 +102,18 @@ class Request_model extends CI_Model
             $this->ensure_field('village_service_catalog', 'source_updated_at', "ALTER TABLE `village_service_catalog` ADD `source_updated_at` DATETIME NULL");
             $this->ensure_field('village_service_catalog', 'published_at', "ALTER TABLE `village_service_catalog` ADD `published_at` DATETIME NULL");
             $this->ensure_field('village_service_catalog', 'source_hash', "ALTER TABLE `village_service_catalog` ADD `source_hash` CHAR(64) DEFAULT NULL");
+            $this->ensure_field('village_service_catalog', 'submission_enabled', "ALTER TABLE `village_service_catalog` ADD `submission_enabled` TINYINT(1) NOT NULL DEFAULT 1");
+            $this->ensure_field('village_service_catalog', 'availability_note', "ALTER TABLE `village_service_catalog` ADD `availability_note` VARCHAR(500) DEFAULT NULL");
+            $this->ensure_field('village_service_catalog', 'source_revision', "ALTER TABLE `village_service_catalog` ADD `source_revision` BIGINT UNSIGNED NOT NULL DEFAULT 0");
         }
         if ($this->db->table_exists('service_requests')) {
             $this->ensure_field('service_requests', 'catalog_service_id', "ALTER TABLE `service_requests` ADD `catalog_service_id` BIGINT UNSIGNED NULL");
             $this->ensure_field('service_requests', 'form_schema_version', "ALTER TABLE `service_requests` ADD `form_schema_version` INT UNSIGNED NULL");
+            $this->ensure_field('service_requests', 'event_version', "ALTER TABLE `service_requests` ADD `event_version` BIGINT UNSIGNED NOT NULL DEFAULT 1");
             $this->ensure_index('service_requests', 'idx_requests_catalog', 'KEY `idx_requests_catalog` (`catalog_service_id`)');
+        }
+        if ($this->db->table_exists('sync_messages')) {
+            $this->ensure_field('sync_messages', 'event_version', "ALTER TABLE `sync_messages` ADD `event_version` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `operation`");
         }
         if ($this->db->table_exists('request_documents')) {
             $this->ensure_field('request_documents', 'field_key', "ALTER TABLE `request_documents` ADD `field_key` VARCHAR(100) NULL");
@@ -127,7 +137,7 @@ class Request_model extends CI_Model
         return rtrim($real, DIRECTORY_SEPARATOR);
     }
 
-    private function collect_uploaded_documents($requestId, array $schema = array())
+    private function collect_uploaded_documents($requestId, array $schema = array(), array $existingCounts = array())
     {
         $fields = isset($schema['fields']) && is_array($schema['fields']) ? $schema['fields'] : array();
         $fileFields = array();
@@ -206,12 +216,15 @@ class Request_model extends CI_Model
         }
         if ($genericCount > 5) return array('files' => array(), 'error' => 'Maksimal lima berkas pendukung umum dapat dikirim.');
         if (count($uploadedEntries) > 10) return array('files' => array(), 'error' => 'Maksimal sepuluh berkas dapat dikirim dalam satu permohonan.');
+        $replaceFieldKeys = array();
         foreach ($fileFields as $fieldKey => $field) {
-            if (!empty($field['required']) && empty($counts[$fieldKey])) {
+            $existingCount = isset($existingCounts[$fieldKey]) ? (int) $existingCounts[$fieldKey] : 0;
+            if (!empty($field['required']) && empty($counts[$fieldKey]) && $existingCount < 1) {
                 return array('files' => array(), 'error' => 'Berkas "' . $field['label'] . '" wajib diunggah.');
             }
+            if ($existingCount > 0 && !empty($counts[$fieldKey]) && empty($field['multiple'])) $replaceFieldKeys[$fieldKey] = TRUE;
         }
-        if (!$uploadedEntries) return array('files' => array(), 'error' => NULL, 'paths' => array());
+        if (!$uploadedEntries) return array('files' => array(), 'error' => NULL, 'paths' => array(), 'replace_field_keys' => array());
 
         $storage = $this->private_storage_path();
         if ($storage === NULL) return array('files' => array(), 'error' => 'Penyimpanan berkas belum siap.');
@@ -219,13 +232,13 @@ class Request_model extends CI_Model
         $files = array();
         $paths = array();
         $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : NULL;
-        $fail = function ($message) use (&$finfo, &$paths) {
+        $fail = function ($message) use (&$finfo, &$paths, &$replaceFieldKeys) {
             if ($finfo) {
                 finfo_close($finfo);
                 $finfo = NULL;
             }
             $this->cleanup_paths($paths);
-            return array('files' => array(), 'error' => $message, 'paths' => array());
+            return array('files' => array(), 'error' => $message, 'paths' => array(), 'replace_field_keys' => array_keys($replaceFieldKeys));
         };
         if (!$finfo) return $fail('Pemeriksaan jenis berkas belum tersedia pada server.');
 
@@ -262,7 +275,7 @@ class Request_model extends CI_Model
             );
         }
         if ($finfo) finfo_close($finfo);
-        return array('files' => $files, 'error' => NULL, 'paths' => $paths);
+        return array('files' => $files, 'error' => NULL, 'paths' => $paths, 'replace_field_keys' => array_keys($replaceFieldKeys));
     }
 
     private function file_accepts_mime($mime, $accept)
@@ -376,6 +389,8 @@ class Request_model extends CI_Model
             $row['schema_version'] = 1;
             $row['catalog_id'] = 0;
             $row['is_catalog'] = false;
+            $row['submission_enabled'] = true;
+            $row['availability_note'] = '';
             $row['icon'] = $row['icon'] ?: 'fa-file-alt';
         }
         unset($row);
@@ -405,6 +420,8 @@ class Request_model extends CI_Model
             'form_schema' => $schema,
             'schema_version' => (int) $schema['version'],
             'template_key' => (string) (isset($row['template_key']) ? $row['template_key'] : ''),
+            'submission_enabled' => !isset($row['submission_enabled']) || (int) $row['submission_enabled'] === 1,
+            'availability_note' => (string) (isset($row['availability_note']) ? $row['availability_note'] : ''),
             'is_catalog' => true
         );
     }
@@ -479,6 +496,8 @@ class Request_model extends CI_Model
         $row['schema_version'] = 1;
         $row['catalog_id'] = 0;
         $row['is_catalog'] = false;
+        $row['submission_enabled'] = true;
+        $row['availability_note'] = '';
         return $row;
     }
 
@@ -515,6 +534,21 @@ class Request_model extends CI_Model
             $values[$key] = $value;
         }
         return array('success' => true, 'values' => $values, 'schema_version' => (int) ($schema['version'] ?? 1));
+    }
+
+    private function validate_request_text($purpose, $note)
+    {
+        $purpose = trim((string) $purpose);
+        $note = trim((string) $note);
+        $purposeLength = function_exists('mb_strlen') ? mb_strlen($purpose, 'UTF-8') : strlen($purpose);
+        $noteLength = function_exists('mb_strlen') ? mb_strlen($note, 'UTF-8') : strlen($note);
+        if ($purposeLength < 5 || $purposeLength > 500) {
+            return array('success' => FALSE, 'message' => 'Keperluan harus 5 sampai 500 karakter.');
+        }
+        if ($noteLength > 1000) {
+            return array('success' => FALSE, 'message' => 'Catatan maksimal 1.000 karakter.');
+        }
+        return array('success' => TRUE);
     }
 
     public function for_user($userId)
@@ -709,9 +743,10 @@ class Request_model extends CI_Model
         $role = isset($user['role_slug']) ? $user['role_slug'] : '';
         $status = isset($request['status']) ? $request['status'] : '';
         $this->load->model('Community_model');
-        $payload = json_decode((string)($request['payload_json'] ?? ''), true);
-        $settings = isset($payload['verification']) && is_array($payload['verification'])
-            ? $payload['verification'] : $this->Community_model->workflow($request['village_id'] ?? ($user['village_id'] ?? ''));
+        // The workflow is mutable village configuration. Never authorize a
+        // staff action from the request payload, which may contain an older
+        // snapshot captured when the citizen submitted the request.
+        $settings = $this->Community_model->workflow($request['village_id'] ?? ($user['village_id'] ?? ''));
         require_once dirname(__DIR__) . '/libraries/Verification_workflow.php';
         return Verification_workflow::actions($role, $status, $settings);
     }
@@ -751,9 +786,15 @@ class Request_model extends CI_Model
         }
         if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
 
-        $payload = json_encode(array('request_id' => $request['id'], 'request_code' => $request['request_code'], 'status' => $next['status'], 'note' => $note, 'actor_name' => $user['name'], 'actor_role' => $user['role_slug']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $this->db->trans_begin();
-        $this->db->where(array('id' => (string) $id, 'status' => $request['status']))->update('service_requests', array('status' => $next['status']));
+        $currentEventVersion = max(1, (int) ($request['event_version'] ?? 1));
+        $eventVersion = $currentEventVersion + 1;
+        $payload = json_encode(array('request_id' => $request['id'], 'request_code' => $request['request_code'], 'status' => $next['status'], 'note' => $note, 'actor_name' => $user['name'], 'actor_role' => $user['role_slug'], 'event_version' => $eventVersion), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!$this->db->trans_begin()) {
+            return array('success' => FALSE, 'message' => 'Tindakan belum dapat dimulai. Silakan coba lagi.');
+        }
+        $this->db->where(array('id' => (string) $id, 'status' => $request['status']))
+            ->where('event_version', $currentEventVersion)
+            ->update('service_requests', array('status' => $next['status'], 'event_version' => $eventVersion));
         $updated = $this->db->affected_rows();
         if ($updated !== 1) {
             $this->db->trans_rollback();
@@ -766,12 +807,14 @@ class Request_model extends CI_Model
         if ($next['status'] === 'verified') $this->Community_model->notify_staff($request['village_id'],
             'Permohonan menunggu persetujuan', 'Sekretaris ' . $institution . ' telah memverifikasi permohonan surat.',
             'petugas/permohonan/'.$id, array('kepala-desa'), $id);
-        $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $request['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => (string) $id, 'direction' => 'cloud_to_local', 'operation' => 'status_update', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request-status:' . $id . ':' . $next['status'] . ':' . bin2hex(random_bytes(6))));
+        $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $request['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => (string) $id, 'direction' => 'cloud_to_local', 'operation' => 'status_update', 'event_version' => $eventVersion, 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request-status:' . $id . ':' . $next['status'] . ':' . bin2hex(random_bytes(6))));
         if (!$this->db->trans_status()) {
             $this->db->trans_rollback();
             return array('success' => FALSE, 'message' => 'Tindakan belum dapat disimpan.');
         }
-        $this->db->trans_commit();
+        if (!$this->db->trans_commit()) {
+            return array('success' => FALSE, 'message' => 'Tindakan belum dapat disimpan.');
+        }
         return array('success' => TRUE, 'status' => $next['status']);
     }
 
@@ -834,6 +877,8 @@ class Request_model extends CI_Model
         $purpose = trim((string) ($data['purpose'] ?? ''));
         $note = trim((string) ($data['note'] ?? ''));
         $formFields = isset($data['form_fields']) && is_array($data['form_fields']) ? $data['form_fields'] : array();
+        $textValidation = $this->validate_request_text($purpose, $note);
+        if (empty($textValidation['success'])) return $textValidation;
         if (warga_demo_mode()) {
             $service = NULL;
             foreach ($this->demo_services() as $candidate) if ($candidate['slug'] === $serviceSlug) $service = $candidate;
@@ -862,7 +907,11 @@ class Request_model extends CI_Model
         }
         if (empty($user['village_id'])) return array('success' => FALSE, 'message' => 'Akun belum terhubung ke ' . $institutionLower . '.');
         $service = $this->service_for_user($serviceSlug, $user['village_id']);
-        if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak tersedia untuk kampung/desa Anda.');
+        if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak tersedia untuk ' . $institutionLower . ' Anda.');
+        if (isset($service['submission_enabled']) && !$service['submission_enabled']) {
+            return array('success' => FALSE, 'message' => !empty($service['availability_note'])
+                ? $service['availability_note'] : 'Layanan ini belum dapat diajukan melalui aplikasi warga.');
+        }
         $validated = $this->validate_dynamic_fields($service, $formFields);
         if (empty($validated['success'])) return array('success' => FALSE, 'message' => $validated['message']);
         $serviceTypeId = (int) $service['id'];
@@ -901,6 +950,7 @@ class Request_model extends CI_Model
             'form_schema' => $service['form_schema'],
             'form_schema_version' => (int) $validated['schema_version'],
             'status' => 'submitted',
+            'event_version' => 1,
             'purpose' => $purpose,
             'note' => $note,
             'citizen_name' => isset($user['name']) ? $user['name'] : '',
@@ -914,12 +964,12 @@ class Request_model extends CI_Model
             $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
             return array('success' => FALSE, 'message' => 'Data permohonan belum dapat diproses.');
         }
-        $requestRow = array('id' => $id, 'request_code' => $requestCode, 'citizen_user_id' => (int) $user['id'], 'village_id' => $user['village_id'], 'service_type_id' => $serviceTypeId, 'catalog_service_id' => !empty($service['catalog_id']) ? (int) $service['catalog_id'] : NULL, 'form_schema_version' => (int) $validated['schema_version'], 'status' => 'submitted', 'payload_json' => $payload, 'local_sync_status' => 'pending', 'submitted_at' => $now);
+        $requestRow = array('id' => $id, 'request_code' => $requestCode, 'citizen_user_id' => (int) $user['id'], 'village_id' => $user['village_id'], 'service_type_id' => $serviceTypeId, 'catalog_service_id' => !empty($service['catalog_id']) ? (int) $service['catalog_id'] : NULL, 'form_schema_version' => (int) $validated['schema_version'], 'status' => 'submitted', 'event_version' => 1, 'payload_json' => $payload, 'local_sync_status' => 'pending', 'submitted_at' => $now);
         $this->db->trans_start();
         $this->db->insert('service_requests', $requestRow);
         $this->db->insert('request_status_history', array('request_id' => $id, 'to_status' => 'submitted', 'note' => 'Permohonan diajukan warga.', 'actor_id' => (int) $user['id']));
         foreach ($uploaded['files'] as $file) $this->db->insert('request_documents', array('id' => $file['id'], 'request_id' => $id, 'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL, 'original_name' => $file['original_name'], 'stored_name' => $file['stored_name'], 'storage_path' => $file['storage_path'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size'], 'uploaded_by' => (int) $user['id']));
-        $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $user['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => $id, 'direction' => 'cloud_to_local', 'operation' => 'upsert', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request:' . $id));
+        $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $user['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => $id, 'direction' => 'cloud_to_local', 'operation' => 'upsert', 'event_version' => 1, 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request:' . $id));
         $roles = $verification['sekdes'] ? array('sekdes') : ($verification['kades'] ? array('kepala-desa') : array());
         $this->Community_model->notify_staff($user['village_id'], 'Permohonan surat baru',
             'Ada permohonan surat menunggu pemeriksaan.', 'petugas/permohonan/'.$id, $roles, $id);
@@ -927,6 +977,139 @@ class Request_model extends CI_Model
         if (!$this->db->trans_status()) {
             $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
             return array('success' => FALSE, 'message' => 'Permohonan belum dapat disimpan.');
+        }
+        return array('success' => TRUE, 'id' => $id);
+    }
+
+    /**
+     * Send a revision back through the same request ID. The history and
+     * citizen-visible URL remain stable; only the submitted payload, files,
+     * status, and monotonic event version advance.
+     */
+    public function resubmit($id, array $user, array $data)
+    {
+        $id = trim((string) $id);
+        if ($id === '') return array('success' => FALSE, 'message' => 'Permohonan tidak valid.');
+        $formFields = isset($data['form_fields']) && is_array($data['form_fields']) ? $data['form_fields'] : array();
+        $purpose = trim((string) ($data['purpose'] ?? ''));
+        $note = trim((string) ($data['note'] ?? ''));
+        $textValidation = $this->validate_request_text($purpose, $note);
+        if (empty($textValidation['success'])) return $textValidation;
+
+        if (warga_demo_mode()) {
+            $request = $this->find_demo_request($id);
+            if (!$request || (int) $request['citizen_user_id'] !== (int) $user['id']) return array('success' => FALSE, 'message' => 'Permohonan tidak ditemukan.');
+            if ((string) $request['status'] !== 'revision') return array('success' => FALSE, 'message' => 'Permohonan ini tidak sedang menunggu perbaikan.');
+            $overrides = $this->session->userdata('warga_demo_request_overrides');
+            if (!is_array($overrides)) $overrides = array();
+            $overrides[$id] = array('status' => 'submitted', 'updated_at' => date('Y-m-d H:i:s'), 'purpose' => $purpose, 'note' => $note, 'form_data' => $formFields);
+            $this->session->set_userdata('warga_demo_request_overrides', $overrides);
+            return array('success' => TRUE, 'id' => $id);
+        }
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
+        $this->load->model('Auth_model');
+        $institution = $this->institution_for_context($user);
+        $institutionLower = function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
+        if (empty($user['id']) || !$this->Auth_model->citizen_is_verified((int) $user['id'], isset($user['village_id']) ? $user['village_id'] : '')) {
+            return array('success' => FALSE, 'message' => 'Akun belum terverifikasi sebagai penduduk aktif ' . $institutionLower . ' ini.');
+        }
+        $request = $this->find_for_user($id, (int) $user['id']);
+        if (!$request || (string) $request['status'] !== 'revision') return array('success' => FALSE, 'message' => 'Permohonan tidak ditemukan atau belum meminta perbaikan.');
+        $service = $this->service_for_user((string) $request['service_slug'], $request['village_id']);
+        if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan sudah tidak tersedia di ' . $institutionLower . '. Hubungi petugas ' . $institutionLower . '.');
+        if (isset($service['submission_enabled']) && !$service['submission_enabled']) return array('success' => FALSE, 'message' => !empty($service['availability_note']) ? $service['availability_note'] : 'Layanan ini tidak menerima pengajuan warga.');
+        $validated = $this->validate_dynamic_fields($service, $formFields);
+        if (empty($validated['success'])) return array('success' => FALSE, 'message' => $validated['message']);
+
+        $existingDocs = $this->db->where('request_id', $id)->order_by('created_at', 'ASC')->get('request_documents')->result_array();
+        $existingCounts = array();
+        foreach ($existingDocs as $doc) {
+            $key = trim((string) ($doc['field_key'] ?? ''));
+            if ($key !== '') $existingCounts[$key] = isset($existingCounts[$key]) ? $existingCounts[$key] + 1 : 1;
+        }
+        $uploaded = $this->collect_uploaded_documents($id, $service['form_schema'], $existingCounts);
+        if (!empty($uploaded['error'])) return array('success' => FALSE, 'message' => $uploaded['error']);
+        $replaceKeys = array_fill_keys(isset($uploaded['replace_field_keys']) ? $uploaded['replace_field_keys'] : array(), TRUE);
+        $retainedDocs = array_values(array_filter($existingDocs, function ($doc) use ($replaceKeys) {
+            $key = trim((string) ($doc['field_key'] ?? ''));
+            return $key === '' || !isset($replaceKeys[$key]);
+        }));
+        if (count($retainedDocs) + count($uploaded['files']) > 10) {
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Maksimal sepuluh berkas dapat disimpan pada satu permohonan.');
+        }
+
+        $oldPayload = json_decode((string) ($request['payload_json'] ?? ''), TRUE);
+        if (!is_array($oldPayload)) $oldPayload = array();
+        $currentEventVersion = max(1, (int) ($request['event_version'] ?? 1));
+        $eventVersion = $currentEventVersion + 1;
+        $now = date('Y-m-d H:i:s');
+        $documentMeta = array();
+        foreach ($retainedDocs as $doc) $documentMeta[] = array(
+            'id' => (string) $doc['id'], 'field_key' => $doc['field_key'], 'original_name' => $doc['original_name'],
+            'mime_type' => $doc['mime_type'], 'file_size' => (int) $doc['file_size']
+        );
+        foreach ($uploaded['files'] as &$file) {
+            $file['id'] = warga_uuid();
+            $documentMeta[] = array('id' => $file['id'], 'field_key' => $file['field_key'], 'original_name' => $file['original_name'], 'mime_type' => $file['mime_type'], 'file_size' => (int) $file['file_size']);
+        }
+        unset($file);
+        $oldPayload['request_id'] = $id;
+        $oldPayload['form_data'] = $validated['values'];
+        $oldPayload['form_schema'] = $service['form_schema'];
+        $oldPayload['form_schema_version'] = (int) $validated['schema_version'];
+        $oldPayload['purpose'] = $purpose;
+        $oldPayload['note'] = $note;
+        $oldPayload['status'] = 'submitted';
+        $oldPayload['event_version'] = $eventVersion;
+        $oldPayload['documents'] = $documentMeta;
+        $oldPayload['document_count'] = count($documentMeta);
+        $oldPayload['submitted_at'] = $now;
+        $payload = json_encode($oldPayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($payload)) {
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Data perbaikan belum dapat diproses.');
+        }
+
+        $this->load->model('Community_model');
+        $verification = $this->Community_model->workflow($request['village_id']);
+        if (!$this->db->trans_begin()) {
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Perbaikan permohonan belum dapat dimulai. Silakan coba lagi.');
+        }
+        $this->db->where(array(
+            'id' => $id,
+            'citizen_user_id' => (int) $user['id'],
+            'status' => 'revision',
+            'event_version' => $currentEventVersion
+        ))
+            ->update('service_requests', array('status' => 'submitted', 'event_version' => $eventVersion, 'form_schema_version' => (int) $validated['schema_version'], 'payload_json' => $payload, 'local_sync_status' => 'pending', 'local_synced_at' => NULL, 'submitted_at' => $now));
+        if ($this->db->affected_rows() !== 1) {
+            $this->db->trans_rollback();
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Permohonan berubah karena diproses pengguna lain. Muat ulang halaman.');
+        }
+        foreach ($existingDocs as $doc) {
+            $key = trim((string) ($doc['field_key'] ?? ''));
+            if (isset($replaceKeys[$key])) $this->db->where('id', (string) $doc['id'])->delete('request_documents');
+        }
+        foreach ($uploaded['files'] as $file) $this->db->insert('request_documents', array('id' => $file['id'], 'request_id' => $id, 'field_key' => $file['field_key'], 'original_name' => $file['original_name'], 'stored_name' => $file['stored_name'], 'storage_path' => $file['storage_path'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size'], 'uploaded_by' => (int) $user['id']));
+        $this->db->insert('request_status_history', array('request_id' => $id, 'from_status' => 'revision', 'to_status' => 'submitted', 'note' => 'Perbaikan permohonan dikirim ulang oleh warga.', 'actor_id' => (int) $user['id']));
+        $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $request['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => $id, 'direction' => 'cloud_to_local', 'operation' => 'upsert', 'event_version' => $eventVersion, 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request-resubmit:' . $id . ':' . $eventVersion . ':' . bin2hex(random_bytes(5))));
+        $roles = !empty($verification['sekdes']) ? array('sekdes') : (!empty($verification['kades']) ? array('kepala-desa') : array());
+        $this->Community_model->notify_staff($request['village_id'], 'Perbaikan permohonan surat', 'Warga telah mengirim perbaikan permohonan.', 'petugas/permohonan/' . $id, $roles, $id);
+        if (!$this->db->trans_status()) {
+            $this->db->trans_rollback();
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Perbaikan permohonan belum dapat disimpan.');
+        }
+        if (!$this->db->trans_commit()) {
+            $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
+            return array('success' => FALSE, 'message' => 'Perbaikan permohonan belum dapat disimpan.');
+        }
+        foreach ($existingDocs as $doc) {
+            $key = trim((string) ($doc['field_key'] ?? ''));
+            if (isset($replaceKeys[$key]) && !empty($doc['storage_path']) && is_file($doc['storage_path'])) @unlink($doc['storage_path']);
         }
         return array('success' => TRUE, 'id' => $id);
     }
