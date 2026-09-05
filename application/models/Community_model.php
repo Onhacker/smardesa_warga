@@ -81,6 +81,24 @@ class Community_model extends CI_Model
         return $this->db->order_by('a.created_at', 'DESC')->limit($limit)->get()->result_array();
     }
 
+    /**
+     * Published announcements are intentionally public.  Unlike the warga
+     * feed, this catalogue is not tied to the visitor's session or village;
+     * the village name is included so a visitor can tell where an item came
+     * from before opening it.
+     */
+    public function public_announcements($limit = 30)
+    {
+        if (!warga_database_available() || !$this->db->table_exists('warga_announcements')) return array();
+        $limit = max(1, min(100, (int) $limit));
+        return $this->db->select('a.*, u.name AS author_name, v.name AS village_name')
+            ->from('warga_announcements a')
+            ->join('users u', 'u.id=a.author_id', 'left')
+            ->join('village_tenants v', 'v.id=a.village_id', 'left')
+            ->where('a.status', 'published')
+            ->order_by('a.created_at', 'DESC')->limit($limit)->get()->result_array();
+    }
+
     public function announcement($id, array $user)
     {
         if (!$this->ready() || empty($user['village_id'])) return null;
@@ -88,6 +106,17 @@ class Community_model extends CI_Model
             ->where(array('a.id' => $id, 'a.village_id' => $user['village_id']));
         if (!$this->can_manage($user)) $this->db->where('a.status', 'published');
         return $this->db->get()->row_array();
+    }
+
+    public function public_announcement($id)
+    {
+        if (!warga_database_available() || !$this->db->table_exists('warga_announcements')) return NULL;
+        return $this->db->select('a.*, u.name AS author_name, v.name AS village_name')
+            ->from('warga_announcements a')
+            ->join('users u', 'u.id=a.author_id', 'left')
+            ->join('village_tenants v', 'v.id=a.village_id', 'left')
+            ->where(array('a.id' => $id, 'a.status' => 'published'))
+            ->limit(1)->get()->row_array();
     }
 
     public function publish(array $user, $title, $body)

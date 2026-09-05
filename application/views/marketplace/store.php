@@ -26,7 +26,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                     <label class="market-form-field" for="market-store-phone"><span>Nomor telepon <em>(opsional)</em></span><input type="tel" id="market-store-phone" name="phone" value="<?= e($value('phone')) ?>" maxlength="30" inputmode="tel" placeholder="08xxxxxxxxxx"></label>
                 </div>
                 <label class="market-form-field" for="market-store-address"><span>Alamat / lokasi usaha <em>(opsional)</em></span><textarea id="market-store-address" name="address" rows="3" maxlength="255" placeholder="Contoh: Jalan utama kampung, dekat balai kampung."><?= e($value('address')) ?></textarea></label>
-                <div class="market-form-actions"><a href="<?= site_url('pasar') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-save color-white" aria-hidden="true"></i><span class="color-white">Simpan identitas toko</span></button></div>
+                <div class="market-form-actions"><a href="<?= site_url('pasar/tokoku') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-save color-white" aria-hidden="true"></i><span class="color-white">Simpan identitas toko</span></button></div>
             </form>
         </div>
     </section>

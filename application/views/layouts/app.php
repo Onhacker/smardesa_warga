@@ -24,7 +24,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=78">
     <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=17">
-    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=3">
+    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=4">
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
@@ -50,12 +50,13 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         <a href="#" data-toggle-theme class="header-icon <?= $themeHeaderClass ?> show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fas fa-moon"></i></a>
     </header>
 
+    <?php $footerIsAuthenticated = !empty($isAuthenticated) && is_array($currentUser); ?>
     <nav id="footer-bar" class="footer-bar-6 warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
         <a class="<?= $navSection === 'dashboard' || ($staffMode && $navSection === 'petugas' && !$this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas' : 'dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
+        <a class="<?= in_array($navSection, array('surat','permohonan','layanan','notifikasi')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
+        <a class="circle-nav <?= $navSection === 'pasar' || $navSection === 'pasar-digital' || $navSection === 'marketplace' ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span></a>
         <a class="<?= $navSection === 'pengumuman' ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
-        <a class="circle-nav <?= in_array($navSection,array('surat','permohonan','layanan','notifikasi')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
-        <a class="<?= $navSection === 'pengaduan' ? 'active-nav' : '' ?>" href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments"></i><span>Pengaduan</span></a>
-        <a class="<?= in_array($navSection,array('akun','kontak')) ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user"></i><span>Akun</span></a>
+        <a class="<?= $footerIsAuthenticated && in_array($navSection,array('akun','kontak')) ? 'active-nav' : '' ?>" href="<?= site_url($footerIsAuthenticated ? 'akun' : 'login') ?>"><i class="fa fa-<?= $footerIsAuthenticated ? 'user' : 'sign-in-alt' ?>"></i><span><?= $footerIsAuthenticated ? 'Akun' : 'Login' ?></span></a>
     </nav>
 
     <section class="page-title page-title-fixed warga-page-title<?= $showBackButton ? ' has-back' : '' ?>" aria-label="Judul halaman">
@@ -81,11 +82,11 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </main>
 
     <aside id="menu-main" class="menu menu-box-left rounded-0" data-menu-width="300">
-        <?php $this->load->view('layouts/menu', array('currentUser' => $currentUser, 'staffMode' => $staffMode, 'institutionLabel' => $institutionLabel)); ?>
+        <?php $this->load->view('layouts/menu', array('currentUser' => $currentUser, 'staffMode' => $staffMode, 'institutionLabel' => $institutionLabel, 'canManageMarketplace' => !empty($canManageMarketplace))); ?>
     </aside>
     <div class="menu-hider"></div>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=37') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=38') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>

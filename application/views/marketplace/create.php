@@ -44,7 +44,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                     <?php else: ?><span>Belum ada foto dipilih.</span><?php endif; ?>
                 </div>
                 <?php if ($error('images')): ?><small class="market-form-error market-form-error-block"><?= e($error('images')) ?></small><?php endif; ?>
-                <div class="market-form-actions"><a href="<?= site_url('pasar') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-cloud-upload-alt color-white" aria-hidden="true"></i><span class="color-white"><?= $editMode ? 'Simpan perubahan' : 'Terbitkan produk' ?></span></button></div>
+                <div class="market-form-actions"><a href="<?= site_url('pasar/tokoku') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-cloud-upload-alt color-white" aria-hidden="true"></i><span class="color-white"><?= $editMode ? 'Simpan perubahan' : 'Terbitkan produk' ?></span></button></div>
             </form>
         </div>
     </section>

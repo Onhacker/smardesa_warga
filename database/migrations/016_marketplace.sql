@@ -1,4 +1,5 @@
--- Pasar Digital per kampung/desa.
+-- Pasar Digital. Produk dimiliki oleh kampung/desa asalnya, tetapi produk
+-- berstatus published dapat ditemukan warga dari seluruh wilayah.
 -- Jalankan setelah schema.sql pada database PWA warga.
 -- Migrasi ini aman dijalankan ulang.
 SET NAMES utf8mb4;
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS marketplace_products (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   KEY idx_marketplace_product_listing (village_id, status, updated_at),
+  KEY idx_marketplace_product_public_listing (status, updated_at),
   KEY idx_marketplace_product_category (village_id, category_id, status),
   KEY idx_marketplace_product_store (store_id, status, updated_at),
   KEY idx_marketplace_product_seller (seller_user_id, status, updated_at),

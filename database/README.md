@@ -27,4 +27,6 @@ Jalankan `migrations/012_citizen_identity_details.sql` untuk menambahkan kolom t
 
 Setelah seluruh migrasi sebelumnya selesai (termasuk `migrations/015_sync_integrity.sql`), jalankan `migrations/016_marketplace.sql` untuk mengaktifkan Pasar Digital: kategori, identitas toko per pengguna, produk, dan metadata gambar privat. Gambar produk disimpan pada `PRIVATE_STORAGE_PATH`, bukan di dalam `public_html`.
 
+Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
+
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

@@ -4,9 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Data access for Pasar Digital.
  *
- * Products and stores are always scoped to the authenticated user's village.
- * The model deliberately keeps uploaded images in private storage; callers
- * should use Marketplace::image() to stream an image after authorization.
+ * Product management remains scoped to the seller's village, while published
+ * products and their contact details form a public, cross-village catalogue.
+ * Uploaded images stay in private storage and are streamed through the
+ * controller only after the product visibility check.
  */
 class Marketplace_model extends CI_Model
 {
@@ -142,13 +143,16 @@ class Marketplace_model extends CI_Model
         $category = (int) ($filters['category_id'] ?? 0);
         $sort = trim((string) ($filters['sort'] ?? 'newest'));
         if (!in_array($sort, array('newest', 'price_low', 'price_high', 'name'), TRUE)) $sort = 'newest';
+        $publicAll = !empty($filters['public_all']);
+        $onlyOwn = !empty($filters['only_own']);
         $villageId = $this->user_village($user);
         $canManage = $this->can_manage($user);
         if (warga_demo_mode()) {
-            $rows = array_values(array_filter($this->demo_products(), function ($row) use ($villageId, $q, $category, $canManage, $user) {
-                if ((string) ($row['village_id'] ?? '') !== $villageId) return FALSE;
+            $rows = array_values(array_filter($this->demo_products(), function ($row) use ($villageId, $q, $category, $canManage, $user, $publicAll, $onlyOwn) {
+                if (!$publicAll && (string) ($row['village_id'] ?? '') !== $villageId) return FALSE;
+                if ($onlyOwn && (int) ($row['seller_user_id'] ?? 0) !== (int) ($user['id'] ?? 0)) return FALSE;
                 $visible = (string) ($row['status'] ?? '') === 'published' || ($canManage && (int) ($row['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0));
-                if (!$visible) return FALSE;
+                if (!$onlyOwn && !$visible) return FALSE;
                 if ($category > 0 && (int) ($row['category_id'] ?? 0) !== $category) return FALSE;
                 if ($q !== '' && stripos((string) ($row['name'] . ' ' . ($row['description'] ?? '') . ' ' . ($row['category_name'] ?? '')), $q) === FALSE) return FALSE;
                 return TRUE;
@@ -169,17 +173,22 @@ class Marketplace_model extends CI_Model
         }
         if (!$this->ready()) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage,
             'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => FALSE);
-        if ($villageId === '') return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage, 'filters' => array('q' => $q, 'category_id' => $category));
+        if ($villageId === '' && !$publicAll) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage, 'filters' => array('q' => $q, 'category_id' => $category));
         $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
-            ->join('marketplace_stores s', 's.id=p.store_id')->where('p.village_id', $villageId);
-        $this->apply_product_visibility($user, $canManage);
+            ->join('marketplace_stores s', 's.id=p.store_id');
+        if (!$publicAll) $this->db->where('p.village_id', $villageId);
+        if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
+        else $this->apply_product_visibility($user, $canManage);
         if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
         if ($category > 0) $this->db->where('p.category_id', $category);
         $total = (int) $this->db->count_all_results();
-        $this->db->select('p.*,c.slug AS category_slug,c.name AS category_name,s.name AS store_name,s.whatsapp AS store_whatsapp,s.phone AS store_phone,s.address AS store_address');
+        $this->db->select('p.*,c.slug AS category_slug,c.name AS category_name,s.name AS store_name,s.whatsapp AS store_whatsapp,s.phone AS store_phone,s.address AS store_address,v.name AS village_name');
         $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
-            ->join('marketplace_stores s', 's.id=p.store_id')->where('p.village_id', $villageId);
-        $this->apply_product_visibility($user, $canManage);
+            ->join('marketplace_stores s', 's.id=p.store_id')
+            ->join('village_tenants v', 'v.id=p.village_id', 'left');
+        if (!$publicAll) $this->db->where('p.village_id', $villageId);
+        if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
+        else $this->apply_product_visibility($user, $canManage);
         if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
         if ($category > 0) $this->db->where('p.category_id', $category);
         if ($sort === 'price_low') $this->db->order_by('p.price', 'ASC');
@@ -193,23 +202,26 @@ class Marketplace_model extends CI_Model
             'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => TRUE);
     }
 
-    public function product($id, array $user)
+    public function product($id, array $user, $publicAll = FALSE)
     {
         $id = trim((string) $id);
-        if ($id === '' || $this->user_village($user) === '') return NULL;
+        if ($id === '' || (!$publicAll && $this->user_village($user) === '')) return NULL;
         $canManage = $this->can_manage($user);
         if (warga_demo_mode()) {
             foreach ($this->demo_products() as $row) {
-                if ((string) $row['id'] !== $id || (string) $row['village_id'] !== $this->user_village($user)) continue;
+                if ((string) $row['id'] !== $id || (!$publicAll && (string) $row['village_id'] !== $this->user_village($user))) continue;
                 if ((string) $row['status'] !== 'published' && !($canManage && (int) $row['seller_user_id'] === (int) $user['id'])) return NULL;
                 return $this->decorate_product($row);
             }
             return NULL;
         }
         if (!$this->ready()) return NULL;
-        $this->db->select('p.*,c.slug AS category_slug,c.name AS category_name,s.name AS store_name,s.description AS store_description,s.whatsapp AS store_whatsapp,s.phone AS store_phone,s.address AS store_address,s.owner_user_id')
+        $this->db->select('p.*,c.slug AS category_slug,c.name AS category_name,s.name AS store_name,s.description AS store_description,s.whatsapp AS store_whatsapp,s.phone AS store_phone,s.address AS store_address,s.owner_user_id,v.name AS village_name')
             ->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
-            ->join('marketplace_stores s', 's.id=p.store_id')->where(array('p.id' => $id, 'p.village_id' => $this->user_village($user)));
+            ->join('marketplace_stores s', 's.id=p.store_id')
+            ->join('village_tenants v', 'v.id=p.village_id', 'left')
+            ->where('p.id', $id);
+        if (!$publicAll) $this->db->where('p.village_id', $this->user_village($user));
         if (!$canManage) $this->db->where('p.status', 'published');
         else $this->db->group_start()->where('p.status', 'published')->or_group_start()->where('p.seller_user_id', (int) $user['id'])->where_in('p.status', array('draft', 'archived'))->group_end()->group_end();
         $row = $this->db->limit(1)->get()->row_array();
@@ -310,13 +322,13 @@ class Marketplace_model extends CI_Model
         return (bool) $this->db->where(array('id' => $id, 'village_id' => $this->user_village($user), 'seller_user_id' => (int) $user['id']))->update('marketplace_products', array('status' => 'archived'));
     }
 
-    public function image_for_user($imageId, array $user)
+    public function image_for_user($imageId, array $user, $publicAll = FALSE)
     {
         $imageId = (int) $imageId;
-        if ($imageId < 1 || $this->user_village($user) === '') return NULL;
+        if ($imageId < 1 || (!$publicAll && $this->user_village($user) === '')) return NULL;
         if (warga_demo_mode()) {
             foreach ($this->demo_products() as $product) {
-                if ((string) ($product['village_id'] ?? '') !== $this->user_village($user)) continue;
+                if (!$publicAll && (string) ($product['village_id'] ?? '') !== $this->user_village($user)) continue;
                 $visible = (string) ($product['status'] ?? '') === 'published'
                     || ($this->can_manage($user) && (int) ($product['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0));
                 if (!$visible) continue;
@@ -326,7 +338,8 @@ class Marketplace_model extends CI_Model
         }
         if (!$this->ready()) return NULL;
         $this->db->select('i.*,p.village_id,p.status,p.seller_user_id')->from('marketplace_product_images i')->join('marketplace_products p', 'p.id=i.product_id')
-            ->where(array('i.id' => $imageId, 'p.village_id' => $this->user_village($user)));
+            ->where('i.id', $imageId);
+        if (!$publicAll) $this->db->where('p.village_id', $this->user_village($user));
         $row = $this->db->limit(1)->get()->row_array();
         if (!$row) return NULL;
         if ((string) $row['status'] !== 'published' && (!$this->can_manage($user) || (int) $row['seller_user_id'] !== (int) $user['id'])) return NULL;
@@ -467,9 +480,9 @@ class Marketplace_model extends CI_Model
     {
         $village = '00000000-0000-4000-8000-000000000001';
         return array(
-            array('id' => 'demo-market-1', 'village_id' => $village, 'store_id' => 'demo-store-1', 'seller_user_id' => 1, 'category_id' => 2, 'category_slug' => 'hasil-tani', 'category_name' => 'Hasil Tani', 'name' => 'Ubi Jalar Pegunungan', 'description' => 'Hasil kebun segar dari warga kampung.', 'price' => '35000.00', 'stock' => 12, 'status' => 'published', 'store_name' => 'Kios Warga Araboda', 'store_whatsapp' => '081234567890', 'store_phone' => '081234567890', 'images' => array()),
-            array('id' => 'demo-market-2', 'village_id' => $village, 'store_id' => 'demo-store-2', 'seller_user_id' => 2, 'category_id' => 3, 'category_slug' => 'kerajinan', 'category_name' => 'Kerajinan', 'name' => 'Noken Rajut Wamena', 'description' => 'Kerajinan tangan buatan warga.', 'price' => '175000.00', 'stock' => 5, 'status' => 'published', 'store_name' => 'Bumdes Araboda', 'store_whatsapp' => '081234567891', 'store_phone' => '081234567891', 'images' => array()),
-            array('id' => 'demo-market-3', 'village_id' => $village, 'store_id' => 'demo-store-3', 'seller_user_id' => 3, 'category_id' => 1, 'category_slug' => 'makanan-minuman', 'category_name' => 'Makanan & Minuman', 'name' => 'Kopi Araboda', 'description' => 'Kopi pilihan dari pegunungan Jayawijaya.', 'price' => '85000.00', 'stock' => 20, 'status' => 'published', 'store_name' => 'Koperasi Kampung', 'store_whatsapp' => '081234567892', 'store_phone' => '081234567892', 'images' => array())
+            array('id' => 'demo-market-1', 'village_id' => $village, 'village_name' => 'Kampung Araboda', 'store_id' => 'demo-store-1', 'seller_user_id' => 1, 'category_id' => 2, 'category_slug' => 'hasil-tani', 'category_name' => 'Hasil Tani', 'name' => 'Ubi Jalar Pegunungan', 'description' => 'Hasil kebun segar dari warga kampung.', 'price' => '35000.00', 'stock' => 12, 'status' => 'published', 'store_name' => 'Kios Warga Araboda', 'store_whatsapp' => '081234567890', 'store_phone' => '081234567890', 'images' => array()),
+            array('id' => 'demo-market-2', 'village_id' => $village, 'village_name' => 'Kampung Araboda', 'store_id' => 'demo-store-2', 'seller_user_id' => 2, 'category_id' => 3, 'category_slug' => 'kerajinan', 'category_name' => 'Kerajinan', 'name' => 'Noken Rajut Wamena', 'description' => 'Kerajinan tangan buatan warga.', 'price' => '175000.00', 'stock' => 5, 'status' => 'published', 'store_name' => 'Bumdes Araboda', 'store_whatsapp' => '081234567891', 'store_phone' => '081234567891', 'images' => array()),
+            array('id' => 'demo-market-3', 'village_id' => $village, 'village_name' => 'Kampung Araboda', 'store_id' => 'demo-store-3', 'seller_user_id' => 3, 'category_id' => 1, 'category_slug' => 'makanan-minuman', 'category_name' => 'Makanan & Minuman', 'name' => 'Kopi Araboda', 'description' => 'Kopi pilihan dari pegunungan Jayawijaya.', 'price' => '85000.00', 'stock' => 20, 'status' => 'published', 'store_name' => 'Koperasi Kampung', 'store_whatsapp' => '081234567892', 'store_phone' => '081234567892', 'images' => array())
         );
     }
 }

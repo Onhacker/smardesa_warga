@@ -49,14 +49,11 @@ $productId = static function (array $item) {
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
 
-    <section class="market-quick-actions" aria-label="Menu Pasar Digital">
-        <?php if ($canManage): ?>
-            <a href="<?= site_url('pasar/buat') ?>" class="market-action market-action-primary"><i class="fa fa-plus color-white" aria-hidden="true"></i><span class="color-white">Jual produk</span></a>
-            <a href="<?= site_url('pasar/toko') ?>" class="market-action"><i class="fa fa-store-alt" aria-hidden="true"></i><span>Identitas toko</span></a>
-        <?php else: ?>
-            <span class="market-action market-action-note"><i class="fa fa-hand-holding-heart" aria-hidden="true"></i><span>Belanja dari warga <?= e($institutionLower ?? 'kampung') ?></span></span>
-        <?php endif; ?>
-    </section>
+    <?php if ($canManage): ?>
+        <section class="market-quick-actions" aria-label="Menu Pasar Digital">
+            <a href="<?= site_url('pasar/tokoku') ?>" class="market-action market-action-primary"><i class="fa fa-store color-white" aria-hidden="true"></i><span class="color-white">Tokoku</span></a>
+        </section>
+    <?php endif; ?>
 
     <section class="card card-style market-filter-card" aria-labelledby="market-filter-title">
         <div class="content mb-0">
@@ -88,19 +85,19 @@ $productId = static function (array $item) {
             <span class="market-result-note"><?= count($products) ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
         </div>
         <?php if ($products): ?>
-            <div class="market-product-list" data-market-product-list>
+            <div class="market-product-grid" data-market-product-list>
                 <?php foreach ($products as $product): ?>
-                    <?php if (!is_array($product)) continue; $id = $productId($product); if ($id === '') continue; $category = $productCategory($product); $storeName = trim((string) ($product['store_name'] ?? ($product['seller_name'] ?? ''))); ?>
-                    <a class="market-product-row" href="<?= site_url('pasar/produk/' . rawurlencode($id)) ?>" data-market-product data-name="<?= e(strtolower((string) ($product['name'] ?? ''))) ?>" data-category="<?= e(strtolower($category)) ?>">
+                    <?php if (!is_array($product)) continue; $id = $productId($product); if ($id === '') continue; $category = $productCategory($product); $storeName = trim((string) ($product['store_name'] ?? ($product['seller_name'] ?? ''))); $villageName = trim((string) ($product['village_name'] ?? '')); ?>
+                    <a class="market-product-card" href="<?= site_url('pasar/produk/' . rawurlencode($id)) ?>" data-market-product data-name="<?= e(strtolower((string) ($product['name'] ?? ''))) ?>" data-category="<?= e(strtolower($category)) ?>">
                         <figure class="market-product-media"><img src="<?= e($productImage($product)) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" loading="lazy"><span class="market-product-badge color-white"><?= e($category) ?></span></figure>
                         <span class="market-product-copy">
                             <span class="market-product-stars" aria-label="Produk warga"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
                             <strong class="market-product-name"><?= e($product['name'] ?? 'Produk warga') ?></strong>
                             <small class="market-product-store"><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName !== '' ? $storeName : 'Toko warga') ?></small>
+                            <?php if ($villageName !== ''): ?><small class="market-product-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></small><?php endif; ?>
                             <b class="market-product-price"><?= e($productPrice($product['price'] ?? 0)) ?></b>
                             <?php if (!empty($product['stock']) || isset($product['stock'])): ?><small class="market-product-stock <?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'Stok habis' : 'Tersedia' ?></small><?php endif; ?>
                         </span>
-                        <i class="fa fa-chevron-right market-product-arrow" aria-hidden="true"></i>
                     </a>
                 <?php endforeach; ?>
             </div>

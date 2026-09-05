@@ -16,6 +16,10 @@ class MY_Controller extends CI_Controller
     protected function institution_label()
     {
         if ($this->institutionLabel !== '') return $this->institutionLabel;
+        if (!$this->currentUser) {
+            $this->institutionLabel = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+            return $this->institutionLabel;
+        }
         $this->load->model('Community_model');
         $village = $this->Community_model->village(
             $this->currentUser['village_id'] ?? '',
@@ -34,8 +38,17 @@ class MY_Controller extends CI_Controller
     protected function render($view, array $data = array())
     {
         $data['currentUser'] = $this->currentUser;
+        $data['isAuthenticated'] = is_array($this->currentUser) && !empty($this->currentUser['id']);
         $this->load->model('Community_model');
-        $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '', $this->currentUser['village_name'] ?? '');
+        if ($data['isAuthenticated']) {
+            $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '', $this->currentUser['village_name'] ?? '');
+        } else {
+            $contactVillage = array(
+                'name' => trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya',
+                'institution' => $this->institution_label(),
+                'contact' => array()
+            );
+        }
         $data['institutionLabel'] = $this->institution_label();
         $data['institutionLower'] = function_exists('mb_strtolower')
             ? mb_strtolower($data['institutionLabel'], 'UTF-8')
@@ -49,6 +62,11 @@ class MY_Controller extends CI_Controller
         $data['footerVillage'] = $contactVillage;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);
+        $data['canManageMarketplace'] = FALSE;
+        if ($data['isAuthenticated']) {
+            $this->load->model('Marketplace_model', 'renderMarketplace');
+            $data['canManageMarketplace'] = $this->renderMarketplace->can_manage($this->currentUser);
+        }
         // The compact AppKit header is navigation-only on primary screens.
         // Reserve a back action for secondary flows and specific records.
         $data['showBackButton'] = array_key_exists('showBackButton', $data)
@@ -71,6 +89,18 @@ class MY_Controller extends CI_Controller
     protected function require_post()
     {
         if (strtoupper($this->input->method(TRUE)) !== 'POST') show_error('Metode permintaan tidak diizinkan.', 405);
+    }
+
+    /**
+     * Guard actions that contain resident data or change application state.
+     * Public pages call this guard only for their protected sub-routes so the
+     * requested URL is still restored after a successful login.
+     */
+    protected function require_authentication()
+    {
+        if ($this->currentUser) return;
+        $this->session->set_userdata('intended_url', current_url());
+        redirect('login');
     }
 
     protected function redirect_with($url, $type, $message)

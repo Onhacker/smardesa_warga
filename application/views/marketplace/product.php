@@ -28,6 +28,7 @@ $price = is_numeric($product['price'] ?? null) ? (float) $product['price'] : 0;
 $priceLabel = 'Rp ' . number_format($price, 0, ',', '.');
 $category = trim((string) ($product['category_name'] ?? ($product['category'] ?? ($product['category_label'] ?? 'Produk warga'))));
 $storeName = trim((string) ($product['store_name'] ?? ($store['name'] ?? ($product['seller_name'] ?? 'Toko warga'))));
+$villageName = trim((string) ($product['village_name'] ?? ''));
 $description = trim((string) ($product['description'] ?? ($product['body'] ?? '')));
 $phoneRaw = trim((string) ($product['whatsapp'] ?? ($product['store_whatsapp'] ?? ($store['whatsapp'] ?? ($product['phone'] ?? ($store['phone'] ?? ''))))));
 $phoneDigits = preg_replace('/[^0-9]/', '', $phoneRaw);
@@ -51,7 +52,7 @@ $telHref = $phoneDigits !== '' ? 'tel:+' . $phoneDigits : '#';
             <span class="market-product-category"><i class="fa fa-tag" aria-hidden="true"></i><?= e($category) ?></span>
             <h1 id="market-product-title"><?= e($product['name'] ?? 'Produk warga') ?></h1>
             <p class="market-product-detail-description"><?= e($description !== '' ? $description : 'Produk pilihan warga dari ' . ($institutionLower ?? 'kampung') . '.') ?></p>
-            <div class="market-product-detail-meta"><strong><?= e($priceLabel) ?></strong><?php if ($storeName !== ''): ?><span><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName) ?></span><?php endif; ?></div>
+            <div class="market-product-detail-meta"><strong><?= e($priceLabel) ?></strong><?php if ($storeName !== ''): ?><span><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName) ?><?php if ($villageName !== ''): ?><br><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?><?php endif; ?></span><?php endif; ?></div>
             <?php if (isset($product['stock'])): ?><span class="market-stock-pill <?= (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><i class="fa fa-box" aria-hidden="true"></i><?= (int) $product['stock'] < 1 ? 'Stok habis' : 'Stok tersedia' ?></span><?php endif; ?>
             <div class="market-contact-actions" aria-label="Hubungi penjual">
                 <a href="<?= e($waHref) ?>" class="market-contact-button market-contact-whatsapp <?= $phoneDigits === '' ? 'is-disabled' : '' ?>" <?= $phoneDigits !== '' ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"' ?>><i class="fab fa-whatsapp color-white" aria-hidden="true"></i><span class="color-white">Chat WhatsApp</span></a>

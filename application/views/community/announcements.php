@@ -1,11 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php
+$isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
+$announcementArea = $isAuthenticated ? (string) ($currentUser['village_name'] ?? '') : 'Semua kampung';
+?>
 <div class="warga-community community-v22-page community-v22-announcement-page">
     <header class="community-heading community-v22-page-hero" aria-labelledby="announcement-page-title">
         <div class="community-v22-page-hero-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
         <div>
             <p class="community-v22-eyebrow">Kabar <?= e($institutionLower) ?></p>
             <h1 id="announcement-page-title">Pengumuman</h1>
-            <p><?= e($currentUser['village_name']) ?> <span aria-hidden="true">·</span> Informasi terbaru untuk warga</p>
+            <p><?= e($announcementArea) ?> <span aria-hidden="true">·</span> Informasi terbaru untuk warga</p>
         </div>
     </header>
 
@@ -39,7 +43,7 @@
             <article class="community-item community-v22-feed-item">
                 <div class="community-v22-feed-item-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
                 <div class="community-v22-feed-item-copy">
-                    <div class="community-meta"><time><?= e(tanggal_id($item['created_at'])) ?></time><span><?= e($item['status'] === 'archived' ? 'Diarsipkan' : $item['author_name']) ?></span></div>
+                        <div class="community-meta"><time><?= e(tanggal_id($item['created_at'])) ?></time><span><?= e($item['village_name'] ?? ($item['status'] === 'archived' ? 'Diarsipkan' : ($item['author_name'] ?? '')) ) ?></span></div>
                     <h2><a href="<?= site_url('pengumuman/'.$item['id']) ?>"><?= e($item['title']) ?></a></h2>
                     <p><?= e(mb_strimwidth($item['body'], 0, 220, '...')) ?></p>
                     <a class="community-text-link" href="<?= site_url('pengumuman/'.$item['id']) ?>">Selengkapnya <i class="fa fa-arrow-right" aria-hidden="true"></i></a>

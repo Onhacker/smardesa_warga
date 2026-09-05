@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Community extends App_Controller
+class Community extends Public_Controller
 {
     public function __construct()
     {
@@ -12,21 +12,28 @@ class Community extends App_Controller
 
     public function announcements()
     {
+        $items = $this->currentUser
+            ? $this->community->announcements($this->currentUser)
+            : $this->community->public_announcements(100);
         $this->render('community/announcements', array('pageTitle' => 'Pengumuman',
-            'items' => $this->community->announcements($this->currentUser),
-            'canManage' => $this->community->can_manage($this->currentUser), 'ready' => $this->community->ready()));
+            'items' => $items,
+            'canManage' => $this->currentUser ? $this->community->can_manage($this->currentUser) : FALSE,
+            'ready' => $this->community->ready()));
     }
 
     public function announcement($id)
     {
-        $item = $this->community->announcement($id, $this->currentUser);
+        $item = $this->currentUser
+            ? $this->community->announcement($id, $this->currentUser)
+            : $this->community->public_announcement($id);
         if (!$item) show_404();
         $this->render('community/announcement', array('pageTitle' => 'Pengumuman', 'item' => $item,
-            'canManage' => $this->community->can_manage($this->currentUser), 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
+            'canManage' => $this->currentUser ? $this->community->can_manage($this->currentUser) : FALSE, 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
     }
 
     public function publish()
     {
+        $this->require_authentication();
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
         $this->form_validation->set_rules('title', 'Judul', 'trim|required|max_length[180]');
@@ -38,6 +45,7 @@ class Community extends App_Controller
 
     public function archive($id)
     {
+        $this->require_authentication();
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
         $ok = $this->community->archive_announcement($id, $this->currentUser);
@@ -46,12 +54,14 @@ class Community extends App_Controller
 
     public function complaints()
     {
+        $this->require_authentication();
         $this->render('community/complaints', array('pageTitle' => 'Pengaduan', 'items' => $this->community->complaints($this->currentUser),
             'canManage' => $this->community->can_manage($this->currentUser), 'ready' => $this->community->ready()));
     }
 
     public function submit()
     {
+        $this->require_authentication();
         $this->require_post();
         if (($this->currentUser['role_slug'] ?? '') !== 'warga') show_error('Akses ditolak.', 403);
         $this->form_validation->set_rules('title', 'Judul', 'trim|required|max_length[180]');
@@ -66,6 +76,7 @@ class Community extends App_Controller
 
     public function complaint($id)
     {
+        $this->require_authentication();
         $item = $this->community->complaint($id, $this->currentUser);
         if (!$item) show_404();
         $this->render('community/complaint', array('pageTitle' => 'Detail Pengaduan', 'item' => $item,
@@ -75,6 +86,7 @@ class Community extends App_Controller
 
     public function reply($id)
     {
+        $this->require_authentication();
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
         $this->form_validation->set_rules('message', 'Tanggapan', 'trim|required|min_length[5]|max_length[3000]');
@@ -85,12 +97,14 @@ class Community extends App_Controller
 
     public function contact()
     {
+        $this->require_authentication();
         $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/contact', array('pageTitle' => 'Kontak '.$village['institution'], 'village' => $village));
     }
 
     public function privacy()
     {
+        $this->require_authentication();
         $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/privacy', array(
             'pageTitle' => 'Kebijakan Privasi',
@@ -102,6 +116,7 @@ class Community extends App_Controller
 
     public function terms()
     {
+        $this->require_authentication();
         $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/terms', array(
             'pageTitle' => 'Syarat & Ketentuan',

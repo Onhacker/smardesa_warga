@@ -1,12 +1,19 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php
+$isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
+$publicArea = trim((string) ($village['name'] ?? (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
+$heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Smart ' . (string) ($institutionLabel ?? 'Kampung') . ' ' . $publicArea;
+$heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
+$contactArea = $village['name'] ?? $heroLocation;
+?>
 <div class="warga-community community-v22-home">
     <section class="community-home community-v22-hero" aria-labelledby="community-welcome-title">
         <div class="community-v22-hero-main">
             <img class="community-v22-hero-logo" src="<?= base_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SmartDesa Warga">
             <div class="community-v22-hero-copy">
                 <p class="community-v22-eyebrow">Layanan digital warga</p>
-                <h1 id="community-welcome-title">Halo, <?= e($currentUser['name']) ?></h1>
-                <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($currentUser['village_name']) ?></p>
+                <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>
+                <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($heroLocation) ?></p>
             </div>
             <a class="community-v22-hero-action" href="<?= site_url('notifikasi') ?>" aria-label="Buka notifikasi surat">
                 <i class="fa fa-bell" aria-hidden="true"></i>
@@ -87,7 +94,7 @@
                 <span class="community-v22-feature-copy">
                     <small>Bantuan warga</small>
                     <strong>Kontak <?= e($village['institution']) ?></strong>
-                    <span>Hubungi petugas <?= e($village['name'] ?? $currentUser['village_name']) ?> saat Anda membutuhkan bantuan.</span>
+                    <span>Hubungi petugas <?= e($contactArea) ?> saat Anda membutuhkan bantuan.</span>
                     <b>Lihat kontak <i class="fa fa-arrow-right" aria-hidden="true"></i></b>
                 </span>
             </a>
