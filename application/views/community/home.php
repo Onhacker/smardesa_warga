@@ -39,7 +39,7 @@
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/20.jpg') ?>" alt="" loading="lazy" width="700" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/pengumuman-layanan.webp') ?>" alt="Ilustrasi layanan pengumuman" loading="lazy" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
