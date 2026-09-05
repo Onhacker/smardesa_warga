@@ -5,6 +5,7 @@ class Dashboard extends Public_Controller
 {
     public function index()
     {
+        if ($this->currentUser && warga_is_staff($this->currentUser)) redirect('petugas');
         $this->load->model('Community_model');
         if ($this->currentUser) {
             $this->load->model('Request_model');
