@@ -2465,6 +2465,21 @@ html {
   margin-top: -8px !important;
 }
 
+#footer-bar .circle-nav strong {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+}
+
+#footer-bar .circle-nav strong i {
+  position: static;
+  transform: none !important;
+  color: #fff !important;
+}
+
 .theme-dark #footer-bar {
   border-top-color: rgba(255, 255, 255, .05);
   background-color: #21252a !important;
@@ -2524,6 +2539,39 @@ html {
 @keyframes footerAni {
   0% { transform: scale(1, 1) translateX(-50%); }
   50% { transform: scale(1.05, 1.05) translateX(-48%); }
+}
+
+/* Give the community screens the same visual rhythm as the dashboard cards. */
+#page .warga-community { max-width: 760px; margin-inline: auto; padding: 0 15px 18px; }
+#page .community-home { margin: 0 0 16px; padding: 20px; border-radius: 18px; background: linear-gradient(135deg, var(--warga-teal-dark), var(--warga-teal)); color: #fff; box-shadow: 0 12px 28px rgba(15,94,91,.16); }
+#page .community-home p { color: #cbe8e5; font-size: 13px; }
+#page .community-home h1 { color: #fff; font-size: 25px; margin: 0; }
+#page .community-shortcuts { margin: 0 0 22px; }
+#page .community-shortcuts > a { min-height: 106px; padding: 15px; border: 1px solid var(--warga-line); border-radius: 15px; box-shadow: 0 7px 18px rgba(31,45,56,.06); transition: transform .18s ease, box-shadow .18s ease; }
+#page .community-shortcuts > a:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(31,45,56,.1); }
+#page .community-shortcuts > a strong { font-size: 15px; }
+#page .community-heading { margin: 0 0 8px; padding: 0 0 12px; border-bottom: 0; }
+#page .community-heading h1 { color: var(--warga-ink); font-size: 25px; }
+#page .community-heading h2 { color: var(--warga-ink); font-size: 21px; }
+#page .community-heading p { font-size: 13px; }
+#page .community-list, #page .community-item { min-width: 0; }
+#page .community-item { margin: 12px 0; padding: 17px; border: 1px solid var(--warga-line); border-radius: 15px; background: var(--warga-surface); box-shadow: 0 7px 18px rgba(31,45,56,.05); }
+#page .community-item h2 { margin: 8px 0 7px; font-size: 18px; }
+#page .community-item h2 a { color: var(--warga-ink); }
+#page .community-item p { margin: 0 0 10px; color: var(--warga-muted); font-size: 14px; line-height: 1.55; }
+#page .community-meta time { font-weight: 700; color: var(--warga-teal-dark); }
+#page .community-text-link { color: var(--warga-teal-dark); font-size: 13px; font-weight: 750; }
+#page .community-compose { padding: 14px 0; border: 1px solid var(--warga-line); border-radius: 15px; background: var(--warga-surface); box-shadow: 0 7px 18px rgba(31,45,56,.05); }
+#page .community-compose summary { padding: 0 16px; }
+#page .community-compose form { padding: 5px 16px 0; }
+body.theme-dark #page .community-item, body.theme-dark #page .community-compose { background: #202a30; border-color: #364750; }
+body.theme-dark #page .community-item h2 a, body.theme-dark #page .community-heading h1, body.theme-dark #page .community-heading h2 { color: #f1f5f7; }
+body.theme-dark #page .community-item p { color: #bdc9d0; }
+@media (max-width: 420px) {
+  #page .warga-community { padding-inline: 12px; }
+  #page .community-shortcuts { gap: 9px; }
+  #page .community-shortcuts > a { min-height: 98px; padding: 12px; }
+  #page .community-home { padding: 17px; }
 }
 
 /* Keep the service-card heading clear of its border. The generic section-head
