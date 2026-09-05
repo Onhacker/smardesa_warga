@@ -11,7 +11,7 @@
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#eef3f5",
-  "theme_color": "#167b78",
+  "theme_color": "#235fa4",
   "categories": ["government", "productivity"],
   "prefer_related_applications": false,
   "icons": [

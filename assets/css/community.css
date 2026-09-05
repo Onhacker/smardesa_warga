@@ -15,8 +15,8 @@
 #page .community-compose label{display:block;position:static;font-size:15px;font-weight:700;color:var(--warga-ink);margin:14px 0 6px;transform:none}
 #page .community-compose input,#page .community-compose textarea,#page .community-compose select{display:block;box-sizing:border-box;width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--warga-line);border-radius:6px;background:var(--warga-surface,#fff);color:var(--warga-ink);font:inherit;font-size:16px;line-height:1.5}
 #page .community-compose textarea{resize:vertical}
-.community-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;margin-top:18px;border:0;border-radius:6px;background:#167b78;color:#fff;font-size:15px;font-weight:700}
-.community-button.is-secondary{background:#e5eeee;color:#195752}
+.community-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;margin-top:18px;border:0;border-radius:6px;background:#235fa4;color:#fff;font-size:15px;font-weight:700}
+.community-button.is-secondary{background:#e8eff8;color:#244f80}
 .community-empty{padding:24px 0;color:var(--warga-muted);font-size:15px}
 .community-contact{margin:0}.community-contact>div{padding:16px 0;border-bottom:1px solid var(--warga-line)}
 .community-contact dt{font-size:14px;color:var(--warga-muted)}.community-contact dd{font-size:17px;margin:5px 0 0;overflow-wrap:anywhere}
@@ -24,13 +24,13 @@
 .community-home img{flex-shrink:0;object-fit:contain}.community-home p{margin:0 0 6px;color:var(--warga-muted)}
 .community-shortcuts,.warga-letter-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
 .community-shortcuts>a,.warga-letter-shortcuts>a{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 14px;border:1px solid var(--warga-line);border-radius:8px;background:var(--warga-surface,#fff);color:var(--warga-ink);font-size:15px;min-width:0}
-.community-shortcuts i,.warga-letter-shortcuts i{font-size:22px;color:#167b78}
+.community-shortcuts i,.warga-letter-shortcuts i{font-size:22px;color:#235fa4}
 .community-shortcuts span{width:100%;font-size:13px;color:var(--warga-muted)}
-.warga-letter-shortcuts{margin:0 15px 20px}.warga-letter-shortcuts>a:last-child{background:#167b78;color:#fff}.warga-letter-shortcuts>a:last-child i{color:#fff}
+.warga-letter-shortcuts{margin:0 15px 20px}.warga-letter-shortcuts>a:last-child{background:#235fa4;color:#fff}.warga-letter-shortcuts>a:last-child i{color:#fff}
 .community-push{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 0}
 .community-push p{margin:0;font-size:14px}.community-push button{margin:0}
 .community-notification-dot{display:inline-flex;min-width:20px;justify-content:center;font-size:12px;font-weight:700;color:#b42338}
-body.theme-dark .community-button.is-secondary{background:#29423f;color:#d1eee7}
+body.theme-dark .community-button.is-secondary{background:#24354c;color:#d7e5f8}
 body.theme-dark #page .community-compose input,body.theme-dark #page .community-compose textarea,body.theme-dark #page .community-compose select,body.theme-dark .community-shortcuts>a,body.theme-dark .warga-letter-shortcuts>a:first-child{background:#202a30;color:#f1f5f7}
 @media(min-width:768px){.warga-community{margin-inline:24px}.community-contact>div{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px}.community-contact dd{margin:0}}
 @media(max-width:380px){#page .community-home h1{font-size:21px}.community-home img{width:56px;height:56px}.community-shortcuts>a,.warga-letter-shortcuts>a{padding:14px 10px;font-size:14px}}
@@ -58,8 +58,8 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   padding: 24px;
   border: 0;
   border-radius: 26px;
-  background: linear-gradient(135deg, #0f5e5b 0%, #167b78 60%, #2a9189 100%);
-  box-shadow: 0 14px 30px rgba(15, 94, 91, .2);
+  background: linear-gradient(135deg, #1d4f8a 0%, #235fa4 60%, #4a89dc 100%);
+  box-shadow: 0 14px 30px rgba(29, 79, 138, .2);
   color: #fff;
 }
 
@@ -83,7 +83,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 #page .community-v22-hero-copy { min-width: 0; }
 #page .community-v22-eyebrow {
   margin: 0 0 5px;
-  color: #a9ddda;
+  color: #bdd4f1;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: .09em !important;
@@ -97,14 +97,14 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   font-weight: 800;
   line-height: 1.12;
 }
-#page .community-v22-hero .community-v22-eyebrow { color: #a9ddda !important; }
+#page .community-v22-hero .community-v22-eyebrow { color: #bdd4f1 !important; }
 #page .community-v22-location {
   margin: 9px 0 0;
-  color: #d4f0ee;
+  color: #e1ecfb;
   font-size: 15px;
   line-height: 1.4;
 }
-#page .community-v22-hero .community-v22-location { color: #d4f0ee !important; }
+#page .community-v22-hero .community-v22-location { color: #e1ecfb !important; }
 #page .community-v22-location i { margin-right: 4px; }
 #page .community-v22-hero-action {
   position: relative;
@@ -131,7 +131,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   place-items: center;
   z-index: 3;
   box-sizing: border-box;
-  border: 2px solid #167b78;
+  border: 2px solid #235fa4;
   border-radius: 99px;
   background: #ef4444;
   color: #fff;
@@ -188,7 +188,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 #page .community-v22-stats dt { color: var(--warga-muted); font-size: 12px; font-weight: 700; }
 #page .community-v22-stats dd { margin: 0; color: var(--warga-ink); font-size: 28px; font-weight: 850; line-height: 1; }
 #page .community-v22-stats > div::before { position: absolute; top: 0; right: 0; left: 0; height: 4px; content: ""; }
-#page .community-v22-stats .is-total::before { background: #167b78; }
+#page .community-v22-stats .is-total::before { background: #235fa4; }
 #page .community-v22-stats .is-active::before { background: #2d6db3; }
 #page .community-v22-stats .is-issued::before { background: #2d783b; }
 #page .community-v22-stats .is-revision::before { background: #b85c20; }
@@ -338,7 +338,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   line-height: 1;
 }
 #page .community-v22-quick-card.is-announcement .community-v22-quick-card-icon {
-  color: #8dcc54 !important;
+  color: #6f9fe5 !important;
 }
 #page .community-v22-quick-card.is-complaint .community-v22-quick-card-icon {
   color: #4a89dc !important;
@@ -405,10 +405,10 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   height: 56px;
   place-items: center;
   border-radius: 17px;
-  background: linear-gradient(145deg, #dff4f1, #bde5df);
+  background: linear-gradient(145deg, #e6effb, #bdd3ef);
   color: var(--warga-teal-dark);
   font-size: 21px;
-  box-shadow: inset 0 0 0 1px rgba(22,123,120,.08);
+  box-shadow: inset 0 0 0 1px rgba(35,95,164,.08);
 }
 #page .community-v22-empty-icon.is-complaint {
   background: linear-gradient(145deg, #e3edfb, #c8daf4);
@@ -496,8 +496,8 @@ body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !importa
 /* simp-v22 applies an !important ink color to plain p/span/strong elements.
    These selectors intentionally carry the theme/page scope so the image-card
    copy keeps the contrast of the original v22 cards. */
-body.theme-light #page .community-v22-home .community-v22-hero .community-v22-eyebrow { color: #a9ddda !important; }
-body.theme-light #page .community-v22-home .community-v22-hero .community-v22-location { color: #d4f0ee !important; }
+body.theme-light #page .community-v22-home .community-v22-hero .community-v22-eyebrow { color: #bdd4f1 !important; }
+body.theme-light #page .community-v22-home .community-v22-hero .community-v22-location { color: #e1ecfb !important; }
 body.theme-light #page .community-v22-home .community-v22-hero-action,
 body.theme-light #page .community-v22-home .community-v22-hero-action i { color: #fff !important; }
 body.theme-light #page .community-v22-home .community-v22-slide-copy,
@@ -525,8 +525,8 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   overflow: hidden;
   border: 0;
   border-radius: 22px;
-  background: linear-gradient(135deg, #0f5e5b, #167b78 65%, #2a9189);
-  box-shadow: 0 12px 28px rgba(15, 94, 91, .18);
+  background: linear-gradient(135deg, #1d4f8a, #235fa4 65%, #4a89dc);
+  box-shadow: 0 12px 28px rgba(29, 79, 138, .18);
   color: #fff;
 }
 #page .community-v22-complaint-page .community-v22-page-hero {
@@ -534,8 +534,8 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   box-shadow: 0 12px 28px rgba(40, 92, 168, .18);
 }
 #page .community-v22-contact-page .community-v22-page-hero {
-  background: linear-gradient(135deg, #0f5e5b, #167b78 65%, #2a9189);
-  box-shadow: 0 12px 28px rgba(15, 94, 91, .18);
+  background: linear-gradient(135deg, #1d4f8a, #235fa4 65%, #4a89dc);
+  box-shadow: 0 12px 28px rgba(29, 79, 138, .18);
 }
 #page .community-v22-page-hero-icon {
   display: grid;
@@ -620,7 +620,7 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   height: 46px;
   place-items: center;
   border-radius: 14px;
-  background: #dcefeb;
+  background: #e4edfa;
   color: var(--warga-teal-dark);
   font-size: 17px;
 }
@@ -648,12 +648,12 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   align-items: flex-start;
   gap: 14px;
   padding: 21px;
-  background: linear-gradient(135deg, #0f5e5b, #167b78);
+  background: linear-gradient(135deg, #1d4f8a, #235fa4);
   color: #fff;
 }
 #page .community-v22-complaint-detail .community-v22-detail-hero { background: linear-gradient(135deg, #285ca8, #3e79c5); }
 #page .community-v22-detail-hero h1 { margin: 2px 0 8px; color: #fff !important; font-size: clamp(22px, 4vw, 30px); line-height: 1.2; overflow-wrap: anywhere; }
-#page .community-v22-detail-hero .community-v22-eyebrow { margin: 0; color: #cceae7 !important; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+#page .community-v22-detail-hero .community-v22-eyebrow { margin: 0; color: #d7e5f8 !important; font-size: 11px; font-weight: 800; text-transform: uppercase; }
 #page .community-v22-detail-hero .community-meta { color: rgba(255,255,255,.78); font-size: 11px; }
 #page .community-v22-detail-hero .community-meta time,
 #page .community-v22-detail-hero .community-meta span { color: inherit !important; }

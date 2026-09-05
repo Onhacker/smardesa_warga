@@ -17,9 +17,9 @@ $registrationErrorHtml = !empty($error)
 <!DOCTYPE HTML>
 <html lang="id">
 <head>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"><meta name="theme-color" content="#167b78">
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"><meta name="theme-color" content="#235fa4">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=67"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=70"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div><div id="page">

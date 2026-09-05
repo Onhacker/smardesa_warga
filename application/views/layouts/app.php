@@ -11,7 +11,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
-    <meta name="theme-color" content="#167b78">
+    <meta name="theme-color" content="#235fa4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SmartDesa Warga">
@@ -22,8 +22,8 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=68">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=15">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=70">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=17">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -77,7 +77,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </aside>
     <div class="menu-hider"></div>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=17') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=19') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>

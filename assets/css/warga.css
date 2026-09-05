@@ -1,6 +1,6 @@
 :root {
-  --warga-teal: #167b78;
-  --warga-teal-dark: #0f5e5b;
+  --warga-teal: #356bb2;
+  --warga-teal-dark: #235fa4;
   --warga-blue: #235fa4;
   --warga-orange: #a85420;
   --warga-green: #2d783b;
@@ -95,7 +95,7 @@ a { color: inherit; }
 .warga-account-head p,
 .warga-page-intro p,
 .warga-detail-head p,
-.warga-staff-head p { margin: 0 0 2px; color: #d8efed; font-size: 10px; font-weight: 750; text-transform: uppercase; }
+.warga-staff-head p { margin: 0 0 2px; color: #dbe9fb; font-size: 10px; font-weight: 750; text-transform: uppercase; }
 .warga-home-identity h1,
 .warga-account-head h1,
 .warga-page-intro h1,
@@ -104,7 +104,7 @@ a { color: inherit; }
 .warga-home-identity span,
 .warga-account-head span,
 .warga-page-intro span,
-.warga-staff-head span { color: #e3f2f1; font-size: 12px; }
+.warga-staff-head span { color: #e8f0fb; font-size: 12px; }
 .warga-head-action,
 .warga-intro-action,
 .warga-intro-icon {
@@ -146,7 +146,7 @@ a { color: inherit; }
 }
 .warga-staff-summary a { display: flex; min-width: 0; flex-direction: column; align-items: center; padding: 13px 5px; border-right: 1px solid var(--warga-line); text-align: center; }
 .warga-staff-summary a:last-child { border-right: 0; }
-.warga-staff-summary a.is-active { background: #eaf4f3; box-shadow: inset 0 -3px 0 var(--warga-teal-dark); }
+.warga-staff-summary a.is-active { background: #e8f0fb; box-shadow: inset 0 -3px 0 var(--warga-teal-dark); }
 .warga-staff-summary strong { color: var(--warga-ink); font-size: 20px; line-height: 1.1; }
 .warga-staff-summary span { margin-top: 4px; color: var(--warga-muted); font-size: 10px; font-weight: 700; }
 .warga-result-count { flex: 0 0 auto; padding: 5px 8px; border-radius: 5px; background: #dfe9ef; color: #405565; font-size: 10px; font-weight: 750; }
@@ -181,7 +181,7 @@ a { color: inherit; }
 .warga-service-item { display: flex; min-width: 0; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
 .warga-service-item:hover { color: var(--warga-teal-dark); }
 .warga-service-icon { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 8px; font-size: 20px; }
-.warga-service-icon.is-teal { background: #d9efed; color: var(--warga-teal-dark); }
+.warga-service-icon.is-teal { background: #e1ecfb; color: var(--warga-teal-dark); }
 .warga-service-icon.is-blue { background: #e2ecf8; color: var(--warga-blue); }
 .warga-service-icon.is-orange { background: #f8eadf; color: var(--warga-orange); }
 .warga-service-icon.is-green { background: #e4f1e6; color: var(--warga-green); }
@@ -197,7 +197,7 @@ a { color: inherit; }
 .surat-icon-rose { --warga-service-color: #ed5565; }
 .surat-icon-amber { --warga-service-color: #f6bb42; }
 .surat-icon-pink { --warga-service-color: #d770ad; }
-.surat-icon-teal { --warga-service-color: #7db1b1; }
+.surat-icon-teal { --warga-service-color: #7aa3d4; }
 .surat-icon-purple { --warga-service-color: #ac92ec; }
 .surat-icon-neutral { --warga-service-color: #656d78; }
 
@@ -228,7 +228,7 @@ a { color: inherit; }
   box-shadow: 0 5px 16px rgba(31,45,56,.045);
 }
 .warga-request-card:hover { border-color: #9fc8c5; color: inherit; }
-.warga-request-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 8px; background: #e1f1ef; color: var(--warga-teal-dark); font-size: 17px; }
+.warga-request-icon { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 8px; background: #e7effa; color: var(--warga-teal-dark); font-size: 17px; }
 .warga-request-copy { display: flex; min-width: 0; flex-direction: column; }
 .warga-request-copy strong { color: var(--warga-ink); font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
 .warga-request-copy small { margin-top: 2px; color: var(--warga-muted); font-size: 10px; line-height: 1.35; }
@@ -315,12 +315,12 @@ a { color: inherit; }
 .warga-form-title > span { display: grid; place-items: center; flex: 0 0 29px; width: 29px; height: 29px; border-radius: 50%; background: var(--warga-teal-dark); color: #fff; font-size: 12px; font-weight: 800; }
 .warga-form-title h2 { margin: 0; font-size: 17px; }
 .warga-form-title p { margin: 2px 0 0; color: var(--warga-muted); font-size: 11px; }
-.warga-service-requirements { margin-top: 14px; padding: 13px; border: 1px solid #c8ddd9; border-radius: 8px; background: #eef8f6; }
+.warga-service-requirements { margin-top: 14px; padding: 13px; border: 1px solid #c7d9ed; border-radius: 8px; background: #eef4fc; }
 .warga-requirement-head { display: flex; align-items: center; gap: 8px; color: var(--warga-teal-dark); font-size: 12px; }
 .warga-service-requirements ul { display: grid; gap: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
 .warga-service-requirements li { position: relative; padding-left: 17px; color: #42515d; font-size: 11px; }
 .warga-service-requirements li::before { position: absolute; left: 0; content: '\f00c'; color: var(--warga-green); font-family: 'Font Awesome 5 Free'; font-weight: 900; }
-.warga-upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 132px; padding: 20px; border: 1px dashed #8bb6b2; border-radius: 8px; background: #f4faf9; color: var(--warga-teal-dark); cursor: pointer; text-align: center; }
+.warga-upload-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 132px; padding: 20px; border: 1px dashed #7aa3d4; border-radius: 8px; background: #f4f7fc; color: var(--warga-teal-dark); cursor: pointer; text-align: center; }
 .warga-upload-zone i { margin-bottom: 8px; font-size: 26px; }
 .warga-upload-zone strong { font-size: 13px; }
 .warga-upload-zone span { margin-top: 4px; color: var(--warga-muted); font-size: 10px; }
@@ -400,7 +400,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .warga-settings-list a > i { color: #9ba5ae; font-size: 10px; }
 
 .warga-pwa-install { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 11px; }
-.warga-pwa-install-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: #e1f1ef; color: var(--warga-teal-dark); font-size: 18px; }
+.warga-pwa-install-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: #e7effa; color: var(--warga-teal-dark); font-size: 18px; }
 .warga-pwa-install-copy { min-width: 0; }
 .warga-pwa-install-copy h3 { margin: 0; font-size: 13px; }
 .warga-pwa-install-copy p { margin: 2px 0 0; color: var(--warga-muted); font-size: 12px; line-height: 1.4; }
@@ -410,7 +410,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .warga-menu-head img { width: 55px; height: 55px; object-fit: contain; border: 2px solid #fff; border-radius: 8px; background: #fff; }
 .warga-menu-head div { min-width: 0; }
 .warga-menu-head h2 { margin: 0; color: #fff; font-size: 18px; }
-.warga-menu-head p { margin: 2px 0 0; color: #d8efed; font-size: 11px; overflow-wrap: anywhere; }
+.warga-menu-head p { margin: 2px 0 0; color: #dbe9fb; font-size: 11px; overflow-wrap: anywhere; }
 .warga-menu-close { position: absolute; top: 11px; right: 11px; width: 32px; height: 32px; border: 0; border-radius: 50%; background: rgba(255,255,255,.14); color: #fff; }
 .warga-menu-list { padding-right: 14px; padding-left: 14px; }
 .warga-menu-list a span,
@@ -423,7 +423,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .warga-empty-state { display: flex; flex-direction: column; align-items: center; padding: 34px 18px; border: 1px solid var(--warga-line); border-radius: 8px; background: #fff; text-align: center; }
 .warga-empty-state > span { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 10px; border-radius: 50%; background: #edf2f4; color: #77838e; font-size: 19px; }
 .warga-empty-state h3 { margin-bottom: 12px; font-size: 14px; }
-.warga-empty-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto; border-radius: 50%; background: #e4f2f0; color: var(--warga-teal); font-size: 21px; }
+.warga-empty-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto; border-radius: 50%; background: #e5eef9; color: var(--warga-teal); font-size: 21px; }
 
 .warga-auth-body { background: #edf2f4; }
 .warga-auth-page { max-width: 560px !important; }
@@ -471,11 +471,11 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .theme-dark .warga-notification-item strong { color: var(--warga-ink); }
 .theme-dark .warga-staff-request-copy strong,
 .theme-dark .warga-staff-request-copy b { color: var(--warga-ink); }
-.theme-dark .warga-staff-summary a.is-active { background: #17312f; }
+.theme-dark .warga-staff-summary a.is-active { background: #172b49; }
 .theme-dark .warga-inline-empty { background: #202a31; }
 .theme-dark .warga-home-notice { border-color: #36526a; background: #1d3040; color: #c8e2f4; }
 .theme-dark .warga-upload-zone,
-.theme-dark .warga-service-requirements { border-color: #3b5e5a; background: #172b2a; }
+.theme-dark .warga-service-requirements { border-color: #35577f; background: #172f51; }
 
 @media (max-width: 460px) {
   .warga-service-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 16px; }
@@ -522,7 +522,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 }
 .warga-summary-band > div {
   --warga-summary-accent: var(--warga-teal-dark);
-  --warga-summary-tint: #e2f3f1;
+  --warga-summary-tint: #e8f0fb;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -595,7 +595,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   background: var(--warga-surface);
   box-shadow: 0 7px 18px rgba(0, 0, 0, .2);
 }
-.theme-dark .warga-summary-band > .is-total { --warga-summary-tint: rgba(22, 123, 120, .22); }
+.theme-dark .warga-summary-band > .is-total { --warga-summary-tint: rgba(35, 95, 164, .24); }
 .theme-dark .warga-summary-band > .is-active { --warga-summary-tint: rgba(35, 95, 164, .24); }
 .theme-dark .warga-summary-band > .is-issued { --warga-summary-tint: rgba(45, 120, 59, .24); }
 .theme-dark .warga-summary-band > .is-revision { --warga-summary-tint: rgba(168, 84, 32, .24); }
@@ -662,9 +662,9 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   justify-content: center;
   min-height: 34px;
   padding: 7px 10px;
-  border: 1px solid #c6dfdc;
+  border: 1px solid #c5d8ee;
   border-radius: 7px;
-  background: #eef8f6;
+  background: #eef4fc;
   color: var(--warga-teal-dark) !important;
   font-size: 10px !important;
   font-weight: 750 !important;
@@ -673,7 +673,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 }
 .warga-service-heading-card > a:hover {
   border-color: var(--warga-teal);
-  background: #e2f3f1;
+  background: #e8f0fb;
   color: var(--warga-teal-dark) !important;
 }
 .warga-service-card > .warga-service-grid {
@@ -690,9 +690,9 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   box-shadow: 0 7px 18px rgba(0, 0, 0, .2);
 }
 .theme-dark .warga-service-heading-card > a {
-  border-color: #365e5a;
-  background: #17312f;
-  color: #bde2df !important;
+  border-color: #314f76;
+  background: #172b49;
+  color: #bed2ee !important;
 }
 
 /* Match AppKit v22: the compact bar is hidden at the top and is revealed by
@@ -881,7 +881,7 @@ body {
 }
 
 .warga-home-head {
-  background: linear-gradient(135deg, #167b78 0%, #0f5e5b 72%, #0b4b49 100%);
+  background: linear-gradient(135deg, #356bb2 0%, #235fa4 72%, #1d4f8a 100%);
 }
 
 .warga-account-head {
@@ -897,7 +897,7 @@ body {
 }
 
 .warga-detail-head {
-  background: linear-gradient(135deg, #167b78 0%, #0f5e5b 72%, #0b4b49 100%);
+  background: linear-gradient(135deg, #356bb2 0%, #235fa4 72%, #1d4f8a 100%);
 }
 
 .warga-detail-head.is-staff-detail,
@@ -910,7 +910,7 @@ body {
 #page .warga-page-intro p,
 #page .warga-detail-head p,
 #page .warga-staff-head p {
-  color: #e3f5f2 !important;
+  color: #e4eefb !important;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .045em !important;
@@ -932,7 +932,7 @@ body {
 #page .warga-account-head span,
 #page .warga-page-intro span,
 #page .warga-staff-head span {
-  color: #effaf8 !important;
+  color: #eff5fd !important;
   font-size: 13px;
   line-height: 1.4;
 }
@@ -1209,8 +1209,8 @@ body {
 }
 
 .warga-filter-tabs button.active {
-  background: linear-gradient(145deg, #287f7b, #0f5e5b);
-  box-shadow: 0 4px 10px rgba(15, 94, 91, .18);
+  background: linear-gradient(145deg, #356bb2, #235fa4);
+  box-shadow: 0 4px 10px rgba(35, 95, 164, .18);
 }
 
 .warga-form-card,
@@ -1245,10 +1245,10 @@ body {
   flex-basis: 34px;
   width: 34px;
   height: 34px;
-  background: linear-gradient(145deg, #287f7b, #0f5e5b);
+  background: linear-gradient(145deg, #356bb2, #235fa4);
   color: #fff !important;
   font-size: 13px;
-  box-shadow: 0 4px 10px rgba(15, 94, 91, .18);
+  box-shadow: 0 4px 10px rgba(35, 95, 164, .18);
 }
 
 .warga-form-title h2 {
@@ -1318,7 +1318,7 @@ body {
   min-height: 154px;
   padding: 24px;
   border-radius: 16px;
-  background: linear-gradient(180deg, #f8fcfb, #eef8f6);
+  background: linear-gradient(180deg, #f8fbff, #eef4fc);
 }
 
 .warga-upload-zone i {
@@ -1486,7 +1486,7 @@ body {
   padding: calc(20px + env(safe-area-inset-top, 0px)) 20px 22px;
   overflow: hidden;
   border-bottom-right-radius: 28px;
-  background: linear-gradient(135deg, #167b78, #0f5e5b 65%, #084c49);
+  background: linear-gradient(135deg, #356bb2, #235fa4 65%, #1d4f8a);
   isolation: isolate;
 }
 
@@ -1674,7 +1674,7 @@ body {
 }
 
 #menu-main .warga-menu-list > a.active-nav {
-  background: #e7f4f2;
+  background: #eaf1fa;
   box-shadow: inset 3px 0 0 var(--warga-teal);
 }
 
@@ -1733,7 +1733,7 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: #e1f1ef;
+  background: #e7effa;
   color: var(--warga-teal-dark) !important;
   font-size: 13px;
   font-weight: 800;
@@ -1767,12 +1767,12 @@ body {
 }
 
 .theme-dark #menu-main .warga-menu-list > a.active-nav {
-  background: #173b3b;
+  background: #172f51;
 }
 
 .theme-dark #menu-main .warga-menu-list > a.active-nav > span,
 .theme-dark #menu-main .warga-menu-list > a.active-nav > i:last-child {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 .theme-dark #menu-main .warga-menu-list > a:hover,
@@ -1931,7 +1931,7 @@ body #page .page-content .warga-auth-error-item {
   border-radius: 13px;
   font-size: 14px;
   font-weight: 800;
-  box-shadow: 0 7px 16px rgba(15, 94, 91, .2);
+  box-shadow: 0 7px 16px rgba(35, 95, 164, .2);
 }
 
 .warga-auth-install {
@@ -1954,7 +1954,7 @@ body #page .page-content .warga-auth-error-item {
 .theme-light #page .warga-account-head p,
 .theme-light #page .warga-detail-head p,
 .theme-light #page .warga-staff-head p {
-  color: #e3f5f2 !important;
+  color: #e4eefb !important;
 }
 
 .theme-light #page .warga-page-intro .warga-intro-action,
@@ -1980,14 +1980,14 @@ body.theme-light #page .page-content .warga-account-head > div > span,
 body.theme-light #page .page-content .warga-home-head > .warga-home-identity > div > span,
 body.theme-light #page .page-content .warga-page-intro > div > span,
 body.theme-light #page .page-content .warga-staff-head > div > span {
-  color: #effaf8 !important;
+  color: #eff5fd !important;
 }
 
 body.theme-light #page .page-content .warga-page-intro > div > p,
 body.theme-light #page .page-content .warga-account-head > div > p,
 body.theme-light #page .page-content .warga-detail-head > div > p,
 body.theme-light #page .page-content .warga-staff-head > div > p {
-  color: #e3f5f2 !important;
+  color: #e4eefb !important;
 }
 
 body.theme-light #page .page-content .warga-form-title > span {
@@ -2064,8 +2064,8 @@ body #page .page-content .warga-action-buttons .btn i {
 .warga-staff-summary a:nth-child(4)::before { background: var(--warga-orange); }
 
 .warga-staff-summary a.is-active {
-  background: #eef8f6;
-  box-shadow: 0 10px 24px rgba(15, 94, 91, .14), inset 0 -3px 0 var(--warga-teal-dark);
+  background: #eef4fc;
+  box-shadow: 0 10px 24px rgba(35, 95, 164, .14), inset 0 -3px 0 var(--warga-teal-dark);
   transform: translateY(-2px);
 }
 
@@ -2086,7 +2086,7 @@ body #page .page-content .warga-action-buttons .btn i {
 }
 
 .theme-dark .warga-staff-summary a.is-active {
-  background: #17312f;
+  background: #172b49;
 }
 
 .theme-dark .warga-staff-summary strong {
@@ -2162,7 +2162,7 @@ body #page .page-content .warga-action-buttons .btn i {
 }
 
 .theme-dark #page .warga-section-head p {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 .theme-dark #page .warga-form-card .input-style.has-borders select,
@@ -2631,7 +2631,7 @@ html {
 
 #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > i,
 #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > span {
-  color: #555e69 !important;
+  color: #235fa4 !important;
 }
 
 #footer-bar.footer-bar-6 .circle-nav { padding-top: 12px; }
@@ -2706,10 +2706,13 @@ html {
   color: #d8dee5 !important;
 }
 
+.theme-dark #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > i,
+.theme-dark #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > span { color: #9fc3f0 !important; }
+
 /* Give the community screens the same visual rhythm as the dashboard cards. */
 #page .warga-community { max-width: 760px; margin-inline: auto; padding: 0 15px 18px; }
-#page .community-home { margin: 0 0 16px; padding: 20px; border-radius: 18px; background: linear-gradient(135deg, var(--warga-teal-dark), var(--warga-teal)); color: #fff; box-shadow: 0 12px 28px rgba(15,94,91,.16); }
-#page .community-home p { color: #cbe8e5; font-size: 13px; }
+#page .community-home { margin: 0 0 16px; padding: 20px; border-radius: 18px; background: linear-gradient(135deg, var(--warga-teal-dark), var(--warga-teal)); color: #fff; box-shadow: 0 12px 28px rgba(35,95,164,.16); }
+#page .community-home p { color: #d7e5f8; font-size: 13px; }
 #page .community-home h1 { color: #fff; font-size: 25px; margin: 0; }
 #page .community-shortcuts { margin: 0 0 22px; }
 #page .community-shortcuts > a { min-height: 106px; padding: 15px; border: 1px solid var(--warga-line); border-radius: 15px; box-shadow: 0 7px 18px rgba(31,45,56,.06); transition: transform .18s ease, box-shadow .18s ease; }
@@ -2806,8 +2809,8 @@ body.theme-dark #page .page-content .warga-empty-state > span i {
 
 body.theme-dark #page .page-content .warga-empty-icon,
 body.theme-dark #page .page-content .warga-empty-icon i {
-  background: #172b2a;
-  color: #8ed1cb !important;
+  background: #172f51;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .warga-filter-tabs {
@@ -2830,7 +2833,7 @@ body.theme-dark #page .warga-result-count {
 
 body.theme-dark #page .warga-form-card .input-style.has-borders label,
 body.theme-dark #page .warga-auth-card .input-style.has-icon label {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 /* Form fields published from the village's local Master Surat catalogue. */
@@ -2899,9 +2902,9 @@ body.theme-dark #page .warga-auth-card .input-style.has-icon label {
   align-items: center;
   justify-content: center;
   padding: 15px;
-  border: 1px dashed #8bb6b2;
+  border: 1px dashed #7aa3d4;
   border-radius: 8px;
-  background: #f4faf9;
+  background: #f4f7fc;
   color: var(--warga-teal-dark);
   cursor: pointer;
   text-align: center;
@@ -2936,7 +2939,7 @@ body.theme-dark #page .warga-auth-card .input-style.has-icon label {
 
 .warga-dynamic-field:focus-within .warga-dynamic-upload {
   border-color: var(--warga-teal);
-  outline: 3px solid rgba(15, 139, 131, 0.14);
+  outline: 3px solid rgba(35, 95, 164, 0.14);
   outline-offset: 2px;
 }
 
@@ -2955,9 +2958,9 @@ body.theme-dark #page .warga-dynamic-field > :is(input, select, textarea).form-c
 }
 
 body.theme-dark #page .warga-dynamic-upload {
-  border-color: #3b5e5a;
-  background: #172b2a;
-  color: #8ed1cb;
+  border-color: #35577f;
+  background: #172f51;
+  color: #a9c8ee;
 }
 
 @media (min-width: 768px) {
@@ -3283,7 +3286,7 @@ body #page .page-content .warga-account-page .warga-account-village {
   gap: 7px;
   max-width: 100%;
   overflow-wrap: anywhere;
-  color: #effaf8 !important;
+  color: #eff5fd !important;
   font-size: 14px !important;
   line-height: 1.4;
 }
@@ -3336,7 +3339,7 @@ body #page .page-content .warga-account-page .warga-account-card-title > span {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: #e1f1ef;
+  background: #e7effa;
   color: var(--warga-teal-dark) !important;
   font-size: 17px !important;
   line-height: 1 !important;
@@ -3369,7 +3372,7 @@ body #page .page-content .warga-account-row-icon {
 }
 
 body #page .page-content .warga-account-row-icon.is-phone {
-  background: #e1f1ef;
+  background: #e7effa;
   color: var(--warga-teal-dark) !important;
 }
 
@@ -3508,7 +3511,7 @@ body.theme-dark #page .warga-account-card-title {
 }
 
 body.theme-dark #page .page-content .warga-account-page .warga-account-card-title p {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .warga-account-card-title h2,
@@ -3527,8 +3530,8 @@ body.theme-dark #page .page-content .warga-account-page .warga-pwa-install-copy 
 
 body.theme-dark #page .page-content .warga-account-row-icon.is-phone,
 body.theme-dark #page .page-content .warga-account-page .warga-account-card-title > span {
-  background: #173b3b;
-  color: #8ed1cb !important;
+  background: #172f51;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .page-content .warga-account-row-icon.is-email,
@@ -3770,7 +3773,7 @@ body #page .page-content .warga-request-field > label > small {
 .warga-request-select > .form-control:focus,
 .warga-request-create .warga-dynamic-field > :is(input, select, textarea).form-control:focus {
   border-color: var(--warga-teal) !important;
-  outline: 3px solid rgba(22, 123, 120, .14) !important;
+  outline: 3px solid rgba(35, 95, 164, .14) !important;
   outline-offset: 1px;
 }
 
@@ -3857,9 +3860,9 @@ body #page .page-content .warga-request-create .warga-service-requirements li {
   align-items: center;
   justify-content: center;
   padding: 22px;
-  border: 1.5px dashed #78aaa5;
+  border: 1.5px dashed #6f9dd2;
   border-radius: 16px;
-  background: linear-gradient(180deg, #f8fcfb, #eef8f6);
+  background: linear-gradient(180deg, #f8fbff, #eef4fc);
   color: var(--warga-teal-dark);
   cursor: pointer;
   text-align: center;
@@ -3890,7 +3893,7 @@ body #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga
 
 .warga-request-create :is(.warga-supporting-upload, .warga-dynamic-field):focus-within :is(.warga-upload-zone, .warga-dynamic-upload) {
   border-color: var(--warga-teal);
-  outline: 3px solid rgba(22, 123, 120, .14);
+  outline: 3px solid rgba(35, 95, 164, .14);
   outline-offset: 2px;
 }
 
@@ -3994,13 +3997,13 @@ body.theme-dark #page .page-content .warga-request-create .warga-service-require
 }
 
 body.theme-dark #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) {
-  border-color: #467672;
-  background: #172b2a;
+  border-color: #4f79aa;
+  background: #172f51;
 }
 
 body.theme-dark #page .page-content .warga-request-create :is(.warga-dynamic-upload, .warga-upload-zone) > i,
 body.theme-dark #page .page-content .warga-request-select > i {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .page-content .warga-request-create .warga-file-list .warga-file-item {
@@ -4219,17 +4222,17 @@ body.theme-dark #page .warga-list-field label { background: transparent !importa
   gap: 7px;
   margin-top: 5px;
   padding: 6px 9px;
-  border: 1px solid #c6dfdd;
+  border: 1px solid #c5d8ee;
   border-radius: 8px;
-  background: #eef7f6;
-  color: #0f5e5b !important;
+  background: #eef4fb;
+  color: #235fa4 !important;
   font-size: 14px;
   font-weight: 750;
   line-height: 1.5;
 }
 
 #page .warga-notification-date i { color: inherit !important; }
-body.theme-dark #page .warga-notification-list .warga-notification-date { border-color: #315756; background: #173b3b; color: #b2e4de !important; }
+body.theme-dark #page .warga-notification-list .warga-notification-date { border-color: #35577f; background: #172f51; color: #b8d5f4 !important; }
 .warga-paged-list :is(a, button):focus-visible { outline: 2px solid var(--warga-teal); outline-offset: 3px; }
 
 @media (max-width: 600px) {
@@ -4467,7 +4470,7 @@ a.warga-service-catalog-item:focus-visible { outline: 2px solid var(--warga-teal
 #page .warga-service-catalog > .warga-service-empty strong { color: var(--warga-ink) !important; font-size: 16px; }
 #page .warga-service-catalog > .warga-service-empty span { color: var(--warga-muted) !important; font-size: 14px; line-height: 1.5; }
 body.theme-dark #page .warga-service-catalog-head p,
-body.theme-dark #page .warga-service-catalog-copy small { color: #9cd9d2 !important; }
+body.theme-dark #page .warga-service-catalog-copy small { color: #a9c8ee !important; }
 
 @media (max-width: 600px) {
   .warga-service-catalog { margin-right: 14px; margin-left: 14px; border-radius: 18px; }
@@ -4531,7 +4534,7 @@ body.theme-dark #page .page-content .warga-detail-head > .warga-detail-icon[clas
 .warga-letter-modal-header span { display: block; color: #64748b; font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: uppercase; }
 .warga-letter-modal-header h2 { margin: 3px 0 0; color: #0f172a; font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
 .warga-letter-icon-button { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid #cbd5e1; border-radius: 50%; background: #fff; color: #334155; cursor: pointer; }
-.warga-letter-icon-button:hover, .warga-letter-icon-button:focus-visible { border-color: #167b78; background: #ecfdf5; color: #167b78; }
+.warga-letter-icon-button:hover, .warga-letter-icon-button:focus-visible { border-color: #235fa4; background: #ecfdf5; color: #235fa4; }
 .warga-letter-modal-frame-wrap { position: relative; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; background: #e5e7eb; padding: 14px; }
 .warga-letter-modal-frame { display: block; width: 100%; min-width: 794px; height: 100%; min-height: 1123px; border: 0; background: #fff; }
 .warga-letter-modal-status { display: grid; place-items: center; min-height: 180px; color: #475569; font-size: 15px; text-align: center; }
@@ -4640,7 +4643,7 @@ body #page .page-content .warga-account-page .warga-resident-item-icon {
   width: 44px;
   height: 44px;
   border-radius: 13px;
-  background: #dcefeb;
+  background: #e4edfa;
   color: var(--warga-teal-dark) !important;
   font-size: 16px !important;
   line-height: 1 !important;
@@ -4683,8 +4686,8 @@ body #page .page-content .warga-account-page .warga-resident-note {
   margin: 0;
   padding: 11px 12px;
   border-radius: 12px;
-  background: #edf7f5;
-  color: #496762 !important;
+  background: #eff4fb;
+  color: #4b6380 !important;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -4696,12 +4699,12 @@ body #page .page-content .warga-account-page .warga-resident-note > i {
 }
 
 body.theme-dark #page .warga-account-page .warga-resident-card-head { border-bottom-color: #34444e; }
-body.theme-dark #page .page-content .warga-account-page .warga-resident-card-head p { color: #8ed1cb !important; }
+body.theme-dark #page .page-content .warga-account-page .warga-resident-card-head p { color: #a9c8ee !important; }
 body.theme-dark #page .warga-account-page .warga-resident-card-head h2,
 body.theme-dark #page .warga-account-page .warga-resident-item-copy > strong { color: #f1f5f7 !important; }
 body.theme-dark #page .warga-account-page .warga-resident-item { border-color: #34444e; background: #202a30; }
 body.theme-dark #page .page-content .warga-account-page .warga-resident-item-copy > span { color: #aebbc4 !important; }
-body.theme-dark #page .page-content .warga-account-page .warga-resident-note { background: #193432; color: #b9d4cf !important; }
+body.theme-dark #page .page-content .warga-account-page .warga-resident-note { background: #1b304d; color: #b8c7da !important; }
 body.theme-dark #page .page-content .warga-account-page .warga-resident-status.is-verified { border-color: #30645d; background: #173b37; color: #9bd9cf !important; }
 body.theme-dark #page .page-content .warga-account-page .warga-resident-status.is-warning { border-color: #69562f; background: #40371f; color: #f2ce7a !important; }
 body.theme-dark #page .page-content .warga-account-page .warga-resident-status.is-danger { border-color: #704047; background: #46282d; color: #f4a1aa !important; }
@@ -4847,7 +4850,7 @@ body #page .page-content .warga-resident-status.is-muted {
 body #page .page-content .warga-resident-item-icon > i { color: inherit !important; }
 
 body #page .page-content .warga-resident-item.is-nik .warga-resident-item-icon {
-  background: #e1f1ef;
+  background: #e7effa;
   color: var(--warga-teal-dark) !important;
 }
 
@@ -4909,7 +4912,7 @@ body #page .page-content .warga-resident-note {
   padding: 10px 11px;
   border: 1px solid #d8e6e8;
   border-radius: 12px;
-  background: #f4faf9;
+  background: #f4f7fc;
   color: var(--warga-muted) !important;
   font-size: 11px;
   line-height: 1.45;
@@ -4933,7 +4936,7 @@ body.theme-dark #page .page-content .warga-account-resident-card .warga-resident
 }
 
 body.theme-dark #page .page-content .warga-resident-card-head p {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .page-content .warga-resident-card-head h2,
@@ -4951,8 +4954,8 @@ body.theme-dark #page .page-content .warga-resident-item-copy > span {
 }
 
 body.theme-dark #page .page-content .warga-resident-item.is-nik .warga-resident-item-icon {
-  background: #173b3b;
-  color: #8ed1cb !important;
+  background: #172f51;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .page-content .warga-resident-item.is-kk .warga-resident-item-icon {
@@ -4981,13 +4984,13 @@ body.theme-dark #page .page-content .warga-resident-item.is-address .warga-resid
 }
 
 body.theme-dark #page .page-content .warga-resident-note {
-  border-color: #315256;
-  background: #193234;
-  color: #aebbc4 !important;
+  border-color: #35577f;
+  background: #1b304d;
+  color: #b8c7da !important;
 }
 
 body.theme-dark #page .page-content .warga-resident-note > i {
-  color: #8ed1cb !important;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .page-content .warga-resident-status.is-verified {
@@ -5092,7 +5095,7 @@ body.theme-dark #page .page-content .warga-resident-status.is-muted {
 
 #page .warga-list-reset:hover {
   border-color: var(--warga-teal);
-  background: #e7f3f1;
+  background: #e8f0fa;
   color: var(--warga-teal-dark) !important;
 }
 
@@ -5108,10 +5111,10 @@ body.theme-dark #page .page-content .warga-resident-status.is-muted {
 }
 
 /* Keep status colours visible before selection. Yellow uses dark text;
- * the darker teal and green selected states use white text. */
+ * the darker blue and green selected states use white text. */
 #page .warga-list-status a[data-list-filter="all"] {
-  border-color: #c6dfdc;
-  background: #eaf6f4;
+  border-color: #c5d8ee;
+  background: #eaf1fb;
   color: var(--warga-teal-dark) !important;
 }
 
@@ -5119,7 +5122,7 @@ body.theme-dark #page .page-content .warga-resident-status.is-muted {
   border-color: var(--warga-teal-dark);
   background: var(--warga-teal-dark);
   color: #fff !important;
-  box-shadow: 0 4px 10px rgba(15, 94, 91, .16);
+  box-shadow: 0 4px 10px rgba(35, 95, 164, .16);
 }
 
 #page .warga-list-status a[data-list-filter="active"] {
@@ -5172,15 +5175,15 @@ body.theme-dark #page .warga-list-reset {
 }
 
 body.theme-dark #page .warga-list-reset:hover {
-  border-color: #5faea7;
-  background: #193b3a;
-  color: #b8e3df !important;
+  border-color: #6f9fd9;
+  background: #1a3357;
+  color: #bed6f5 !important;
 }
 
 body.theme-dark #page .warga-list-status a[data-list-filter="all"] {
-  border-color: #286462;
-  background: #173b3b;
-  color: #9cd9d2 !important;
+  border-color: #315f95;
+  background: #172f51;
+  color: #a9c8ee !important;
 }
 
 body.theme-dark #page .warga-list-status a[data-list-filter="active"] {
@@ -5196,8 +5199,8 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"] {
 }
 
 body.theme-dark #page .warga-list-status a[data-list-filter="all"].active {
-  border-color: #0f5e5b;
-  background: #0f5e5b;
+  border-color: #235fa4;
+  background: #235fa4;
   color: #fff !important;
 }
 
@@ -5251,12 +5254,12 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
 .warga-account-form-field > small { display: block; margin-top: 6px; color: var(--warga-muted); font-size: 12px; line-height: 1.45; }
 .warga-account-form-field > .warga-form-field-error { color: var(--warga-red) !important; font-weight: 700; }
 .warga-password-toggle { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--warga-muted); }
-.warga-password-toggle:hover { background: rgba(22,123,120,.1); color: var(--warga-teal-dark); }
+.warga-password-toggle:hover { background: rgba(35,95,164,.1); color: var(--warga-teal-dark); }
 .warga-account-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 24px; }
 .warga-account-form-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; margin: 0; padding: 9px 15px; border-radius: 11px; font-size: 14px; font-weight: 750; }
 .warga-form-cancel { border: 1px solid var(--warga-line); background: var(--warga-page); color: var(--warga-muted) !important; }
 .warga-form-demo-note, .warga-form-error { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 18px; padding: 11px 12px; border-radius: 11px; font-size: 13px; line-height: 1.45; }
-.warga-form-demo-note { border: 1px solid #c6dfdc; background: #eaf6f4; color: var(--warga-teal-dark); }
+.warga-form-demo-note { border: 1px solid #c5d8ee; background: #eaf1fb; color: var(--warga-teal-dark); }
 .warga-form-error { border: 1px solid #edbec2; background: #fff0f1; color: #9d2933; }
 .warga-form-demo-note > i, .warga-form-error > i { flex: 0 0 auto; margin-top: 2px; }
 .warga-confirm-dialog[hidden] { display: none !important; }
@@ -5271,7 +5274,7 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
 .warga-confirm-actions .warga-confirm-cancel { border: 1px solid var(--warga-line); background: var(--warga-page); color: var(--warga-ink) !important; }
 .warga-dialog-open { overflow: hidden; }
 body.theme-dark .warga-account-form-input { border-color: #41525d; background: #202b32; }
-body.theme-dark .warga-form-demo-note { border-color: #286462; background: #173b3b; color: #9cd9d2; }
+body.theme-dark .warga-form-demo-note { border-color: #315f95; background: #172f51; color: #a9c8ee; }
 body.theme-dark .warga-form-error { border-color: #704047; background: #46282d; color: #f4a1aa; }
 body.theme-dark .warga-form-cancel { border-color: #41525d; background: #202b32; color: #c0cbd2 !important; }
 body.theme-dark .warga-confirm-panel { border-color: #34444e; background: #1a2229; }
@@ -5300,7 +5303,7 @@ body.theme-dark .warga-confirm-actions .warga-confirm-cancel { border-color: #41
   left: 27px;
   width: 2px;
   border-radius: 2px;
-  background: linear-gradient(180deg, #c7d9de 0%, #dce6e9 100%);
+  background: linear-gradient(180deg, #c7d6e8 0%, #dce5ef 100%);
   content: '';
 }
 
@@ -5319,7 +5322,7 @@ body.theme-dark .warga-confirm-actions .warga-confirm-cancel { border-color: #41
 
 #page .warga-request-detail .warga-timeline-item.is-draft { --timeline-color: #656d78; }
 #page .warga-request-detail .warga-timeline-item.is-submitted { --timeline-color: #4a89dc; }
-#page .warga-request-detail .warga-timeline-item.is-verified { --timeline-color: #167b78; }
+#page .warga-request-detail .warga-timeline-item.is-verified { --timeline-color: #235fa4; }
 #page .warga-request-detail .warga-timeline-item.is-approved,
 #page .warga-request-detail .warga-timeline-item.is-synced { --timeline-color: #8cc152; }
 #page .warga-request-detail .warga-timeline-item.is-issued { --timeline-color: #967adc; }
