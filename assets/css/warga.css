@@ -4182,6 +4182,13 @@ body #page .page-content .warga-request-create .warga-consent {
   min-height: 128px;
 }
 
+/* Keep the envelope legible against the blue Surat header. AppKit's
+ * generic icon rules can otherwise override the inherited white color. */
+body #page .page-content .warga-letters-head .warga-intro-icon,
+body #page .page-content .warga-letters-head .warga-intro-icon > i {
+  color: #fff !important;
+}
+
 .warga-letters-copy {
   min-width: 0;
 }
