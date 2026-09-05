@@ -534,8 +534,8 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   box-shadow: 0 12px 28px rgba(40, 92, 168, .18);
 }
 #page .community-v22-contact-page .community-v22-page-hero {
-  background: linear-gradient(135deg, #a85420, #c47b32 65%, #de9a4b);
-  box-shadow: 0 12px 28px rgba(168, 84, 32, .18);
+  background: linear-gradient(135deg, #0f5e5b, #167b78 65%, #2a9189);
+  box-shadow: 0 12px 28px rgba(15, 94, 91, .18);
 }
 #page .community-v22-page-hero-icon {
   display: grid;
