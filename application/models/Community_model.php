@@ -26,7 +26,7 @@ class Community_model extends CI_Model
 
     public function workflow($villageId)
     {
-        require_once APPPATH . 'libraries/Verification_workflow.php';
+        require_once dirname(__DIR__) . '/libraries/Verification_workflow.php';
         $village = $this->village($villageId);
         return Verification_workflow::settings($village['settings']['verification'] ?? array());
     }

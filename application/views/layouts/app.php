@@ -43,7 +43,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         <a href="#" data-toggle-theme class="header-icon <?= $themeHeaderClass ?> show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fas fa-moon"></i></a>
     </header>
 
-    <nav id="footer-bar" class="footer-bar-6 <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
+    <nav id="footer-bar" class="warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
         <a class="<?= $navSection === 'dashboard' || ($staffMode && $navSection === 'petugas' && !$this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas' : 'dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a class="<?= $navSection === 'pengumuman' ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
         <a class="<?= in_array($navSection,array('surat','permohonan','layanan')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>

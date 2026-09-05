@@ -696,7 +696,7 @@ class Request_model extends CI_Model
         $payload = json_decode((string)($request['payload_json'] ?? ''), true);
         $settings = isset($payload['verification']) && is_array($payload['verification'])
             ? $payload['verification'] : $this->Community_model->workflow($request['village_id'] ?? ($user['village_id'] ?? ''));
-        require_once APPPATH . 'libraries/Verification_workflow.php';
+        require_once dirname(__DIR__) . '/libraries/Verification_workflow.php';
         return Verification_workflow::actions($role, $status, $settings);
     }
 

@@ -1,6 +1,7 @@
 <?php
+if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 require dirname(__DIR__).'/vendor/autoload.php';
-$keys=MinishlinkWebPushVAPID::createVapidKeys();
+$keys=\Minishlink\WebPush\VAPID::createVapidKeys();
 echo 'WARGA_VAPID_PUBLIC_KEY='.$keys['publicKey'].PHP_EOL;
 echo 'WARGA_VAPID_PRIVATE_KEY='.$keys['privateKey'].PHP_EOL;
 echo 'WARGA_VAPID_SUBJECT=mailto:admin@mediaverse.co.id'.PHP_EOL;
