@@ -392,6 +392,8 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .warga-setting-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 8px; color: #fff; }
 .warga-setting-icon.is-dark { background: #343d47; }
 .warga-setting-icon.is-red { background: var(--warga-red); }
+.warga-setting-icon.is-blue { background: var(--warga-blue); }
+.warga-setting-icon.is-orange { background: var(--warga-orange); }
 .warga-settings-list a div { display: flex; min-width: 0; flex-direction: column; }
 .warga-settings-list strong { font-size: 12px; }
 .warga-settings-list small { color: var(--warga-muted); font-size: 10px; }
@@ -5053,6 +5055,7 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
 .warga-confirm-panel p { margin: 7px 0 20px; color: var(--warga-muted); font-size: 14px; line-height: 1.45; }
 .warga-confirm-actions { display: flex; justify-content: center; gap: 9px; }
 .warga-confirm-actions .btn { min-width: 112px; min-height: 42px; margin: 0; border-radius: 10px; font-size: 14px; font-weight: 750; }
+.warga-confirm-actions .warga-confirm-cancel { border: 1px solid var(--warga-line); background: var(--warga-page); color: var(--warga-ink) !important; }
 .warga-dialog-open { overflow: hidden; }
 body.theme-dark .warga-account-form-input { border-color: #41525d; background: #202b32; }
 body.theme-dark .warga-form-demo-note { border-color: #286462; background: #173b3b; color: #9cd9d2; }
@@ -5060,6 +5063,7 @@ body.theme-dark .warga-form-error { border-color: #704047; background: #46282d; 
 body.theme-dark .warga-form-cancel { border-color: #41525d; background: #202b32; color: #c0cbd2 !important; }
 body.theme-dark .warga-confirm-panel { border-color: #34444e; background: #1a2229; }
 body.theme-dark .warga-confirm-icon { background: #46282d; color: #f4a1aa; }
+body.theme-dark .warga-confirm-actions .warga-confirm-cancel { border-color: #41525d; background: #202b32; color: #f1f5f7 !important; }
 @media (max-width: 460px) {
   .warga-account-form-card { margin-right: 14px; margin-left: 14px; border-radius: 18px; }
   .warga-account-form-card .content { padding: 18px 15px; }

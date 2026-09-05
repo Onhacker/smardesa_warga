@@ -33,11 +33,14 @@ class Account extends App_Controller
             'fieldErrors' => array(), 'demoMode' => warga_demo_mode()
         );
         if ($this->input->method(TRUE) === 'POST') {
-            $data['formValues'] = array('email' => trim((string) $this->input->post('email', TRUE)), 'phone' => trim((string) $this->input->post('phone', TRUE)));
-            $current = (string) $this->input->post('current_password');
+            $emailInput = $this->input->post('email', TRUE);
+            $phoneInput = $this->input->post('phone', TRUE);
+            $currentInput = $this->input->post('current_password');
+            $data['formValues'] = array('email' => is_string($emailInput) ? trim($emailInput) : '', 'phone' => is_string($phoneInput) ? trim($phoneInput) : '');
+            $current = is_string($currentInput) ? $currentInput : '';
             if (!$data['formValues']['email'] && !$data['formValues']['phone']) $data['fieldErrors']['contact'] = 'Isi minimal email atau nomor telepon.';
             if (!$current) $data['fieldErrors']['current_password'] = 'Masukkan kata sandi saat ini.';
-            if (!$data['fieldErrors'] && !$this->Auth_model->verify_password((int) $this->currentUser['id'], $current)) $data['fieldErrors']['current_password'] = 'Kata sandi saat ini tidak sesuai.';
+            if (!$data['fieldErrors'] && !$this->Auth_model->verify_password((int) $this->currentUser['id'], $current)) $data['fieldErrors']['current_password'] = $this->Auth_model->error() ?: 'Kata sandi saat ini tidak sesuai.';
             if (!$data['fieldErrors']) {
                 $result = $this->Auth_model->update_contact((int) $this->currentUser['id'], $data['formValues']['email'], $data['formValues']['phone']);
                 if ($result['success']) $this->redirect_with('akun', 'success', 'Data akun berhasil diperbarui.');
@@ -52,11 +55,14 @@ class Account extends App_Controller
         $this->no_store();
         $data = array('pageTitle' => 'Ganti Password', 'showBackButton' => TRUE, 'backUrl' => site_url('akun'), 'fieldErrors' => array(), 'demoMode' => warga_demo_mode());
         if ($this->input->method(TRUE) === 'POST') {
-            $current = (string) $this->input->post('current_password');
-            $new = (string) $this->input->post('new_password');
-            $confirm = (string) $this->input->post('password_confirm');
+            $newInput = $this->input->post('new_password');
+            $confirmInput = $this->input->post('password_confirm');
+            $currentInput = $this->input->post('current_password');
+            $current = is_string($currentInput) ? $currentInput : '';
+            $new = is_string($newInput) ? $newInput : '';
+            $confirm = is_string($confirmInput) ? $confirmInput : '';
             if (!$current) $data['fieldErrors']['current_password'] = 'Masukkan kata sandi saat ini.';
-            if (strlen($new) < 8 || strlen($new) > 72) $data['fieldErrors']['new_password'] = 'Kata sandi baru harus 8–72 karakter.';
+            if (strlen($new) < 8 || strlen($new) > 72 || strpos($new, "\0") !== FALSE) $data['fieldErrors']['new_password'] = 'Kata sandi baru harus 8–72 karakter tanpa karakter kosong.';
             if ($new !== $confirm) $data['fieldErrors']['password_confirm'] = 'Konfirmasi kata sandi belum sama.';
             if (!$data['fieldErrors']) {
                 $result = $this->Auth_model->change_password((int) $this->currentUser['id'], $current, $new);

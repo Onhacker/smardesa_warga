@@ -597,6 +597,12 @@
     });
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && dialog && !dialog.hidden) { event.preventDefault(); close(); }
+      if (event.key === 'Tab' && dialog && !dialog.hidden) {
+        var buttons = dialog.querySelectorAll('.warga-confirm-panel button:not(:disabled)');
+        var first = buttons[0], last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }
     });
   }());
 

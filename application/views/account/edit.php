@@ -11,13 +11,13 @@ $error = function ($key) use ($errors) { return isset($errors[$key]) ? (string) 
     </section>
     <section class="card card-style warga-account-form-card">
         <div class="content">
-            <?php if (!empty($errors['contact'])): ?><div class="warga-form-error" role="alert"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><?= e($errors['contact']) ?></div><?php endif; ?>
+            <?php if (!empty($errors['contact'])): ?><div id="account-contact-error" class="warga-form-error" role="alert"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><?= e($errors['contact']) ?></div><?php endif; ?>
             <?php if (!empty($demoMode)): ?><p class="warga-form-demo-note"><i class="fa fa-info-circle" aria-hidden="true"></i>Mode demo menyimpan perubahan pada sesi browser ini.</p><?php endif; ?>
             <form method="post" action="<?= site_url('akun/edit') ?>" autocomplete="on" data-disable-submit>
                 <?= csrf_field() ?>
                 <div class="warga-account-form-field">
                     <label for="account-email">Email</label>
-                    <div class="warga-account-form-input"><i class="fa fa-envelope" aria-hidden="true"></i><input type="email" id="account-email" name="email" value="<?= e($value('email')) ?>" maxlength="180" autocomplete="email" placeholder="nama@contoh.com" aria-describedby="account-email-hint<?= $error('contact') ? ' account-contact-error' : '' ?>"></div>
+                    <div class="warga-account-form-input"><i class="fa fa-envelope" aria-hidden="true"></i><input type="email" id="account-email" name="email" value="<?= e($value('email')) ?>" maxlength="160" autocomplete="email" placeholder="nama@contoh.com" aria-describedby="account-email-hint<?= $error('contact') ? ' account-contact-error' : '' ?>"></div>
                     <small id="account-email-hint">Gunakan email yang aktif untuk menerima informasi layanan.</small>
                 </div>
                 <div class="warga-account-form-field">
