@@ -54,7 +54,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <nav id="footer-bar" class="footer-bar-6 warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
         <a class="<?= $navSection === 'dashboard' || ($staffMode && $navSection === 'petugas' && !$this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas' : 'dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a class="<?= in_array($navSection, array('surat','permohonan','layanan','notifikasi')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
-        <a class="circle-nav <?= $navSection === 'pasar' || $navSection === 'pasar-digital' || $navSection === 'marketplace' ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span></a>
+        <a class="circle-nav <?= in_array($navSection, array('pasar', 'pasar-digital', 'marketplace', 'tokoku'), TRUE) ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span></a>
         <a class="<?= $navSection === 'pengumuman' ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
         <a class="<?= $footerIsAuthenticated && in_array($navSection,array('akun','kontak')) ? 'active-nav' : '' ?>" href="<?= site_url($footerIsAuthenticated ? 'akun' : 'login') ?>"><i class="fa fa-<?= $footerIsAuthenticated ? 'user' : 'sign-in-alt' ?>"></i><span><?= $footerIsAuthenticated ? 'Akun' : 'Login' ?></span></a>
     </nav>
