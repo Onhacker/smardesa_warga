@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class MY_Controller extends CI_Controller
 {
     protected $currentUser = NULL;
+    protected $institutionLabel = '';
 
     public function __construct()
     {
@@ -12,12 +13,36 @@ class MY_Controller extends CI_Controller
         $this->currentUser = $this->Auth_model->current_user();
     }
 
+    protected function institution_label()
+    {
+        if ($this->institutionLabel !== '') return $this->institutionLabel;
+        $this->load->model('Community_model');
+        $village = $this->Community_model->village(
+            $this->currentUser['village_id'] ?? '',
+            $this->currentUser['village_name'] ?? ''
+        );
+        $this->institutionLabel = trim((string) ($village['institution'] ?? 'Desa')) ?: 'Desa';
+        return $this->institutionLabel;
+    }
+
+    protected function institution_label_lower()
+    {
+        $label = $this->institution_label();
+        return function_exists('mb_strtolower') ? mb_strtolower($label, 'UTF-8') : strtolower($label);
+    }
+
     protected function render($view, array $data = array())
     {
         $data['currentUser'] = $this->currentUser;
         $this->load->model('Community_model');
         $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '', $this->currentUser['village_name'] ?? '');
-        $data['institutionLabel'] = $contactVillage['institution'];
+        $data['institutionLabel'] = $this->institution_label();
+        $data['institutionLower'] = function_exists('mb_strtolower')
+            ? mb_strtolower($data['institutionLabel'], 'UTF-8')
+            : strtolower($data['institutionLabel']);
+        $data['institutionUpper'] = function_exists('mb_strtoupper')
+            ? mb_strtoupper($data['institutionLabel'], 'UTF-8')
+            : strtoupper($data['institutionLabel']);
         // Keep the complete tenant/contact context available to shared layout
         // components.  The footer uses this data for the identity and contact
         // buttons, while the page views remain responsible for their own data.

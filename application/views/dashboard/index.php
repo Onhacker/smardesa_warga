@@ -42,7 +42,7 @@ $lettersPage = !empty($lettersPage);
 
 <section class="warga-service-card warga-dashboard-services" aria-labelledby="warga-service-title">
     <div class="content warga-section-head warga-service-heading-card">
-        <div><p class="font-600 color-highlight mb-n1">Pelayanan desa</p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
+        <div><p class="font-600 color-highlight mb-n1">Pelayanan <?= e($institutionLower) ?></p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
         <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600">Semua Surat</a>
     </div>
     <div class="warga-service-grid" id="wargaServiceGrid" aria-label="Jenis layanan">
@@ -61,7 +61,7 @@ $lettersPage = !empty($lettersPage);
             <?php endif; ?>
         <?php endforeach; ?>
     </div>
-    <?php if (!$services): ?><p class="warga-service-empty">Belum ada layanan dari desa.</p><?php endif; ?>
+    <?php if (!$services): ?><p class="warga-service-empty">Belum ada layanan dari <?= e($institutionLower) ?>.</p><?php endif; ?>
 </section>
 
 <section class="content warga-section-head warga-activity-head mt-4">
@@ -85,10 +85,10 @@ $lettersPage = !empty($lettersPage);
 <?php if (!$citizenVerified): ?>
 <section class="warga-verification-notice" role="status">
     <i class="fa fa-user-shield"></i>
-    <div><strong>Akun belum terverifikasi</strong><p>Akun lama ini belum cocok dengan Data Penduduk kampung/desa. Hubungi operator desa agar data penduduk disinkronkan, lalu daftarkan akun warga menggunakan NIK, No. KK, dan nama yang sesuai.</p></div>
+    <div><strong>Akun belum terverifikasi</strong><p>Akun lama ini belum cocok dengan Data Penduduk <?= e($institutionLower) ?>. Hubungi operator <?= e($institutionLower) ?> agar data penduduk disinkronkan, lalu daftarkan akun warga menggunakan NIK, No. KK, dan nama yang sesuai.</p></div>
 </section>
 <?php endif; ?>
 
 <section class="warga-home-notice">
-    <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi desa</strong><p>Status permohonan diperbarui otomatis saat perangkat SmartDesa desa terhubung.</p></div>
+    <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi <?= e($institutionLabel) ?></strong><p>Status permohonan diperbarui otomatis saat perangkat SmartDesa <?= e($institutionLower) ?> terhubung.</p></div>
 </section>

@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <section class="warga-page-intro">
-    <div><p>LAYANAN WARGA</p><h1>Permohonan Saya</h1><span>Riwayat pengajuan dan status pelayanan desa.</span></div>
+    <div><p>LAYANAN WARGA</p><h1>Permohonan Saya</h1><span>Riwayat pengajuan dan status pelayanan <?= e($institutionLower) ?>.</span></div>
     <a href="<?= site_url('permohonan/baru') ?>" class="warga-intro-action" aria-label="Buat permohonan"><i class="fa fa-plus"></i></a>
 </section>
 

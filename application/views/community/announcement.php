@@ -3,7 +3,7 @@
     <header class="community-v22-detail-hero">
         <div class="community-v22-page-hero-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
         <div>
-            <p class="community-v22-eyebrow">Pengumuman kampung</p>
+            <p class="community-v22-eyebrow">Pengumuman <?= e($institutionLower) ?></p>
             <h1><?= e($item['title']) ?></h1>
             <div class="community-meta"><time><?= e(tanggal_id($item['created_at'], true)) ?></time><span><?= e($item['author_name']) ?></span></div>
         </div>

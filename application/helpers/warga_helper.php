@@ -9,6 +9,41 @@ if (!function_exists('warga_demo_mode')) {
     function warga_demo_mode() { return getenv('WARGA_DEMO_MODE') === '1'; }
 }
 
+/**
+ * Resolve the institution type from a tenant/village name when older tenant
+ * records do not yet have an explicit bentuk_lembaga value.  This keeps
+ * citizen-facing copy consistent without changing any workflow identifiers.
+ */
+if (!function_exists('warga_institution_label')) {
+    function warga_institution_label($name, $fallback = 'Desa')
+    {
+        $name = trim((string) $name);
+        if (preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\b/iu', $name, $matches)) {
+            return function_exists('mb_convert_case')
+                ? mb_convert_case($matches[1], MB_CASE_TITLE, 'UTF-8')
+                : ucfirst(strtolower($matches[1]));
+        }
+        $fallback = trim((string) $fallback);
+        return $fallback !== '' ? $fallback : 'Desa';
+    }
+}
+
+if (!function_exists('warga_replace_institution')) {
+    function warga_replace_institution($text, $institution)
+    {
+        $institution = trim((string) $institution);
+        if ($institution === '') return (string) $text;
+        return preg_replace_callback('/\bdesa\b/iu', static function ($match) use ($institution) {
+            $source = (string) $match[0];
+            if ($source === strtoupper($source)) return strtoupper($institution);
+            if ($source === strtolower($source)) {
+                return function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
+            }
+            return $institution;
+        }, (string) $text);
+    }
+}
+
 function warga_complaint_status($status)
 {
     $labels = array('submitted'=>'Dikirim','received'=>'Diterima','processing'=>'Ditindaklanjuti','resolved'=>'Selesai','rejected'=>'Ditolak');

@@ -6,7 +6,7 @@
     <?php foreach ($notifications as $notification): ?>
         <a href="<?= site_url($notification['target_path']) ?>" class="warga-notification-item">
             <span class="warga-notification-icon surat-icon-teal"><i class="fa fa-bell" aria-hidden="true"></i></span>
-            <span><strong><?= e($notification['title']) ?></strong><p><?= e($notification['message']) ?></p><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span>
+            <span><strong><?= e($notification['title']) ?></strong><p><?= e(warga_replace_institution($notification['message'], $institutionLabel)) ?></p><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span>
             <i class="fa fa-chevron-right" aria-hidden="true"></i>
         </a>
     <?php endforeach; ?>

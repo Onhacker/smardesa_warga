@@ -25,7 +25,7 @@ $registrationErrorHtml = !empty($error)
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div><div id="page">
 <header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a></header>
 <main class="page-content header-clear-medium warga-auth-page">
-    <section class="warga-auth-brand compact"><img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan desa.</span></div></section>
+    <section class="warga-auth-brand compact"><img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">
         <?php if ($registrationErrorHtml !== ''): ?>
             <div class="warga-auth-error" role="alert" aria-live="assertive">
@@ -39,7 +39,7 @@ $registrationErrorHtml = !empty($error)
         <?php if ($demoMode): ?><div class="warga-demo-credentials mb-4"><i class="fa fa-info-circle"></i><span>Mode demo aktif. Data pendaftaran tidak disimpan permanen.</span></div><?php endif; ?>
         <form method="post" action="<?= site_url('register') ?>" data-disable-submit>
             <?= csrf_field() ?>
-            <div class="warga-identity-note"><i class="fa fa-shield-alt"></i><span>Pendaftaran hanya untuk penduduk kampung yang dipilih. Isi NIK, No. KK, dan nama sesuai Data Penduduk desa.</span></div>
+            <div class="warga-identity-note"><i class="fa fa-shield-alt"></i><span>Pendaftaran hanya untuk penduduk wilayah yang dipilih. Isi NIK, No. KK, dan nama sesuai Data Penduduk wilayah.</span></div>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-id-card"></i><input type="text" class="form-control" id="register-nik" name="nik" value="<?= e(old('nik')) ?>" placeholder="NIK (16 digit)" required maxlength="25" inputmode="numeric" autocomplete="off"><label for="register-nik" class="color-highlight">NIK (16 digit)</label><em>*</em></div>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-address-card"></i><input type="text" class="form-control" id="register-kk" name="kk" value="<?= e(old('kk')) ?>" placeholder="No. KK (16 digit)" required maxlength="25" inputmode="numeric" autocomplete="off"><label for="register-kk" class="color-highlight">No. KK (16 digit)</label><em>*</em></div>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="register-name" name="name" value="<?= e(old('name')) ?>" placeholder="Nama Lengkap sesuai Data Penduduk" required maxlength="120"><label for="register-name" class="color-highlight">Nama Lengkap sesuai Data Penduduk</label><em>*</em></div>
@@ -59,14 +59,14 @@ $registrationErrorHtml = !empty($error)
                 <div class="input-style no-borders has-icon validate-field warga-region-field">
                     <i class="fa fa-home"></i>
                     <select class="form-select registration-cascade-select warga-region-select" id="register-village" name="village_code" required disabled>
-                        <option value="">Pilih kampung/desa</option>
+                        <option value="">Pilih wilayah</option>
                     </select>
                     <i class="fa fa-times disabled invalid color-red-dark"></i><i class="fa fa-check disabled valid color-green-dark"></i>
-                    <label for="register-village" class="color-highlight">Kampung/Desa</label><em>*</em>
+                    <label for="register-village" class="color-highlight">Wilayah</label><em>*</em>
                 </div>
             </div>
             <div class="warga-region-hint" id="register-region-hint" aria-live="polite">Pilih distrik/kecamatan terlebih dahulu. Kode wilayah disimpan otomatis.</div>
-            <?php if (!$registrationRegions): ?><div class="warga-region-empty" role="alert"><i class="fa fa-info-circle"></i><span>Daftar kampung/desa belum tersedia. Hubungi administrator pusat.</span></div><?php endif; ?>
+            <?php if (!$registrationRegions): ?><div class="warga-region-empty" role="alert"><i class="fa fa-info-circle"></i><span>Daftar wilayah belum tersedia. Hubungi administrator pusat.</span></div><?php endif; ?>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-lock"></i><input type="password" class="form-control" id="register-password" name="password" placeholder="Kata Sandi" required minlength="8" autocomplete="new-password"><label for="register-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-check-circle"></i><input type="password" class="form-control" id="register-confirm" name="password_confirm" placeholder="Ulangi Kata Sandi" required minlength="8" autocomplete="new-password"><label for="register-confirm" class="color-highlight">Ulangi Kata Sandi</label><em>*</em></div>
             <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Daftar Akun</span><i class="fa fa-arrow-right ms-2"></i></button>
@@ -95,7 +95,7 @@ $registrationErrorHtml = !empty($error)
             if (selected) {
                 hint.textContent = 'Wilayah terpilih: ' + (selected.village_name || selected.village_code) + '. Kode wilayah disimpan otomatis.';
             } else if (district.value) {
-                hint.textContent = 'Pilih kampung/desa. Kode wilayah disimpan otomatis.';
+                hint.textContent = 'Pilih wilayah. Kode wilayah disimpan otomatis.';
             } else {
                 hint.textContent = 'Pilih distrik/kecamatan terlebih dahulu. Kode wilayah disimpan otomatis.';
             }
@@ -109,7 +109,7 @@ $registrationErrorHtml = !empty($error)
             village.innerHTML = '';
             var placeholder = document.createElement('option');
             placeholder.value = '';
-            placeholder.textContent = 'Pilih kampung/desa';
+            placeholder.textContent = 'Pilih wilayah';
             village.appendChild(placeholder);
             available.forEach(function (region) {
                 var option = document.createElement('option');

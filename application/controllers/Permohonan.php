@@ -29,7 +29,7 @@ class Permohonan extends Citizen_Controller
     public function create()
     {
         if (!$this->verified_citizen()) {
-            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan baru belum dapat dibuat.');
+            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif ' . $this->institution_label_lower() . ' ini. Permohonan baru belum dapat dibuat.');
             redirect('dashboard');
         }
         $this->load->model('Request_model');
@@ -40,7 +40,7 @@ class Permohonan extends Citizen_Controller
     {
         $this->require_post();
         if (!$this->verified_citizen()) {
-            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan belum dapat dikirim.');
+            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif ' . $this->institution_label_lower() . ' ini. Permohonan belum dapat dikirim.');
             redirect('dashboard');
         }
         $this->load->model('Request_model');

@@ -10,7 +10,7 @@
 <section class="card card-style warga-form-card"><div class="content text-center py-4">
     <span class="warga-empty-icon"><i class="fa fa-sync-alt"></i></span>
     <h2 class="font-22 mt-3 mb-2">Layanan Belum Tersedia</h2>
-    <p class="color-theme opacity-70 mb-4">Belum ada Master Surat yang dipublikasikan oleh desa. Daftar layanan akan tampil otomatis setelah sinkronisasi berikutnya.</p>
+    <p class="color-theme opacity-70 mb-4">Belum ada Master Surat yang dipublikasikan oleh <?= e($institutionLower) ?>. Daftar layanan akan tampil otomatis setelah sinkronisasi berikutnya.</p>
     <a href="<?= site_url('dashboard') ?>" class="btn btn-m bg-teal-dark color-white rounded-s font-600 px-4"><i class="fa fa-chevron-left me-2"></i>Kembali ke Beranda</a>
 </div></section>
 <?php else: ?>

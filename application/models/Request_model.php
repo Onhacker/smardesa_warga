@@ -5,6 +5,22 @@ class Request_model extends CI_Model
 {
     private $catalog_schema_ready = false;
 
+    private function institution_for_context(array $context = array())
+    {
+        $this->load->model('Community_model');
+        $village = $this->Community_model->village(
+            $context['village_id'] ?? '',
+            $context['village_name'] ?? ''
+        );
+        return trim((string) ($village['institution'] ?? 'Desa')) ?: 'Desa';
+    }
+
+    private function institution_lower(array $context = array())
+    {
+        $label = $this->institution_for_context($context);
+        return function_exists('mb_strtolower') ? mb_strtolower($label, 'UTF-8') : strtolower($label);
+    }
+
     private function normalize_row(array $row)
     {
         $payloadSchema = NULL;
@@ -704,15 +720,17 @@ class Request_model extends CI_Model
     {
         $request = $this->find_for_staff($id, $user);
         if (!$request) return array('success' => FALSE, 'message' => 'Permohonan tidak ditemukan atau bukan wilayah kerja Anda.');
+        $institution = $this->institution_for_context($request + $user);
+        $institutionLower = function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
         $actions = array(
-            'verify' => array('status' => 'verified', 'label' => 'Diverifikasi Sekdes', 'default_note' => 'Berkas dan data awal telah diperiksa.'),
-            'approve' => array('status' => 'approved', 'label' => 'Disetujui Kepala Desa', 'default_note' => 'Permohonan disetujui untuk diproses.'),
+            'verify' => array('status' => 'verified', 'label' => 'Diverifikasi Sekretaris ' . $institution, 'default_note' => 'Berkas dan data awal telah diperiksa.'),
+            'approve' => array('status' => 'approved', 'label' => 'Disetujui Kepala ' . $institution, 'default_note' => 'Permohonan disetujui untuk diproses.'),
             'revision' => array('status' => 'revision', 'label' => 'Perlu perbaikan', 'default_note' => 'Permohonan memerlukan perbaikan data atau berkas.'),
-            'reject' => array('status' => 'rejected', 'label' => 'Permohonan ditolak', 'default_note' => 'Permohonan belum dapat disetujui desa.')
+            'reject' => array('status' => 'rejected', 'label' => 'Permohonan ditolak', 'default_note' => 'Permohonan belum dapat disetujui ' . $institutionLower . '.')
         );
         if (!isset($actions[$action]) || !in_array($action, $this->allowed_actions($user, $request), TRUE)) return array('success' => FALSE, 'message' => 'Tindakan tidak tersedia untuk peran dan status ini.');
         $next = $actions[$action];
-        if ($action === 'approve' && $user['role_slug'] === 'sekdes') $next['label'] = 'Disetujui Sekdes';
+        if ($action === 'approve' && $user['role_slug'] === 'sekdes') $next['label'] = 'Disetujui Sekretaris ' . $institution;
         if (mb_strlen((string)$note) > 1000) return array('success'=>false,'message'=>'Catatan maksimal 1000 karakter.');
         if (in_array($action, array('revision', 'reject'), TRUE) && trim((string) $note) === '') return array('success' => FALSE, 'message' => 'Alasan wajib diisi untuk perbaikan atau penolakan.');
         $note = trim((string) $note) !== '' ? trim((string) $note) : $next['default_note'];
@@ -746,7 +764,7 @@ class Request_model extends CI_Model
         $this->db->insert('notifications', array('id' => $notificationId, 'user_id' => (int) $request['citizen_user_id'], 'request_id' => (string) $id, 'title' => $request['service_name'], 'message' => $next['label'] . '. ' . $note));
         $this->db->insert('warga_notification_targets', array('notification_id' => $notificationId, 'target_path' => 'permohonan/' . (string) $id));
         if ($next['status'] === 'verified') $this->Community_model->notify_staff($request['village_id'],
-            'Permohonan menunggu persetujuan', 'Sekdes telah memverifikasi permohonan surat.',
+            'Permohonan menunggu persetujuan', 'Sekretaris ' . $institution . ' telah memverifikasi permohonan surat.',
             'petugas/permohonan/'.$id, array('kepala-desa'), $id);
         $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $request['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => (string) $id, 'direction' => 'cloud_to_local', 'operation' => 'status_update', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request-status:' . $id . ':' . $next['status'] . ':' . bin2hex(random_bytes(6))));
         if (!$this->db->trans_status()) {
@@ -787,11 +805,11 @@ class Request_model extends CI_Model
             if (!$request) return array();
             $history = array(array('status' => 'submitted', 'label' => 'Permohonan diajukan', 'note' => 'Data berhasil diterima oleh sistem.', 'occurred_at' => $request['submitted_at']));
             $steps = array(
-                'verified' => array('label' => 'Diverifikasi Sekdes', 'note' => 'Berkas dan data awal telah diperiksa.'),
-                'approved' => array('label' => 'Disetujui Kepala Desa', 'note' => 'Permohonan disetujui untuk diproses.'),
-                'issued' => array('label' => 'Surat diterbitkan', 'note' => 'Dokumen resmi telah diterbitkan desa.'),
+                'verified' => array('label' => 'Diverifikasi Sekretaris ' . $this->institution_for_context($request), 'note' => 'Berkas dan data awal telah diperiksa.'),
+                'approved' => array('label' => 'Disetujui Kepala ' . $this->institution_for_context($request), 'note' => 'Permohonan disetujui untuk diproses.'),
+                'issued' => array('label' => 'Surat diterbitkan', 'note' => 'Dokumen resmi telah diterbitkan ' . $this->institution_lower($request) . '.'),
                 'revision' => array('label' => 'Perlu perbaikan', 'note' => 'Permohonan memerlukan perbaikan data atau berkas.'),
-                'rejected' => array('label' => 'Permohonan ditolak', 'note' => 'Permohonan belum dapat disetujui desa.')
+                'rejected' => array('label' => 'Permohonan ditolak', 'note' => 'Permohonan belum dapat disetujui ' . $this->institution_lower($request) . '.')
             );
             $statusOrder = array('verified', 'approved', 'issued');
             foreach ($statusOrder as $status) {
@@ -837,10 +855,12 @@ class Request_model extends CI_Model
 
         if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
         $this->load->model('Auth_model');
+        $institution = $this->institution_for_context($user);
+        $institutionLower = function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
         if (empty($user['id']) || !$this->Auth_model->citizen_is_verified((int) $user['id'], isset($user['village_id']) ? $user['village_id'] : '')) {
-            return array('success' => FALSE, 'message' => 'Akun belum terverifikasi sebagai penduduk aktif kampung/desa ini. Permohonan belum dapat dikirim.');
+            return array('success' => FALSE, 'message' => 'Akun belum terverifikasi sebagai penduduk aktif ' . $institutionLower . ' ini. Permohonan belum dapat dikirim.');
         }
-        if (empty($user['village_id'])) return array('success' => FALSE, 'message' => 'Akun belum terhubung ke desa.');
+        if (empty($user['village_id'])) return array('success' => FALSE, 'message' => 'Akun belum terhubung ke ' . $institutionLower . '.');
         $service = $this->service_for_user($serviceSlug, $user['village_id']);
         if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak tersedia untuk kampung/desa Anda.');
         $validated = $this->validate_dynamic_fields($service, $formFields);

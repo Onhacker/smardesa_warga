@@ -3,7 +3,7 @@
     <header class="community-heading community-v22-page-hero" aria-labelledby="announcement-page-title">
         <div class="community-v22-page-hero-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
         <div>
-            <p class="community-v22-eyebrow">Kabar kampung</p>
+            <p class="community-v22-eyebrow">Kabar <?= e($institutionLower) ?></p>
             <h1 id="announcement-page-title">Pengumuman</h1>
             <p><?= e($currentUser['village_name']) ?> <span aria-hidden="true">·</span> Informasi terbaru untuk warga</p>
         </div>
@@ -31,7 +31,7 @@
                 <span class="community-v22-empty-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
                 <span class="community-v22-empty-copy">
                     <strong>Belum ada pengumuman</strong>
-                    <span>Informasi terbaru dari kampung akan tampil di sini.</span>
+                    <span>Informasi terbaru dari <?= e($institutionLower) ?> akan tampil di sini.</span>
                 </span>
             </div>
             <?php endif; ?>

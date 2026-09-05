@@ -4,7 +4,7 @@ $citizenVerified = !empty($citizenVerified);
 ?>
 <div class="warga-services-page">
     <section class="warga-page-intro warga-services-intro">
-        <div><p>PELAYANAN DESA</p><h1>Semua Surat</h1><span>Temukan surat administrasi yang Anda perlukan.</span></div>
+        <div><p>PELAYANAN <?= e($institutionUpper) ?></p><h1>Semua Surat</h1><span>Temukan surat administrasi yang Anda perlukan.</span></div>
         <span class="warga-intro-icon"><i class="ti ti-mail" aria-hidden="true"></i></span>
     </section>
 
@@ -51,15 +51,15 @@ $citizenVerified = !empty($citizenVerified);
         </div>
         <div class="warga-service-empty" data-service-empty <?= $services ? 'hidden' : '' ?>>
             <i class="fa <?= $services ? 'fa-search' : 'fa-folder-open' ?>" aria-hidden="true"></i>
-            <strong><?= $services ? 'Surat tidak ditemukan' : 'Belum ada surat dari desa' ?></strong>
-            <span><?= $services ? 'Coba gunakan kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh desa.' ?></span>
+            <strong><?= $services ? 'Surat tidak ditemukan' : 'Belum ada surat dari ' . e($institutionLower) ?></strong>
+            <span><?= $services ? 'Coba gunakan kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh ' . e($institutionLower) . '.' ?></span>
         </div>
     </section>
 
     <?php if (!$citizenVerified): ?>
         <section class="warga-verification-notice" role="status">
             <i class="fa fa-user-shield" aria-hidden="true"></i>
-            <div><strong>Pengajuan belum tersedia</strong><p>Anda tetap dapat melihat katalog. Hubungi operator desa untuk memverifikasi akun sebelum mengajukan surat.</p></div>
+            <div><strong>Pengajuan belum tersedia</strong><p>Anda tetap dapat melihat katalog. Hubungi operator <?= e($institutionLower) ?> untuk memverifikasi akun sebelum mengajukan surat.</p></div>
         </section>
     <?php endif; ?>
 </div>

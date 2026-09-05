@@ -24,18 +24,28 @@ class Community_model extends CI_Model
         // Keep the newer aliases as compatibility fallbacks for older tenant snapshots.
         $institution = trim((string) ($row['contact']['institution'] ?? ''));
         if ($institution === '') {
+            $identity = isset($row['settings']['identitas_desa']) && is_array($row['settings']['identitas_desa'])
+                ? $row['settings']['identitas_desa']
+                : (isset($row['settings']['identitas_desa']) && is_object($row['settings']['identitas_desa'])
+                    ? (array) $row['settings']['identitas_desa'] : array());
             $institution = trim((string) ($row['settings']['bentuk_lembaga']
-                ?? ($row['settings']['identity']['bentuk_lembaga'] ?? ($row['settings']['identitas']['bentuk_lembaga'] ?? ''))));
+                ?? ($row['settings']['identity']['bentuk_lembaga']
+                    ?? ($row['settings']['identitas']['bentuk_lembaga']
+                        ?? ($identity['bentuk_lembaga'] ?? '')))));
         }
         $institutionName = trim((string) ($row['name'] ?? ''));
         if ($institutionName === '') {
             $institutionName = trim((string) $fallbackName);
         }
-        if ($institution === '' && preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\b/iu', $institutionName, $matches)) {
-            $institution = mb_convert_case($matches[1], MB_CASE_TITLE, 'UTF-8');
-        }
+        if ($institution === '') $institution = warga_institution_label($institutionName, 'Desa');
         $row['institution'] = $institution !== '' ? $institution : 'Desa';
         return $row;
+    }
+
+    private function institution_for_user(array $user)
+    {
+        $village = $this->village($user['village_id'] ?? '', $user['village_name'] ?? '');
+        return trim((string) ($village['institution'] ?? 'Desa')) ?: 'Desa';
     }
 
     public function workflow($villageId)
@@ -88,10 +98,12 @@ class Community_model extends CI_Model
         $this->db->insert('warga_announcements', array('id' => $id, 'village_id' => $user['village_id'],
             'author_id' => $user['id'], 'title' => $title, 'body' => $body));
         // INSERT SELECT keeps publication independent of village population size.
+        $institution = $this->institution_for_user($user);
+        $institutionLower = function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
         $this->db->query("INSERT INTO notifications (id,user_id,title,message)
             SELECT MD5(CONCAT(?,u.id)),u.id,?,? FROM users u JOIN roles r ON r.id=u.role_id
             WHERE u.village_id=? AND u.is_active=1 AND r.slug='warga'",
-            array($id, $title, 'Pengumuman baru dari pemerintah kampung/desa.', $user['village_id']));
+            array($id, $title, 'Pengumuman baru dari pemerintah ' . $institutionLower . '.', $user['village_id']));
         // A stable announcement ID in targets also supports direct notification links.
         $this->db->query("INSERT INTO warga_notification_targets (notification_id,target_path)
             SELECT n.id,? FROM notifications n JOIN users u ON u.id=n.user_id
@@ -158,7 +170,9 @@ class Community_model extends CI_Model
         $this->db->query('SELECT id FROM warga_complaints WHERE id=? AND village_id=? FOR UPDATE', array($id,$user['village_id']));
         $this->db->where('id', $id)->update('warga_complaints', array('status' => $status, 'updated_at' => date('Y-m-d H:i:s')));
         $this->db->insert('warga_complaint_replies', array('complaint_id' => $id, 'actor_id' => $user['id'], 'message' => $message, 'status' => $status));
-        $this->notify($row['citizen_user_id'], 'Tanggapan pengaduan', 'Pengaduan Anda mendapat tanggapan dari desa.', 'pengaduan/' . $id);
+        $institution = $this->institution_for_user($user);
+        $institutionLower = function_exists('mb_strtolower') ? mb_strtolower($institution, 'UTF-8') : strtolower($institution);
+        $this->notify($row['citizen_user_id'], 'Tanggapan pengaduan', 'Pengaduan Anda mendapat tanggapan dari ' . $institutionLower . '.', 'pengaduan/' . $id);
         if (!$this->db->trans_status()) { $this->db->trans_rollback(); return false; }
         $this->db->trans_commit();
         return true;

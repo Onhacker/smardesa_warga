@@ -9,7 +9,7 @@
     <div class="warga-form-title"><span><i class="fa fa-user"></i></span><div><h2>Data Pemohon</h2><p>Identitas warga yang mengajukan layanan.</p></div></div>
     <div class="warga-detail-row"><span>Nama warga</span><strong><?= e($request['citizen_name']) ?></strong></div>
     <div class="warga-detail-row"><span>Nomor telepon</span><strong><?= e(!empty($request['citizen_phone']) ? $request['citizen_phone'] : '-') ?></strong></div>
-    <div class="warga-detail-row"><span>Desa/Kampung</span><strong><?= e($request['village_name']) ?></strong></div>
+    <div class="warga-detail-row"><span><?= e($institutionLabel) ?></span><strong><?= e($request['village_name']) ?></strong></div>
     <div class="warga-detail-row"><span>Tanggal pengajuan</span><strong><?= e(tanggal_id($request['submitted_at'], TRUE)) ?></strong></div>
 </div></section>
 
@@ -63,7 +63,7 @@
     <?php foreach ($history as $index => $item): ?>
         <div class="warga-timeline-item <?= $index === count($history) - 1 ? 'is-current' : '' ?>">
             <span class="warga-timeline-marker"><i class="fa fa-check"></i></span>
-            <div><strong><?= e($item['label']) ?></strong><time><?= e(tanggal_id($item['occurred_at'], TRUE)) ?><?= !empty($item['actor_name']) ? ' · ' . e($item['actor_name']) : '' ?></time><p><?= e($item['note']) ?></p></div>
+            <div><strong><?= e(warga_replace_institution($item['label'], $institutionLabel)) ?></strong><time><?= e(tanggal_id($item['occurred_at'], TRUE)) ?><?= !empty($item['actor_name']) ? ' · ' . e($item['actor_name']) : '' ?></time><p><?= e(warga_replace_institution($item['note'], $institutionLabel)) ?></p></div>
         </div>
     <?php endforeach; ?>
 </section>

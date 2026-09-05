@@ -20,7 +20,7 @@
         <section>
             <h2>2. Penggunaan layanan</h2>
             <ul>
-                <li>gunakan aplikasi untuk keperluan administrasi dan informasi kampung/desa;</li>
+                <li>gunakan aplikasi untuk keperluan administrasi dan informasi <?= e($institutionLower) ?>;</li>
                 <li>isi tujuan surat dan data pendukung secara lengkap serta jujur;</li>
                 <li>pastikan berkas yang dikirim milik Anda atau Anda berwenang menggunakannya; dan</li>
                 <li>jangan mencoba mengganggu sistem, mengakses akun orang lain, atau mengirim konten yang melanggar hukum.</li>
@@ -28,11 +28,11 @@
         </section>
         <section>
             <h2>3. Permohonan dan dokumen</h2>
-            <p>Pengiriman permohonan bukan jaminan bahwa surat akan diterbitkan. Petugas dapat meminta perbaikan, menolak, atau menunda permohonan jika data tidak lengkap, tidak sesuai, atau perlu verifikasi tambahan. Surat resmi hanya dianggap sah setelah diterbitkan melalui proses yang ditetapkan kampung/desa.</p>
+            <p>Pengiriman permohonan bukan jaminan bahwa surat akan diterbitkan. Petugas dapat meminta perbaikan, menolak, atau menunda permohonan jika data tidak lengkap, tidak sesuai, atau perlu verifikasi tambahan. Surat resmi hanya dianggap sah setelah diterbitkan melalui proses yang ditetapkan <?= e($institutionLower) ?>.</p>
         </section>
         <section>
             <h2>4. Pengaduan dan informasi</h2>
-            <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Pengumuman, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah kampung/desa.</p>
+            <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Pengumuman, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah <?= e($institutionLower) ?>.</p>
         </section>
         <section>
             <h2>5. Ketersediaan layanan</h2>

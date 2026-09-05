@@ -16,7 +16,7 @@
 
 <?php if (!empty($formRows)): ?>
 <section class="card card-style warga-detail-card"><div class="content mb-2">
-    <div class="warga-form-title"><span><i class="fa fa-list-alt"></i></span><div><h2>Data Tambahan</h2><p>Data yang diisi mengikuti formulir layanan desa.</p></div></div>
+    <div class="warga-form-title"><span><i class="fa fa-list-alt"></i></span><div><h2>Data Tambahan</h2><p>Data yang diisi mengikuti formulir layanan <?= e($institutionLower) ?>.</p></div></div>
     <div class="warga-form-data-grid">
         <?php foreach ($formRows as $formRow): ?>
             <div class="warga-form-data-item"><span><?= e($formRow['label']) ?></span><strong><?= e($formRow['value']) ?></strong></div>
@@ -38,7 +38,7 @@
 <?php endif; ?>
 
 <?php if ($request['status'] === 'issued'): ?>
-<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi mengikuti tampilan surat desa dan siap dilihat di sini.</p></div><?php if (!empty($request['official_html_available'])): ?><div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-warga-letter-open data-html-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat-html')) ?>" data-html-name="<?= e('surat-' . $request['local_reference'] . '.html') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div><?php else: ?><div class="warga-result-pending"><i class="fa fa-info-circle"></i> Tampilan surat sedang disiapkan oleh desa.</div><?php endif; ?></section>
+<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi mengikuti tampilan surat <?= e($institutionLower) ?> dan siap dilihat di sini.</p></div><?php if (!empty($request['official_html_available'])): ?><div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-warga-letter-open data-html-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat-html')) ?>" data-html-name="<?= e('surat-' . $request['local_reference'] . '.html') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div><?php else: ?><div class="warga-result-pending"><i class="fa fa-info-circle"></i> Tampilan surat sedang disiapkan oleh <?= e($institutionLower) ?>.</div><?php endif; ?></section>
 <div id="warga-letter-modal" class="warga-letter-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="warga-letter-modal-title">
     <button type="button" class="warga-letter-modal-backdrop" data-warga-letter-close aria-label="Tutup surat"></button>
     <section class="warga-letter-modal-panel" role="document">
@@ -75,10 +75,10 @@ $timelineIcons = array(
         ?>
         <article class="warga-timeline-item is-<?= e($timelineStatusClass) ?> <?= $timelineCurrent ? 'is-current' : '' ?>"<?= $timelineCurrent ? ' aria-current="step"' : '' ?>>
             <span class="warga-timeline-marker"><i class="fa <?= e($timelineIcon) ?>" aria-hidden="true"></i></span>
-            <div class="warga-timeline-item-content"><strong><?= e(isset($item['label']) ? $item['label'] : ucwords(str_replace('_', ' ', $item['to_status']))) ?></strong><time datetime="<?= e(str_replace(' ', 'T', (string) $item['occurred_at'])) ?>"><i class="fa fa-clock" aria-hidden="true"></i><?= e(tanggal_id($item['occurred_at'], TRUE)) ?></time><p><?= e($item['note']) ?></p></div>
+            <div class="warga-timeline-item-content"><strong><?= e(warga_replace_institution(isset($item['label']) ? $item['label'] : ucwords(str_replace('_', ' ', $item['to_status'])), $institutionLabel)) ?></strong><time datetime="<?= e(str_replace(' ', 'T', (string) $item['occurred_at'])) ?>"><i class="fa fa-clock" aria-hidden="true"></i><?= e(tanggal_id($item['occurred_at'], TRUE)) ?></time><p><?= e(warga_replace_institution($item['note'], $institutionLabel)) ?></p></div>
         </article>
     <?php endforeach; ?>
 </section>
 
-<section class="warga-home-notice"><i class="fa fa-info-circle"></i><div><strong>Pembaruan status</strong><p>Verifikasi Sekdes, persetujuan Kepala Desa, dan penerbitan surat akan tampil pada halaman ini.</p></div></section>
+<section class="warga-home-notice"><i class="fa fa-info-circle"></i><div><strong>Pembaruan status</strong><p>Verifikasi Sekretaris <?= e($institutionLabel) ?>, persetujuan Kepala <?= e($institutionLabel) ?>, dan penerbitan surat akan tampil pada halaman ini.</p></div></section>
 </div>

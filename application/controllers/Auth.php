@@ -37,7 +37,7 @@ class Auth extends Public_Controller
             $this->form_validation->set_rules('kk', 'No. KK', 'trim|required|max_length[25]');
             $this->form_validation->set_rules('contact', 'Email atau nomor telepon', 'trim|required|max_length[160]');
             $this->form_validation->set_rules('district_code', 'Distrik/Kecamatan', 'trim|required|max_length[20]');
-            $this->form_validation->set_rules('village_code', 'Kampung/Desa', 'trim|required|max_length[30]');
+            $this->form_validation->set_rules('village_code', 'Wilayah', 'trim|required|max_length[30]');
             $this->form_validation->set_rules('password', 'Kata sandi', 'required|min_length[8]|max_length[200]');
             $this->form_validation->set_rules('password_confirm', 'Konfirmasi kata sandi', 'required|matches[password]');
             if ($this->form_validation->run()) {

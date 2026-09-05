@@ -84,12 +84,13 @@ class Auth_model extends CI_Model
             'village_name' => 'Kampung Araboda',
             'district_name' => 'Asologaima',
             'regency_code' => '95.01',
-            'regency_name' => 'Jayawijaya'
+            'regency_name' => 'Jayawijaya',
+            'institution' => 'Kampung'
         );
         return array(
             1 => array_merge($scope, array('id' => 1, 'role_id' => 1, 'role_slug' => 'warga', 'role_name' => 'Warga', 'name' => 'Yotam Wamena', 'username' => 'warga', 'email' => 'warga@demo.local', 'phone' => '081234567890')),
-            2 => array_merge($scope, array('id' => 2, 'role_id' => 2, 'role_slug' => 'sekdes', 'role_name' => 'Sekretaris Desa', 'name' => 'Markus Huby', 'username' => 'sekdes', 'email' => 'sekdes@demo.local', 'phone' => '081234567891')),
-            3 => array_merge($scope, array('id' => 3, 'role_id' => 3, 'role_slug' => 'kepala-desa', 'role_name' => 'Kepala Desa', 'name' => 'Yulius Wenda', 'username' => 'kades', 'email' => 'kades@demo.local', 'phone' => '081234567892'))
+            2 => array_merge($scope, array('id' => 2, 'role_id' => 2, 'role_slug' => 'sekdes', 'role_name' => 'Sekretaris Kampung', 'name' => 'Markus Huby', 'username' => 'sekdes', 'email' => 'sekdes@demo.local', 'phone' => '081234567891')),
+            3 => array_merge($scope, array('id' => 3, 'role_id' => 3, 'role_slug' => 'kepala-desa', 'role_name' => 'Kepala Kampung', 'name' => 'Yulius Wenda', 'username' => 'kades', 'email' => 'kades@demo.local', 'phone' => '081234567892'))
         );
     }
 
@@ -378,9 +379,9 @@ class Auth_model extends CI_Model
         if ($email === NULL && strlen($phone) < 8) return array('success' => FALSE, 'message' => 'Email atau nomor telepon belum valid.');
 
         $village = $this->db->where('village_code', $villageCode)->where('status', 'active')->get('village_tenants')->row_array();
-        if (!$village) return array('success' => FALSE, 'message' => 'Kampung/Desa yang dipilih belum terdaftar atau tidak aktif.');
+        if (!$village) return array('success' => FALSE, 'message' => 'Wilayah yang dipilih belum terdaftar atau tidak aktif.');
         if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
-            return array('success' => FALSE, 'message' => 'Pilihan distrik dan kampung/desa tidak sesuai. Silakan pilih ulang.');
+            return array('success' => FALSE, 'message' => 'Pilihan distrik dan wilayah tidak sesuai. Silakan pilih ulang.');
         }
         $verification = $this->verify_resident_central($villageCode, $name, $nik, $kk);
         if (empty($verification['success'])) {
@@ -556,10 +557,10 @@ class Auth_model extends CI_Model
         }
         $code = isset($decoded['error']) ? (string) $decoded['error'] : '';
         if ($code === 'resident_directory_unavailable' || $code === 'service_unavailable') {
-            return array('success' => FALSE, 'message' => 'Data penduduk kampung belum tersinkron ke layanan warga. Silakan coba lagi setelah SmartDesa desa terhubung ke internet.');
+            return array('success' => FALSE, 'message' => 'Data penduduk wilayah belum tersinkron ke layanan warga. Silakan coba lagi setelah SmartDesa terhubung ke internet.');
         }
         if ($code === 'rate_limited') return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan. Silakan tunggu beberapa menit lalu coba lagi.');
-        return array('success' => FALSE, 'message' => 'NIK, No. KK, atau Nama Lengkap tidak sesuai dengan data penduduk kampung yang dipilih.');
+        return array('success' => FALSE, 'message' => 'NIK, No. KK, atau Nama Lengkap tidak sesuai dengan data penduduk wilayah yang dipilih.');
     }
 
     private function identity_digits($value)

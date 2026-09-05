@@ -10,7 +10,7 @@
     </div>
 </div>
 
-<h6 class="menu-divider mt-4"><?= $staffMode ? 'Pelayanan Desa' : 'Layanan' ?></h6>
+<h6 class="menu-divider mt-4"><?= $staffMode ? 'Pelayanan ' . e($institutionLabel) : 'Layanan' ?></h6>
 <div class="list-group list-custom-small list-menu warga-menu-list">
     <?php if ($staffMode): ?>
         <a class="<?= nav_is('petugas') ? 'active-nav' : '' ?>" href="<?= site_url('petugas') ?>"><i class="fa fa-chart-pie bg-teal-dark color-white"></i><span>Ringkasan Layanan</span><i class="fa fa-angle-right"></i></a>

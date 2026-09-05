@@ -29,7 +29,7 @@
             <div class="splide__track">
                 <div class="splide__list">
             <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/surat-layanan.webp') ?>" alt="Ilustrasi layanan surat" loading="lazy" width="1537" height="1023">
+                <img src="<?= base_url('assets/v22/images/pictures/surat-layanan.webp') ?>" alt="Ilustrasi layanan surat" loading="eager" decoding="async" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
@@ -43,7 +43,7 @@
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
-                    <small>Informasi kampung</small>
+                    <small>Informasi <?= e($institutionLower) ?></small>
                     <strong>Pengumuman</strong>
                     <span><?= $announcements ? number_format(count($announcements)) . ' informasi terbaru' : 'Belum ada informasi terbaru' ?></span>
                 </span>

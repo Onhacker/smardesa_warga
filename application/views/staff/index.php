@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <section class="warga-staff-head">
     <div>
-        <p><?= e(strtoupper($currentUser['role_name'])) ?></p>
+        <p><?= e(strtoupper(warga_replace_institution($currentUser['role_name'], $institutionLabel))) ?></p>
         <h1>Pelayanan Surat</h1>
         <span><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span>
     </div>
@@ -17,7 +17,7 @@
 
 <section class="content warga-section-head mt-3">
     <div>
-        <p class="font-600 color-highlight mb-n1">ANTREAN DESA</p>
+        <p class="font-600 color-highlight mb-n1">ANTREAN <?= e($institutionUpper) ?></p>
         <h2 class="font-22 mb-0"><?= $selectedStatus !== '' ? e(warga_status_text($selectedStatus)) : 'Semua Permohonan' ?></h2>
     </div>
     <span class="warga-result-count"><?= number_format(count($requests)) ?> data</span>
@@ -42,5 +42,5 @@
 
 <section class="warga-home-notice">
     <i class="fa fa-shield-alt"></i>
-    <div><strong>Data sesuai wilayah kerja</strong><p>Petugas hanya dapat melihat dan memproses permohonan pada desa yang terhubung dengan akunnya.</p></div>
+    <div><strong>Data sesuai wilayah kerja</strong><p>Petugas hanya dapat melihat dan memproses permohonan pada <?= e($institutionLower) ?> yang terhubung dengan akunnya.</p></div>
 </section>

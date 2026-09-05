@@ -5,13 +5,13 @@
         <div>
             <p class="warga-legal-kicker">Dokumen layanan</p>
             <h1>Kebijakan Privasi</h1>
-            <p>Penjelasan singkat tentang data yang digunakan dalam layanan <?= e($village['institution'] ?? 'kampung/desa') ?>.</p>
+            <p>Penjelasan singkat tentang data yang digunakan dalam layanan <?= e($institutionLower) ?>.</p>
         </div>
     </header>
 
     <div class="warga-legal-card">
         <p class="warga-legal-updated">Terakhir diperbarui: <?= e(tanggal_id('2026-09-05')) ?></p>
-        <p>Smart Kampung membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan kampung/desa.</p>
+        <p>Smart Kampung membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan <?= e($institutionLower) ?>.</p>
 
         <section>
             <h2>1. Data yang kami gunakan</h2>
@@ -28,7 +28,7 @@
         </section>
         <section>
             <h2>3. Akses dan pembagian data</h2>
-            <p>Data permohonan hanya dapat diakses oleh warga pemilik akun dan petugas kampung/desa yang berwenang sesuai kebutuhan pelayanan. Data tidak dijual atau dipakai untuk iklan. Jika penyedia teknis diperlukan untuk menjalankan infrastruktur, aksesnya dibatasi sesuai fungsi dan kewajiban keamanan.</p>
+            <p>Data permohonan hanya dapat diakses oleh warga pemilik akun dan petugas <?= e($institutionLower) ?> yang berwenang sesuai kebutuhan pelayanan. Data tidak dijual atau dipakai untuk iklan. Jika penyedia teknis diperlukan untuk menjalankan infrastruktur, aksesnya dibatasi sesuai fungsi dan kewajiban keamanan.</p>
         </section>
         <section>
             <h2>4. Penyimpanan dan keamanan</h2>
@@ -40,7 +40,7 @@
         </section>
         <section>
             <h2>6. Hak Anda</h2>
-            <p>Anda dapat memeriksa dan memperbarui data kontak melalui menu Akun, meminta koreksi data yang keliru, serta menghubungi kantor kampung/desa untuk pertanyaan tentang pemrosesan data. Permintaan penghapusan dapat dibatasi jika data masih diperlukan untuk pelayanan atau kewajiban hukum.</p>
+            <p>Anda dapat memeriksa dan memperbarui data kontak melalui menu Akun, meminta koreksi data yang keliru, serta menghubungi kantor <?= e($institutionLower) ?> untuk pertanyaan tentang pemrosesan data. Permintaan penghapusan dapat dibatasi jika data masih diperlukan untuk pelayanan atau kewajiban hukum.</p>
         </section>
         <section>
             <h2>7. Perubahan kebijakan</h2>

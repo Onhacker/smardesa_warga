@@ -61,7 +61,7 @@ class Community extends App_Controller
         $id = $this->community->submit_complaint($this->currentUser, trim((string)$this->input->post('title')),
             trim((string)$this->input->post('body')), trim((string)$this->input->post('location')));
         $this->redirect_with($id ? 'pengaduan/'.$id : 'pengaduan', $id ? 'success' : 'error',
-            $id ? 'Pengaduan dikirim kepada Kepala Desa dan Sekdes.' : 'Pengaduan belum dapat dikirim. Pastikan akun terverifikasi dan batas 10 pengaduan per hari belum tercapai.');
+            $id ? 'Pengaduan dikirim kepada Kepala ' . $this->institution_label() . ' dan Sekretaris ' . $this->institution_label() . '.' : 'Pengaduan belum dapat dikirim. Pastikan akun terverifikasi dan batas 10 pengaduan per hari belum tercapai.');
     }
 
     public function complaint($id)

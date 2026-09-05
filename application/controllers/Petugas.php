@@ -10,7 +10,7 @@ class Petugas extends Staff_Controller
         $validStatuses = array('submitted', 'verified', 'approved', 'revision', 'rejected', 'issued');
         if ($status !== '' && !in_array($status, $validStatuses, TRUE)) $status = '';
         $this->render('staff/index', array(
-            'pageTitle' => 'Layanan Desa',
+            'pageTitle' => 'Layanan ' . $this->institution_label(),
             'staffMode' => TRUE,
             'requests' => $this->Request_model->for_staff($this->currentUser, $status ?: NULL),
             'summary' => $this->Request_model->staff_summary($this->currentUser),

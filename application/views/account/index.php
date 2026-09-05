@@ -41,7 +41,7 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
     <section class="warga-account-head" aria-labelledby="warga-account-name">
         <span class="warga-account-avatar" aria-hidden="true"><?= e(warga_initials($currentUser['name'])) ?></span>
         <div>
-            <p><?= e(strtoupper($currentUser['role_name'])) ?></p>
+            <p><?= e(strtoupper(warga_replace_institution($currentUser['role_name'], $institutionLabel))) ?></p>
             <h1 id="warga-account-name"><?= e($currentUser['name']) ?></h1>
             <span class="warga-account-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($currentUser['village_name']) ?></span>
         </div>
