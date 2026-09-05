@@ -538,6 +538,42 @@ body.theme-light #page .community-v22-detail-hero .community-meta,
 body.theme-light #page .community-v22-detail-hero .community-meta time,
 body.theme-light #page .community-v22-detail-hero .community-meta span { color: #fff !important; }
 
+/* Use the same Splide geometry as v22's double-slider. The template's
+ * custom.min.js supplies the loop/autoplay behaviour; these rules only keep
+ * the SmartDesa card proportions and spacing after Splide mounts. */
+#page .community-v22-slider.splide {
+  display: block;
+  width: calc(100% + 18px);
+  height: 250px;
+  margin: 0 -18px 0 0;
+  padding: 2px 70px 14px 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+#page .community-v22-slider.splide.is-active { visibility: visible; }
+#page .community-v22-slider.splide .splide__track { height: 234px; overflow: visible; }
+#page .community-v22-slider.splide .splide__list {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+#page .community-v22-slider.splide .community-v22-slide {
+  flex: 0 0 auto;
+  height: 218px;
+  margin-right: 14px;
+}
+
+@media (max-width: 480px) {
+  #page .community-v22-slider.splide {
+    width: calc(100% + 12px);
+    height: 236px;
+    margin-right: -12px;
+    padding-right: 42px;
+  }
+  #page .community-v22-slider.splide .splide__track { height: 220px; }
+  #page .community-v22-slider.splide .community-v22-slide { height: 204px; margin-right: 11px; }
+}
+
 @media (max-width: 480px) {
   #page .community-v22-page, #page .community-v22-detail { padding-right: 12px; padding-left: 12px; }
   #page .community-v22-page-hero { min-height: 126px; padding: 18px; border-radius: 19px; }

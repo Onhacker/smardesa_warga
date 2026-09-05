@@ -14,12 +14,6 @@
             </a>
         </div>
 
-        <dl class="community-v22-stats" aria-label="Ringkasan permohonan surat">
-            <div class="is-total"><dt>Total</dt><dd><?= number_format($summary['total']) ?></dd></div>
-            <div class="is-active"><dt>Diproses</dt><dd><?= number_format($summary['active']) ?></dd></div>
-            <div class="is-issued"><dt>Selesai</dt><dd><?= number_format($summary['issued']) ?></dd></div>
-            <div class="is-revision"><dt>Perbaikan</dt><dd><?= number_format($summary['revision']) ?></dd></div>
-        </dl>
     </section>
 
     <section class="community-v22-services" aria-labelledby="community-services-title">
@@ -31,8 +25,10 @@
             <span>Geser untuk melihat <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
         </header>
 
-        <nav class="community-v22-slider" aria-label="Layanan utama">
-            <a class="community-v22-slide is-letter" href="<?= site_url('surat') ?>">
+        <nav class="community-v22-slider splide double-slider visible-slider slider-no-dots" id="community-services-slider" aria-label="Layanan utama">
+            <div class="splide__track">
+                <div class="splide__list">
+            <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>">
                 <img src="<?= base_url('assets/v22/images/pictures/19l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
@@ -42,7 +38,7 @@
                     <span><?= number_format($summary['active']) ?> permohonan diproses</span>
                 </span>
             </a>
-            <a class="community-v22-slide is-announcement" href="<?= site_url('pengumuman') ?>">
+            <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>">
                 <img src="<?= base_url('assets/v22/images/pictures/20l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
@@ -52,7 +48,7 @@
                     <span><?= number_format(count($announcements)) ?> informasi terbaru</span>
                 </span>
             </a>
-            <a class="community-v22-slide is-complaint" href="<?= site_url('pengaduan') ?>">
+            <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>">
                 <img src="<?= base_url('assets/v22/images/pictures/6l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-comments" aria-hidden="true"></i></span>
@@ -62,6 +58,8 @@
                     <span>Sampaikan keluhan dan masukan</span>
                 </span>
             </a>
+                </div>
+            </div>
         </nav>
     </section>
 

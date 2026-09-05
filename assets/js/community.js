@@ -69,4 +69,52 @@
   document.addEventListener('visibilitychange',function(){if(!document.hidden)schedule();});
   window.addEventListener('online',schedule);
   schedule();
+
+  // AppKit v22's double-slider advances every four seconds.  Keep the
+  // community slider equally useful when its lightweight scroll-snap markup
+  // is used (Splide-marked sliders are initialized by custom.min.js instead).
+  function initCommunitySliderAutoplay() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    document.querySelectorAll('.community-v22-slider').forEach(function (slider) {
+      if (slider.classList.contains('splide') || slider.querySelector('.splide__track')) return;
+      var slides = Array.prototype.slice.call(slider.querySelectorAll('.community-v22-slide'));
+      if (slides.length < 2 || slider.dataset.autoplayReady === '1') return;
+      slider.dataset.autoplayReady = '1';
+      var index = 0, paused = false, timeoutId;
+      function nearestIndex() {
+        var left = slider.scrollLeft, nearest = 0, distance = Infinity;
+        slides.forEach(function (slide, slideIndex) {
+          var currentDistance = Math.abs(slide.offsetLeft - left);
+          if (currentDistance < distance) { distance = currentDistance; nearest = slideIndex; }
+        });
+        return nearest;
+      }
+      function stop() { paused = true; clearTimeout(timeoutId); }
+      function restart() {
+        paused = false;
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(advance, 4000);
+      }
+      function advance() {
+        if (paused || document.hidden || !document.body.contains(slider)) return;
+        index = (nearestIndex() + 1) % slides.length;
+        var target = slides[index];
+        // Returning to the first card mirrors Splide's loop while keeping the
+        // native scroll-snap implementation accessible and touch friendly.
+        slider.scrollTo({left: target.offsetLeft, behavior: 'smooth'});
+        timeoutId = setTimeout(advance, 4000);
+      }
+      slider.addEventListener('mouseenter', stop);
+      slider.addEventListener('mouseleave', restart);
+      slider.addEventListener('focusin', stop);
+      slider.addEventListener('focusout', function (event) {
+        if (!slider.contains(event.relatedTarget)) restart();
+      });
+      slider.addEventListener('touchstart', stop, {passive:true});
+      slider.addEventListener('touchend', restart, {passive:true});
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stop(); else restart(); });
+      restart();
+    });
+  }
+  initCommunitySliderAutoplay();
 })();

@@ -2537,28 +2537,34 @@ html {
 }
 
 /* AppKit v22 header transition: the spacious page-title is the initial state;
- * custom.min.js adds .header-active after the first scroll. */
+ * custom.min.js adds .header-active after the first scroll. AppKit keeps this
+ * compact bar neutral (it does not change to the product accent colour). */
 #page .header {
   background-color: rgba(255, 255, 255, .72);
+  border-bottom-color: rgba(0, 0, 0, .08);
+  box-shadow: none;
   transition: background-color 300ms ease, box-shadow 300ms ease, color 300ms ease;
 }
-#page .header.header-active {
-  background-color: var(--warga-teal-dark) !important;
-  border-bottom-color: rgba(255, 255, 255, .12) !important;
-  box-shadow: 0 8px 22px rgba(15, 94, 91, .24);
-}
+#page .header.header-active,
 #page > .header.header-auto-show.header-active {
-  background-color: var(--warga-teal-dark) !important;
-  border-bottom-color: rgba(255, 255, 255, .12) !important;
-  box-shadow: 0 8px 22px rgba(15, 94, 91, .24) !important;
+  background-color: rgba(255, 255, 255, .7) !important;
+  border-bottom-color: rgba(0, 0, 0, .08) !important;
+  box-shadow: none !important;
 }
 #page .header.header-active .header-title,
 #page .header.header-active .header-icon,
-#page .header.header-active .header-icon i { color: #fff !important; }
+#page .header.header-active .header-icon i { color: #1f1f1f !important; }
 #page .header.header-active .header-icon { background-color: transparent !important; }
-.theme-dark #page .header { background-color: rgba(15, 17, 23, .78); }
+.theme-dark #page .header,
 .theme-dark #page .header.header-active,
-.theme-dark #page > .header.header-auto-show.header-active { background-color: #0f5e5b !important; }
+.theme-dark #page > .header.header-auto-show.header-active {
+  background-color: #21252a !important;
+  border-bottom-color: rgba(255, 255, 255, .05) !important;
+  box-shadow: none !important;
+}
+.theme-dark #page .header.header-active .header-title,
+.theme-dark #page .header.header-active .header-icon,
+.theme-dark #page .header.header-active .header-icon i { color: #fff !important; }
 
 @keyframes footerAni {
   0% { transform: scale(1, 1) translateX(-50%); }
