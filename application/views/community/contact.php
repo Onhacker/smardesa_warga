@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); $contact=$village['contact']; ?>
-<div class="warga-community">
-<header class="community-heading"><div><h1>Kontak <?= e($village['institution']) ?></h1><p><?= e($village['name'] ?? $currentUser['village_name']) ?></p></div><i class="fa fa-address-book"></i></header>
+<div class="warga-community community-v22-page community-v22-contact-page">
+<header class="community-heading community-v22-page-hero"><div class="community-v22-page-hero-icon"><i class="fa fa-address-book" aria-hidden="true"></i></div><div><p class="community-v22-eyebrow">Bantuan warga</p><h1>Kontak <?= e($village['institution']) ?></h1><p><?= e($village['name'] ?? $currentUser['village_name']) ?> <span aria-hidden="true">·</span> Kami siap membantu</p></div></header>
 <dl class="community-contact">
 <?php foreach (array('address'=>'Alamat kantor','phone'=>'Telepon','email'=>'Email','website'=>'Website','office_hours'=>'Jam pelayanan') as $key=>$label): ?>
 <div><dt><?= e($label) ?></dt><dd>
@@ -12,4 +12,3 @@
 <div><dt>Distrik / Kecamatan</dt><dd><?= e($village['district_name'] ?? '-') ?></dd></div>
 <div><dt>Kabupaten</dt><dd><?= e($village['regency_name'] ?? '-') ?></dd></div>
 </dl></div>
-

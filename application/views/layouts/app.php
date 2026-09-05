@@ -22,8 +22,8 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=63">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=3">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=66">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=8">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -43,10 +43,10 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         <a href="#" data-toggle-theme class="header-icon <?= $themeHeaderClass ?> show-on-theme-light" aria-label="Gunakan mode gelap"><i class="fas fa-moon"></i></a>
     </header>
 
-    <nav id="footer-bar" class="warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
+    <nav id="footer-bar" class="footer-bar-6 warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
         <a class="<?= $navSection === 'dashboard' || ($staffMode && $navSection === 'petugas' && !$this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas' : 'dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a class="<?= $navSection === 'pengumuman' ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
-        <a class="circle-nav <?= in_array($navSection,array('surat','permohonan','layanan')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><strong><i class="fa fa-envelope"></i></strong><span>Surat</span></a>
+        <a class="circle-nav <?= in_array($navSection,array('surat','permohonan','layanan')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
         <a class="<?= $navSection === 'pengaduan' ? 'active-nav' : '' ?>" href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments"></i><span>Pengaduan</span></a>
         <a class="<?= $navSection === 'akun' ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user"></i><span>Akun</span></a>
     </nav>

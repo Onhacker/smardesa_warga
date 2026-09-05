@@ -2536,9 +2536,168 @@ html {
   padding-top: 0 !important;
 }
 
+/* AppKit v22 header transition: the spacious page-title is the initial state;
+ * custom.min.js adds .header-active after the first scroll. */
+#page .header {
+  background-color: rgba(255, 255, 255, .72);
+  transition: background-color 300ms ease, box-shadow 300ms ease, color 300ms ease;
+}
+#page .header.header-active {
+  background-color: var(--warga-teal-dark) !important;
+  border-bottom-color: rgba(255, 255, 255, .12) !important;
+  box-shadow: 0 8px 22px rgba(15, 94, 91, .24);
+}
+#page > .header.header-auto-show.header-active {
+  background-color: var(--warga-teal-dark) !important;
+  border-bottom-color: rgba(255, 255, 255, .12) !important;
+  box-shadow: 0 8px 22px rgba(15, 94, 91, .24) !important;
+}
+#page .header.header-active .header-title,
+#page .header.header-active .header-icon,
+#page .header.header-active .header-icon i { color: #fff !important; }
+#page .header.header-active .header-icon { background-color: transparent !important; }
+.theme-dark #page .header { background-color: rgba(15, 17, 23, .78); }
+.theme-dark #page .header.header-active,
+.theme-dark #page > .header.header-auto-show.header-active { background-color: #0f5e5b !important; }
+
 @keyframes footerAni {
   0% { transform: scale(1, 1) translateX(-50%); }
   50% { transform: scale(1.05, 1.05) translateX(-48%); }
+}
+
+/* Footer parity with AppKit v22 (.footer-bar-6).  The v22 script adds the
+ * active underline and the circle's <strong><u></u></strong> decoration at
+ * runtime; keeping the same class/geometry lets it do that without a second
+ * custom wrapper or an off-centre white layer. */
+#footer-bar.footer-bar-6 {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 98;
+  display: flex;
+  width: auto;
+  max-width: none;
+  height: calc(65px + env(safe-area-inset-bottom));
+  min-height: 61px;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgba(0, 0, 0, .05);
+  border-radius: 0;
+  background-color: rgba(255, 255, 255, .92);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: none;
+  text-align: center;
+  transition: transform 350ms ease !important;
+}
+
+#footer-bar.footer-bar-6::before { display: none; }
+
+#footer-bar.footer-bar-6 > a {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  padding-top: 12px;
+  color: #1f1f1f;
+}
+
+#footer-bar.footer-bar-6 > a > i {
+  position: relative;
+  z-index: 2;
+  color: #6b7280;
+  font-size: 18px;
+  opacity: .82;
+  transform: translateY(-2px);
+}
+
+#footer-bar.footer-bar-6 > a > span {
+  position: relative;
+  z-index: 2;
+  display: block;
+  margin-top: -6px;
+  color: #555e69 !important;
+  font-family: Roboto, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  opacity: .9;
+}
+
+#footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > i,
+#footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > span {
+  color: #555e69 !important;
+}
+
+#footer-bar.footer-bar-6 .circle-nav { padding-top: 12px; }
+
+#footer-bar.footer-bar-6 .circle-nav > strong {
+  position: absolute;
+  top: -23px;
+  left: 50%;
+  z-index: 0;
+  display: block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  background-image: linear-gradient(to bottom, #5f8fe8 0%, #416dcc 100%) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, .13);
+  animation: footerAni 1s infinite;
+  transform: translateX(-50%);
+  will-change: transform;
+}
+
+#footer-bar.footer-bar-6 .circle-nav > strong > u {
+  position: absolute;
+  left: 0;
+  z-index: 0;
+  display: block;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  background-color: rgba(255, 255, 255, .08);
+  text-decoration: none;
+}
+
+#footer-bar.footer-bar-6 .circle-nav > i {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  width: auto;
+  color: #fff !important;
+  font-size: 20px !important;
+  opacity: 1 !important;
+  transform: translateY(-21px) translateX(0) !important;
+}
+
+#footer-bar.footer-bar-6 .circle-nav > span {
+  margin-top: -8px !important;
+  color: #555e69 !important;
+}
+
+#footer-bar.footer-bar-6 .circle-nav.active-nav::after,
+#footer-bar.footer-bar-6 .circle-nav.active-nav em {
+  position: absolute;
+  top: 57px;
+  left: 50%;
+  display: block;
+  width: 60px;
+  height: 4px;
+  border-radius: 60px;
+  background-image: linear-gradient(to bottom, #1b55bf 0%, #1740bf 100%) !important;
+  content: "";
+  transform: translateX(-50%);
+}
+
+.theme-dark #footer-bar.footer-bar-6 {
+  border-top-color: rgba(255, 255, 255, .06);
+  background-color: rgba(33, 37, 42, .94);
+}
+
+.theme-dark #footer-bar.footer-bar-6 > a > i,
+.theme-dark #footer-bar.footer-bar-6 > a > span,
+.theme-dark #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > i,
+.theme-dark #footer-bar.footer-bar-6 > a.active-nav:not(.circle-nav) > span {
+  color: #d8dee5 !important;
 }
 
 /* Give the community screens the same visual rhythm as the dashboard cards. */
