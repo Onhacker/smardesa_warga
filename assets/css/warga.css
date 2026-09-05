@@ -2641,7 +2641,7 @@ html {
 
 .warga-legal-kicker {
   margin: 0 0 3px;
-  color: #dbe9fb;
+  color: #fff;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em !important;
@@ -2664,6 +2664,19 @@ html {
 
 #page .warga-legal-hero > div:last-child > p:last-child {
   color: #e8f0fb !important;
+}
+
+#page .warga-legal-hero .warga-legal-kicker,
+#page .warga-legal-hero h1 {
+  color: #fff !important;
+}
+
+/* simp-v22 has a broad light-theme rule that colours plain text inside the
+ * page content black. Keep every line in this blue hero explicitly white. */
+body #page .page-content .warga-legal-page .warga-legal-hero .warga-legal-kicker,
+body #page .page-content .warga-legal-page .warga-legal-hero h1,
+body #page .page-content .warga-legal-page .warga-legal-hero > div:last-child > p:last-child {
+  color: #fff !important;
 }
 
 .warga-legal-card {

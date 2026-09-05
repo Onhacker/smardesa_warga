@@ -5,7 +5,7 @@ $lettersPage = !empty($lettersPage);
 ?>
 <?php if ($lettersPage): ?>
 <section class="warga-home-head warga-letters-head" aria-labelledby="warga-letters-title">
-    <div class="warga-letters-copy"><p>SURAT MENYURAT</p><h1 id="warga-letters-title">Surat menyurat</h1><span>Ajukan dan pantau surat administrasi Anda.</span></div>
+    <div class="warga-letters-copy"><p>PELAYANAN PERMOHONAN SURAT</p><h1 id="warga-letters-title">Surat menyurat</h1><span>Ajukan dan pantau surat administrasi Anda.</span></div>
     <span class="warga-intro-icon" aria-hidden="true"><i class="fa fa-envelope"></i></span>
 </section>
 <?php endif; ?>

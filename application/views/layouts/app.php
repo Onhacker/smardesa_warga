@@ -22,7 +22,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=75">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=77">
     <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=17">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
@@ -78,7 +78,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </aside>
     <div class="menu-hider"></div>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=25') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=27') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>
