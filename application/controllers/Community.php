@@ -88,4 +88,26 @@ class Community extends App_Controller
         $village = $this->community->village($this->currentUser['village_id']);
         $this->render('community/contact', array('pageTitle' => 'Kontak '.$village['institution'], 'village' => $village));
     }
+
+    public function privacy()
+    {
+        $village = $this->community->village($this->currentUser['village_id']);
+        $this->render('community/privacy', array(
+            'pageTitle' => 'Kebijakan Privasi',
+            'village' => $village,
+            'showBackButton' => TRUE,
+            'backUrl' => site_url('akun')
+        ));
+    }
+
+    public function terms()
+    {
+        $village = $this->community->village($this->currentUser['village_id']);
+        $this->render('community/terms', array(
+            'pageTitle' => 'Syarat & Ketentuan',
+            'village' => $village,
+            'showBackButton' => TRUE,
+            'backUrl' => site_url('akun')
+        ));
+    }
 }

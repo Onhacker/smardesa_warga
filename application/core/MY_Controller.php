@@ -18,6 +18,10 @@ class MY_Controller extends CI_Controller
         $this->load->model('Community_model');
         $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '');
         $data['institutionLabel'] = $contactVillage['institution'];
+        // Keep the complete tenant/contact context available to shared layout
+        // components.  The footer uses this data for the identity and contact
+        // buttons, while the page views remain responsible for their own data.
+        $data['footerVillage'] = $contactVillage;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);
         // The compact AppKit header is navigation-only on primary screens.

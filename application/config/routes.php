@@ -37,4 +37,6 @@ $route['notifikasi'] = 'notifications/index';
 $route['akun'] = 'account/index';
 $route['akun/edit'] = 'account/edit';
 $route['akun/ganti-password'] = 'account/password';
+$route['kebijakan-privasi'] = 'community/privacy';
+$route['syarat-ketentuan'] = 'community/terms';
 $route['api/health'] = 'api/health';
