@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
+  <title id="title">Produk Pasar Digital</title>
+  <desc id="desc">Ilustrasi tas belanja berwarna biru</desc>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eaf3ff"/><stop offset="1" stop-color="#c7def8"/></linearGradient><linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2d6bb2"/><stop offset="1" stop-color="#1f4f8d"/></linearGradient></defs>
+  <rect width="600" height="600" rx="72" fill="url(#bg)"/>
+  <circle cx="468" cy="118" r="92" fill="#fff" opacity=".45"/>
+  <path d="M146 238h308l-26 238H172z" fill="url(#bag)"/>
+  <path d="M232 250v-38c0-38 30-69 68-69s68 31 68 69v38" fill="none" stroke="#fff" stroke-width="24" stroke-linecap="round"/>
+  <path d="M222 319h156M222 382h156" stroke="#fff" stroke-width="22" stroke-linecap="round" opacity=".9"/>
+  <circle cx="300" cy="438" r="15" fill="#fff"/>
+</svg>

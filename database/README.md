@@ -25,4 +25,6 @@ Jalankan `migrations/010_sync_aggregate_keys.sql` untuk memperpanjang kunci kata
 
 Jalankan `migrations/012_citizen_identity_details.sql` untuk menambahkan kolom terenkripsi NIK dan No. KK pada profil warga. Kolom ini hanya dibaca pada halaman akun milik warga yang sedang masuk; direktori penduduk dan riwayat sinkronisasi tetap hanya menyimpan HMAC.
 
+Setelah seluruh migrasi sebelumnya selesai (termasuk `migrations/015_sync_integrity.sql`), jalankan `migrations/016_marketplace.sql` untuk mengaktifkan Pasar Digital: kategori, identitas toko per pengguna, produk, dan metadata gambar privat. Gambar produk disimpan pada `PRIVATE_STORAGE_PATH`, bukan di dalam `public_html`.
+
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

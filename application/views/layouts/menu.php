@@ -33,6 +33,7 @@ if ($menuInstitution === '') $menuInstitution = 'Desa';
 <div class="list-group list-custom-small list-menu warga-menu-list">
     <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn bg-blue-dark color-white"></i><span>Pengumuman</span><i class="fa fa-angle-right"></i></a>
     <a href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments bg-orange-dark color-white"></i><span>Pengaduan</span><i class="fa fa-angle-right"></i></a>
+    <a class="<?= nav_is('marketplace') ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store bg-blue-dark color-white"></i><span>Pasar Digital</span><i class="fa fa-angle-right"></i></a>
     <a href="<?= site_url('kontak') ?>"><i class="fa fa-address-book bg-teal-dark color-white"></i><span>Kontak <?= e($institutionLabel) ?></span><i class="fa fa-angle-right"></i></a>
     <?php if ($staffMode): ?><a href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell bg-red-dark color-white"></i><span>Notifikasi</span><i class="fa fa-angle-right"></i></a><?php endif; ?>
     <a class="<?= nav_is('account') ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user bg-blue-dark color-white"></i><span>Akun Saya</span><i class="fa fa-angle-right"></i></a>

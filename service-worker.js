@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-ui-34';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-06-marketplace-37';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -23,6 +23,9 @@ const precache = [
   'assets/js/warga.min.js?v=14',
   'assets/js/community.min.js?v=6',
   'assets/css/community.min.css?v=17',
+  'assets/css/market.css?v=3',
+  'assets/js/market.js?v=1',
+  'assets/images/market-product-placeholder.svg',
   'assets/v22/images/pictures/surat-layanan.webp',
   'assets/v22/images/pictures/pengaduan-layanan.webp',
   'assets/v22/images/pictures/pengumuman-layanan.webp',

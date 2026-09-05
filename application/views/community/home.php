@@ -111,5 +111,12 @@
             </span>
             <span class="community-v22-quick-card-copy">Sampaikan keluhan dan masukan warga.</span>
         </a>
+        <a class="community-v22-quick-card is-marketplace" href="<?= site_url('pasar') ?>">
+            <span class="community-v22-quick-card-head">
+                <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
+                <strong>Pasar Digital</strong>
+            </span>
+            <span class="community-v22-quick-card-copy">Temukan dan jual produk warga <?= e($institutionLower) ?>.</span>
+        </a>
     </section>
 </div>
