@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-ui-10';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-ui-11';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -21,7 +21,7 @@ const precache = [
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=1',
   'assets/js/warga.min.js?v=13',
-  'assets/js/community.min.js?v=4',
+  'assets/js/community.min.js?v=5',
   'assets/css/community.min.css?v=10'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 

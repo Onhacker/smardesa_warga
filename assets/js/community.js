@@ -1,5 +1,32 @@
 (function () {
   'use strict';
+  // AppKit v22's .double-slider uses perPage: 2, which makes landscape cards
+  // fill almost half of a wide viewport. Keep its loop/autoplay behavior, but
+  // give the home slider a compact, responsive card width like the original
+  // v22 showcase. This wrapper runs before custom.min.js handles DOM ready and
+  // leaves every other Splide instance untouched.
+  (function tuneCommunitySplide() {
+    var OriginalSplide = window.Splide;
+    if (!OriginalSplide || window.__SDWCommunitySplideTuned) return;
+    function compactSplide(root, options) {
+      var element = typeof root === 'string' ? document.querySelector(root) : root;
+      var tunedOptions = options ? Object.assign({}, options) : {};
+      if (element && element.id === 'community-services-slider') {
+        var viewport = window.innerWidth || document.documentElement.clientWidth || 360;
+        var width = viewport <= 480 ? Math.min(316, Math.max(270, Math.round(viewport * .81))) : Math.min(360, Math.max(300, Math.round(viewport * .38)));
+        tunedOptions.autoWidth = false;
+        tunedOptions.fixedWidth = width;
+        tunedOptions.perPage = 1;
+        tunedOptions.gap = '14px';
+        tunedOptions.padding = {left: 0, right: viewport <= 480 ? 42 : 70};
+      }
+      return new OriginalSplide(root, tunedOptions);
+    }
+    compactSplide.prototype = OriginalSplide.prototype;
+    try { Object.setPrototypeOf(compactSplide, OriginalSplide); } catch (_) {}
+    window.Splide = compactSplide;
+    window.__SDWCommunitySplideTuned = true;
+  }());
   var config = window.SDW || {}, base = config.baseUrl || '/';
   var button = document.querySelector('[data-push-toggle]');
   var status = document.querySelector('[data-push-status]');

@@ -82,6 +82,6 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
 <script src="<?= base_url('assets/js/warga.min.js') ?>?v=13"></script>
-<script src="<?= base_url('assets/js/community.min.js') ?>?v=4"></script>
+<script src="<?= base_url('assets/js/community.min.js') ?>?v=5"></script>
 </body>
 </html>
