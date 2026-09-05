@@ -1,11 +1,14 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+$menuInstitution = trim((string) ($institutionLabel ?? 'Desa'));
+if ($menuInstitution === '') $menuInstitution = 'Desa';
+?>
 <div class="warga-menu-head">
     <div class="warga-menu-brand-row">
-        <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo SmartDesa" width="56" height="56">
+        <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Smart <?= e($menuInstitution) ?>" width="56" height="56">
         <button type="button" class="close-menu warga-menu-close" aria-label="Tutup menu"><i class="fa fa-times" aria-hidden="true"></i></button>
     </div>
     <div class="warga-menu-brand-copy">
-        <h2>SmartDesa Warga</h2>
+        <h2>Smart <?= e($menuInstitution) ?></h2>
         <p><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($currentUser['village_name']) ?></span></p>
     </div>
 </div>
