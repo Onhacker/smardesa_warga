@@ -73,7 +73,7 @@
 
         <div class="community-v22-feature-list">
             <a class="community-v22-feature" href="<?= site_url('notifikasi') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/18l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/notifikasi-layanan.webp') ?>" alt="Ilustrasi notifikasi surat" loading="lazy" width="600" height="1067">
                 <span class="community-v22-feature-copy">
                     <small>Kabar layanan</small>
                     <strong>Notifikasi Surat</strong>
