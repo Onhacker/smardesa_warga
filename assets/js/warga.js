@@ -535,6 +535,71 @@
     });
   }());
 
+  document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
+    toggle.addEventListener('click', function () {
+      var id = toggle.getAttribute('aria-controls');
+      var input = id ? document.getElementById(id) : null;
+      if (!input) return;
+      var visible = input.type === 'text';
+      input.type = visible ? 'password' : 'text';
+      toggle.setAttribute('aria-pressed', visible ? 'false' : 'true');
+      toggle.setAttribute('aria-label', visible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+      var icon = toggle.querySelector('i');
+      if (icon) icon.className = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
+    });
+  });
+
+  (function initLogoutConfirmation() {
+    var activeForm = null;
+    var activeTrigger = null;
+    var dialog = null;
+    function close() {
+      if (!dialog) return;
+      dialog.hidden = true;
+      document.body.classList.remove('warga-dialog-open');
+      if (activeTrigger && typeof activeTrigger.focus === 'function') activeTrigger.focus();
+      activeForm = null; activeTrigger = null;
+    }
+    function ensureDialog() {
+      if (dialog) return dialog;
+      dialog = document.createElement('div');
+      dialog.className = 'warga-confirm-dialog';
+      dialog.hidden = true;
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.setAttribute('aria-labelledby', 'warga-confirm-title');
+      dialog.innerHTML = '<button type="button" class="warga-confirm-backdrop" data-confirm-cancel aria-label="Tutup"></button><div class="warga-confirm-panel"><span class="warga-confirm-icon" aria-hidden="true"><i class="fa fa-sign-out-alt"></i></span><h2 id="warga-confirm-title">Keluar dari akun?</h2><p>Anda yakin ingin keluar dari akun ini?</p><div class="warga-confirm-actions"><button type="button" class="btn warga-confirm-cancel" data-confirm-cancel>Tidak</button><button type="button" class="btn bg-red-dark color-white" data-confirm-accept>Ya, keluar</button></div></div>';
+      document.body.appendChild(dialog);
+      dialog.addEventListener('click', function (event) {
+        var target = event.target.closest('[data-confirm-cancel], [data-confirm-accept]');
+        if (!target) return;
+        if (target.hasAttribute('data-confirm-cancel')) { event.preventDefault(); close(); return; }
+        if (!activeForm) return;
+        event.preventDefault();
+        var form = activeForm;
+        close();
+        form.setAttribute('data-logout-confirmed', 'true');
+        if (HTMLFormElement.prototype.submit) HTMLFormElement.prototype.submit.call(form);
+      });
+      return dialog;
+    }
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (!form || !form.matches('[data-logout-form]') || form.getAttribute('data-logout-confirmed') === 'true') return;
+      event.preventDefault();
+      activeForm = form;
+      activeTrigger = form.querySelector('button[type="submit"]');
+      var box = ensureDialog();
+      box.hidden = false;
+      document.body.classList.add('warga-dialog-open');
+      var cancel = box.querySelector('[data-confirm-cancel]:not(.warga-confirm-backdrop)');
+      if (cancel) cancel.focus();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && dialog && !dialog.hidden) { event.preventDefault(); close(); }
+    });
+  }());
+
   var deferredInstall = null;
   var installPanels = Array.prototype.slice.call(document.querySelectorAll('[data-pwa-install-panel]'));
   function updateInstallStatus(message, installed) {

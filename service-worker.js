@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-v64';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-2';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -17,10 +17,12 @@ const precache = [
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=60',
+  'assets/css/warga.min.css?v=61',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=1',
-  'assets/js/warga.min.js?v=10'
+  'assets/js/warga.min.js?v=11',
+  'assets/js/community.min.js?v=2',
+  'assets/css/community.min.css?v=2'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {
@@ -58,3 +60,28 @@ self.addEventListener('fetch', function (event) {
 });
 
 self.addEventListener('message', function (event) { if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting(); });
+
+self.addEventListener('push', function (event) {
+  var data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (_) {}
+  var url = new URL(data.url || 'notifikasi', scopeUrl);
+  if (url.origin !== scopeUrl.origin || !url.pathname.startsWith(appPath)) url = new URL('notifikasi', scopeUrl);
+  event.waitUntil(self.registration.showNotification(data.title || 'SmartDesa Warga', {
+    body: data.body || 'Ada pembaruan layanan untuk Anda.',
+    icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
+    badge: new URL('assets/pwa/icon-192.png',scopeUrl).href,
+    tag: data.tag || 'sdw-notification', vibrate: [200,100,200],
+    data: {url:url.href}
+  }));
+});
+self.addEventListener('notificationclick', function (event) {
+  event.notification.close();
+  var url = new URL(event.notification.data && event.notification.data.url || 'notifikasi',scopeUrl);
+  if (url.origin !== scopeUrl.origin || !url.pathname.startsWith(appPath)) url = new URL('notifikasi',scopeUrl);
+  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async function(clients) {
+    for (var client of clients) {
+      if (client.url.startsWith(scopeUrl.href) && 'focus' in client) { await client.navigate(url.href); return client.focus(); }
+    }
+    return self.clients.openWindow(url.href);
+  }));
+});

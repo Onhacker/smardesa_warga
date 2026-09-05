@@ -5023,3 +5023,46 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
     grid-column: auto;
   }
 }
+
+/* Account editing forms and the logout confirmation dialog. */
+.warga-account-form-card { margin: 0 15px 24px; }
+.warga-account-form-card .content { padding: 22px 20px; }
+.warga-account-form-field { margin-bottom: 18px; }
+.warga-account-form-field > label { display: block; margin: 0 0 7px; color: var(--warga-ink); font-size: 14px; font-weight: 750; }
+.warga-account-form-input { display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 13px; border: 1px solid var(--warga-line); border-radius: 13px; background: var(--warga-page); }
+.warga-account-form-input > i { flex: 0 0 auto; width: 18px; color: var(--warga-teal-dark); text-align: center; }
+.warga-account-form-input > input { width: 100%; min-width: 0; height: 48px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--warga-ink); font: inherit; font-size: 16px; box-shadow: none; }
+.warga-account-form-input:focus-within { outline: 2px solid var(--warga-teal); outline-offset: 2px; }
+.warga-account-form-field > small { display: block; margin-top: 6px; color: var(--warga-muted); font-size: 12px; line-height: 1.45; }
+.warga-account-form-field > .warga-form-field-error { color: var(--warga-red) !important; font-weight: 700; }
+.warga-password-toggle { display: grid; place-items: center; flex: 0 0 34px; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px; background: transparent; color: var(--warga-muted); }
+.warga-password-toggle:hover { background: rgba(22,123,120,.1); color: var(--warga-teal-dark); }
+.warga-account-form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 24px; }
+.warga-account-form-actions .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; margin: 0; padding: 9px 15px; border-radius: 11px; font-size: 14px; font-weight: 750; }
+.warga-form-cancel { border: 1px solid var(--warga-line); background: var(--warga-page); color: var(--warga-muted) !important; }
+.warga-form-demo-note, .warga-form-error { display: flex; align-items: flex-start; gap: 8px; margin: 0 0 18px; padding: 11px 12px; border-radius: 11px; font-size: 13px; line-height: 1.45; }
+.warga-form-demo-note { border: 1px solid #c6dfdc; background: #eaf6f4; color: var(--warga-teal-dark); }
+.warga-form-error { border: 1px solid #edbec2; background: #fff0f1; color: #9d2933; }
+.warga-form-demo-note > i, .warga-form-error > i { flex: 0 0 auto; margin-top: 2px; }
+.warga-confirm-dialog[hidden] { display: none !important; }
+.warga-confirm-dialog { position: fixed; inset: 0; z-index: 4000; display: grid; place-items: center; padding: 18px; background: rgba(15, 23, 42, .58); }
+.warga-confirm-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; }
+.warga-confirm-panel { position: relative; z-index: 1; width: min(360px, 100%); padding: 24px 22px 20px; border: 1px solid var(--warga-line); border-radius: 20px; background: var(--warga-surface); box-shadow: 0 20px 60px rgba(15,23,42,.28); text-align: center; }
+.warga-confirm-icon { display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 12px; border-radius: 15px; background: #fbe5e7; color: var(--warga-red); font-size: 20px; }
+.warga-confirm-panel h2 { margin: 0; color: var(--warga-ink); font-size: 20px; }
+.warga-confirm-panel p { margin: 7px 0 20px; color: var(--warga-muted); font-size: 14px; line-height: 1.45; }
+.warga-confirm-actions { display: flex; justify-content: center; gap: 9px; }
+.warga-confirm-actions .btn { min-width: 112px; min-height: 42px; margin: 0; border-radius: 10px; font-size: 14px; font-weight: 750; }
+.warga-dialog-open { overflow: hidden; }
+body.theme-dark .warga-account-form-input { border-color: #41525d; background: #202b32; }
+body.theme-dark .warga-form-demo-note { border-color: #286462; background: #173b3b; color: #9cd9d2; }
+body.theme-dark .warga-form-error { border-color: #704047; background: #46282d; color: #f4a1aa; }
+body.theme-dark .warga-form-cancel { border-color: #41525d; background: #202b32; color: #c0cbd2 !important; }
+body.theme-dark .warga-confirm-panel { border-color: #34444e; background: #1a2229; }
+body.theme-dark .warga-confirm-icon { background: #46282d; color: #f4a1aa; }
+@media (max-width: 460px) {
+  .warga-account-form-card { margin-right: 14px; margin-left: 14px; border-radius: 18px; }
+  .warga-account-form-card .content { padding: 18px 15px; }
+  .warga-account-form-actions { justify-content: stretch; }
+  .warga-account-form-actions .btn { flex: 1; padding-right: 10px; padding-left: 10px; }
+}

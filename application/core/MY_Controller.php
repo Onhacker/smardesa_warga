@@ -15,6 +15,9 @@ class MY_Controller extends CI_Controller
     protected function render($view, array $data = array())
     {
         $data['currentUser'] = $this->currentUser;
+        $this->load->model('Community_model');
+        $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '');
+        $data['institutionLabel'] = $contactVillage['institution'];
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);
         // The compact AppKit header is navigation-only on primary screens.

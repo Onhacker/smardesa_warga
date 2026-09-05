@@ -1,0 +1,37 @@
+.warga-community{margin:0 15px 24px;color:var(--warga-ink);letter-spacing:0}
+#page .community-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0;border-bottom:1px solid var(--warga-line);margin-bottom:18px}
+#page .community-heading h1,#page .community-detail h1,#page .community-home h1{font-size:24px;line-height:1.3;margin:0 0 8px;overflow-wrap:anywhere;letter-spacing:0}
+#page .community-heading h2,#page .community-item h2,#page .community-replies h2{font-size:19px;line-height:1.4;margin:8px 0;letter-spacing:0;overflow-wrap:anywhere}
+#page .community-heading p{margin:0;color:var(--warga-muted)}
+.community-heading>i{font-size:28px;color:var(--warga-teal)}
+.community-item{border-bottom:1px solid var(--warga-line);padding:20px 0}
+.community-item p,.community-prose{font-size:16px;line-height:1.7;overflow-wrap:anywhere}
+.community-meta{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;color:var(--warga-muted);font-size:13px}
+.community-detail{padding:20px 0}.community-prose{padding:16px 0 24px}
+.community-status{font-size:13px;font-weight:700;color:var(--warga-teal-dark)}
+.community-compose{padding:18px 0;border-block:1px solid var(--warga-line);margin:18px 0}
+.community-compose summary{cursor:pointer;color:var(--warga-teal-dark);font-weight:700;font-size:16px}
+.community-compose form{padding-top:18px}
+#page .community-compose label{display:block;position:static;font-size:15px;font-weight:700;color:var(--warga-ink);margin:14px 0 6px;transform:none}
+#page .community-compose input,#page .community-compose textarea,#page .community-compose select{display:block;box-sizing:border-box;width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--warga-line);border-radius:6px;background:var(--warga-surface,#fff);color:var(--warga-ink);font:inherit;font-size:16px;line-height:1.5}
+#page .community-compose textarea{resize:vertical}
+.community-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;margin-top:18px;border:0;border-radius:6px;background:#167b78;color:#fff;font-size:15px;font-weight:700}
+.community-button.is-secondary{background:#e5eeee;color:#195752}
+.community-empty{padding:24px 0;color:var(--warga-muted);font-size:15px}
+.community-contact{margin:0}.community-contact>div{padding:16px 0;border-bottom:1px solid var(--warga-line)}
+.community-contact dt{font-size:14px;color:var(--warga-muted)}.community-contact dd{font-size:17px;margin:5px 0 0;overflow-wrap:anywhere}
+.community-home{display:flex;align-items:center;gap:16px;padding:22px 0}
+.community-home img{flex-shrink:0;object-fit:contain}.community-home p{margin:0 0 6px;color:var(--warga-muted)}
+.community-shortcuts,.warga-letter-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
+.community-shortcuts>a,.warga-letter-shortcuts>a{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:18px 14px;border:1px solid var(--warga-line);border-radius:8px;background:var(--warga-surface,#fff);color:var(--warga-ink);font-size:15px;min-width:0}
+.community-shortcuts i,.warga-letter-shortcuts i{font-size:22px;color:#167b78}
+.community-shortcuts span{width:100%;font-size:13px;color:var(--warga-muted)}
+.warga-letter-shortcuts{margin:0 15px 20px}.warga-letter-shortcuts>a:last-child{background:#167b78;color:#fff}.warga-letter-shortcuts>a:last-child i{color:#fff}
+.community-push{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:18px 0}
+.community-push p{margin:0;font-size:14px}.community-push button{margin:0}
+.community-notification-dot{display:inline-flex;min-width:20px;justify-content:center;font-size:12px;font-weight:700;color:#b42338}
+body.theme-dark .community-button.is-secondary{background:#29423f;color:#d1eee7}
+body.theme-dark #page .community-compose input,body.theme-dark #page .community-compose textarea,body.theme-dark #page .community-compose select,body.theme-dark .community-shortcuts>a,body.theme-dark .warga-letter-shortcuts>a:first-child{background:#202a30;color:#f1f5f7}
+@media(min-width:768px){.warga-community{margin-inline:24px}.community-contact>div{display:grid;grid-template-columns:180px minmax(0,1fr);gap:20px}.community-contact dd{margin:0}}
+@media(max-width:380px){#page .community-home h1{font-size:21px}.community-home img{width:56px;height:56px}.community-shortcuts>a,.warga-letter-shortcuts>a{padding:14px 10px;font-size:14px}}
+

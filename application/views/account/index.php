@@ -141,10 +141,28 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
                     <i class="fa fa-chevron-right" aria-hidden="true"></i>
                 </a>
             <?php endif; ?>
+            <a href="<?= site_url('akun/edit') ?>">
+                <span class="warga-setting-icon is-blue"><i class="fa fa-user-edit" aria-hidden="true"></i></span>
+                <div><strong>Edit Akun</strong><small>Ubah email atau nomor telepon</small></div>
+                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </a>
+            <a href="<?= site_url('akun/ganti-password') ?>">
+                <span class="warga-setting-icon is-orange"><i class="fa fa-key" aria-hidden="true"></i></span>
+                <div><strong>Ganti Password</strong><small>Perbarui kata sandi akun</small></div>
+                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </a>
         </div>
     </section>
 
     <section class="card card-style warga-install-card"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
+    <section class="warga-community">
+        <a href="<?= site_url('kontak') ?>" class="community-text-link"><i class="fa fa-address-book"></i> Kontak <?= e($institutionLabel) ?></a>
+        <div class="community-push">
+            <button type="button" class="community-button" data-push-toggle><i class="fa fa-bell"></i> Aktifkan Notifikasi</button>
+            <p data-push-status role="status"></p>
+        </div>
+        <?php if ($staffMode): ?><a href="<?= site_url('notifikasi') ?>">Notifikasi <span data-notification-count></span></a><?php endif; ?>
+    </section>
 
     <form method="post" action="<?= site_url('logout') ?>" class="content warga-account-logout" data-logout-form>
         <?= csrf_field() ?>

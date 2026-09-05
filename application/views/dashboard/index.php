@@ -2,6 +2,10 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 $citizenVerified = !empty($citizenVerified);
 ?>
+<nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
+    <a href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell"></i> Notifikasi Surat <span data-notification-count></span></a>
+    <a href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
+</nav>
 <section class="warga-home-head">
     <div class="warga-home-identity">
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>

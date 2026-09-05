@@ -9,6 +9,12 @@ if (!function_exists('warga_demo_mode')) {
     function warga_demo_mode() { return getenv('WARGA_DEMO_MODE') === '1'; }
 }
 
+function warga_complaint_status($status)
+{
+    $labels = array('submitted'=>'Dikirim','received'=>'Diterima','processing'=>'Ditindaklanjuti','resolved'=>'Selesai','rejected'=>'Ditolak');
+    return $labels[$status] ?? $status;
+}
+
 if (!function_exists('warga_database_available')) {
     function warga_database_available()
     {

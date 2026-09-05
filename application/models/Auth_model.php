@@ -96,7 +96,10 @@ class Auth_model extends CI_Model
     private function demo_user($id)
     {
         $users = $this->demo_users();
-        return isset($users[(int) $id]) ? $users[(int) $id] : NULL;
+        if (!isset($users[(int) $id])) return NULL;
+        $overrides = $this->session->userdata('warga_demo_overrides');
+        $override = is_array($overrides) && isset($overrides[(string) (int) $id]) && is_array($overrides[(string) (int) $id]) ? $overrides[(string) (int) $id] : array();
+        return array_merge($users[(int) $id], array_intersect_key($override, array('email' => TRUE, 'phone' => TRUE)));
     }
 
     public function attempt($identity, $password)
@@ -104,10 +107,13 @@ class Auth_model extends CI_Model
         $this->lastError = '';
         $identity = trim((string) $identity);
         if (warga_demo_mode()) {
-            if (!hash_equals('demo12345', (string) $password)) return FALSE;
             $identity = strtolower($identity);
             foreach ($this->demo_users() as $user) {
-                if (in_array($identity, array(strtolower($user['username']), strtolower($user['email']), strtolower($user['phone'])), TRUE)) {
+                $effective = $this->demo_user((int) $user['id']);
+                $overrides = $this->session->userdata('warga_demo_overrides');
+                $override = is_array($overrides) && isset($overrides[(string) (int) $user['id']]) && is_array($overrides[(string) (int) $user['id']]) ? $overrides[(string) (int) $user['id']] : array();
+                $demoPassword = isset($override['password']) && is_string($override['password']) && $override['password'] !== '' ? $override['password'] : 'demo12345';
+                if (hash_equals($demoPassword, (string) $password) && in_array($identity, array(strtolower($effective['username']), strtolower($effective['email']), strtolower($effective['phone'])), TRUE)) {
                     $this->session->sess_regenerate(TRUE);
                     $this->session->set_userdata(array('warga_logged_in' => TRUE, 'warga_user_id' => (int) $user['id']));
                     return $user;
@@ -159,6 +165,80 @@ class Auth_model extends CI_Model
         return $this->db
             ->where(array('u.id' => (int) $this->session->userdata('warga_user_id'), 'u.is_active' => 1))
             ->get()->row_array();
+    }
+
+    private function normalize_profile_phone($value)
+    {
+        $value = trim((string) $value);
+        if ($value === '') return '';
+        if (!preg_match('/^[0-9+() .-]+$/', $value)) return FALSE;
+        $normalized = preg_replace('/[^0-9+]/', '', $value);
+        return preg_match('/^\+?[0-9]{8,15}$/', $normalized) ? $normalized : FALSE;
+    }
+
+    public function update_contact($userId, $email, $phone)
+    {
+        $userId = (int) $userId;
+        $email = strtolower(trim((string) $email));
+        $phone = $this->normalize_profile_phone($phone);
+        if ($email !== '' && (strlen($email) > 180 || !filter_var($email, FILTER_VALIDATE_EMAIL))) return array('success' => FALSE, 'message' => 'Email belum valid.');
+        if ($phone === FALSE) return array('success' => FALSE, 'message' => 'Nomor telepon harus berisi 8–15 digit angka.');
+        if ($email === '' && $phone === '') return array('success' => FALSE, 'message' => 'Isi minimal email atau nomor telepon.');
+        if (warga_demo_mode()) {
+            $all = $this->session->userdata('warga_demo_overrides');
+            if (!is_array($all)) $all = array();
+            $key = (string) $userId;
+            if (!isset($all[$key]) || !is_array($all[$key])) $all[$key] = array();
+            $all[$key]['email'] = $email; $all[$key]['phone'] = $phone;
+            $this->session->set_userdata('warga_demo_overrides', $all);
+            return array('success' => TRUE);
+        }
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
+        $this->db->group_start();
+        if ($email !== '') $this->db->where('email', $email);
+        if ($phone !== '') $this->db->or_where('phone', $phone);
+        $this->db->group_end()->where('id !=', $userId);
+        if ($this->db->count_all_results('users') > 0) return array('success' => FALSE, 'message' => 'Email atau nomor telepon sudah digunakan akun lain.');
+        $updated = $this->db->where('id', $userId)->update('users', array('email' => $email !== '' ? $email : NULL, 'phone' => $phone !== '' ? $phone : NULL, 'updated_at' => date('Y-m-d H:i:s')));
+        return $updated ? array('success' => TRUE) : array('success' => FALSE, 'message' => 'Data kontak belum dapat disimpan.');
+    }
+
+    public function change_password($userId, $currentPassword, $newPassword)
+    {
+        $userId = (int) $userId; $currentPassword = (string) $currentPassword; $newPassword = (string) $newPassword;
+        if (strlen($newPassword) < 8 || strlen($newPassword) > 72) return array('success' => FALSE, 'message' => 'Kata sandi baru harus 8–72 karakter.');
+        if ($currentPassword === $newPassword) return array('success' => FALSE, 'message' => 'Kata sandi baru harus berbeda dari kata sandi saat ini.');
+        if (warga_demo_mode()) {
+            $all = $this->session->userdata('warga_demo_overrides');
+            $override = is_array($all) && isset($all[(string) $userId]) && is_array($all[(string) $userId]) ? $all[(string) $userId] : array();
+            $current = isset($override['password']) && is_string($override['password']) && $override['password'] !== '' ? $override['password'] : 'demo12345';
+            if (!hash_equals($current, $currentPassword)) return array('success' => FALSE, 'message' => 'Kata sandi saat ini tidak sesuai.');
+            if (!is_array($all)) $all = array();
+            if (!isset($all[(string) $userId]) || !is_array($all[(string) $userId])) $all[(string) $userId] = array();
+            $all[(string) $userId]['password'] = $newPassword;
+            $this->session->set_userdata('warga_demo_overrides', $all);
+            return array('success' => TRUE);
+        }
+        if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
+        $user = $this->db->select('password_hash')->where('id', $userId)->where('is_active', 1)->limit(1)->get('users')->row_array();
+        if (!$user || !password_verify($currentPassword, (string) $user['password_hash'])) return array('success' => FALSE, 'message' => 'Kata sandi saat ini tidak sesuai.');
+        $updated = $this->db->where('id', $userId)->update('users', array('password_hash' => password_hash($newPassword, PASSWORD_DEFAULT), 'updated_at' => date('Y-m-d H:i:s')));
+        return $updated ? array('success' => TRUE) : array('success' => FALSE, 'message' => 'Kata sandi belum dapat diubah.');
+    }
+
+    public function verify_password($userId, $password)
+    {
+        $userId = (int) $userId; $password = (string) $password;
+        if ($password === '') return FALSE;
+        if (warga_demo_mode()) {
+            $all = $this->session->userdata('warga_demo_overrides');
+            $override = is_array($all) && isset($all[(string) $userId]) && is_array($all[(string) $userId]) ? $all[(string) $userId] : array();
+            $current = isset($override['password']) && is_string($override['password']) && $override['password'] !== '' ? $override['password'] : 'demo12345';
+            return hash_equals($current, $password);
+        }
+        if (!warga_database_available()) return FALSE;
+        $user = $this->db->select('password_hash')->where('id', $userId)->where('is_active', 1)->limit(1)->get('users')->row_array();
+        return $user && password_verify($password, (string) $user['password_hash']);
     }
 
     /**

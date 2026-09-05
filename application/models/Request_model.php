@@ -692,13 +692,12 @@ class Request_model extends CI_Model
     {
         $role = isset($user['role_slug']) ? $user['role_slug'] : '';
         $status = isset($request['status']) ? $request['status'] : '';
-        if ($role === 'sekdes' && $status === 'submitted') return array('verify', 'revision', 'reject');
-        if ($role === 'kepala-desa' && $status === 'verified') return array('approve', 'revision', 'reject');
-        if ($role === 'admin-desa') {
-            if ($status === 'submitted') return array('verify', 'revision', 'reject');
-            if ($status === 'verified') return array('approve', 'revision', 'reject');
-        }
-        return array();
+        $this->load->model('Community_model');
+        $payload = json_decode((string)($request['payload_json'] ?? ''), true);
+        $settings = isset($payload['verification']) && is_array($payload['verification'])
+            ? $payload['verification'] : $this->Community_model->workflow($request['village_id'] ?? ($user['village_id'] ?? ''));
+        require_once APPPATH . 'libraries/Verification_workflow.php';
+        return Verification_workflow::actions($role, $status, $settings);
     }
 
     public function apply_action($id, array $user, $action, $note = '')
@@ -713,6 +712,8 @@ class Request_model extends CI_Model
         );
         if (!isset($actions[$action]) || !in_array($action, $this->allowed_actions($user, $request), TRUE)) return array('success' => FALSE, 'message' => 'Tindakan tidak tersedia untuk peran dan status ini.');
         $next = $actions[$action];
+        if ($action === 'approve' && $user['role_slug'] === 'sekdes') $next['label'] = 'Disetujui Sekdes';
+        if (mb_strlen((string)$note) > 1000) return array('success'=>false,'message'=>'Catatan maksimal 1000 karakter.');
         if (in_array($action, array('revision', 'reject'), TRUE) && trim((string) $note) === '') return array('success' => FALSE, 'message' => 'Alasan wajib diisi untuk perbaikan atau penolakan.');
         $note = trim((string) $note) !== '' ? trim((string) $note) : $next['default_note'];
         $now = date('Y-m-d H:i:s');
@@ -732,7 +733,7 @@ class Request_model extends CI_Model
         }
         if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database layanan warga sedang tidak tersedia. Silakan coba lagi.');
 
-        $payload = json_encode(array('request_id' => $request['id'], 'request_code' => $request['request_code'], 'status' => $next['status'], 'note' => $note, 'actor_name' => $user['name']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $payload = json_encode(array('request_id' => $request['id'], 'request_code' => $request['request_code'], 'status' => $next['status'], 'note' => $note, 'actor_name' => $user['name'], 'actor_role' => $user['role_slug']), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         $this->db->trans_begin();
         $this->db->where(array('id' => (string) $id, 'status' => $request['status']))->update('service_requests', array('status' => $next['status']));
         $updated = $this->db->affected_rows();
@@ -741,7 +742,12 @@ class Request_model extends CI_Model
             return array('success' => FALSE, 'message' => 'Status berubah karena diproses pengguna lain. Muat ulang halaman.');
         }
         $this->db->insert('request_status_history', array('request_id' => (string) $id, 'from_status' => $request['status'], 'to_status' => $next['status'], 'note' => $note, 'actor_id' => (int) $user['id']));
-        $this->db->insert('notifications', array('id' => warga_uuid(), 'user_id' => (int) $request['citizen_user_id'], 'request_id' => (string) $id, 'title' => $request['service_name'], 'message' => $next['label'] . '. ' . $note));
+        $notificationId = warga_uuid();
+        $this->db->insert('notifications', array('id' => $notificationId, 'user_id' => (int) $request['citizen_user_id'], 'request_id' => (string) $id, 'title' => $request['service_name'], 'message' => $next['label'] . '. ' . $note));
+        $this->db->insert('warga_notification_targets', array('notification_id' => $notificationId, 'target_path' => 'permohonan/' . (string) $id));
+        if ($next['status'] === 'verified') $this->Community_model->notify_staff($request['village_id'],
+            'Permohonan menunggu persetujuan', 'Sekdes telah memverifikasi permohonan surat.',
+            'petugas/permohonan/'.$id, array('kepala-desa'), $id);
         $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $request['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => (string) $id, 'direction' => 'cloud_to_local', 'operation' => 'status_update', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request-status:' . $id . ':' . $next['status'] . ':' . bin2hex(random_bytes(6))));
         if (!$this->db->trans_status()) {
             $this->db->trans_rollback();
@@ -860,8 +866,11 @@ class Request_model extends CI_Model
         unset($file);
         // The local SmartDesa inbox needs one self-contained message. The
         // central database remains the source of the actual documents.
+        $this->load->model('Community_model');
+        $verification = $this->Community_model->workflow($user['village_id']);
         $payload = json_encode(array(
             'request_id' => $id,
+            'verification' => $verification,
             'request_code' => $requestCode,
             'service_type_id' => $serviceTypeId,
             'service_slug' => $service['slug'],
@@ -891,6 +900,9 @@ class Request_model extends CI_Model
         $this->db->insert('request_status_history', array('request_id' => $id, 'to_status' => 'submitted', 'note' => 'Permohonan diajukan warga.', 'actor_id' => (int) $user['id']));
         foreach ($uploaded['files'] as $file) $this->db->insert('request_documents', array('id' => $file['id'], 'request_id' => $id, 'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL, 'original_name' => $file['original_name'], 'stored_name' => $file['stored_name'], 'storage_path' => $file['storage_path'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size'], 'uploaded_by' => (int) $user['id']));
         $this->db->insert('sync_messages', array('id' => warga_uuid(), 'village_id' => $user['village_id'], 'aggregate_type' => 'service_request', 'aggregate_id' => $id, 'direction' => 'cloud_to_local', 'operation' => 'upsert', 'payload_json' => $payload, 'status' => 'pending', 'idempotency_key' => 'request:' . $id));
+        $roles = $verification['sekdes'] ? array('sekdes') : ($verification['kades'] ? array('kepala-desa') : array());
+        $this->Community_model->notify_staff($user['village_id'], 'Permohonan surat baru',
+            'Ada permohonan surat menunggu pemeriksaan.', 'petugas/permohonan/'.$id, $roles, $id);
         $this->db->trans_complete();
         if (!$this->db->trans_status()) {
             $this->cleanup_paths(isset($uploaded['paths']) ? $uploaded['paths'] : array());
