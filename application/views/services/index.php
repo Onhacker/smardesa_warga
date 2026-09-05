@@ -4,14 +4,14 @@ $citizenVerified = !empty($citizenVerified);
 ?>
 <div class="warga-services-page">
     <section class="warga-page-intro warga-services-intro">
-        <div><p>PELAYANAN DESA</p><h1>Semua Jenis Surat</h1><span>Temukan layanan administrasi yang Anda perlukan.</span></div>
+        <div><p>PELAYANAN DESA</p><h1>Semua Surat</h1><span>Temukan surat administrasi yang Anda perlukan.</span></div>
         <span class="warga-intro-icon"><i class="ti ti-mail" aria-hidden="true"></i></span>
     </section>
 
     <section class="warga-service-catalog" aria-labelledby="warga-catalog-title">
         <div class="warga-service-catalog-head">
-            <div><p>KATALOG LAYANAN</p><h2 id="warga-catalog-title">Pilih Jenis Surat</h2></div>
-            <span class="warga-service-total"><?= count($services) ?> layanan</span>
+            <div><p>KATALOG SURAT</p><h2 id="warga-catalog-title">Pilih Jenis Surat</h2></div>
+            <span class="warga-service-total"><?= count($services) ?> surat</span>
         </div>
 
         <?php if ($services): ?>
@@ -21,11 +21,11 @@ $citizenVerified = !empty($citizenVerified);
                     <i class="fa fa-search" aria-hidden="true"></i>
                     <input type="search" id="wargaServiceSearch" placeholder="Nama atau jenis surat" data-service-search aria-controls="wargaServiceGrid" autocomplete="off">
                 </div>
-                <span class="warga-service-count" data-service-count aria-live="polite"><?= count($services) ?> layanan</span>
+                <span class="warga-service-count" data-service-count aria-live="polite"><?= count($services) ?> surat</span>
             </div>
         <?php endif; ?>
 
-        <div class="warga-service-catalog-grid" id="wargaServiceGrid" aria-label="Semua jenis layanan">
+        <div class="warga-service-catalog-grid" id="wargaServiceGrid" aria-label="Semua surat">
             <?php foreach ($services as $index => $service): ?>
                 <?php
                 $serviceDescription = isset($service['description']) ? trim((string) $service['description']) : '';
@@ -51,7 +51,7 @@ $citizenVerified = !empty($citizenVerified);
         </div>
         <div class="warga-service-empty" data-service-empty <?= $services ? 'hidden' : '' ?>>
             <i class="fa <?= $services ? 'fa-search' : 'fa-folder-open' ?>" aria-hidden="true"></i>
-            <strong><?= $services ? 'Surat tidak ditemukan' : 'Belum ada layanan dari desa' ?></strong>
+            <strong><?= $services ? 'Surat tidak ditemukan' : 'Belum ada surat dari desa' ?></strong>
             <span><?= $services ? 'Coba gunakan kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh desa.' ?></span>
         </div>
     </section>

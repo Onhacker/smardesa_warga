@@ -7,7 +7,7 @@ class Layanan extends Citizen_Controller
     {
         $this->load->model('Request_model');
         $this->render('services/index', array(
-            'pageTitle' => 'Semua Layanan',
+            'pageTitle' => 'Semua Surat',
             'showBackButton' => TRUE,
             'backUrl' => site_url('dashboard'),
             'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : ''),

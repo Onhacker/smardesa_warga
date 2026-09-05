@@ -23,7 +23,8 @@ class Dashboard extends Citizen_Controller
             'requests' => $requests,
             'summary' => $this->Request_model->summary($this->currentUser['id']),
             'services' => array_slice($services, 0, 8),
-            'citizenVerified' => $this->Auth_model->citizen_is_verified((int) $this->currentUser['id'])
+            'citizenVerified' => $this->Auth_model->citizen_is_verified((int) $this->currentUser['id']),
+            'lettersPage' => TRUE
         ));
     }
 }

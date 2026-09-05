@@ -3940,6 +3940,42 @@ body #page .page-content .warga-request-create .warga-consent {
   width: 20px;
   height: 20px;
   margin: 0;
+  /* AppKit's generic input:hover/focus rule removes the native checkbox
+   * glyph. Keep this consent control visible in both states. */
+  -webkit-appearance: checkbox !important;
+  -moz-appearance: checkbox !important;
+  appearance: auto !important;
+  accent-color: var(--warga-teal-dark);
+}
+
+.warga-letters-head {
+  min-height: 128px;
+}
+
+.warga-letters-copy {
+  min-width: 0;
+}
+
+#page .warga-letters-head .warga-letters-copy p {
+  margin-bottom: 5px;
+  color: #e4eefb !important;
+}
+
+#page .warga-letters-head .warga-letters-copy h1 {
+  margin-bottom: 7px;
+  font-size: clamp(25px, 5vw, 34px);
+}
+
+#page .warga-letters-head .warga-letters-copy > span {
+  color: #eff5fd !important;
+}
+
+body.theme-light #page .page-content .warga-letters-head .warga-letters-copy > p {
+  color: #e4eefb !important;
+}
+
+body.theme-light #page .page-content .warga-letters-head .warga-letters-copy > span {
+  color: #eff5fd !important;
 }
 
 body #page .page-content .warga-request-create .warga-consent > span {

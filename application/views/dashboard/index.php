@@ -1,18 +1,25 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 $citizenVerified = !empty($citizenVerified);
+$lettersPage = !empty($lettersPage);
 ?>
+<?php if ($lettersPage): ?>
+<section class="warga-home-head warga-letters-head" aria-labelledby="warga-letters-title">
+    <div class="warga-letters-copy"><p>SURAT MENYURAT</p><h1 id="warga-letters-title">Surat menyurat</h1><span>Ajukan dan pantau surat administrasi Anda.</span></div>
+    <span class="warga-intro-icon" aria-hidden="true"><i class="fa fa-envelope"></i></span>
+</section>
+<?php endif; ?>
 <nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
     <a href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell"></i> Notifikasi Surat <span data-notification-count></span></a>
     <a href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
 </nav>
-<section class="warga-home-head">
+<?php if (!$lettersPage): ?><section class="warga-home-head">
     <div class="warga-home-identity">
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
         <div><p class="color-white">Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span class="color-white"><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
     </div>
     <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka notifikasi"><i class="fa fa-bell"></i></a>
-</section>
+</section><?php endif; ?>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">
     <div class="warga-summary-card is-total">
@@ -36,7 +43,7 @@ $citizenVerified = !empty($citizenVerified);
 <section class="warga-service-card warga-dashboard-services" aria-labelledby="warga-service-title">
     <div class="content warga-section-head warga-service-heading-card">
         <div><p class="font-600 color-highlight mb-n1">Pelayanan desa</p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
-        <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600">Semua layanan</a>
+        <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600">Semua Surat</a>
     </div>
     <div class="warga-service-grid" id="wargaServiceGrid" aria-label="Jenis layanan">
         <?php foreach ($services as $index => $service): ?>

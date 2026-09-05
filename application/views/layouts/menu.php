@@ -19,7 +19,7 @@
         <a href="<?= site_url('petugas?status=issued') ?>"><i class="fa fa-file-pdf bg-blue-dark color-white"></i><span>Surat Terbit</span><i class="fa fa-angle-right"></i></a>
     <?php else: ?>
         <a class="<?= nav_is('dashboard') ? 'active-nav' : '' ?>" href="<?= site_url('dashboard') ?>"><i class="fa fa-home bg-teal-dark color-white"></i><span>Beranda</span><i class="fa fa-angle-right"></i></a>
-        <a class="<?= nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="ti ti-mail bg-blue-dark color-white"></i><span>Semua Layanan</span><i class="fa fa-angle-right"></i></a>
+        <a class="<?= nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="ti ti-mail bg-blue-dark color-white"></i><span>Surat</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('permohonan') && $this->router->fetch_method() === 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-plus bg-blue-dark color-white"></i><span>Permohonan Baru</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('permohonan') && $this->router->fetch_method() !== 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt bg-orange-dark color-white"></i><span>Riwayat Permohonan</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('notifications') ? 'active-nav' : '' ?>" href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell bg-red-dark color-white"></i><span>Notifikasi</span><i class="fa fa-angle-right"></i></a>

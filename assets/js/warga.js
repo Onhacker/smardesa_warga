@@ -76,7 +76,7 @@
         if (matches) visible++;
       });
       if (serviceEmpty) serviceEmpty.hidden = visible !== 0;
-      if (serviceCount) serviceCount.textContent = visible + ' layanan';
+      if (serviceCount) serviceCount.textContent = visible + ' surat';
     }
     serviceSearch.addEventListener('input', filterServices);
     serviceSearch.addEventListener('search', filterServices);
