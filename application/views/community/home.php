@@ -29,7 +29,7 @@
             <div class="splide__track">
                 <div class="splide__list">
             <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/19l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/19.jpg') ?>" alt="" loading="lazy" width="700" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
@@ -39,7 +39,7 @@
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/20l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/20.jpg') ?>" alt="" loading="lazy" width="700" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
@@ -49,7 +49,7 @@
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/6l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/6.jpg') ?>" alt="" loading="lazy" width="700" height="466">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-comments" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">

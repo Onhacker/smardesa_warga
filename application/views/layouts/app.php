@@ -70,9 +70,6 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
             <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Perlu diperbaiki', 'flashMessage' => $flashError)); ?>
         <?php endif; ?>
         <?php $this->load->view($contentView); ?>
-        <div class="warga-connectivity" data-connectivity role="status" aria-live="polite">
-            <span class="warga-connectivity-dot"></span><span data-connectivity-label>Memeriksa jaringan</span>
-        </div>
     </main>
 
     <aside id="menu-main" class="menu menu-box-left rounded-0" data-menu-width="300">

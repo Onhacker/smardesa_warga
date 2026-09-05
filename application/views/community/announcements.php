@@ -9,8 +9,6 @@
         </div>
     </header>
 
-    <?php if (!$ready): ?><p class="community-empty" role="status">Layanan pengumuman sedang disiapkan.</p><?php endif; ?>
-
     <?php if ($canManage && $ready): ?>
     <details class="community-compose community-v22-compose">
         <summary><i class="fa fa-plus" aria-hidden="true"></i><span>Buat Pengumuman</span><i class="fa fa-chevron-down" aria-hidden="true"></i></summary>
@@ -28,7 +26,7 @@
     <section class="community-v22-feed" aria-label="Daftar pengumuman">
         <div class="community-v22-feed-heading"><h2>Info terbaru</h2><span><?= count($items) ?> kabar</span></div>
         <div class="community-list">
-            <?php if (!$items && $ready): ?><p class="community-empty">Belum ada pengumuman.</p><?php endif; ?>
+            <?php if (!$items): ?><p class="community-empty" role="status">Belum ada pengumuman.</p><?php endif; ?>
             <?php foreach ($items as $item): ?>
             <article class="community-item community-v22-feed-item">
                 <div class="community-v22-feed-item-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
