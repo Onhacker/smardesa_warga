@@ -49,7 +49,7 @@
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/6.jpg') ?>" alt="" loading="lazy" width="700" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/pengaduan-layanan.webp') ?>" alt="Ilustrasi layanan pengaduan" loading="lazy" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-comments" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
