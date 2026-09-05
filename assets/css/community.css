@@ -122,19 +122,43 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 #page .community-v22-hero-action i { color: #fff !important; }
 #page .community-v22-hero-action span:not(:empty) {
   position: absolute;
-  top: -7px;
-  right: -7px;
+  top: -9px;
+  right: -9px;
   display: grid;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
   place-items: center;
+  z-index: 3;
+  box-sizing: border-box;
   border: 2px solid #167b78;
   border-radius: 99px;
   background: #ef4444;
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  box-shadow: 0 3px 8px rgba(127, 29, 29, .24);
+}
+#page .community-v22-feature-copy b [data-notification-count]:not(:empty) {
+  display: inline-grid;
+  min-width: 20px;
+  height: 20px;
+  margin-left: 3px;
+  padding: 0 5px;
+  place-items: center;
+  box-sizing: border-box;
+  border-radius: 99px;
+  background: #ef4444;
+  color: #fff !important;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
 }
 
 #page .community-v22-stats {
@@ -299,14 +323,74 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 
 #page .community-v22-announcements .community-item { margin: 12px 0; }
 #page .community-v22-announcements .community-empty { margin: 0; padding: 20px; border: 1px solid var(--warga-line); border-radius: 15px; background: var(--warga-surface); }
+#page .community-v22-empty-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 104px;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--warga-line);
+  border-radius: 18px;
+  background: var(--warga-surface, #fff);
+  box-shadow: 0 8px 20px rgba(31,45,56,.08);
+}
+#page .community-v22-empty-icon {
+  display: grid;
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  place-items: center;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #dff4f1, #bde5df);
+  color: var(--warga-teal-dark);
+  font-size: 21px;
+  box-shadow: inset 0 0 0 1px rgba(22,123,120,.08);
+}
+#page .community-v22-empty-icon.is-complaint {
+  background: linear-gradient(145deg, #e3edfb, #c8daf4);
+  color: #285ca8;
+  box-shadow: inset 0 0 0 1px rgba(40,92,168,.08);
+}
+#page .community-v22-empty-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+#page .community-v22-empty-copy strong {
+  color: var(--warga-ink);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+#page .community-v22-empty-copy > span {
+  color: var(--warga-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+body.theme-light #page .community-v22-empty-icon {
+  color: var(--warga-teal-dark) !important;
+}
+body.theme-light #page .community-v22-empty-copy strong {
+  color: var(--warga-ink) !important;
+}
+body.theme-light #page .community-v22-empty-copy > span {
+  color: var(--warga-muted) !important;
+}
 
 body.theme-dark #page .community-v22-stats,
 body.theme-dark #page .community-v22-feature,
-body.theme-dark #page .community-v22-announcements .community-empty { background: #202a30; }
+body.theme-dark #page .community-v22-announcements .community-empty,
+body.theme-dark #page .community-v22-empty-card { background: #202a30; }
 body.theme-dark #page .community-v22-stats dt,
 body.theme-dark #page .community-v22-stats dd,
-body.theme-dark #page .community-v22-section-head h2 { color: #f1f5f7; }
+body.theme-dark #page .community-v22-section-head h2,
+body.theme-dark #page .community-v22-empty-copy strong { color: #f1f5f7; }
 body.theme-dark #page .community-v22-feature-copy strong { color: #f1f5f7; }
+body.theme-dark #page .community-v22-empty-icon { background: #254c4a; color: #a9ddda !important; }
+body.theme-dark #page .community-v22-empty-icon.is-complaint { background: #263f62; color: #b8d2f6 !important; }
+body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !important; }
 
 @media (min-width: 680px) {
   #page .community-v22-slide { flex-basis: min(43vw, 430px); }
@@ -329,6 +413,10 @@ body.theme-dark #page .community-v22-feature-copy strong { color: #f1f5f7; }
   #page .community-v22-feature-copy { padding: 14px; }
   #page .community-v22-feature-copy strong { font-size: 18px; }
   #page .community-v22-feature-copy > span { font-size: 12px; }
+  #page .community-v22-empty-card { min-height: 96px; padding: 15px; }
+  #page .community-v22-empty-icon { flex-basis: 50px; width: 50px; height: 50px; border-radius: 15px; }
+  #page .community-v22-empty-copy strong { font-size: 16px; }
+  #page .community-v22-empty-copy > span { font-size: 12px; }
 }
 
 /* simp-v22 applies an !important ink color to plain p/span/strong elements.

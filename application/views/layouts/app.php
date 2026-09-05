@@ -23,7 +23,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=67">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=10">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=11">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -82,6 +82,6 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
 <script src="<?= base_url('assets/js/warga.min.js') ?>?v=13"></script>
-<script src="<?= base_url('assets/js/community.min.js') ?>?v=5"></script>
+<script src="<?= base_url('assets/js/community.min.js') ?>?v=6"></script>
 </body>
 </html>

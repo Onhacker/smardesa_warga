@@ -28,7 +28,15 @@
     <section class="community-v22-feed" aria-label="Daftar pengaduan">
         <div class="community-v22-feed-heading"><h2>Daftar pengaduan</h2><span><?= count($items) ?> laporan</span></div>
         <div class="community-list">
-            <?php if (!$items): ?><p class="community-empty" role="status">Belum ada pengaduan.</p><?php endif; ?>
+            <?php if (!$items): ?>
+            <div class="community-v22-empty-card" role="status">
+                <span class="community-v22-empty-icon is-complaint" aria-hidden="true"><i class="fa fa-comments"></i></span>
+                <span class="community-v22-empty-copy">
+                    <strong>Belum ada pengaduan</strong>
+                    <span>Pengaduan warga akan tampil di sini setelah dikirim.</span>
+                </span>
+            </div>
+            <?php endif; ?>
             <?php foreach ($items as $item): ?>
             <article class="community-item community-v22-feed-item">
                 <div class="community-v22-feed-item-icon is-complaint"><i class="fa fa-comments" aria-hidden="true"></i></div>

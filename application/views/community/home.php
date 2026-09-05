@@ -45,7 +45,7 @@
                 <span class="community-v22-slide-copy">
                     <small>Informasi kampung</small>
                     <strong>Pengumuman</strong>
-                    <span><?= number_format(count($announcements)) ?> informasi terbaru</span>
+                    <span><?= $announcements ? number_format(count($announcements)) . ' informasi terbaru' : 'Belum ada informasi terbaru' ?></span>
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>">
@@ -104,7 +104,13 @@
         </header>
 
         <?php if (!$announcements): ?>
-            <p class="community-empty">Belum ada pengumuman.</p>
+            <div class="community-v22-empty-card" role="status">
+                <span class="community-v22-empty-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
+                <span class="community-v22-empty-copy">
+                    <strong>Belum ada pengumuman</strong>
+                    <span>Informasi terbaru dari kampung akan tampil di sini.</span>
+                </span>
+            </div>
         <?php endif; ?>
         <?php foreach ($announcements as $item): ?>
             <article class="community-item">

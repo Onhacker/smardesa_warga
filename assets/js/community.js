@@ -89,7 +89,9 @@
       if (response.redirected || response.status===401) { stopped=true; return; }
       if (!response.ok) return;
       var data=await response.json();
-      document.querySelectorAll('[data-notification-count]').forEach(function(el){el.textContent=data.unread>0 ? String(data.unread)+' baru' : '';});
+      document.querySelectorAll('[data-notification-count]').forEach(function(el){
+        el.textContent=data.unread>0 ? String(data.unread) : '';
+      });
     } catch (_) {} finally { clearTimeout(timeout); pending=false; }
   }
   function schedule() { clearTimeout(timer); poll().finally(function(){timer=setTimeout(schedule,60000);}); }
