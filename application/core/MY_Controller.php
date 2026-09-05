@@ -16,7 +16,7 @@ class MY_Controller extends CI_Controller
     {
         $data['currentUser'] = $this->currentUser;
         $this->load->model('Community_model');
-        $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '');
+        $contactVillage = $this->Community_model->village($this->currentUser['village_id'] ?? '', $this->currentUser['village_name'] ?? '');
         $data['institutionLabel'] = $contactVillage['institution'];
         // Keep the complete tenant/contact context available to shared layout
         // components.  The footer uses this data for the identity and contact

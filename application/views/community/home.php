@@ -83,7 +83,7 @@
             </a>
 
             <a class="community-v22-feature" href="<?= site_url('kontak') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/3l.jpg') ?>" alt="" loading="lazy" width="300" height="466">
+                <img src="<?= base_url('assets/v22/images/pictures/kontak-lembaga.webp') ?>" alt="Ilustrasi kontak <?= e($village['institution']) ?>" loading="lazy" width="600" height="933">
                 <span class="community-v22-feature-copy">
                     <small>Bantuan warga</small>
                     <strong>Kontak <?= e($village['institution']) ?></strong>

@@ -8,7 +8,7 @@ class Dashboard extends Citizen_Controller
         $this->load->model('Community_model');
         $this->load->model('Request_model');
         $this->render('community/home', array('pageTitle'=>'Beranda',
-            'village'=>$this->Community_model->village($this->currentUser['village_id']),
+            'village'=>$this->Community_model->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? ''),
             'summary'=>$this->Request_model->summary($this->currentUser['id']),
             'announcements'=>$this->Community_model->announcements($this->currentUser,3)));
     }

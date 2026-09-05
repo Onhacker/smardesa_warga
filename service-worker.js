@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-ui-31';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-05-community-ui-32';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -26,7 +26,8 @@ const precache = [
   'assets/v22/images/pictures/surat-layanan.webp',
   'assets/v22/images/pictures/pengaduan-layanan.webp',
   'assets/v22/images/pictures/pengumuman-layanan.webp',
-  'assets/v22/images/pictures/notifikasi-layanan.webp'
+  'assets/v22/images/pictures/notifikasi-layanan.webp',
+  'assets/v22/images/pictures/kontak-lembaga.webp'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {

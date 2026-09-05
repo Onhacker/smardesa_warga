@@ -85,13 +85,13 @@ class Community extends App_Controller
 
     public function contact()
     {
-        $village = $this->community->village($this->currentUser['village_id']);
+        $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/contact', array('pageTitle' => 'Kontak '.$village['institution'], 'village' => $village));
     }
 
     public function privacy()
     {
-        $village = $this->community->village($this->currentUser['village_id']);
+        $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/privacy', array(
             'pageTitle' => 'Kebijakan Privasi',
             'village' => $village,
@@ -102,7 +102,7 @@ class Community extends App_Controller
 
     public function terms()
     {
-        $village = $this->community->village($this->currentUser['village_id']);
+        $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
         $this->render('community/terms', array(
             'pageTitle' => 'Syarat & Ketentuan',
             'village' => $village,

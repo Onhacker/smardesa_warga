@@ -14,13 +14,27 @@ class Community_model extends CI_Model
         return !empty($user['village_id']) && in_array($user['role_slug'] ?? '', array('sekdes', 'kepala-desa'), true);
     }
 
-    public function village($id)
+    public function village($id, $fallbackName = '')
     {
         $row = warga_database_available() ? $this->db->where('id', (string) $id)->get('village_tenants')->row_array() : array();
         $settings = json_decode((string) ($row['settings_json'] ?? ''), true);
         $row['settings'] = is_array($settings) ? $settings : array();
         $row['contact'] = isset($row['settings']['contact']) && is_array($row['settings']['contact']) ? $row['settings']['contact'] : array();
-        $row['institution'] = $row['contact']['institution'] ?? 'Desa';
+        // The sync API stores the canonical bentuk_lembaga value in contact.institution.
+        // Keep the newer aliases as compatibility fallbacks for older tenant snapshots.
+        $institution = trim((string) ($row['contact']['institution'] ?? ''));
+        if ($institution === '') {
+            $institution = trim((string) ($row['settings']['bentuk_lembaga']
+                ?? ($row['settings']['identity']['bentuk_lembaga'] ?? ($row['settings']['identitas']['bentuk_lembaga'] ?? ''))));
+        }
+        $institutionName = trim((string) ($row['name'] ?? ''));
+        if ($institutionName === '') {
+            $institutionName = trim((string) $fallbackName);
+        }
+        if ($institution === '' && preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\b/iu', $institutionName, $matches)) {
+            $institution = mb_convert_case($matches[1], MB_CASE_TITLE, 'UTF-8');
+        }
+        $row['institution'] = $institution !== '' ? $institution : 'Desa';
         return $row;
     }
 
