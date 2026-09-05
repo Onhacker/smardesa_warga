@@ -5283,3 +5283,202 @@ body.theme-dark .warga-confirm-actions .warga-confirm-cancel { border-color: #41
   .warga-account-form-actions { justify-content: stretch; }
   .warga-account-form-actions .btn { flex: 1; padding-right: 10px; padding-left: 10px; }
 }
+
+/* Request status journey: follow the AppKit v22 timeline pattern with a
+ * coloured icon rail and one readable card per event. The status classes are
+ * presentation-only; the history data and its order remain unchanged. */
+#page .warga-request-detail .warga-timeline {
+  position: relative;
+  margin: 18px 15px 30px;
+  padding: 2px 0;
+}
+
+#page .warga-request-detail .warga-timeline::before {
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  left: 27px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #c7d9de 0%, #dce6e9 100%);
+  content: '';
+}
+
+#page .warga-request-detail .warga-timeline-item {
+  --timeline-color: #656d78;
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding-bottom: 17px;
+}
+
+#page .warga-request-detail .warga-timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+#page .warga-request-detail .warga-timeline-item.is-draft { --timeline-color: #656d78; }
+#page .warga-request-detail .warga-timeline-item.is-submitted { --timeline-color: #4a89dc; }
+#page .warga-request-detail .warga-timeline-item.is-verified { --timeline-color: #167b78; }
+#page .warga-request-detail .warga-timeline-item.is-approved,
+#page .warga-request-detail .warga-timeline-item.is-synced { --timeline-color: #8cc152; }
+#page .warga-request-detail .warga-timeline-item.is-issued { --timeline-color: #967adc; }
+#page .warga-request-detail .warga-timeline-item.is-revision { --timeline-color: #f6bb42; }
+#page .warga-request-detail .warga-timeline-item.is-rejected { --timeline-color: #da4453; }
+#page .warga-request-detail .warga-timeline-item.is-syncing { --timeline-color: #e9573f; }
+
+#page .warga-request-detail .warga-timeline-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: 17px;
+  background: var(--timeline-color);
+  color: #fff !important;
+  font-size: 19px;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--timeline-color) 28%, transparent), 0 2px 5px rgba(31, 45, 56, .14);
+}
+
+#page .warga-request-detail .warga-timeline-marker > i {
+  color: #fff !important;
+  line-height: 1;
+}
+
+#page .warga-request-detail .warga-timeline-item.is-current .warga-timeline-marker {
+  outline: 4px solid color-mix(in srgb, var(--timeline-color) 18%, transparent);
+  transform: scale(1.04);
+}
+
+#page .warga-request-detail .warga-timeline-item-content {
+  position: relative;
+  min-width: 0;
+  padding: 15px 16px 14px;
+  border: 1px solid var(--warga-line);
+  border-radius: 16px;
+  background: var(--warga-surface);
+  box-shadow: 0 7px 18px rgba(31, 45, 56, .06);
+}
+
+#page .warga-request-detail .warga-timeline-item-content::before {
+  position: absolute;
+  top: 19px;
+  left: -7px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 1px solid var(--warga-line);
+  border-left: 1px solid var(--warga-line);
+  background: var(--warga-surface);
+  content: '';
+  transform: rotate(45deg);
+}
+
+#page .warga-request-detail .warga-timeline-item.is-current .warga-timeline-item-content {
+  border-color: color-mix(in srgb, var(--timeline-color) 38%, var(--warga-line));
+  box-shadow: 0 9px 22px color-mix(in srgb, var(--timeline-color) 12%, transparent);
+}
+
+#page .warga-request-detail .warga-timeline-item strong {
+  position: relative;
+  z-index: 1;
+  display: block;
+  color: var(--warga-ink);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+#page .warga-request-detail .warga-timeline-item time {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: var(--warga-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+#page .warga-request-detail .warga-timeline-item time > i {
+  color: var(--timeline-color);
+  font-size: 11px;
+}
+
+#page .warga-request-detail .warga-timeline-item p {
+  margin: 8px 0 0;
+  color: var(--warga-muted);
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+body.theme-dark #page .warga-request-detail .warga-timeline::before {
+  background: linear-gradient(180deg, #41525d 0%, #34444e 100%);
+}
+
+body.theme-dark #page .warga-request-detail .warga-timeline-item-content {
+  border-color: #34444e;
+  background: #202b32;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .2);
+}
+
+body.theme-dark #page .warga-request-detail .warga-timeline-item-content::before {
+  border-color: #34444e;
+  background: #202b32;
+}
+
+body.theme-dark #page .warga-request-detail .warga-timeline-item strong {
+  color: #f1f5f7;
+}
+
+body.theme-dark #page .warga-request-detail .warga-timeline-item time,
+body.theme-dark #page .warga-request-detail .warga-timeline-item p {
+  color: #aebbc4;
+}
+
+@media (max-width: 460px) {
+  #page .warga-request-detail .warga-timeline {
+    margin-right: 14px;
+    margin-left: 14px;
+  }
+
+  #page .warga-request-detail .warga-timeline::before {
+    left: 24px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item {
+    grid-template-columns: 50px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  #page .warga-request-detail .warga-timeline-marker {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+    font-size: 17px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item-content {
+    padding: 13px 13px 12px;
+    border-radius: 14px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item-content::before {
+    top: 16px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item strong {
+    font-size: 15px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item time {
+    font-size: 11px;
+  }
+
+  #page .warga-request-detail .warga-timeline-item p {
+    font-size: 13px;
+  }
+}

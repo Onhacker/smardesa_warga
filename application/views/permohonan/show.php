@@ -50,11 +50,32 @@
 <?php endif; ?>
 
 <section class="content warga-section-head mt-4"><div><p class="font-600 color-highlight mb-n1">Perjalanan layanan</p><h2 class="font-22 mb-0">Status Permohonan</h2></div></section>
+<?php
+$timelineIcons = array(
+    'draft' => 'fa-pencil-alt',
+    'submitted' => 'fa-paper-plane',
+    'verified' => 'fa-user-check',
+    'approved' => 'fa-check-double',
+    'issued' => 'fa-file-download',
+    'revision' => 'fa-edit',
+    'rejected' => 'fa-times',
+    'syncing' => 'fa-sync-alt',
+    'synced' => 'fa-check-circle'
+);
+?>
 <section class="warga-timeline">
     <?php foreach ($history as $index => $item): ?>
-        <article class="warga-timeline-item <?= $index + 1 === count($history) ? 'is-current' : '' ?>">
-            <span class="warga-timeline-marker"><i class="fa <?= $item['status'] === 'verified' ? 'fa-user-check' : ($item['status'] === 'issued' ? 'fa-file-download' : 'fa-paper-plane') ?>"></i></span>
-            <div><strong><?= e(isset($item['label']) ? $item['label'] : ucwords(str_replace('_', ' ', $item['to_status']))) ?></strong><time><?= e(tanggal_id($item['occurred_at'], TRUE)) ?></time><p><?= e($item['note']) ?></p></div>
+        <?php
+        $timelineStatus = isset($item['status']) ? (string) $item['status'] : (isset($item['to_status']) ? (string) $item['to_status'] : 'submitted');
+        $timelineStatusKey = strtolower(trim($timelineStatus));
+        $timelineStatusClass = preg_replace('/[^a-z0-9_-]/i', '-', $timelineStatusKey);
+        if ($timelineStatusClass === '') $timelineStatusClass = 'submitted';
+        $timelineIcon = isset($timelineIcons[$timelineStatusKey]) ? $timelineIcons[$timelineStatusKey] : 'fa-clock';
+        $timelineCurrent = $index + 1 === count($history);
+        ?>
+        <article class="warga-timeline-item is-<?= e($timelineStatusClass) ?> <?= $timelineCurrent ? 'is-current' : '' ?>"<?= $timelineCurrent ? ' aria-current="step"' : '' ?>>
+            <span class="warga-timeline-marker"><i class="fa <?= e($timelineIcon) ?>" aria-hidden="true"></i></span>
+            <div class="warga-timeline-item-content"><strong><?= e(isset($item['label']) ? $item['label'] : ucwords(str_replace('_', ' ', $item['to_status']))) ?></strong><time datetime="<?= e(str_replace(' ', 'T', (string) $item['occurred_at'])) ?>"><i class="fa fa-clock" aria-hidden="true"></i><?= e(tanggal_id($item['occurred_at'], TRUE)) ?></time><p><?= e($item['note']) ?></p></div>
         </article>
     <?php endforeach; ?>
 </section>

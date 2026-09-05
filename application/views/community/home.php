@@ -63,6 +63,25 @@
         </nav>
     </section>
 
+    <section class="community-v22-quick-cards" aria-label="Akses warga">
+        <a class="community-v22-quick-card is-announcement" href="<?= site_url('pengumuman') ?>">
+            <span class="community-v22-quick-card-head">
+                <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
+                <strong>Pengumuman</strong>
+            </span>
+            <span class="community-v22-quick-card-copy">
+                <?= $announcements ? number_format(count($announcements)) . ' informasi terbaru.' : 'Belum ada informasi terbaru.' ?>
+            </span>
+        </a>
+        <a class="community-v22-quick-card is-complaint" href="<?= site_url('pengaduan') ?>">
+            <span class="community-v22-quick-card-head">
+                <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-comments"></i></span>
+                <strong>Pengaduan</strong>
+            </span>
+            <span class="community-v22-quick-card-copy">Sampaikan keluhan dan masukan warga.</span>
+        </a>
+    </section>
+
     <section class="community-v22-information" aria-labelledby="community-information-title">
         <header class="community-v22-section-head">
             <div>

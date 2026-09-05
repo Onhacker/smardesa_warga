@@ -297,6 +297,69 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 #page .community-v22-slide-copy strong { margin-top: 2px; font-size: 27px; line-height: 1.1; }
 #page .community-v22-slide-copy > span { margin-top: 5px; color: rgba(255,255,255,.88); font-size: 12px; }
 
+#page .community-v22-quick-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 26px;
+}
+#page .community-v22-quick-card {
+  display: flex;
+  min-width: 0;
+  min-height: 145px;
+  flex-direction: column;
+  padding: 16px 15px 15px;
+  border: 1px solid var(--warga-line);
+  border-radius: 18px;
+  background: var(--warga-surface);
+  box-shadow: 0 8px 20px rgba(31,45,56,.08);
+  color: var(--warga-ink);
+  text-decoration: none;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+#page .community-v22-quick-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(31,45,56,.14);
+}
+#page .community-v22-quick-card-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+#page .community-v22-quick-card-icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  font-size: 18px;
+}
+#page .community-v22-quick-card.is-announcement .community-v22-quick-card-icon {
+  background: #dff4f1;
+  color: #167b78;
+}
+#page .community-v22-quick-card.is-complaint .community-v22-quick-card-icon {
+  background: #e3edfb;
+  color: #285ca8;
+}
+#page .community-v22-quick-card-head strong {
+  min-width: 0;
+  color: var(--warga-ink);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+#page .community-v22-quick-card-copy {
+  display: block;
+  margin-top: 14px;
+  color: var(--warga-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 #page .community-v22-feature-list { display: grid; gap: 14px; }
 #page .community-v22-feature {
   position: relative;
@@ -381,6 +444,7 @@ body.theme-light #page .community-v22-empty-copy > span {
 
 body.theme-dark #page .community-v22-stats,
 body.theme-dark #page .community-v22-feature,
+body.theme-dark #page .community-v22-quick-card,
 body.theme-dark #page .community-v22-announcements .community-empty,
 body.theme-dark #page .community-v22-empty-card { background: #202a30; }
 body.theme-dark #page .community-v22-stats dt,
@@ -388,6 +452,10 @@ body.theme-dark #page .community-v22-stats dd,
 body.theme-dark #page .community-v22-section-head h2,
 body.theme-dark #page .community-v22-empty-copy strong { color: #f1f5f7; }
 body.theme-dark #page .community-v22-feature-copy strong { color: #f1f5f7; }
+body.theme-dark #page .community-v22-quick-card-head strong { color: #f1f5f7; }
+body.theme-dark #page .community-v22-quick-card-copy { color: #aebbc4; }
+body.theme-dark #page .community-v22-quick-card.is-announcement .community-v22-quick-card-icon { background: #254c4a; color: #a9ddda; }
+body.theme-dark #page .community-v22-quick-card.is-complaint .community-v22-quick-card-icon { background: #263f62; color: #b8d2f6; }
 body.theme-dark #page .community-v22-empty-icon { background: #254c4a; color: #a9ddda !important; }
 body.theme-dark #page .community-v22-empty-icon.is-complaint { background: #263f62; color: #b8d2f6 !important; }
 body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !important; }
@@ -408,6 +476,12 @@ body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !importa
   #page .community-v22-stats dd { font-size: 24px; }
   #page .community-v22-stats dt { font-size: 10px; }
   #page .community-v22-slide { flex-basis: 81vw; height: 204px; }
+  #page .community-v22-quick-cards { gap: 8px; }
+  #page .community-v22-quick-card { min-height: 137px; padding: 14px 12px 13px; }
+  #page .community-v22-quick-card-icon { flex-basis: 38px; width: 38px; height: 38px; border-radius: 12px; font-size: 16px; }
+  #page .community-v22-quick-card-head { gap: 8px; }
+  #page .community-v22-quick-card-head strong { font-size: 16px; }
+  #page .community-v22-quick-card-copy { margin-top: 12px; font-size: 12px; }
   #page .community-v22-feature { grid-template-columns: 106px minmax(0,1fr); }
   #page .community-v22-feature > img { width: 106px; min-height: 144px; }
   #page .community-v22-feature-copy { padding: 14px; }

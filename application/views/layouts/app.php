@@ -22,8 +22,8 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=67">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=11">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=68">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=12">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -46,9 +46,9 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <nav id="footer-bar" class="footer-bar-6 warga-footer <?= $staffMode ? 'is-staff' : '' ?>" aria-label="Navigasi utama">
         <a class="<?= $navSection === 'dashboard' || ($staffMode && $navSection === 'petugas' && !$this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas' : 'dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a class="<?= $navSection === 'pengumuman' ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
-        <a class="circle-nav <?= in_array($navSection,array('surat','permohonan','layanan')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
+        <a class="circle-nav <?= in_array($navSection,array('surat','permohonan','layanan','notifikasi')) || ($staffMode && $navSection === 'petugas' && $this->input->get('status')) ? 'active-nav' : '' ?>" href="<?= site_url($staffMode ? 'petugas?status=submitted' : 'surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
         <a class="<?= $navSection === 'pengaduan' ? 'active-nav' : '' ?>" href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments"></i><span>Pengaduan</span></a>
-        <a class="<?= $navSection === 'akun' ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user"></i><span>Akun</span></a>
+        <a class="<?= in_array($navSection,array('akun','kontak')) ? 'active-nav' : '' ?>" href="<?= site_url('akun') ?>"><i class="fa fa-user"></i><span>Akun</span></a>
     </nav>
 
     <section class="page-title page-title-fixed warga-page-title<?= $showBackButton ? ' has-back' : '' ?>" aria-label="Judul halaman">
@@ -80,7 +80,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
-<script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script>
+<script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=2"></script>
 <script src="<?= base_url('assets/js/warga.min.js') ?>?v=13"></script>
 <script src="<?= base_url('assets/js/community.min.js') ?>?v=6"></script>
 </body>
