@@ -15,5 +15,5 @@ $dateLabel = $createdAt !== '' ? date('d M Y', strtotime($createdAt)) : '';
         </div>
         <?php if ($dateLabel !== ''): ?><time datetime="<?= e($createdAt) ?>"><?= e($dateLabel) ?></time><?php endif; ?>
     </div>
-    <p><?= e($comment) ?></p>
+    <?php if ($comment !== ''): ?><p><?= e($comment) ?></p><?php else: ?><p class="market-review-no-comment">Rating diberikan tanpa komentar.</p><?php endif; ?>
 </article>

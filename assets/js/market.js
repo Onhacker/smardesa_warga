@@ -256,7 +256,12 @@
     root.querySelectorAll('[data-market-query-clear]').forEach(function (button) {
       button.addEventListener('click', function () {
         state.query = '';
+        state.category = '';
+        state.sort = 'newest';
+        if (categorySelect) categorySelect.value = '';
+        if (sortSelect) sortSelect.value = 'newest';
         syncStatus();
+        syncCategoryTitle();
         closeSearch();
         requestCatalog(1, false, true);
       });
@@ -264,7 +269,12 @@
     root.querySelectorAll('[data-market-search-clear]').forEach(function (button) {
       button.addEventListener('click', function () {
         state.query = '';
+        state.category = '';
+        state.sort = 'newest';
+        if (categorySelect) categorySelect.value = '';
+        if (sortSelect) sortSelect.value = 'newest';
         syncStatus();
+        syncCategoryTitle();
         closeSearch();
         requestCatalog(1, false, true);
       });
@@ -454,7 +464,7 @@
       event.preventDefault();
       if (!selectedRating) { setStatus('Pilih jumlah bintang terlebih dahulu.', 'error'); return; }
       var text = comment ? comment.value.trim() : '';
-      if (text.length < 3) { setStatus('Komentar minimal 3 karakter.', 'error'); if (comment) comment.focus(); return; }
+      if (text.length > 0 && text.length < 3) { setStatus('Komentar minimal 3 karakter atau boleh dikosongkan.', 'error'); if (comment) comment.focus(); return; }
       var endpoint = form.getAttribute('data-review-url') || '';
       if (!endpoint || typeof window.fetch !== 'function') { setStatus('Rating belum dapat dikirim. Coba muat ulang halaman.', 'error'); return; }
       var config = window.SDW || {};

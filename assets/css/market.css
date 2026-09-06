@@ -90,13 +90,17 @@
 .market-search-close:hover, .market-search-close:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
 .market-search-input-wrap { min-height: 49px; padding: 0 13px; }
 .market-search-input-wrap input { height: 47px; font-size: 15px; }
+.market-search-filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 13px; }
 .market-search-dialog-actions { display: flex; align-items: center; gap: 9px; margin-top: 15px; }
 .market-search-dialog-actions .market-filter-submit { flex: 1 1 auto; }
 .market-search-clear { min-height: 45px; padding: 0 15px; border: 1px solid var(--market-line); border-radius: 10px; background: transparent; color: var(--market-muted); font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 .market-search-clear:hover, .market-search-clear:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
 body.market-search-open { overflow: hidden; }
 .market-products { margin: 0 15px 26px; }
-.market-products-heading { margin-bottom: 12px; }
+.market-products-heading { align-items: center; margin-bottom: 12px; }
+.market-products-heading-actions { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 9px; }
+.market-products-heading-actions .market-search-trigger { flex-basis: 39px; width: 39px; height: 39px; }
+.marketplace-listing-page > .market-filter-status { margin: 0 15px 12px; }
 .market-product-list { display: grid; gap: 11px; }
 .market-product-row { position: relative; display: grid; grid-template-columns: 118px minmax(0, 1fr) 18px; align-items: center; gap: 13px; min-height: 142px; padding: 10px; overflow: hidden; border: 1px solid var(--market-line); border-radius: 17px; background: var(--market-surface); box-shadow: 0 4px 15px rgba(31,62,96,.07); color: inherit; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .market-product-row:hover, .market-product-row:focus-visible { border-color: #98b9df; box-shadow: 0 8px 21px rgba(31,62,96,.13); color: inherit; transform: translateY(-1px); }
@@ -217,11 +221,12 @@ body.market-search-open { overflow: hidden; }
 .market-review-item time { flex: 0 0 auto; color: var(--market-muted); font-size: 10px; }
 .market-review-stars { display: block; margin-top: 4px; font-size: 11px; }
 .market-review-item p { margin: 8px 0 0; color: var(--market-muted); font-size: 12px; line-height: 1.55; }
+.market-review-item .market-review-no-comment { font-style: italic; opacity: .82; }
 .market-review-empty { margin: 14px 0 1px; color: var(--market-muted); font-size: 12px; line-height: 1.5; }
-.market-review-modal { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: start center; padding: max(18px, env(safe-area-inset-top)) 15px 18px; }
+.market-review-modal { --market-blue: #2d6bb2; --market-ink: #172333; --market-muted: #69798e; --market-line: #d8e2ed; --market-surface: #fff; position: fixed; z-index: 10000; inset: 0; display: grid; place-items: start center; padding: max(18px, env(safe-area-inset-top)) 15px 18px; color: var(--market-ink); }
 .market-review-modal[hidden] { display: none; }
 .market-review-backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(12, 30, 52, .58); cursor: pointer; }
-.market-review-dialog { position: relative; z-index: 1; width: min(100%, 450px); margin-top: min(13vh, 105px); padding: 19px 16px 16px; border: 1px solid var(--market-line); border-radius: 19px; background: var(--market-surface); box-shadow: 0 20px 55px rgba(13, 36, 66, .28); color: var(--market-ink); }
+.market-review-dialog { position: relative; z-index: 1; width: min(100%, 450px); margin-top: min(13vh, 105px); padding: 19px 16px 16px; border: 1px solid var(--market-line); border-radius: 19px; background: var(--market-surface) !important; box-shadow: 0 20px 55px rgba(13, 36, 66, .28); color: var(--market-ink) !important; opacity: 1; }
 .market-review-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
 .market-review-dialog h2 { margin: 3px 0 0; color: var(--market-ink); font-size: 23px; font-weight: 850; line-height: 1.15; }
 .market-review-close { display: grid; flex: 0 0 33px; width: 33px; height: 33px; place-items: center; border: 1px solid var(--market-line); border-radius: 9px; background: transparent; color: var(--market-muted); font-size: 14px; cursor: pointer; }
@@ -233,6 +238,7 @@ body.market-search-open { overflow: hidden; }
 .market-review-rating-label { min-height: 16px; margin: 8px 0 13px; color: #a16c16; font-size: 11px; font-weight: 800; }
 .market-review-comment-field { display: block; }
 .market-review-comment-field > span { display: block; margin-bottom: 5px; color: var(--market-ink); font-size: 12px; font-weight: 800; }
+.market-review-comment-field > span small { color: var(--market-muted); font-size: 10px; font-weight: 600; }
 .market-review-comment-field textarea { display: block; width: 100%; min-height: 92px; box-sizing: border-box; padding: 10px 11px; resize: vertical; border: 1px solid var(--market-line); border-radius: 10px; outline: 0; background: var(--market-surface); color: var(--market-ink); font: inherit; font-size: 12px; line-height: 1.45; }
 .market-review-comment-field textarea:focus { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
 .market-review-status { min-height: 17px; margin: 8px 0 0; color: var(--market-muted); font-size: 11px; line-height: 1.4; }
@@ -242,7 +248,8 @@ body.market-search-open { overflow: hidden; }
 .market-review-actions { display: flex; gap: 9px; margin-top: 13px; }
 .market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 43px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }
-.market-review-submit { border: 0; background: var(--market-blue); color: #fff; }
+.market-review-submit { border: 0 !important; background: var(--market-blue) !important; color: #fff !important; }
+.market-review-submit i, .market-review-submit span { color: #fff !important; }
 .market-review-submit:disabled { cursor: wait; opacity: .65; }
 body.market-review-open { overflow: hidden; }
 
@@ -337,7 +344,8 @@ body.theme-dark .market-search-trigger:hover, body.theme-dark .market-search-tri
 body.theme-dark .market-search-dialog { background: var(--market-surface); color: var(--market-ink); }
 body.theme-dark .market-search-dialog h2, body.theme-dark .market-filter-status strong { color: var(--market-ink); }
 body.theme-dark .market-product-skeleton-media, body.theme-dark .market-product-skeleton-line { background: linear-gradient(110deg, #213c5a 25%, #2b4054 37%, #213c5a 63%); background-size: 400% 100%; }
-body.theme-dark .market-review-card, body.theme-dark .market-review-dialog { background: var(--market-surface); color: var(--market-ink); }
+body.theme-dark .market-review-modal { --market-ink: #edf3fa; --market-muted: #aab8c7; --market-line: #405263; --market-surface: #1c2733; }
+body.theme-dark .market-review-card, body.theme-dark .market-review-dialog { background: var(--market-surface) !important; color: var(--market-ink) !important; }
 body.theme-dark .market-review-card h2, body.theme-dark .market-review-score > strong, body.theme-dark .market-review-item strong, body.theme-dark .market-review-dialog h2, body.theme-dark .market-review-comment-field > span { color: var(--market-ink); }
 body.theme-dark .market-review-open-button { background: #4c3b1e; color: #f4d58d; }
 body.theme-dark .market-review-star-button { background: #3c3425; border-color: #7e6730; }
@@ -346,7 +354,8 @@ body.theme-dark .market-review-comment-field textarea { background: var(--market
 body.theme-dark .market-review-cancel { background: #22303b; }
 
 @media (max-width: 560px) {
-  .market-auto-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 43px; gap: 7px; }
+  .market-search-filter-grid { gap: 7px; }
+  .market-products-heading .market-result-note { display: none; }
   .market-search-dialog { margin-top: 10vh; }
   .market-product-row { grid-template-columns: 96px minmax(0, 1fr) 13px; gap: 10px; min-height: 118px; padding: 8px; }
   .market-product-media { width: 96px; height: 96px; }

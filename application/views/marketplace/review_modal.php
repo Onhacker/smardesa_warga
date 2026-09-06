@@ -19,13 +19,13 @@ $isAuthenticated = !empty($isAuthenticated);
             </div>
             <p class="market-review-rating-label" data-market-review-rating-label>Pilih bintang</p>
             <label class="market-review-comment-field">
-                <span>Komentar</span>
-                <textarea name="comment" rows="4" maxlength="1000" placeholder="Bagikan pengalaman Anda dengan produk ini…" required data-market-review-comment></textarea>
+                <span>Komentar <small>(opsional)</small></span>
+                <textarea name="comment" rows="4" maxlength="1000" placeholder="Bagikan pengalaman Anda dengan produk ini (boleh dikosongkan)…" data-market-review-comment></textarea>
             </label>
             <p class="market-review-status" data-market-review-status role="status" aria-live="polite"></p>
             <div class="market-review-actions">
                 <button type="button" class="market-review-cancel" data-market-review-close>Batal</button>
-                <button type="submit" class="market-review-submit"><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Kirim ulasan</span></button>
+                <button type="submit" class="market-review-submit"><i class="fa fa-paper-plane color-white" aria-hidden="true"></i><span class="color-white">Kirim ulasan</span></button>
             </div>
         </form>
     </section>

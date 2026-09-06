@@ -69,7 +69,7 @@ $productId = (string) ($product['id'] ?? '');
 
     <section class="card card-style market-review-card" data-market-review-summary data-review-product-id="<?= e($productId) ?>" aria-labelledby="market-review-summary-title">
         <div class="content">
-            <p class="market-eyebrow market-eyebrow-blue">WHAT CUSTOMERS SAY</p>
+            <p class="market-eyebrow market-eyebrow-blue">ULASAN PEMBELI</p>
             <h2 id="market-review-summary-title">Ulasan produk</h2>
             <div class="market-review-summary-row">
                 <div class="market-review-score">

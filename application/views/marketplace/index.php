@@ -43,44 +43,27 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
 
-    <section class="card card-style market-filter-card" aria-label="Filter katalog pasar">
-        <div class="content mb-0">
-            <form method="get" action="<?= site_url('pasar') ?>" class="market-filter-form" data-market-filter>
-                <div class="market-auto-filters">
-                    <label class="market-field" for="market-category">
-                        <span>Kategori</span>
-                        <span class="market-input-wrap"><i class="fa fa-tags" aria-hidden="true"></i><select id="market-category" name="category_id" data-market-auto-filter><option value="">Semua kategori</option><?php foreach ($categories as $category): ?><?php $categoryValue = (string) ($category['id'] ?? ''); ?><option value="<?= e($categoryValue) ?>" <?= $selectedCategory === $categoryValue ? 'selected' : '' ?>><?= e($category['name'] ?? ($category['label'] ?? $categoryValue)) ?></option><?php endforeach; ?></select></span>
-                    </label>
-                    <label class="market-field" for="market-sort">
-                        <span>Urutkan</span>
-                        <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" name="sort" data-market-auto-filter><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
-                    </label>
-                    <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari produk" aria-haspopup="dialog" aria-controls="market-search-modal">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <input type="hidden" name="q" value="<?= e($search) ?>" data-market-query-field>
-                <noscript><button type="submit" class="market-filter-submit"><i class="fa fa-filter color-white" aria-hidden="true"></i><span class="color-white">Terapkan</span></button></noscript>
-            </form>
-
-            <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
-                <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
-                <button type="button" data-market-query-clear>Hapus</button>
-            </div>
-        </div>
-    </section>
-
     <div class="market-search-modal" id="market-search-modal" data-market-search-modal hidden>
         <button type="button" class="market-search-backdrop" data-market-search-close aria-label="Tutup pencarian"></button>
         <section class="market-search-dialog" role="dialog" aria-modal="true" aria-labelledby="market-search-title">
             <div class="market-search-dialog-head">
                 <div>
-                    <p class="market-eyebrow market-eyebrow-blue">PENCARIAN</p>
-                    <h2 id="market-search-title">Cari produk</h2>
+                    <p class="market-eyebrow market-eyebrow-blue">FILTER &amp; PENCARIAN</p>
+                    <h2 id="market-search-title">Temukan produk</h2>
                 </div>
                 <button type="button" class="market-search-close" data-market-search-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
             </div>
             <form method="get" action="<?= site_url('pasar') ?>" data-market-search-form>
+                <div class="market-search-filter-grid" aria-label="Filter katalog">
+                    <label class="market-field" for="market-category">
+                        <span>Kategori</span>
+                        <span class="market-input-wrap"><i class="fa fa-tags" aria-hidden="true"></i><select id="market-category" data-market-auto-filter><option value="">Semua kategori</option><?php foreach ($categories as $category): ?><?php $categoryValue = (string) ($category['id'] ?? ''); ?><option value="<?= e($categoryValue) ?>" <?= $selectedCategory === $categoryValue ? 'selected' : '' ?>><?= e($category['name'] ?? ($category['label'] ?? $categoryValue)) ?></option><?php endforeach; ?></select></span>
+                    </label>
+                    <label class="market-field" for="market-sort">
+                        <span>Urutkan</span>
+                        <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" data-market-auto-filter><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
+                    </label>
+                </div>
                 <label class="market-field" for="market-search-input">
                     <span>Nama produk</span>
                     <span class="market-input-wrap market-search-input-wrap"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="market-search-input" name="q" value="<?= e($search) ?>" placeholder="Contoh: kopi, sayur, kerajinan" autocomplete="off" data-market-search-input></span>
@@ -95,10 +78,20 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
         </section>
     </div>
 
+    <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
+        <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
+        <button type="button" data-market-query-clear>Hapus</button>
+    </div>
+
     <section class="market-products" aria-labelledby="market-products-title">
         <div class="market-section-heading market-products-heading">
             <div><h2 id="market-products-title" data-market-products-title><?= e($selectedCategoryName) ?></h2></div>
-            <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
+            <div class="market-products-heading-actions">
+                <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
+                <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari, filter, dan urutkan produk" aria-haspopup="dialog" aria-controls="market-search-modal">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
         </div>
 
         <div class="market-product-grid" data-market-product-list aria-live="polite">
