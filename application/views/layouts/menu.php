@@ -26,7 +26,7 @@ $menuArea = $menuIsAuthenticated ? (string) ($currentUser['village_name'] ?? '')
     <?php else: ?>
         <a class="<?= nav_is('dashboard') ? 'active-nav' : '' ?>" href="<?= site_url('dashboard') ?>"><i class="fa fa-home warga-menu-icon is-green"></i><span>Beranda</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="ti ti-mail warga-menu-icon is-teal"></i><span>Surat</span><i class="fa fa-angle-right"></i></a>
-        <a class="<?= nav_is('permohonan') && $this->router->fetch_method() === 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-plus warga-menu-icon is-blue"></i><span>Permohonan Baru</span><i class="fa fa-angle-right"></i></a>
+        <a class="<?= nav_is('permohonan') && $this->router->fetch_method() === 'create' ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="fa fa-plus warga-menu-icon is-blue"></i><span>Permohonan Baru</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('permohonan') && $this->router->fetch_method() !== 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt warga-menu-icon is-sand"></i><span>Riwayat Permohonan</span><i class="fa fa-angle-right"></i></a>
         <?php if ($menuIsAuthenticated): ?><a class="<?= nav_is('notifications') ? 'active-nav' : '' ?>" href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell warga-menu-icon is-red"></i><span>Notifikasi</span><i class="fa fa-angle-right"></i></a><?php endif; ?>
     <?php endif; ?>

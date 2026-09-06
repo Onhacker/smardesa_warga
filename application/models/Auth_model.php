@@ -399,6 +399,16 @@ class Auth_model extends CI_Model
         $role = $this->db->where('slug', 'warga')->get('roles')->row_array();
         if (!$role) return array('success' => FALSE, 'message' => 'Peran warga belum disiapkan pada server.');
 
+        // A NIK may have only one citizen account, regardless of the
+        // village selected during registration. The database unique key below
+        // remains the race-safe guard for simultaneous registrations.
+        $profileNikHash = $this->profile_identity_hash($nik);
+        $existingNikProfile = $this->db->where('nik_hash', $profileNikHash)
+            ->limit(1)->get('citizen_profiles')->row_array();
+        if ($existingNikProfile) {
+            return array('success' => FALSE, 'message' => 'NIK ini sudah memiliki akun layanan warga. Silakan gunakan menu masuk.');
+        }
+
         $this->db->group_start();
         if ($email !== NULL) $this->db->where('email', $email);
         if ($phone !== NULL) $this->db->or_where('phone', $phone);
@@ -434,7 +444,7 @@ class Auth_model extends CI_Model
             'user_id' => $userId,
             'village_id' => $village['id'],
             'local_citizen_key' => $sourceKey,
-            'nik_hash' => $this->profile_identity_hash($nik),
+            'nik_hash' => $profileNikHash,
             'kk_hash' => $this->profile_identity_hash($kk),
             'name_hash' => $this->profile_identity_hash($this->identity_name($canonicalName)),
             'birth_date' => isset($resident['birth_date']) && preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', (string) $resident['birth_date']) ? $resident['birth_date'] : NULL,
@@ -510,15 +520,37 @@ class Auth_model extends CI_Model
         if (!$this->db->field_exists('address_snapshot', 'citizen_profiles')) {
             $this->db->query("ALTER TABLE `citizen_profiles` ADD `address_snapshot` TEXT DEFAULT NULL");
         }
+        if (!$this->db->field_exists('nik_hash', 'citizen_profiles')) {
+            $this->db->query("ALTER TABLE `citizen_profiles` ADD `nik_hash` CHAR(64) DEFAULT NULL");
+        }
         $query = $this->db->query('SHOW INDEX FROM `citizen_profiles`');
         $hasUniqueIndex = FALSE;
-        if ($query) foreach ($query->result_array() as $row) if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_source') $hasUniqueIndex = TRUE;
+        $hasGlobalNikIndex = FALSE;
+        if ($query) foreach ($query->result_array() as $row) {
+            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_source') $hasUniqueIndex = TRUE;
+            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_nik_global') $hasGlobalNikIndex = TRUE;
+        }
         if (!$hasUniqueIndex && $this->db->field_exists('village_id', 'citizen_profiles') && $this->db->field_exists('local_citizen_key', 'citizen_profiles')) {
             $this->db->query('ALTER TABLE `citizen_profiles` ADD UNIQUE KEY `uniq_citizen_source` (`village_id`, `local_citizen_key`)');
         }
+        if (!$hasGlobalNikIndex && $this->db->field_exists('nik_hash', 'citizen_profiles')) {
+            $previousDebug = $this->db->db_debug;
+            $this->db->db_debug = FALSE;
+            $this->db->query('ALTER TABLE `citizen_profiles` ADD UNIQUE KEY `uniq_citizen_nik_global` (`nik_hash`)');
+            $this->db->db_debug = $previousDebug;
+        }
+        $indexQuery = $this->db->query('SHOW INDEX FROM `citizen_profiles`');
+        $hasUniqueIndex = FALSE;
+        $hasGlobalNikIndex = FALSE;
+        if ($indexQuery) foreach ($indexQuery->result_array() as $row) {
+            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_source') $hasUniqueIndex = TRUE;
+            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_nik_global') $hasGlobalNikIndex = TRUE;
+        }
         $this->identity_schema_ready = $this->db->field_exists('local_citizen_key', 'citizen_profiles')
             && $this->db->field_exists('name_hash', 'citizen_profiles')
-            && $this->db->field_exists('verification_status', 'citizen_profiles');
+            && $this->db->field_exists('verification_status', 'citizen_profiles')
+            && $hasUniqueIndex
+            && $hasGlobalNikIndex;
         return $this->identity_schema_ready;
     }
 

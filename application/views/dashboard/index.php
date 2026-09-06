@@ -11,7 +11,7 @@ $lettersPage = !empty($lettersPage);
 <?php endif; ?>
 <nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
     <a href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell"></i> Notifikasi Surat <span data-notification-count></span></a>
-    <a href="<?= site_url('permohonan/baru') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
+    <a href="<?= site_url('layanan') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
 </nav>
 <?php if (!$lettersPage): ?><section class="warga-home-head">
     <div class="warga-home-identity">
@@ -70,7 +70,7 @@ $lettersPage = !empty($lettersPage);
 </section>
 <section class="warga-request-list warga-activity-list">
     <?php if (!$requests): ?>
-        <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><?php if ($citizenVerified): ?><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?></div>
+        <div class="warga-empty-state"><span><i class="fa fa-file-alt"></i></span><h3>Belum ada permohonan</h3><?php if ($citizenVerified): ?><a href="<?= site_url('layanan') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?></div>
     <?php endif; ?>
     <?php foreach (array_slice($requests, 0, 3) as $request): ?>
         <?php $requestIcon = warga_request_service_icon($request); ?>

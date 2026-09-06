@@ -1,5 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $editMode = !empty($edit_mode) && !empty($request); $selectedService = $editMode ? (string) $request['service_slug'] : ($this->input->get('layanan', TRUE) ?: old('service_type')); ?>
+<?php $editMode = !empty($edit_mode) && !empty($request); ?>
+<?php $selectedServiceRow = isset($selected_service) && is_array($selected_service) ? $selected_service : array(); ?>
+<?php $selectedService = isset($selectedServiceRow['slug']) ? (string) $selectedServiceRow['slug'] : ''; ?>
+<?php $selectedServiceIcon = warga_service_icon($selectedServiceRow); ?>
 <?php $initialFields = $editMode && isset($request['form_data']) && is_array($request['form_data']) ? $request['form_data'] : array(); ?>
 <?php $existingDocuments = $editMode && isset($request['documents']) && is_array($request['documents']) ? $request['documents'] : array(); ?>
 <div class="warga-request-create">
@@ -18,23 +21,20 @@
 <?php else: ?>
 <form method="post" action="<?= site_url('permohonan/simpan') ?>" enctype="multipart/form-data" class="warga-request-form" data-request-form data-services="<?= warga_json($services) ?>" data-initial-fields="<?= warga_json($initialFields) ?>" data-existing-documents="<?= warga_json($existingDocuments) ?>" data-edit-mode="<?= $editMode ? '1' : '0' ?>" data-disable-submit>
     <?= csrf_field() ?>
-    <?php if ($editMode): ?><input type="hidden" name="request_id" value="<?= e($request['id']) ?>"><input type="hidden" name="service_type" value="<?= e($selectedService) ?>"><?php endif; ?>
+    <?php if ($editMode): ?><input type="hidden" name="request_id" value="<?= e($request['id']) ?>"><?php endif; ?>
+    <input type="hidden" name="service_type" value="<?= e($selectedService) ?>" data-service-select>
     <p class="warga-request-form-hint"><i class="fa fa-info-circle" aria-hidden="true"></i><span>Kolom bertanda <em>*</em> wajib diisi.</span></p>
     <section class="card card-style warga-form-card" aria-labelledby="request-service-title"><div class="content">
-        <div class="warga-form-title"><span aria-hidden="true">1</span><div><h2 id="request-service-title">Jenis Layanan</h2><p>Pilih surat yang akan diajukan.</p></div></div>
-        <div class="warga-request-field">
-            <label for="service-type">Jenis Surat <em>*</em></label>
-            <div class="warga-request-select">
-                <select name="service_type" id="service-type" class="form-control" required data-service-select <?= $editMode ? 'disabled' : '' ?>>
-                    <option value="">Pilih jenis surat</option>
-                    <?php foreach ($services as $service): ?>
-                        <option value="<?= e($service['slug']) ?>" data-submission-enabled="<?= !empty($service['submission_enabled']) ? '1' : '0' ?>" <?= empty($service['submission_enabled']) ? 'disabled' : '' ?> <?= (string) $selectedService === (string) $service['slug'] ? 'selected' : '' ?>><?= e($service['name']) ?><?= empty($service['submission_enabled']) ? ' (Belum tersedia)' : '' ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <i class="fa fa-chevron-down" aria-hidden="true"></i>
-            </div>
-            <p class="warga-service-availability d-none" data-service-availability role="status"></p>
+        <div class="warga-form-title"><span aria-hidden="true">1</span><div><h2 id="request-service-title">Surat yang Diajukan</h2><p>Jenis surat dipilih dari katalog layanan.</p></div></div>
+        <div class="warga-service-catalog-item" aria-label="Jenis surat yang dipilih">
+            <span class="warga-service-icon <?= e($selectedServiceIcon['class']) ?>"><i class="<?= e($selectedServiceIcon['icon']) ?>" aria-hidden="true"></i></span>
+            <span class="warga-service-catalog-copy">
+                <strong><?= e(isset($selectedServiceRow['name']) ? $selectedServiceRow['name'] : '') ?></strong>
+                <span class="warga-service-description"><?= e(!empty($selectedServiceRow['description']) ? $selectedServiceRow['description'] : 'Layanan administrasi untuk kebutuhan warga.') ?></span>
+            </span>
+            <i class="fa fa-check-circle warga-service-catalog-action color-green-dark" aria-hidden="true"></i>
         </div>
+        <p class="warga-service-availability d-none" data-service-availability role="status"></p>
         <div class="warga-service-requirements d-none" data-service-requirements><div class="warga-requirement-head"><i class="fa fa-clipboard-check"></i><strong>Dokumen yang diperlukan</strong></div><ul data-requirement-list></ul></div>
     </div></section>
 

@@ -3,7 +3,7 @@
     <?php if (!$requests): ?>
         <?php $hasFilters = $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' || $listing['filters']['status'] !== 'all'; ?>
         <div class="warga-empty-state"><span><i class="fa <?= $hasFilters ? 'fa-search' : 'fa-inbox' ?>" aria-hidden="true"></i></span><h3><?= $hasFilters ? 'Permohonan tidak ditemukan' : 'Belum ada permohonan' ?></h3>
-            <?php if ($hasFilters): ?><p>Coba nama surat, tanggal, atau status lainnya.</p><?php else: ?><a href="<?= site_url('permohonan/baru') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?>
+            <?php if ($hasFilters): ?><p>Coba nama surat, tanggal, atau status lainnya.</p><?php else: ?><a href="<?= site_url('layanan') ?>" class="btn btn-s bg-teal-dark color-white rounded-s">Ajukan Surat</a><?php endif; ?>
         </div>
     <?php endif; ?>
     <?php foreach ($requests as $request): ?>
