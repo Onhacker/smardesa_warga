@@ -2457,7 +2457,9 @@ html {
 #footer-bar .circle-nav i {
   position: relative;
   width: auto;
-  transform: translateY(-21px) translateX(0) !important;
+  /* The store glyph has a slightly high ink box.  Move only the glyph down
+   * one pixel so its visual centre stays aligned with the pulse circle. */
+  transform: translateY(-20px) translateX(0) !important;
 }
 
 #footer-bar .circle-nav span {
@@ -2902,7 +2904,9 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
   color: #fff !important;
   font-size: 20px !important;
   opacity: 1 !important;
-  transform: translateY(-21px) translateX(0) !important;
+  /* Font Awesome's store glyph sits one pixel above the circle's centre at
+   * the default line box; this keeps the active Pasar icon optically centred. */
+  transform: translateY(-20px) translateX(0) !important;
 }
 
 #footer-bar.footer-bar-6 .circle-nav > span {
