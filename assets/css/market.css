@@ -228,27 +228,27 @@ body.market-search-open { overflow: hidden; }
 .market-review-backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(12, 30, 52, .58); cursor: pointer; }
 .market-review-dialog { position: relative; z-index: 1; width: min(100%, 450px); margin-top: min(13vh, 105px); padding: 19px 16px 16px; border: 1px solid var(--market-line); border-radius: 19px; background: var(--market-surface) !important; box-shadow: 0 20px 55px rgba(13, 36, 66, .28); color: var(--market-ink) !important; opacity: 1; }
 .market-review-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
-.market-review-dialog h2 { margin: 3px 0 0; color: var(--market-ink); font-size: 23px; font-weight: 850; line-height: 1.15; }
+.market-review-dialog h2 { margin: 3px 0 0; color: var(--market-ink); font-size: 25px; font-weight: 850; line-height: 1.15; }
 .market-review-close { display: grid; flex: 0 0 33px; width: 33px; height: 33px; place-items: center; border: 1px solid var(--market-line); border-radius: 9px; background: transparent; color: var(--market-muted); font-size: 14px; cursor: pointer; }
 .market-review-close:hover, .market-review-close:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
-.market-review-product-label { margin: 0 0 13px; color: var(--market-muted); font-size: 12px; line-height: 1.45; }
+.market-review-product-label { margin: 0 0 13px; color: var(--market-muted); font-size: 13px; line-height: 1.5; }
 .market-review-login-notice { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 15px; padding: 12px; border: 1px solid #b7d1ee; border-radius: 13px; background: linear-gradient(135deg, #edf6ff 0%, #e1effd 100%); color: #1f4f84; }
 .market-review-login-notice-icon { display: grid; flex: 0 0 35px; width: 35px; height: 35px; place-items: center; border-radius: 10px; background: var(--market-blue); color: #fff; font-size: 14px; }
 .market-review-login-notice-copy { min-width: 0; flex: 1 1 auto; }
-.market-review-login-notice-copy strong { display: block; color: #173f6c; font-size: 13px; font-weight: 900; line-height: 1.25; }
-.market-review-login-notice-copy p { margin: 4px 0 9px; color: #315d89; font-size: 11px; font-weight: 700; line-height: 1.4; }
-.market-review-login-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 6px 10px; border-radius: 8px; background: var(--market-blue); color: #fff !important; font-size: 11px; font-weight: 900; line-height: 1; }
-.market-review-login-link:hover, .market-review-login-link:focus-visible { background: var(--market-blue-dark); color: #fff !important; outline: 3px solid rgba(45,107,178,.2); outline-offset: 1px; }
+.market-review-login-notice-copy strong { display: block; color: #173f6c; font-size: 14px; font-weight: 900; line-height: 1.3; }
+.market-review-login-notice-copy p { margin: 4px 0 10px; color: #315d89; font-size: 12px; font-weight: 700; line-height: 1.45; }
+.market-review-login-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 7px 12px; border-radius: 8px; background: #b42331 !important; color: #fff !important; font-size: 12px; font-weight: 900; line-height: 1; }
+.market-review-login-link:hover, .market-review-login-link:focus-visible { background: #8f1f2d !important; color: #fff !important; outline: 3px solid rgba(180,35,49,.22); outline-offset: 1px; }
 .market-review-picker { display: flex; align-items: center; gap: 8px; }
 .market-review-star-button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; border: 1px solid #f1d58f; border-radius: 11px; background: #fffaf0; color: #e5c06d; font-size: 19px; cursor: pointer; transition: transform .16s ease, background .16s ease, color .16s ease, border-color .16s ease; }
 .market-review-star-button:hover, .market-review-star-button:focus-visible, .market-review-star-button.is-selected { border-color: #e1ab2f; background: #fff1c9; color: #f0b323; outline: 0; transform: translateY(-1px); }
-.market-review-rating-label { min-height: 16px; margin: 8px 0 13px; color: #a16c16; font-size: 11px; font-weight: 800; }
+.market-review-rating-label { min-height: 17px; margin: 8px 0 13px; color: #a16c16; font-size: 12px; font-weight: 800; }
 .market-review-comment-field { display: block; }
-.market-review-comment-field > span { display: block; margin-bottom: 5px; color: var(--market-ink); font-size: 12px; font-weight: 800; }
-.market-review-comment-field > span small { color: var(--market-muted); font-size: 10px; font-weight: 600; }
-.market-review-comment-field textarea { display: block; width: 100%; min-height: 92px; box-sizing: border-box; padding: 10px 11px; resize: vertical; border: 1px solid var(--market-line); border-radius: 10px; outline: 0; background: var(--market-surface); color: var(--market-ink); font: inherit; font-size: 12px; line-height: 1.45; }
+.market-review-comment-field > span { display: block; margin-bottom: 5px; color: var(--market-ink); font-size: 13px; font-weight: 800; }
+.market-review-comment-field > span small { color: var(--market-muted); font-size: 11px; font-weight: 600; }
+.market-review-comment-field textarea { display: block; width: 100%; min-height: 96px; box-sizing: border-box; padding: 10px 11px; resize: vertical; border: 1px solid var(--market-line); border-radius: 10px; outline: 0; background: var(--market-surface); color: var(--market-ink); font: inherit; font-size: 13px; line-height: 1.5; }
 .market-review-comment-field textarea:focus { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
-.market-review-status { min-height: 17px; margin: 8px 0 0; color: var(--market-muted); font-size: 11px; line-height: 1.4; }
+.market-review-status { min-height: 18px; margin: 8px 0 0; color: var(--market-muted); font-size: 12px; line-height: 1.45; }
 .market-review-status.is-error { color: #ad3843; }
 .market-review-status.is-success { color: #267842; }
 .market-review-status.is-login { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 10px 11px; border: 1px solid #b7d1ee; border-radius: 10px; background: #edf6ff; color: #24598d; font-weight: 700; }
@@ -256,7 +256,7 @@ body.market-search-open { overflow: hidden; }
 .market-review-status a { color: var(--market-blue); font-weight: 800; text-decoration: underline; }
 .market-review-status.is-login a { display: inline-flex; align-items: center; min-height: 26px; padding: 4px 8px; border-radius: 7px; background: var(--market-blue); color: #fff !important; font-weight: 900; text-decoration: none; }
 .market-review-actions { display: flex; gap: 9px; margin-top: 13px; }
-.market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 43px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 45px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 .market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }
 .market-review-submit { border: 0 !important; background: var(--market-blue) !important; color: #fff !important; }
 .market-review-submit i, .market-review-submit span { color: #fff !important; }

@@ -19,7 +19,7 @@ $isAuthenticated = !empty($isAuthenticated);
                     <div class="market-review-login-notice-copy">
                         <strong>Login diperlukan untuk memberi rating</strong>
                         <p>Silakan masuk terlebih dahulu untuk memberi rating.</p>
-                        <a href="<?= e(site_url('login')) ?>" class="market-review-login-link"><span>Masuk sekarang</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                        <a href="<?= e(site_url('login')) ?>" class="market-review-login-link bg-red-dark"><span>Masuk sekarang</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                     </div>
                 </div>
             <?php endif; ?>

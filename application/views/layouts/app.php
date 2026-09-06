@@ -24,7 +24,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=90">
     <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=17">
-    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=15">
+    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=16">
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
