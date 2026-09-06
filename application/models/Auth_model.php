@@ -411,7 +411,9 @@ class Auth_model extends CI_Model
 
         $username = 'warga_' . strtolower(substr(preg_replace('/[^a-z0-9]+/i', '', $canonicalName), 0, 20)) . '_' . substr(bin2hex(random_bytes(4)), 0, 8);
         $now = date('Y-m-d H:i:s');
-        $this->db->trans_begin();
+        if (!$this->db->trans_begin()) {
+            return array('success' => FALSE, 'message' => 'Pendaftaran belum dapat dimulai. Silakan coba lagi.');
+        }
         $inserted = $this->db->insert('users', array(
             'role_id' => (int) $role['id'],
             'village_id' => $village['id'],
@@ -458,7 +460,9 @@ class Auth_model extends CI_Model
             $this->db->trans_rollback();
             return array('success' => FALSE, 'message' => 'Profil penduduk belum dapat disimpan.');
         }
-        $this->db->trans_commit();
+        if (!$this->db->trans_commit()) {
+            return array('success' => FALSE, 'message' => 'Pendaftaran belum dapat diselesaikan. Silakan coba lagi.');
+        }
         return array('success' => TRUE);
     }
 

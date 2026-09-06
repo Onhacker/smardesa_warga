@@ -1,8 +1,10 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $selectedService = $this->input->get('layanan', TRUE) ?: old('service_type'); ?>
+<?php $editMode = !empty($edit_mode) && !empty($request); $selectedService = $editMode ? (string) $request['service_slug'] : ($this->input->get('layanan', TRUE) ?: old('service_type')); ?>
+<?php $initialFields = $editMode && isset($request['form_data']) && is_array($request['form_data']) ? $request['form_data'] : array(); ?>
+<?php $existingDocuments = $editMode && isset($request['documents']) && is_array($request['documents']) ? $request['documents'] : array(); ?>
 <div class="warga-request-create">
 <section class="warga-page-intro is-form">
-    <div><p>PERMOHONAN BARU</p><h1>Ajukan Surat</h1><span>Lengkapi data dan berkas permohonan.</span></div>
+    <div><p><?= $editMode ? 'PERBAIKAN PERMOHONAN' : 'PERMOHONAN BARU' ?></p><h1><?= $editMode ? 'Perbaiki Surat' : 'Ajukan Surat' ?></h1><span><?= $editMode ? 'Perbarui data atau berkas sesuai catatan ' . e($institutionLower) . '.' : 'Lengkapi data dan berkas permohonan.' ?></span></div>
     <span class="warga-intro-icon" aria-hidden="true"><i class="fa fa-file-alt"></i></span>
 </section>
 
@@ -14,22 +16,24 @@
     <a href="<?= site_url('dashboard') ?>" class="btn btn-m bg-teal-dark color-white rounded-s font-600 px-4"><i class="fa fa-chevron-left me-2"></i>Kembali ke Beranda</a>
 </div></section>
 <?php else: ?>
-<form method="post" action="<?= site_url('permohonan/simpan') ?>" enctype="multipart/form-data" class="warga-request-form" data-request-form data-services="<?= warga_json($services) ?>" data-disable-submit>
+<form method="post" action="<?= site_url('permohonan/simpan') ?>" enctype="multipart/form-data" class="warga-request-form" data-request-form data-services="<?= warga_json($services) ?>" data-initial-fields="<?= warga_json($initialFields) ?>" data-existing-documents="<?= warga_json($existingDocuments) ?>" data-edit-mode="<?= $editMode ? '1' : '0' ?>" data-disable-submit>
     <?= csrf_field() ?>
+    <?php if ($editMode): ?><input type="hidden" name="request_id" value="<?= e($request['id']) ?>"><input type="hidden" name="service_type" value="<?= e($selectedService) ?>"><?php endif; ?>
     <p class="warga-request-form-hint"><i class="fa fa-info-circle" aria-hidden="true"></i><span>Kolom bertanda <em>*</em> wajib diisi.</span></p>
     <section class="card card-style warga-form-card" aria-labelledby="request-service-title"><div class="content">
         <div class="warga-form-title"><span aria-hidden="true">1</span><div><h2 id="request-service-title">Jenis Layanan</h2><p>Pilih surat yang akan diajukan.</p></div></div>
         <div class="warga-request-field">
             <label for="service-type">Jenis Surat <em>*</em></label>
             <div class="warga-request-select">
-                <select name="service_type" id="service-type" class="form-control" required data-service-select>
+                <select name="service_type" id="service-type" class="form-control" required data-service-select <?= $editMode ? 'disabled' : '' ?>>
                     <option value="">Pilih jenis surat</option>
                     <?php foreach ($services as $service): ?>
-                        <option value="<?= e($service['slug']) ?>" <?= (string) $selectedService === (string) $service['slug'] ? 'selected' : '' ?>><?= e($service['name']) ?></option>
+                        <option value="<?= e($service['slug']) ?>" data-submission-enabled="<?= !empty($service['submission_enabled']) ? '1' : '0' ?>" <?= empty($service['submission_enabled']) ? 'disabled' : '' ?> <?= (string) $selectedService === (string) $service['slug'] ? 'selected' : '' ?>><?= e($service['name']) ?><?= empty($service['submission_enabled']) ? ' (Belum tersedia)' : '' ?></option>
                     <?php endforeach; ?>
                 </select>
                 <i class="fa fa-chevron-down" aria-hidden="true"></i>
             </div>
+            <p class="warga-service-availability d-none" data-service-availability role="status"></p>
         </div>
         <div class="warga-service-requirements d-none" data-service-requirements><div class="warga-requirement-head"><i class="fa fa-clipboard-check"></i><strong>Dokumen yang diperlukan</strong></div><ul data-requirement-list></ul></div>
     </div></section>
@@ -38,12 +42,12 @@
         <div class="warga-form-title"><span aria-hidden="true">2</span><div><h2 id="request-purpose-title">Keperluan</h2><p>Isi tujuan penggunaan surat.</p></div></div>
         <div class="warga-request-field">
             <label for="request-purpose">Keperluan Surat <em>*</em></label>
-            <textarea name="purpose" id="request-purpose" class="form-control" rows="4" minlength="5" maxlength="500" required placeholder="Contoh: Persyaratan administrasi sekolah" aria-describedby="request-purpose-help"><?= e(old('purpose')) ?></textarea>
+            <textarea name="purpose" id="request-purpose" class="form-control" rows="4" minlength="5" maxlength="500" required placeholder="Contoh: Persyaratan administrasi sekolah" aria-describedby="request-purpose-help"><?= e($editMode ? $request['purpose'] : old('purpose')) ?></textarea>
             <small id="request-purpose-help">Minimal 5 karakter, maksimal 500 karakter.</small>
         </div>
         <div class="warga-request-field">
             <label for="request-note">Catatan Tambahan <small>Opsional</small></label>
-            <textarea name="note" id="request-note" class="form-control" rows="3" maxlength="1000" placeholder="Catatan tambahan jika diperlukan"><?= e(old('note')) ?></textarea>
+            <textarea name="note" id="request-note" class="form-control" rows="3" maxlength="1000" placeholder="Catatan tambahan jika diperlukan"><?= e($editMode ? $request['note'] : old('note')) ?></textarea>
         </div>
     </div></section>
 
@@ -55,13 +59,14 @@
     <section class="card card-style warga-form-card" aria-labelledby="request-files-title"><div class="content">
         <div class="warga-form-title"><span data-supporting-step aria-hidden="true">4</span><div><h2 id="request-files-title">Berkas Pendukung</h2><p>Tambahkan foto atau PDF jika diperlukan.</p></div></div>
         <div class="warga-supporting-upload">
+            <?php if ($editMode && !empty($existingDocuments)): ?><div class="warga-existing-files"><strong>Berkas tersimpan</strong><ul><?php foreach ($existingDocuments as $document): ?><li><i class="fa fa-file-alt"></i><?= e($document['original_name']) ?></li><?php endforeach; ?></ul><small>Unggah berkas baru hanya jika ingin mengganti berkas pada isian yang sama.</small></div><?php endif; ?>
             <label for="supporting-files" class="warga-upload-zone"><i class="fa fa-cloud-upload-alt" aria-hidden="true"></i><strong>Pilih Berkas</strong><span id="supporting-files-help">JPG, PNG, atau PDF · maksimal 5 MB per berkas</span></label>
             <input type="file" id="supporting-files" name="supporting_files[]" class="warga-file-input-native" accept="image/jpeg,image/png,application/pdf" multiple data-file-input aria-describedby="supporting-files-help">
             <div class="warga-file-list" data-file-list aria-live="polite"><span>Belum ada berkas dipilih.</span></div>
         </div>
     </div></section>
 
-    <section class="warga-submit-panel"><label class="warga-consent"><input type="checkbox" required><span>Saya memastikan data dan berkas yang dikirim benar.</span></label><button type="submit" class="btn btn-full btn-l bg-teal-dark color-white rounded-s font-600"><span>Kirim Permohonan</span><i class="fa fa-paper-plane ms-2" aria-hidden="true"></i></button></section>
+    <section class="warga-submit-panel"><label class="warga-consent"><input type="checkbox" required><span>Saya memastikan data dan berkas yang dikirim benar.</span></label><button type="submit" class="btn btn-full btn-l bg-teal-dark color-white rounded-s font-600"><span><?= $editMode ? 'Kirim Perbaikan' : 'Kirim Permohonan' ?></span><i class="fa fa-paper-plane ms-2" aria-hidden="true"></i></button></section>
 </form>
 <?php endif; ?>
 </div>

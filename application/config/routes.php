@@ -39,6 +39,7 @@ $route['notifikasi/push/hapus'] = 'notifications/unsubscribe';
 $route['layanan'] = 'layanan/index';
 $route['permohonan'] = 'permohonan/index';
 $route['permohonan/baru'] = 'permohonan/create';
+$route['permohonan/(:any)/perbaiki'] = 'permohonan/edit/$1';
 $route['permohonan/simpan'] = 'permohonan/store';
 $route['permohonan/(:any)/surat'] = 'permohonan/document/$1';
 $route['permohonan/(:any)/surat-html'] = 'permohonan/document_html/$1';

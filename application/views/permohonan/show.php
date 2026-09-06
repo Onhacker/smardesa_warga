@@ -12,6 +12,7 @@
     <?php if (!empty($request['note'])): ?><div class="warga-detail-row"><span>Catatan</span><strong><?= e($request['note']) ?></strong></div><?php endif; ?>
     <?php if (!empty($request['local_reference'])): ?><div class="warga-detail-row"><span>Nomor surat</span><strong><?= e($request['local_reference']) ?></strong></div><?php endif; ?>
     <?php if (!empty($request['documents'])): ?><div class="warga-detail-row"><span>Berkas dikirim</span><strong><?= e(count($request['documents'])) ?> berkas</strong></div><?php endif; ?>
+    <?php if ((string) $request['status'] === 'revision'): ?><div class="warga-detail-action-row"><a href="<?= site_url('permohonan/' . rawurlencode($request['id']) . '/perbaiki') ?>" class="btn btn-m bg-teal-dark color-white rounded-s"><i class="fa fa-edit"></i><span>Perbaiki Permohonan</span></a></div><?php endif; ?>
 </div></section>
 
 <?php if (!empty($formRows)): ?>

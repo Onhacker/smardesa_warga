@@ -33,7 +33,28 @@ class Permohonan extends Citizen_Controller
             redirect('dashboard');
         }
         $this->load->model('Request_model');
-        $this->render('permohonan/create', array('pageTitle' => 'Permohonan Baru', 'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : '')));
+        $this->render('permohonan/create', array('pageTitle' => 'Permohonan Baru', 'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : ''), 'request' => NULL, 'edit_mode' => FALSE));
+    }
+
+    public function edit($id)
+    {
+        if (!$this->verified_citizen()) {
+            $this->session->set_flashdata('error', 'Akun Anda belum terverifikasi sebagai penduduk aktif ' . $this->institution_label_lower() . ' ini.');
+            redirect('dashboard');
+        }
+        $this->load->model('Request_model');
+        $request = $this->Request_model->find_for_user($id, $this->currentUser['id']);
+        if (!$request || (string) $request['status'] !== 'revision') {
+            $this->session->set_flashdata('error', 'Permohonan ini belum meminta perbaikan atau sudah diproses.');
+            redirect('permohonan/' . rawurlencode((string) $id));
+        }
+        $request['documents'] = $this->Request_model->documents_for_user($id, $this->currentUser['id']);
+        $this->render('permohonan/create', array(
+            'pageTitle' => 'Perbaiki Permohonan',
+            'services' => $this->Request_model->service_types(isset($this->currentUser['village_id']) ? $this->currentUser['village_id'] : ''),
+            'request' => $request,
+            'edit_mode' => TRUE
+        ));
     }
 
     public function store()
@@ -53,12 +74,17 @@ class Permohonan extends Citizen_Controller
         }
         $formFields = $this->input->post('warga_fields', FALSE);
         if (!is_array($formFields)) $formFields = array();
-        $result = $this->Request_model->create($this->currentUser, array('service_type' => $this->input->post('service_type', TRUE), 'purpose' => $this->input->post('purpose', TRUE), 'note' => $this->input->post('note', TRUE), 'form_fields' => $formFields));
+        $requestId = trim((string) $this->input->post('request_id', TRUE));
+        $requestData = array('service_type' => $this->input->post('service_type', TRUE), 'purpose' => $this->input->post('purpose', TRUE), 'note' => $this->input->post('note', TRUE), 'form_fields' => $formFields);
+        $result = $requestId !== ''
+            ? $this->Request_model->resubmit($requestId, $this->currentUser, $requestData)
+            : $this->Request_model->create($this->currentUser, $requestData);
         if (empty($result['success'])) {
             $this->session->set_flashdata('error', isset($result['message']) ? $result['message'] : 'Permohonan belum dapat disimpan.');
             redirect('permohonan/baru');
         }
-        $this->session->set_flashdata('success', 'Permohonan berhasil dikirim dan menunggu verifikasi desa.');
+        $institution = $this->institution_label_lower();
+        $this->session->set_flashdata('success', $requestId !== '' ? 'Perbaikan berhasil dikirim dan menunggu verifikasi ' . $institution . '.' : 'Permohonan berhasil dikirim dan menunggu verifikasi ' . $institution . '.');
         redirect('permohonan/' . rawurlencode($result['id']));
     }
 
