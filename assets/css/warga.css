@@ -6140,8 +6140,27 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
   animation: warga-loader-spin .72s linear infinite;
 }
 
-#footer-bar > a.is-navigating > i {
+#footer-bar.footer-bar-6 > a.is-navigating > i,
+#footer-bar.footer-bar-6 .circle-nav.is-navigating > i {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 14px !important;
+  min-width: 14px !important;
+  height: 14px;
+  border: 2px solid rgba(35, 95, 164, .22);
+  border-top-color: var(--warga-teal-dark);
+  border-radius: 50%;
+  color: transparent !important;
+  font-size: 0 !important;
+  opacity: 1 !important;
+  transform: translateY(-2px) !important;
   animation: warga-loader-spin .72s linear infinite !important;
+}
+
+#footer-bar.footer-bar-6 .circle-nav.is-navigating > i {
+  border-color: rgba(255, 255, 255, .38);
+  border-top-color: #fff;
+  transform: translateY(-20px) translateX(0) !important;
 }
 
 form[data-disable-submit].is-submitting { cursor: progress; }
@@ -6239,7 +6258,8 @@ body.theme-dark .warga-media-loading::before {
   [data-dashboard-home][aria-busy="true"] [data-dashboard-media-card]::before,
   .warga-media-loading::before,
   #menu-main .warga-menu-list > a.is-navigating > span::before,
-  #footer-bar > a.is-navigating > i,
+  #footer-bar.footer-bar-6 > a.is-navigating > i,
+  #footer-bar.footer-bar-6 .circle-nav.is-navigating > i,
   form[data-disable-submit].is-submitting button[type="submit"] .fa-spinner {
     animation: none !important;
   }

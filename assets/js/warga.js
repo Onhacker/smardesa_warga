@@ -127,8 +127,7 @@
     if (link && link.closest && link.closest('#footer-bar')) {
       var footerIcon = directChild(link, 'i') || link.querySelector('i');
       if (footerIcon) {
-        footerIcon.setAttribute('data-warga-original-class', footerIcon.className || '');
-        footerIcon.className = 'fa fa-spinner fa-spin';
+        footerIcon.setAttribute('data-warga-footer-loading', '1');
       }
       link.classList.add('is-navigating');
       link.setAttribute('aria-busy', 'true');
@@ -154,6 +153,9 @@
       if (icon && icon.hasAttribute('data-warga-original-class')) {
         icon.className = icon.getAttribute('data-warga-original-class') || '';
         icon.removeAttribute('data-warga-original-class');
+      }
+      if (icon && icon.hasAttribute('data-warga-footer-loading')) {
+        icon.removeAttribute('data-warga-footer-loading');
       }
       var label = directChild(link, 'span');
       if (label && label.hasAttribute('data-warga-original-label')) {
