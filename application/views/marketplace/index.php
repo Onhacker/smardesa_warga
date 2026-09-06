@@ -32,17 +32,8 @@ $ajaxEndpoint = site_url('pasar/data');
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
 
-    <section class="card card-style market-filter-card" aria-labelledby="market-filter-title">
+    <section class="card card-style market-filter-card" aria-label="Filter katalog pasar">
         <div class="content mb-0">
-            <div class="market-section-heading market-filter-heading">
-                <div>
-                    <h2 id="market-filter-title">Produk warga</h2>
-                </div>
-                <div class="market-filter-actions">
-                    <span class="market-product-count" data-market-count><?= $listingTotal ?> produk</span>
-                </div>
-            </div>
-
             <form method="get" action="<?= site_url('pasar') ?>" class="market-filter-form" data-market-filter>
                 <div class="market-auto-filters">
                     <label class="market-field" for="market-category">
@@ -60,6 +51,8 @@ $ajaxEndpoint = site_url('pasar/data');
                 <input type="hidden" name="q" value="<?= e($search) ?>" data-market-query-field>
                 <noscript><button type="submit" class="market-filter-submit"><i class="fa fa-filter color-white" aria-hidden="true"></i><span class="color-white">Terapkan</span></button></noscript>
             </form>
+
+            <div class="market-filter-summary"><span class="market-product-count" data-market-count><?= $listingTotal ?> produk</span></div>
 
             <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
                 <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
