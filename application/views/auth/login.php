@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=73">
+    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=83">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -20,6 +20,13 @@
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
 <div id="page">
     <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title">SmartDesa Warga</a><a href="#" data-toggle-theme class="header-icon header-icon-4" aria-label="Ubah tema"><i class="fas fa-moon"></i></a></header>
+    <nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
+        <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
+        <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
+        <a class="circle-nav" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span></a>
+        <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
+        <a class="active-nav" href="<?= site_url('login') ?>"><i class="fa fa-sign-in-alt"></i><span>Login</span></a>
+    </nav>
     <main class="page-content header-clear-medium warga-auth-page">
         <section class="warga-auth-brand">
             <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
@@ -50,9 +57,10 @@
             </div>
         </section>
         <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install'); ?></div>
+        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=14"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=46') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=14"></script>
 </body>
 </html>

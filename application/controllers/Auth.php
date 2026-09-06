@@ -6,7 +6,22 @@ class Auth extends Public_Controller
     public function login()
     {
         if ($this->currentUser) redirect('dashboard');
-        $data = array('pageTitle' => 'Masuk | SmartDesa Warga', 'demoMode' => warga_demo_mode());
+        // The login screen is rendered outside the authenticated app layout,
+        // but it still uses the same public tenant identity as the shared
+        // footer.  Keep that context available so the footer is branded
+        // consistently before a session exists.
+        $data = array(
+            'pageTitle' => 'Masuk | SmartDesa Warga',
+            'demoMode' => warga_demo_mode(),
+            'currentUser' => NULL,
+            'isAuthenticated' => FALSE,
+            'staffMode' => FALSE,
+            'footerVillage' => array(
+                'name' => trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya',
+                'institution' => trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung',
+                'contact' => array()
+            )
+        );
         if ($this->input->method(TRUE) === 'POST') {
             $this->form_validation->set_rules('identity', 'Email atau nomor telepon', 'trim|required|max_length[160]');
             $this->form_validation->set_rules('password', 'Kata sandi', 'required|max_length[200]');
