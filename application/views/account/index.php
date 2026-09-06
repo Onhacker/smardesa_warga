@@ -161,10 +161,11 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
     </section>
 
     <section class="card card-style warga-install-card"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
-    <section class="warga-community">
-        <a href="<?= site_url('kontak') ?>" class="community-text-link"><i class="fa fa-address-book"></i> Kontak <?= e($institutionLabel) ?></a>
-        <?php if ($staffMode): ?><a href="<?= site_url('notifikasi') ?>">Notifikasi <span data-notification-count></span></a><?php endif; ?>
-    </section>
+    <?php if ($staffMode): ?>
+        <section class="warga-community">
+            <a href="<?= site_url('notifikasi') ?>">Notifikasi <span data-notification-count></span></a>
+        </section>
+    <?php endif; ?>
 
     <form method="post" action="<?= site_url('logout') ?>" class="content warga-account-logout" data-logout-form>
         <?= csrf_field() ?>
