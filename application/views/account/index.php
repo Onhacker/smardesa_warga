@@ -134,13 +134,19 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
                 <div><strong>Mode Tampilan</strong><small>Gunakan tema terang atau gelap</small></div>
                 <i class="fa fa-chevron-right" aria-hidden="true"></i>
             </a>
-            <?php if (!$staffMode): ?>
-                <a href="<?= site_url('notifikasi') ?>">
-                    <span class="warga-setting-icon is-red"><i class="fa fa-bell" aria-hidden="true"></i></span>
-                    <div><strong>Notifikasi</strong><small>Lihat pembaruan status layanan</small></div>
-                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
-                </a>
-            <?php endif; ?>
+            <div class="warga-account-notification-row">
+                <span class="warga-setting-icon is-red"><i class="fa fa-bell" aria-hidden="true"></i></span>
+                <div class="warga-account-notification-copy">
+                    <strong>Notifikasi</strong>
+                    <small>Aktifkan pemberitahuan status layanan</small>
+                    <span class="warga-account-notification-status" data-push-status role="status" aria-live="polite"></span>
+                    <a class="warga-account-notification-history" href="<?= site_url('notifikasi') ?>">Lihat riwayat notifikasi <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                </div>
+                <div class="custom-control small-switch ios-switch warga-account-notification-switch">
+                    <input data-push-toggle type="checkbox" class="ios-input" id="switch-push-notification" aria-label="Aktifkan notifikasi">
+                    <label class="custom-control-label" for="switch-push-notification" aria-hidden="true"></label>
+                </div>
+            </div>
             <a href="<?= site_url('akun/edit') ?>">
                 <span class="warga-setting-icon is-blue"><i class="fa fa-user-edit" aria-hidden="true"></i></span>
                 <div><strong>Edit Akun</strong><small>Ubah email atau nomor telepon</small></div>
@@ -157,10 +163,6 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
     <section class="card card-style warga-install-card"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
     <section class="warga-community">
         <a href="<?= site_url('kontak') ?>" class="community-text-link"><i class="fa fa-address-book"></i> Kontak <?= e($institutionLabel) ?></a>
-        <div class="community-push">
-            <button type="button" class="community-button" data-push-toggle><i class="fa fa-bell"></i> Aktifkan Notifikasi</button>
-            <p data-push-status role="status"></p>
-        </div>
         <?php if ($staffMode): ?><a href="<?= site_url('notifikasi') ?>">Notifikasi <span data-notification-count></span></a><?php endif; ?>
     </section>
 

@@ -2580,7 +2580,7 @@ html {
 .warga-site-footer-action.is-youtube { background: #e34b4b; }
 .warga-site-footer-action.is-whatsapp { background: #22b875; }
 .warga-site-footer-action.is-top { background: var(--warga-teal-dark); }
-.warga-site-footer-action.is-top > i { font-size: 15px; }
+.warga-site-footer-action.is-top > i { font-size: 13px; }
 
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
@@ -3692,6 +3692,109 @@ body #page .page-content .warga-account-page .warga-settings-list small {
 #page .warga-account-page .warga-settings-list a > i {
   color: #8b98a5 !important;
   font-size: 12px;
+}
+
+/* Keep the notification preference in the same settings card as the dark
+ * mode switch.  The push subscription is a browser/device setting, so the
+ * switch reflects the current Service Worker subscription rather than a
+ * second account preference. */
+.warga-account-page .warga-account-notification-row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 14px;
+  min-height: 80px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--warga-line);
+  line-height: 1.4;
+}
+
+.warga-account-notification-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.warga-account-page .warga-account-notification-copy strong {
+  color: var(--warga-ink) !important;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.warga-account-page .warga-account-notification-copy > small {
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.warga-account-notification-status {
+  min-height: 0;
+  color: var(--warga-blue) !important;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.warga-account-page .warga-settings-list .warga-account-notification-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  margin-top: 2px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  color: var(--warga-blue) !important;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.warga-account-notification-history i {
+  font-size: 10px;
+}
+
+.warga-account-page .warga-account-notification-switch {
+  position: relative;
+  top: auto;
+  right: auto;
+  display: block;
+  flex: 0 0 42px;
+  width: 42px;
+  height: 26px;
+  margin: 0 !important;
+  padding: 0;
+  transform: scale(.8);
+  transform-origin: right center;
+}
+
+.warga-account-page .warga-account-notification-switch .custom-control-label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.warga-account-page .warga-account-notification-switch .ios-input:disabled + .custom-control-label {
+  cursor: wait;
+  opacity: .55;
+}
+
+body.theme-dark #page .warga-account-notification-row {
+  border-bottom-color: #34444e;
+}
+
+body.theme-dark #page .warga-account-page .warga-account-notification-copy strong {
+  color: #f1f5f7 !important;
+}
+
+body.theme-dark #page .warga-account-page .warga-account-notification-copy > small {
+  color: #aebbc4 !important;
+}
+
+body.theme-dark #page .warga-account-notification-status,
+body.theme-dark #page .warga-account-notification-history {
+  color: #a9c8ee !important;
 }
 
 #page .warga-account-page .warga-install-card .content {

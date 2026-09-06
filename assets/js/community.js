@@ -29,6 +29,7 @@
   }());
   var config = window.SDW || {}, base = config.baseUrl || '/';
   var button = document.querySelector('[data-push-toggle]');
+  var checkbox = button && button.matches('input[type="checkbox"]');
   var status = document.querySelector('[data-push-status]');
   var subscribed = false;
   function message(text) { if (status) status.textContent = text; }
@@ -44,35 +45,54 @@
     return Uint8Array.from(decoded, function (char) { return char.charCodeAt(0); });
   }
   function updateButton(active) {
-    subscribed = active;
-    if (button) button.innerHTML = '<i class="fa fa-bell"></i> ' + (active ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi');
+    subscribed = !!active;
+    if (!button) return;
+    if (checkbox) {
+      button.checked = subscribed;
+      button.setAttribute('aria-checked', subscribed ? 'true' : 'false');
+    } else {
+      button.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi');
+    }
   }
+  function setDisabled(disabled) { if (button) button.disabled = !!disabled; }
   var supported = window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   if (button) {
-    if (!supported) { button.disabled=true; message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
-    else if (!config.vapidPublicKey) { button.disabled=true; message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
+    if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
+    else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
     else {
       navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
         .then(function (sub) { updateButton(!!sub); if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); })
         .catch(function () { message('Status notifikasi belum dapat diperiksa.'); });
-      button.addEventListener('click', async function () {
-        button.disabled = true;
+      async function toggleSubscription(desired) {
+        var previous = subscribed;
+        setDisabled(true);
         try {
-          var permission = subscribed ? 'granted' : await Notification.requestPermission();
-          if (permission !== 'granted') { message('Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.'); return; }
+          var permission = desired ? (subscribed ? 'granted' : await Notification.requestPermission()) : 'granted';
+          if (permission !== 'granted') {
+            updateButton(previous);
+            message('Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
+            return;
+          }
           var reg = await navigator.serviceWorker.ready;
           var sub = await reg.pushManager.getSubscription();
-          if (subscribed && sub) {
+          if (!desired && subscribed && sub) {
             await post('notifikasi/push/hapus', {endpoint:sub.endpoint});
             await sub.unsubscribe(); updateButton(false); message('Notifikasi perangkat dinonaktifkan.');
-          } else {
+          } else if (desired) {
             sub = sub || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:keyBytes(config.vapidPublicKey)});
             await post('notifikasi/push', {subscription:JSON.stringify(sub)});
             updateButton(true); message('Notifikasi perangkat aktif.');
-          }
-        } catch (error) { message(error.message || 'Notifikasi belum dapat diaktifkan.'); }
-        finally { button.disabled=false; }
-      });
+          } else updateButton(false);
+        } catch (error) {
+          updateButton(previous);
+          message(error.message || 'Notifikasi belum dapat diaktifkan.');
+        } finally { setDisabled(false); }
+      }
+      if (checkbox) {
+        button.addEventListener('change', function () { toggleSubscription(button.checked); });
+      } else {
+        button.addEventListener('click', function () { toggleSubscription(!subscribed); });
+      }
     }
   }
   // Rebind an existing subscription after switching accounts; no permission prompt.
