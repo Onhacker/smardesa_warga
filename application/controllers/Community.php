@@ -104,25 +104,49 @@ class Community extends Public_Controller
 
     public function privacy()
     {
-        $this->require_authentication();
-        $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
+        // Legal documents must be readable by anyone (including Play Store
+        // reviewers) without creating an account.  Use the signed-in tenant
+        // when available, otherwise render only the configured public
+        // identity and never query resident-specific data.
+        $village = $this->legal_village_context();
         $this->render('community/privacy', array(
             'pageTitle' => 'Kebijakan Privasi',
             'village' => $village,
             'showBackButton' => TRUE,
-            'backUrl' => site_url('akun')
+            'backUrl' => $this->currentUser ? site_url('akun') : site_url('dashboard')
         ));
     }
 
     public function terms()
     {
-        $this->require_authentication();
-        $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
+        // Keep the terms page public for store listing and policy links.
+        $village = $this->legal_village_context();
         $this->render('community/terms', array(
             'pageTitle' => 'Syarat & Ketentuan',
             'village' => $village,
             'showBackButton' => TRUE,
-            'backUrl' => site_url('akun')
+            'backUrl' => $this->currentUser ? site_url('akun') : site_url('dashboard')
         ));
+    }
+
+    /**
+     * Return only the identity needed by public legal documents.  A visitor
+     * must not need a session (or receive a resident's tenant record) just to
+     * read the privacy policy and terms of service.
+     */
+    private function legal_village_context()
+    {
+        if ($this->currentUser) {
+            return $this->community->village(
+                $this->currentUser['village_id'] ?? '',
+                $this->currentUser['village_name'] ?? ''
+            );
+        }
+
+        return array(
+            'name' => trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya',
+            'institution' => $this->institution_label(),
+            'contact' => array()
+        );
     }
 }
