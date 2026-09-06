@@ -6,19 +6,22 @@ class Auth extends Public_Controller
     public function login()
     {
         if ($this->currentUser) redirect('dashboard');
+        $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+        $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         // The login screen is rendered outside the authenticated app layout,
         // but it still uses the same public tenant identity as the shared
         // footer.  Keep that context available so the footer is branded
         // consistently before a session exists.
         $data = array(
-            'pageTitle' => 'Masuk | SmartDesa Warga',
+            'pageTitle' => 'Masuk | Smart ' . $publicInstitution,
             'demoMode' => warga_demo_mode(),
             'currentUser' => NULL,
             'isAuthenticated' => FALSE,
             'staffMode' => FALSE,
+            'institutionLabel' => $publicInstitution,
             'footerVillage' => array(
-                'name' => trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya',
-                'institution' => trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung',
+                'name' => $publicArea,
+                'institution' => $publicInstitution,
                 'contact' => array()
             )
         );

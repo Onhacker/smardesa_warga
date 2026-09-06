@@ -22,10 +22,8 @@ if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
 }
 if ($footerInstitution === '') $footerInstitution = 'Desa';
 $footerBrand = trim('Smart ' . $footerInstitution . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
-if ($footerBrand === 'Smart Desa') $footerBrand = 'SmartDesa Warga';
 
 $footerAddress = trim((string) ($footerContact['address'] ?? ''));
-if ($footerAddress === '') $footerAddress = 'Alamat kantor belum tersedia';
 
 $footerHttpUrl = static function ($value) {
     $value = trim((string) $value);
@@ -64,7 +62,9 @@ foreach (array(
     <div class="warga-site-footer-main">
         <p class="warga-site-footer-kicker">Layanan digital warga</p>
         <h2><?= e($footerBrand) ?></h2>
-        <p class="warga-site-footer-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($footerAddress) ?></span></p>
+        <?php if ($footerAddress !== ''): ?>
+            <p class="warga-site-footer-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($footerAddress) ?></span></p>
+        <?php endif; ?>
 
         <?php if ($footerActions): ?>
             <div class="warga-site-footer-actions" aria-label="Kontak <?= e($footerBrand) ?>">

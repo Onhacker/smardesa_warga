@@ -1,4 +1,8 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+$loginInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Kampung')));
+if ($loginInstitution === '') $loginInstitution = 'Kampung';
+$loginBrand = 'Smart ' . $loginInstitution;
+?>
 <!DOCTYPE HTML>
 <html lang="id">
 <head>
@@ -6,7 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
     <meta name="theme-color" content="#235fa4">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="SmartDesa Warga">
+    <meta name="apple-mobile-web-app-title" content="<?= e($loginBrand) ?>">
     <title><?= e($pageTitle) ?></title>
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
@@ -19,7 +23,7 @@
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
 <div id="page">
-    <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title">SmartDesa Warga</a><a href="#" data-toggle-theme class="header-icon header-icon-4" aria-label="Ubah tema"><i class="fas fa-moon"></i></a></header>
+    <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title"><?= e($loginBrand) ?></a><a href="#" data-toggle-theme class="header-icon header-icon-4" aria-label="Ubah tema"><i class="fas fa-moon"></i></a></header>
     <nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
         <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
@@ -30,7 +34,7 @@
     <main class="page-content header-clear-medium warga-auth-page">
         <section class="warga-auth-brand">
             <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
-            <div><p>LAYANAN DIGITAL WARGA</p><h1>SmartDesa Warga</h1><span>Kampung terhubung, layanan lebih dekat.</span></div>
+            <div><p>LAYANAN DIGITAL WARGA</p><h1><?= e($loginBrand) ?></h1><span><?= e($loginInstitution) ?> terhubung, layanan lebih dekat.</span></div>
         </section>
         <section class="card card-style warga-auth-card">
             <div class="content">
