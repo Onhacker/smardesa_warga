@@ -3684,7 +3684,8 @@ body #page .page-content .warga-account-page .warga-account-row > div > small {
 
 .warga-account-page .warga-account-theme-row > .warga-account-theme-switch {
   grid-column: 3;
-  justify-self: end;
+  /* Match the notification switch's intrinsic grid alignment exactly. */
+  justify-self: auto;
   min-width: 0;
 }
 
