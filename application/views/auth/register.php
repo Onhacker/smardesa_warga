@@ -74,7 +74,7 @@ $registrationErrorHtml = !empty($error)
         <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="color-highlight font-600" href="<?= site_url('login') ?>">Masuk</a></p>
     </div></section>
 </main></div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=53') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=15"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=54') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=15"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

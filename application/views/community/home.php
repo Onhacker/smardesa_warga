@@ -4,7 +4,6 @@ $isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
 $publicArea = trim((string) ($village['name'] ?? (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
 $heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Smart ' . (string) ($institutionLabel ?? 'Kampung') . ' ' . $publicArea;
 $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
-$contactArea = $village['name'] ?? $heroLocation;
 ?>
 <div class="warga-community community-v22-home" data-dashboard-home>
     <section class="community-home community-v22-hero" aria-labelledby="community-welcome-title">
@@ -133,7 +132,7 @@ $contactArea = $village['name'] ?? $heroLocation;
                 <span class="community-v22-feature-copy">
                     <small>Bantuan warga</small>
                     <strong>Kontak <?= e($village['institution']) ?></strong>
-                    <span>Hubungi petugas <?= e($contactArea) ?> saat Anda membutuhkan bantuan.</span>
+                    <span>Hubungi <?= e($institutionLabel) ?> saat Anda membutuhkan bantuan.</span>
                     <b>Lihat kontak <i class="fa fa-arrow-right" aria-hidden="true"></i></b>
                 </span>
             </a>

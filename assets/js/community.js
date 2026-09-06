@@ -27,7 +27,7 @@
     window.Splide = compactSplide;
     window.__SDWCommunitySplideTuned = true;
   }());
-  var config = window.SDW || {}, base = config.baseUrl || '/';
+  var config = window.SDW || {}, base = config.baseUrl || '/', isAuthenticated = config.isAuthenticated === true || config.isAuthenticated === 1 || config.isAuthenticated === '1';
   var button = document.querySelector('[data-push-toggle]');
   var checkbox = button && button.matches('input[type="checkbox"]');
   var status = document.querySelector('[data-push-status]');
@@ -96,10 +96,10 @@
     }
   }
   // Rebind an existing subscription after switching accounts; no permission prompt.
-  if (supported && config.vapidPublicKey && !button) navigator.serviceWorker.ready
+  if (isAuthenticated && supported && config.vapidPublicKey && !button) navigator.serviceWorker.ready
     .then(function (reg) { return reg.pushManager.getSubscription(); })
     .then(function (sub) { if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); }).catch(function () {});
-  var pending=false, stopped=false, timer;
+  var pending=false, stopped=!isAuthenticated, timer;
   async function poll() {
     if (pending || stopped || document.hidden || !navigator.onLine) return;
     pending=true;
@@ -115,9 +115,11 @@
     } catch (_) {} finally { clearTimeout(timeout); pending=false; }
   }
   function schedule() { clearTimeout(timer); poll().finally(function(){timer=setTimeout(schedule,60000);}); }
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)schedule();});
-  window.addEventListener('online',schedule);
-  schedule();
+  if (isAuthenticated) {
+    document.addEventListener('visibilitychange',function(){if(!document.hidden)schedule();});
+    window.addEventListener('online',schedule);
+    schedule();
+  }
 
   // AppKit v22's double-slider advances every four seconds.  Keep the
   // community slider equally useful when its lightweight scroll-snap markup
