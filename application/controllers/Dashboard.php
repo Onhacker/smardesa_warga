@@ -7,6 +7,7 @@ class Dashboard extends Public_Controller
     {
         if ($this->currentUser && warga_is_staff($this->currentUser)) redirect('petugas');
         $this->load->model('Community_model');
+        $this->load->model('Marketplace_model', 'marketplace');
         if ($this->currentUser) {
             $this->load->model('Request_model');
             $summary = $this->Request_model->summary($this->currentUser['id']);
@@ -17,8 +18,19 @@ class Dashboard extends Public_Controller
             $village = array('name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya', 'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung', 'contact' => array());
             $announcements = $this->Community_model->public_announcements(3);
         }
+        // Keep the dashboard preview lightweight while the public catalogue
+        // remains available from the dedicated Pasar page.  The marketplace
+        // model applies the same published/public visibility rules here.
+        $marketListing = $this->marketplace->products(array(), array(
+            'public_all' => TRUE,
+            'sort' => 'newest',
+            'page' => 1,
+            'per_page' => 4
+        ));
         $this->render('community/home', array('pageTitle'=>'Beranda',
-            'village'=>$village, 'summary'=>$summary, 'announcements'=>$announcements));
+            'village'=>$village, 'summary'=>$summary, 'announcements'=>$announcements,
+            'marketplaceProducts'=>array_slice(isset($marketListing['items']) && is_array($marketListing['items']) ? $marketListing['items'] : array(), 0, 4),
+            'marketplaceReady'=>!isset($marketListing['ready']) || (bool) $marketListing['ready']));
     }
 
     public function letters()

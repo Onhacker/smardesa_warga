@@ -80,6 +80,35 @@ $contactArea = $village['name'] ?? $heroLocation;
         </nav>
     </section>
 
+    <?php
+    $marketplaceProducts = isset($marketplaceProducts) && is_array($marketplaceProducts) ? array_slice($marketplaceProducts, 0, 4) : array();
+    $marketplaceReady = !isset($marketplaceReady) || (bool) $marketplaceReady;
+    ?>
+    <section class="marketplace-page community-v22-market-preview" aria-labelledby="community-market-preview-title">
+        <header class="community-v22-section-head">
+            <div>
+                <p class="community-v22-eyebrow">Pasar digital</p>
+                <h2 id="community-market-preview-title">Produk terbaru</h2>
+            </div>
+            <a href="<?= site_url('pasar') ?>">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </header>
+
+        <?php if ($marketplaceProducts): ?>
+            <div class="market-product-grid community-v22-market-grid" data-dashboard-market-preview>
+                <?php $this->load->view('marketplace/product_cards', array('products' => $marketplaceProducts, 'eagerFirst' => TRUE)); ?>
+            </div>
+            <?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>
+        <?php else: ?>
+            <div class="community-v22-market-empty" role="status">
+                <span class="community-v22-market-empty-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
+                <span>
+                    <strong><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar digital sedang disiapkan' ?></strong>
+                    <small><?= $marketplaceReady ? 'Produk warga akan tampil di sini.' : 'Silakan lihat kembali beberapa saat lagi.' ?></small>
+                </span>
+            </div>
+        <?php endif; ?>
+    </section>
+
     <section class="community-v22-information" aria-labelledby="community-information-title">
         <header class="community-v22-section-head">
             <div>
