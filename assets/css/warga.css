@@ -3046,7 +3046,8 @@ body.theme-dark #page .community-item p { color: #bdc9d0; }
 }
 
 #page .community-v22-market-grid {
-  gap: 12px 10px;
+  /* Keep the home preview on the exact same two-column rhythm as Pasar. */
+  gap: 13px 11px;
 }
 
 #page .community-v22-market-grid .market-product-card {
@@ -3054,7 +3055,38 @@ body.theme-dark #page .community-item p { color: #bdc9d0; }
 }
 
 #page .community-v22-market-grid .market-product-card .market-product-copy {
-  min-height: 138px;
+  min-height: 132px;
+  padding: 10px 11px 12px;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-stars {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-name {
+  min-height: 2.45em;
+  font-size: 17px;
+  line-height: 1.22;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-store {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-village {
+  font-size: 11px;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-price {
+  margin-top: 9px;
+  font-size: 19px;
+}
+
+#page .community-v22-market-grid .market-product-card .market-product-stock {
+  margin-top: 6px;
+  font-size: 11px;
 }
 
 #page .community-v22-market-empty {
@@ -3138,20 +3170,21 @@ body.theme-dark #page .community-v22-market-empty small {
   }
 
   #page .community-v22-market-grid {
-    gap: 10px 8px;
+    gap: 13px 11px;
   }
 
   #page .community-v22-market-grid .market-product-card .market-product-copy {
-    min-height: 126px;
-    padding: 9px 9px 11px;
+    min-height: 132px;
+    padding: 10px 11px 12px;
   }
 
   #page .community-v22-market-grid .market-product-card .market-product-name {
-    font-size: 15px;
+    font-size: 17px;
+    line-height: 1.22;
   }
 
   #page .community-v22-market-grid .market-product-card .market-product-price {
-    font-size: 17px;
+    font-size: 19px;
   }
 }
 
