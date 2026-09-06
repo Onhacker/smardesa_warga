@@ -48,12 +48,157 @@
   window.addEventListener('offline', updateConnectivity);
   updateConnectivity();
 
+  function bindMediaSkeletons(root) {
+    var scope = root && typeof root.querySelectorAll === 'function' ? root : document;
+    var images = scope.querySelectorAll([
+      '[data-dashboard-media-card] > img',
+      '.market-product-media > img',
+      '.market-product-hero-image > img',
+      '.market-product-thumb > img'
+    ].join(','));
+
+    images.forEach(function (image) {
+      var frame = image.parentElement;
+      if (!frame) return;
+
+      function finish() {
+        frame.classList.remove('warga-media-loading');
+        frame.removeAttribute('aria-busy');
+      }
+
+      if (image.getAttribute('data-warga-media-bound') !== '1') {
+        image.setAttribute('data-warga-media-bound', '1');
+        image.addEventListener('load', finish);
+        image.addEventListener('error', finish);
+      }
+
+      if (image.complete) {
+        finish();
+      } else {
+        frame.classList.add('warga-media-loading');
+        frame.setAttribute('aria-busy', 'true');
+      }
+    });
+
+    var dashboard = document.querySelector('[data-dashboard-home]');
+    if (dashboard) dashboard.setAttribute('aria-busy', 'false');
+  }
+
+  config.bindMediaSkeletons = bindMediaSkeletons;
+  bindMediaSkeletons(document);
+
+  function directChild(element, tagName) {
+    if (!element) return null;
+    var children = element.children || [];
+    for (var index = 0; index < children.length; index += 1) {
+      if (children[index].tagName && children[index].tagName.toLowerCase() === tagName) return children[index];
+    }
+    return null;
+  }
+
+  function pageSkeleton() {
+    var skeleton = document.querySelector('[data-warga-page-skeleton]');
+    if (skeleton) return skeleton;
+    skeleton = document.createElement('div');
+    skeleton.className = 'warga-page-skeleton';
+    skeleton.hidden = true;
+    skeleton.setAttribute('data-warga-page-skeleton', '');
+    skeleton.setAttribute('role', 'status');
+    skeleton.setAttribute('aria-live', 'polite');
+    skeleton.setAttribute('aria-label', 'Memuat halaman');
+    skeleton.innerHTML = '<span class="visually-hidden">Memuat halaman…</span>' +
+      '<div class="warga-page-skeleton-inner" aria-hidden="true">' +
+        '<span class="warga-page-skeleton-hero"></span>' +
+        '<span class="warga-page-skeleton-heading"></span>' +
+        '<span class="warga-page-skeleton-grid"><i></i><i></i><i></i><i></i></span>' +
+        '<span class="warga-page-skeleton-row"><i></i><b></b></span>' +
+        '<span class="warga-page-skeleton-row"><i></i><b></b></span>' +
+        '<span class="warga-page-skeleton-row"><i></i><b></b></span>' +
+      '</div>';
+    document.body.appendChild(skeleton);
+    return skeleton;
+  }
+
+  function showNavigationLoader(link) {
+    body.classList.add('warga-is-navigating');
+    var skeleton = pageSkeleton();
+    skeleton.hidden = false;
+
+    if (link && link.closest && link.closest('#footer-bar')) {
+      var footerIcon = directChild(link, 'i') || link.querySelector('i');
+      if (footerIcon) {
+        footerIcon.setAttribute('data-warga-original-class', footerIcon.className || '');
+        footerIcon.className = 'fa fa-spinner fa-spin';
+      }
+      link.classList.add('is-navigating');
+      link.setAttribute('aria-busy', 'true');
+    }
+
+    if (link && link.closest && link.closest('#menu-main .warga-menu-list')) {
+      var menuLabel = directChild(link, 'span');
+      if (menuLabel) {
+        menuLabel.setAttribute('data-warga-original-label', menuLabel.textContent || '');
+        menuLabel.textContent = 'Memuat…';
+      }
+      link.classList.add('is-navigating');
+      link.setAttribute('aria-busy', 'true');
+    }
+  }
+
+  function resetNavigationLoader() {
+    body.classList.remove('warga-is-navigating');
+    var skeleton = document.querySelector('[data-warga-page-skeleton]');
+    if (skeleton) skeleton.hidden = true;
+    document.querySelectorAll('#footer-bar a.is-navigating, #menu-main .warga-menu-list > a.is-navigating').forEach(function (link) {
+      var icon = directChild(link, 'i');
+      if (icon && icon.hasAttribute('data-warga-original-class')) {
+        icon.className = icon.getAttribute('data-warga-original-class') || '';
+        icon.removeAttribute('data-warga-original-class');
+      }
+      var label = directChild(link, 'span');
+      if (label && label.hasAttribute('data-warga-original-label')) {
+        label.textContent = label.getAttribute('data-warga-original-label') || '';
+        label.removeAttribute('data-warga-original-label');
+      }
+      link.classList.remove('is-navigating');
+      link.removeAttribute('aria-busy');
+    });
+  }
+
+  document.addEventListener('click', function (event) {
+    if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    var target = event.target;
+    if (!target || typeof target.closest !== 'function') return;
+    if (target.closest('[data-toggle-theme], [data-menu], [data-market-review-open], [data-market-page-link], [data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]')) return;
+    var link = target.closest('a[href]');
+    if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
+    var href = (link.getAttribute('href') || '').trim();
+    if (!href || href === '#' || href.indexOf('javascript:') === 0) return;
+    var url;
+    try { url = new URL(link.href, window.location.href); } catch (error) { return; }
+    if (!/^https?:$/.test(url.protocol) || url.origin !== window.location.origin) return;
+    if (url.href === window.location.href) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search && url.hash) return;
+    showNavigationLoader(link);
+  });
+
+  window.addEventListener('pageshow', resetNavigationLoader);
+
   document.querySelectorAll('form[data-disable-submit]').forEach(function (form) {
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (event) {
       if (!form.checkValidity()) return;
-      var button = form.querySelector('button[type="submit"]');
+      if (form.getAttribute('data-submitting') === '1') {
+        event.preventDefault();
+        return;
+      }
+      form.setAttribute('data-submitting', '1');
+      form.setAttribute('aria-busy', 'true');
+      form.classList.add('is-submitting');
+      var button = event.submitter || form.querySelector('button[type="submit"]');
       if (!button) return;
       button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.setAttribute('aria-disabled', 'true');
       var label = button.querySelector('span');
       if (label) label.textContent = 'Memproses...';
       var icon = button.querySelector('i');

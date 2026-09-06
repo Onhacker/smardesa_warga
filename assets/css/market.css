@@ -261,7 +261,8 @@ body.market-search-open { overflow: hidden; }
 .market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }
 .market-review-submit { border: 0 !important; background: var(--market-blue) !important; color: #fff !important; }
 .market-review-submit i, .market-review-submit span { color: #fff !important; }
-.market-review-submit:disabled { cursor: wait; opacity: .65; }
+.market-review-submit:disabled, .market-review-submit.is-loading { cursor: wait; opacity: .78; }
+.market-review-submit.is-loading .fa-spinner { animation: fa-spin 1s linear infinite; }
 body.market-review-open { overflow: hidden; }
 
 /* Product/store forms */

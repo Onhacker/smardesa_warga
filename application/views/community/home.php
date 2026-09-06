@@ -6,7 +6,7 @@ $heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Sma
 $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
 $contactArea = $village['name'] ?? $heroLocation;
 ?>
-<div class="warga-community community-v22-home">
+<div class="warga-community community-v22-home" data-dashboard-home>
     <section class="community-home community-v22-hero" aria-labelledby="community-welcome-title">
         <div class="community-v22-hero-main">
             <img class="community-v22-hero-logo" src="<?= base_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SmartDesa Warga">
@@ -35,7 +35,7 @@ $contactArea = $village['name'] ?? $heroLocation;
         <nav class="community-v22-slider splide double-slider visible-slider slider-no-dots" id="community-services-slider" aria-label="Layanan utama">
             <div class="splide__track">
                 <div class="splide__list">
-            <a class="community-v22-slide splide__slide is-marketplace" href="<?= site_url('pasar') ?>">
+            <a class="community-v22-slide splide__slide is-marketplace" href="<?= site_url('pasar') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/pasar-layanan.webp') ?>" alt="Ilustrasi Pasar Digital <?= e($institutionLabel) ?>" loading="eager" decoding="async" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-store" aria-hidden="true"></i></span>
@@ -45,7 +45,7 @@ $contactArea = $village['name'] ?? $heroLocation;
                     <span>Temukan produk warga <?= e($institutionLower) ?></span>
                 </span>
             </a>
-            <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>">
+            <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/surat-layanan.webp') ?>" alt="Ilustrasi layanan surat" loading="lazy" decoding="async" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
@@ -55,7 +55,7 @@ $contactArea = $village['name'] ?? $heroLocation;
                     <span><?= number_format($summary['active']) ?> permohonan diproses</span>
                 </span>
             </a>
-            <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>">
+            <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/pengumuman-layanan.webp') ?>" alt="Ilustrasi layanan pengumuman" loading="lazy" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
@@ -65,7 +65,7 @@ $contactArea = $village['name'] ?? $heroLocation;
                     <span><?= $announcements ? number_format(count($announcements)) . ' informasi terbaru' : 'Belum ada informasi terbaru' ?></span>
                 </span>
             </a>
-            <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>">
+            <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/pengaduan-layanan.webp') ?>" alt="Ilustrasi layanan pengaduan" loading="lazy" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-comments" aria-hidden="true"></i></span>
@@ -89,7 +89,7 @@ $contactArea = $village['name'] ?? $heroLocation;
         </header>
 
         <div class="community-v22-feature-list">
-            <a class="community-v22-feature" href="<?= site_url('notifikasi') ?>">
+            <a class="community-v22-feature" href="<?= site_url('notifikasi') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/notifikasi-layanan.webp') ?>" alt="Ilustrasi notifikasi surat" loading="lazy" width="600" height="1067">
                 <span class="community-v22-feature-copy">
                     <small>Kabar layanan</small>
@@ -99,7 +99,7 @@ $contactArea = $village['name'] ?? $heroLocation;
                 </span>
             </a>
 
-            <a class="community-v22-feature" href="<?= site_url('kontak') ?>">
+            <a class="community-v22-feature" href="<?= site_url('kontak') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/kontak-lembaga.webp') ?>" alt="Ilustrasi kontak <?= e($village['institution']) ?>" loading="lazy" width="600" height="933">
                 <span class="community-v22-feature-copy">
                     <small>Bantuan warga</small>

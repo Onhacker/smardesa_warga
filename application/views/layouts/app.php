@@ -22,9 +22,9 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=90">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=95">
     <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=17">
-    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=17">
+    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=18">
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
@@ -36,7 +36,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light" data-highlight="highlight-teal" data-base-url="<?= e(base_url()) ?>" data-csrf-name="<?= e($this->security->get_csrf_token_name()) ?>" data-csrf-hash="<?= e($this->security->get_csrf_hash()) ?>">
-<div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
+<?php $this->load->view('layouts/page_skeleton'); ?>
 <div id="page">
     <header class="header header-fixed header-logo-center header-auto-show">
         <?php if ($showBackButton): ?>
@@ -86,12 +86,12 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </aside>
     <div class="menu-hider"></div>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=47') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=51') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>
-<script src="<?= base_url('assets/js/warga.min.js') ?>?v=14"></script>
+<script src="<?= base_url('assets/js/warga.min.js') ?>?v=15"></script>
 <script src="<?= base_url('assets/js/community.min.js') ?>?v=8"></script>
-<script src="<?= base_url('assets/js/market.js') ?>?v=7"></script>
+<script src="<?= base_url('assets/js/market.js') ?>?v=8"></script>
 </body>
 </html>

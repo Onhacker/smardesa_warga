@@ -15,13 +15,13 @@ $loginBrand = 'Smart ' . $loginInstitution;
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=83">
+    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=95">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
-<div id="preloader"><div class="spinner-border color-highlight" role="status"><span class="visually-hidden">Memuat</span></div></div>
+<?php $this->load->view('layouts/page_skeleton'); ?>
 <div id="page">
     <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title"><?= e($loginBrand) ?></a><a href="#" data-toggle-theme class="header-icon header-icon-4" aria-label="Ubah tema"><i class="fas fa-moon"></i></a></header>
     <nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
@@ -64,7 +64,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=46') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=14"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=51') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=15"></script>
 </body>
 </html>

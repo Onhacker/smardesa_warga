@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-06-marketplace-52';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-06-loaders-56';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -17,14 +17,14 @@ const precache = [
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=88',
+  'assets/css/warga.min.css?v=95',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=3',
-  'assets/js/warga.min.js?v=14',
-  'assets/js/community.min.js?v=7',
+  'assets/js/warga.min.js?v=15',
+  'assets/js/community.min.js?v=8',
   'assets/css/community.min.css?v=17',
-  'assets/css/market.css?v=15',
-  'assets/js/market.js?v=6',
+  'assets/css/market.css?v=18',
+  'assets/js/market.js?v=8',
   'assets/images/market-product-placeholder.svg',
   'assets/v22/images/pictures/pasar-layanan.webp',
   'assets/v22/images/pictures/surat-layanan.webp',

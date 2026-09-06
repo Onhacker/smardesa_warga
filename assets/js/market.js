@@ -54,6 +54,12 @@
     element.hidden = !!hidden;
   }
 
+  function bindMediaSkeletons(root) {
+    if (window.SDW && typeof window.SDW.bindMediaSkeletons === 'function') {
+      window.SDW.bindMediaSkeletons(root || document);
+    }
+  }
+
   function skeletonMarkup() {
     var html = '';
     for (var index = 0; index < 4; index += 1) {
@@ -200,6 +206,7 @@
         } else {
           list.innerHTML = itemsHtml || (typeof data.empty_html === 'string' ? data.empty_html : '');
         }
+        bindMediaSkeletons(list);
         state.page = Math.max(1, parseInt(data.page, 10) || page);
         state.pages = Math.max(1, parseInt(data.pages, 10) || state.page);
         state.perPage = Math.max(1, parseInt(data.per_page, 10) || state.perPage);
@@ -346,6 +353,46 @@
     var selectedRating = 0;
     var lastFocus = null;
 
+    function setSubmitLoading(loading) {
+      if (!submit) return;
+      if (loading) {
+        if (submit.getAttribute('data-loading') === '1') return;
+        submit.setAttribute('data-loading', '1');
+        submit.disabled = true;
+        submit.setAttribute('aria-busy', 'true');
+        submit.setAttribute('aria-disabled', 'true');
+        submit.classList.add('is-loading');
+        if (form) form.setAttribute('aria-busy', 'true');
+        var label = submit.querySelector('span');
+        var icon = submit.querySelector('i');
+        if (label) {
+          label.setAttribute('data-original-label', label.textContent || '');
+          label.textContent = 'Mengirim…';
+        }
+        if (icon) {
+          icon.setAttribute('data-original-class', icon.className || '');
+          icon.className = 'fa fa-spinner fa-spin';
+        }
+        return;
+      }
+      submit.removeAttribute('data-loading');
+      submit.disabled = false;
+      submit.removeAttribute('aria-busy');
+      submit.removeAttribute('aria-disabled');
+      submit.classList.remove('is-loading');
+      if (form) form.removeAttribute('aria-busy');
+      var label = submit.querySelector('span');
+      var icon = submit.querySelector('i');
+      if (label) {
+        label.textContent = label.getAttribute('data-original-label') || 'Kirim ulasan';
+        label.removeAttribute('data-original-label');
+      }
+      if (icon) {
+        icon.className = icon.getAttribute('data-original-class') || 'fa fa-paper-plane color-white';
+        icon.removeAttribute('data-original-class');
+      }
+    }
+
     function setStatus(message, type, loginUrl) {
       if (!status) return;
       status.textContent = '';
@@ -473,6 +520,7 @@
     });
     if (form) form.addEventListener('submit', function (event) {
       event.preventDefault();
+      if (submit && submit.getAttribute('data-loading') === '1') return;
       if (!authenticated) {
         var loginLink = loginNotice && loginNotice.querySelector('a');
         setStatus('Login diperlukan. Silakan masuk terlebih dahulu untuk memberi rating.', 'login', loginLink ? loginLink.href : '');
@@ -488,7 +536,7 @@
       if (config.csrfName) body.set(config.csrfName, config.csrfHash || '');
       body.set('rating', String(selectedRating));
       body.set('comment', text);
-      if (submit) submit.disabled = true;
+      setSubmitLoading(true);
       setStatus('Menyimpan ulasan…', '');
       window.fetch(endpoint, { method: 'POST', credentials: 'same-origin', body: body, cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
         .then(function (response) {
@@ -515,7 +563,7 @@
           var payload = error && error.payload ? error.payload : {};
           setStatus(error && error.message ? error.message : 'Rating belum dapat disimpan.', payload.login_url ? 'login' : 'error', payload.login_url || '');
         })
-        .then(function () { if (submit) submit.disabled = false; });
+        .then(function () { setSubmitLoading(false); });
     });
   }
 
@@ -536,11 +584,13 @@
         var main = gallery && gallery.querySelector('[data-market-gallery-main]');
         if (!main) return;
         main.src = thumb.getAttribute('data-image') || main.src;
+        bindMediaSkeletons(gallery);
         gallery.querySelectorAll('[data-market-gallery-thumb]').forEach(function (item) { item.classList.remove('is-active'); });
         thumb.classList.add('is-active');
       });
     });
     document.querySelectorAll('[data-market-catalog]').forEach(bindCatalog);
+    bindMediaSkeletons(document);
     bindReviewModals();
   }
 

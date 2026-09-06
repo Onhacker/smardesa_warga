@@ -12,7 +12,7 @@
     <?php if (!$staffMode && $ready): ?>
     <details class="community-compose community-v22-compose">
         <summary><i class="fa fa-plus" aria-hidden="true"></i><span>Buat Pengaduan</span><i class="fa fa-chevron-down" aria-hidden="true"></i></summary>
-        <form method="post" action="<?= site_url('pengaduan/kirim') ?>">
+        <form method="post" action="<?= site_url('pengaduan/kirim') ?>" data-disable-submit>
             <?= csrf_field() ?>
             <label for="complaint-title">Judul</label>
             <input id="complaint-title" name="title" maxlength="180" required>
@@ -20,7 +20,7 @@
             <input id="complaint-location" name="location" maxlength="255">
             <label for="complaint-body">Isi pengaduan</label>
             <textarea id="complaint-body" name="body" rows="6" minlength="10" maxlength="5000" required></textarea>
-            <button class="community-button" type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i> Kirim Pengaduan</button>
+            <button class="community-button" type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Kirim Pengaduan</span></button>
         </form>
     </details>
     <?php endif; ?>
