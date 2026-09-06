@@ -66,7 +66,12 @@
         frame.removeAttribute('aria-busy');
       }
 
-      if (image.getAttribute('data-warga-media-bound') !== '1') {
+      // Splide clones slide nodes with cloneNode(), which copies attributes
+      // but not event listeners.  Track the listener on the DOM object so a
+      // cloned image is rebound correctly instead of inheriting a stale
+      // `data-warga-media-bound` marker from the original slide.
+      if (!image.__sdwMediaBound) {
+        image.__sdwMediaBound = true;
         image.setAttribute('data-warga-media-bound', '1');
         image.addEventListener('load', finish);
         image.addEventListener('error', finish);
@@ -86,6 +91,33 @@
 
   config.bindMediaSkeletons = bindMediaSkeletons;
   bindMediaSkeletons(document);
+
+  // The home slider is mounted by AppKit after this script runs. Splide adds
+  // cloned slide nodes at mount time, and cloneNode() copies the loading class
+  // and data attributes but not the image listeners. Observe the slider so
+  // every newly-added clone is rebound and completed cached images have their
+  // shimmer cleared immediately.
+  function observeDashboardMedia() {
+    var dashboard = document.querySelector('[data-dashboard-home]');
+    var slider = dashboard && dashboard.querySelector('.community-v22-slider');
+    if (!slider || typeof window.MutationObserver !== 'function') return;
+    var refreshPending = false;
+    var refresh = function () {
+      refreshPending = false;
+      bindMediaSkeletons(slider);
+    };
+    var observer = new MutationObserver(function (records) {
+      var hasAddedNodes = records.some(function (record) {
+        return record.addedNodes && record.addedNodes.length > 0;
+      });
+      if (!hasAddedNodes || refreshPending) return;
+      refreshPending = true;
+      if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(refresh);
+      else window.setTimeout(refresh, 0);
+    });
+    observer.observe(slider, { childList: true, subtree: true });
+  }
+  observeDashboardMedia();
 
   function directChild(element, tagName) {
     if (!element) return null;

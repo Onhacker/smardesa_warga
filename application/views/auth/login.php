@@ -64,7 +64,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=55') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=16"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=56') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=17"></script>
 </body>
 </html>

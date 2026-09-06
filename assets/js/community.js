@@ -168,4 +168,16 @@
     });
   }
   initCommunitySliderAutoplay();
+
+  // Splide mounts after this file has been evaluated (custom.min.js runs its
+  // DOMContentLoaded handler first) and creates cloned slide nodes.  The
+  // initial media-skeleton pass in warga.js runs before those clones exist,
+  // so a clone can inherit `warga-media-loading` from an image that was still
+  // loading at mount time.  Rebind once the DOM is ready to clear completed
+  // cached images and attach load/error handlers to every clone as well.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.SDW && typeof window.SDW.bindMediaSkeletons === 'function') {
+      window.SDW.bindMediaSkeletons(document);
+    }
+  });
 })();
