@@ -232,6 +232,13 @@ body.market-search-open { overflow: hidden; }
 .market-review-close { display: grid; flex: 0 0 33px; width: 33px; height: 33px; place-items: center; border: 1px solid var(--market-line); border-radius: 9px; background: transparent; color: var(--market-muted); font-size: 14px; cursor: pointer; }
 .market-review-close:hover, .market-review-close:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
 .market-review-product-label { margin: 0 0 13px; color: var(--market-muted); font-size: 12px; line-height: 1.45; }
+.market-review-login-notice { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 15px; padding: 12px; border: 1px solid #b7d1ee; border-radius: 13px; background: linear-gradient(135deg, #edf6ff 0%, #e1effd 100%); color: #1f4f84; }
+.market-review-login-notice-icon { display: grid; flex: 0 0 35px; width: 35px; height: 35px; place-items: center; border-radius: 10px; background: var(--market-blue); color: #fff; font-size: 14px; }
+.market-review-login-notice-copy { min-width: 0; flex: 1 1 auto; }
+.market-review-login-notice-copy strong { display: block; color: #173f6c; font-size: 13px; font-weight: 900; line-height: 1.25; }
+.market-review-login-notice-copy p { margin: 4px 0 9px; color: #315d89; font-size: 11px; font-weight: 700; line-height: 1.4; }
+.market-review-login-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 6px 10px; border-radius: 8px; background: var(--market-blue); color: #fff !important; font-size: 11px; font-weight: 900; line-height: 1; }
+.market-review-login-link:hover, .market-review-login-link:focus-visible { background: var(--market-blue-dark); color: #fff !important; outline: 3px solid rgba(45,107,178,.2); outline-offset: 1px; }
 .market-review-picker { display: flex; align-items: center; gap: 8px; }
 .market-review-star-button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; border: 1px solid #f1d58f; border-radius: 11px; background: #fffaf0; color: #e5c06d; font-size: 19px; cursor: pointer; transition: transform .16s ease, background .16s ease, color .16s ease, border-color .16s ease; }
 .market-review-star-button:hover, .market-review-star-button:focus-visible, .market-review-star-button.is-selected { border-color: #e1ab2f; background: #fff1c9; color: #f0b323; outline: 0; transform: translateY(-1px); }
@@ -244,7 +251,10 @@ body.market-search-open { overflow: hidden; }
 .market-review-status { min-height: 17px; margin: 8px 0 0; color: var(--market-muted); font-size: 11px; line-height: 1.4; }
 .market-review-status.is-error { color: #ad3843; }
 .market-review-status.is-success { color: #267842; }
+.market-review-status.is-login { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 10px 11px; border: 1px solid #b7d1ee; border-radius: 10px; background: #edf6ff; color: #24598d; font-weight: 700; }
+.market-review-status.is-login .market-review-status-message { color: #173f6c; font-weight: 900; }
 .market-review-status a { color: var(--market-blue); font-weight: 800; text-decoration: underline; }
+.market-review-status.is-login a { display: inline-flex; align-items: center; min-height: 26px; padding: 4px 8px; border-radius: 7px; background: var(--market-blue); color: #fff !important; font-weight: 900; text-decoration: none; }
 .market-review-actions { display: flex; gap: 9px; margin-top: 13px; }
 .market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 43px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
 .market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }
@@ -352,6 +362,9 @@ body.theme-dark .market-review-star-button { background: #3c3425; border-color: 
 body.theme-dark .market-review-star-button:hover, body.theme-dark .market-review-star-button:focus-visible, body.theme-dark .market-review-star-button.is-selected { background: #5a4822; }
 body.theme-dark .market-review-comment-field textarea { background: var(--market-surface); color: var(--market-ink); }
 body.theme-dark .market-review-cancel { background: #22303b; }
+body.theme-dark .market-review-login-notice, body.theme-dark .market-review-status.is-login { border-color: #456b94; background: #203b59; color: #c1dcf7; }
+body.theme-dark .market-review-login-notice-copy strong, body.theme-dark .market-review-status.is-login .market-review-status-message { color: #e6f2ff; }
+body.theme-dark .market-review-login-notice-copy p { color: #c1dcf7; }
 
 @media (max-width: 560px) {
   .market-search-filter-grid { gap: 7px; }

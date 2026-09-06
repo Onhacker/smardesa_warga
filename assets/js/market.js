@@ -341,6 +341,8 @@
     var comment = modal.querySelector('[data-market-review-comment]');
     var status = modal.querySelector('[data-market-review-status]');
     var submit = modal.querySelector('.market-review-submit');
+    var loginNotice = modal.querySelector('[data-market-review-login-notice]');
+    var authenticated = !!form && form.getAttribute('data-review-authenticated') === '1';
     var selectedRating = 0;
     var lastFocus = null;
 
@@ -348,12 +350,16 @@
       if (!status) return;
       status.textContent = '';
       status.className = 'market-review-status' + (type ? ' is-' + type : '');
-      if (message) status.appendChild(document.createTextNode(message));
+      if (message) {
+        var messageNode = document.createElement((type === 'login' || loginUrl) ? 'strong' : 'span');
+        if (type === 'login' || loginUrl) messageNode.className = 'market-review-status-message';
+        messageNode.textContent = message;
+        status.appendChild(messageNode);
+      }
       if (loginUrl) {
         var link = document.createElement('a');
         link.href = loginUrl;
         link.textContent = 'Masuk sekarang';
-        status.appendChild(document.createTextNode(' '));
         status.appendChild(link);
       }
     }
@@ -422,7 +428,11 @@
       modal.hidden = false;
       document.body.classList.add('market-review-open');
       var first = picker && picker.querySelector('[data-review-rating]');
-      if (first) setTimeout(function () { first.focus(); }, 20);
+      if (first && authenticated) setTimeout(function () { first.focus(); }, 20);
+      if (loginNotice && !authenticated) {
+        var loginLink = loginNotice.querySelector('a');
+        if (loginLink) setTimeout(function () { loginLink.focus(); }, 20);
+      }
     }
 
     function close() {
@@ -462,6 +472,11 @@
     });
     if (form) form.addEventListener('submit', function (event) {
       event.preventDefault();
+      if (!authenticated) {
+        var loginLink = loginNotice && loginNotice.querySelector('a');
+        setStatus('Login diperlukan. Silakan masuk terlebih dahulu untuk memberi rating.', 'login', loginLink ? loginLink.href : '');
+        return;
+      }
       if (!selectedRating) { setStatus('Pilih jumlah bintang terlebih dahulu.', 'error'); return; }
       var text = comment ? comment.value.trim() : '';
       if (text.length > 0 && text.length < 3) { setStatus('Komentar minimal 3 karakter atau boleh dikosongkan.', 'error'); if (comment) comment.focus(); return; }
@@ -497,7 +512,7 @@
         })
         .catch(function (error) {
           var payload = error && error.payload ? error.payload : {};
-          setStatus(error && error.message ? error.message : 'Rating belum dapat disimpan.', 'error', payload.login_url || '');
+          setStatus(error && error.message ? error.message : 'Rating belum dapat disimpan.', payload.login_url ? 'login' : 'error', payload.login_url || '');
         })
         .then(function () { if (submit) submit.disabled = false; });
     });

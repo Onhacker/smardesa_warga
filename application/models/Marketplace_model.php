@@ -448,7 +448,7 @@ class Marketplace_model extends CI_Model
         $userId = (int) ($user['id'] ?? 0);
         $rating = (int) $rating;
         $comment = trim((string) $comment);
-        if ($userId < 1) return array('success' => FALSE, 'message' => 'Silakan masuk terlebih dahulu untuk memberi rating.');
+        if ($userId < 1) return array('success' => FALSE, 'message' => 'Login diperlukan. Silakan masuk terlebih dahulu untuk memberi rating.');
         if ($productId === '' || !$this->product($productId, array(), TRUE)) return array('success' => FALSE, 'message' => 'Produk yang dinilai tidak ditemukan.');
         if ($rating < 1 || $rating > 5) return array('success' => FALSE, 'message' => 'Pilih rating antara 1 sampai 5 bintang.');
         if ($comment !== '' && mb_strlen($comment, 'UTF-8') < 3) return array('success' => FALSE, 'message' => 'Komentar minimal 3 karakter atau boleh dikosongkan.');

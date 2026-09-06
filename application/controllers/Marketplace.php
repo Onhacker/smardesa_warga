@@ -108,7 +108,7 @@ class Marketplace extends Public_Controller
             $this->session->set_userdata('intended_url', site_url('pasar/produk/' . rawurlencode((string) $id)));
             return $this->json(array(
                 'success' => FALSE,
-                'message' => 'Silakan masuk terlebih dahulu untuk memberi rating.',
+                'message' => 'Login diperlukan. Silakan masuk terlebih dahulu untuk memberi rating.',
                 'login_url' => site_url('login')
             ), 401);
         }
