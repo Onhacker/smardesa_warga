@@ -33,6 +33,15 @@ class Auth extends Public_Controller
                 if ($user) {
                     $intended = $this->session->userdata('intended_url');
                     $this->session->unset_userdata('intended_url');
+                    // Older sessions may still contain the notification
+                    // summary endpoint from before it returned a JSON 401.
+                    // Never navigate a normal browser to that API response
+                    // after login; fall back to the user's regular home page.
+                    $intendedPath = parse_url((string) $intended, PHP_URL_PATH);
+                    if (is_string($intendedPath)
+                        && preg_match('#(?:^|/)notifikasi/ringkasan/?$#', trim($intendedPath, '/'))) {
+                        $intended = NULL;
+                    }
                     redirect($intended ?: warga_home_route($user));
                 }
                 $data['error'] = $this->Auth_model->error() ?: 'Email/nomor telepon atau kata sandi tidak sesuai.';

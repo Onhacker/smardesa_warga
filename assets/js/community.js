@@ -36,7 +36,7 @@
   function post(path, values) {
     var data = new URLSearchParams(values);
     data.set(config.csrfName, config.csrfHash);
-    return fetch(base + path, {method:'POST', credentials:'same-origin', body:data, cache:'no-store'})
+    return fetch(base + path, {method:'POST', credentials:'same-origin', body:data, cache:'no-store', headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}})
       .then(function (r) { if (!r.ok) throw new Error('Permintaan belum dapat disimpan. Muat ulang halaman lalu coba lagi.'); return r.json(); })
       .then(function (data) { if (data.csrf) { config.csrfName=data.csrf.name; config.csrfHash=data.csrf.hash; } return data; });
   }
@@ -105,7 +105,7 @@
     pending=true;
     var controller = new AbortController(), timeout = setTimeout(function(){controller.abort();},10000);
     try {
-      var response=await fetch(base+'notifikasi/ringkasan',{credentials:'same-origin',cache:'no-store',signal:controller.signal});
+      var response=await fetch(base+'notifikasi/ringkasan',{credentials:'same-origin',cache:'no-store',signal:controller.signal,headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}});
       if (response.redirected || response.status===401) { stopped=true; return; }
       if (!response.ok) return;
       var data=await response.json();

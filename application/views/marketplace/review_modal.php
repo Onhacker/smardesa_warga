@@ -17,7 +17,7 @@ $isAuthenticated = !empty($isAuthenticated);
                 <div class="market-review-login-notice" data-market-review-login-notice role="alert">
                     <span class="market-review-login-notice-icon" aria-hidden="true"><i class="fa fa-lock"></i></span>
                     <div class="market-review-login-notice-copy">
-                        <strong>Login diperlukan untuk memberi rating</strong>
+                        <strong>Login diperlukan.</strong>
                         <p>Silakan masuk terlebih dahulu untuk memberi rating.</p>
                         <a href="<?= e(site_url('login')) ?>" class="market-review-login-link bg-red-dark"><span>Masuk sekarang</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                     </div>

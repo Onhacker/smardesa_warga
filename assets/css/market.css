@@ -254,7 +254,8 @@ body.market-search-open { overflow: hidden; }
 .market-review-status.is-login { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 10px; padding: 10px 11px; border: 1px solid #b7d1ee; border-radius: 10px; background: #edf6ff; color: #24598d; font-weight: 700; }
 .market-review-status.is-login .market-review-status-message { color: #173f6c; font-weight: 900; }
 .market-review-status a { color: var(--market-blue); font-weight: 800; text-decoration: underline; }
-.market-review-status.is-login a { display: inline-flex; align-items: center; min-height: 26px; padding: 4px 8px; border-radius: 7px; background: var(--market-blue); color: #fff !important; font-weight: 900; text-decoration: none; }
+.market-review-status.is-login a { display: inline-flex; align-items: center; min-height: 30px; padding: 5px 10px; border-radius: 7px; background: #b42331 !important; color: #fff !important; font-size: 12px; font-weight: 900; text-decoration: none; }
+.market-review-status.is-login a:hover, .market-review-status.is-login a:focus-visible { background: #8f1f2d !important; color: #fff !important; outline: 3px solid rgba(180,35,49,.22); outline-offset: 1px; }
 .market-review-actions { display: flex; gap: 9px; margin-top: 13px; }
 .market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 45px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; }
 .market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }

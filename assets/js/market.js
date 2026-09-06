@@ -359,6 +359,7 @@
       if (loginUrl) {
         var link = document.createElement('a');
         link.href = loginUrl;
+        link.className = 'bg-red-dark color-white';
         link.textContent = 'Masuk sekarang';
         status.appendChild(link);
       }

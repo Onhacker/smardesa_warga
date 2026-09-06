@@ -1,10 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Notifications extends App_Controller
+class Notifications extends Public_Controller
 {
     public function index()
     {
+        // Keep the notification page protected while allowing the lightweight
+        // summary endpoint below to answer an unauthenticated background poll
+        // without redirecting it to the login page.
+        $this->require_authentication();
         $this->load->model('Notification_model');
         $listing = $this->Notification_model->listing($this->currentUser, array(
             'q' => $this->input->get('q', TRUE),
@@ -28,6 +32,16 @@ class Notifications extends App_Controller
 
     public function summary()
     {
+        if (!$this->currentUser || empty($this->currentUser['id'])) {
+            // This endpoint is polled from public pages.  Do not call
+            // require_authentication() here: doing so stores this JSON URL as
+            // intended_url and the next successful login would open raw JSON.
+            return $this->json(array(
+                'success' => FALSE,
+                'message' => 'Sesi login diperlukan.',
+                'login_url' => site_url('login')
+            ), 401);
+        }
         $this->load->model('Notification_model');
         $this->output->set_header('Cache-Control: no-store, private');
         return $this->json(array('unread' => $this->Notification_model->unread($this->currentUser['id'])));
@@ -35,6 +49,7 @@ class Notifications extends App_Controller
 
     public function read()
     {
+        $this->require_authentication();
         $this->require_post();
         $this->load->model('Notification_model');
         $this->Notification_model->read($this->currentUser['id']);
@@ -43,6 +58,7 @@ class Notifications extends App_Controller
 
     public function subscribe()
     {
+        if (!$this->require_json_authentication()) return;
         $this->require_post();
         $this->load->model('Notification_model');
         $raw = $this->input->post('subscription');
@@ -53,6 +69,7 @@ class Notifications extends App_Controller
 
     public function unsubscribe()
     {
+        if (!$this->require_json_authentication()) return;
         $this->require_post();
         $this->load->model('Notification_model');
         if ($this->Notification_model->ready()) {
@@ -60,5 +77,20 @@ class Notifications extends App_Controller
                 'endpoint_hash'=>hash('sha256',(string)$this->input->post('endpoint'))))->delete('warga_push_subscriptions');
         }
         return $this->json(array('success'=>true));
+    }
+
+    /**
+     * Return a machine-readable auth failure for notification mutations.
+     * Browser page requests still use the normal login redirect elsewhere.
+     */
+    private function require_json_authentication()
+    {
+        if ($this->currentUser && !empty($this->currentUser['id'])) return TRUE;
+        $this->json(array(
+            'success' => FALSE,
+            'message' => 'Sesi login diperlukan.',
+            'login_url' => site_url('login')
+        ), 401);
+        return FALSE;
     }
 }
