@@ -14,6 +14,9 @@ $listingPage = max(1, (int) ($listing['page'] ?? 1));
 $listingTotal = max(0, (int) ($listing['total'] ?? count($products)));
 $listingPerPage = max(1, (int) ($listing['per_page'] ?? 12));
 $ajaxEndpoint = site_url('pasar/data');
+$activeRegency = trim((string) ($currentUser['regency_name'] ?? ($footerVillage['regency_name'] ?? '')));
+if ($activeRegency === '') $activeRegency = trim((string) (getenv('PUBLIC_REGENCY_NAME') ?: (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
+$activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRegency, 'UTF-8') : strtoupper($activeRegency);
 ?>
 
 <div class="marketplace-page marketplace-listing-page"
@@ -25,9 +28,10 @@ $ajaxEndpoint = site_url('pasar/data');
      data-market-ready="<?= $marketplaceReady ? '1' : '0' ?>">
     <section class="market-hero" aria-labelledby="market-title">
         <div class="market-hero-copy">
-            <p class="market-eyebrow color-white">EKONOMI <?= e($institutionUpper ?? 'KAMPUNG') ?></p>
+            <p class="market-eyebrow color-white">KABUPATEN <?= e($activeRegencyUpper) ?></p>
             <h1 id="market-title">Pasar Digital</h1>
             <span class="color-white">Temukan produk warga dan dukung usaha lokal.</span>
+            <small class="market-hero-count" data-market-count><?= $listingTotal ?> produk</small>
         </div>
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
@@ -51,8 +55,6 @@ $ajaxEndpoint = site_url('pasar/data');
                 <input type="hidden" name="q" value="<?= e($search) ?>" data-market-query-field>
                 <noscript><button type="submit" class="market-filter-submit"><i class="fa fa-filter color-white" aria-hidden="true"></i><span class="color-white">Terapkan</span></button></noscript>
             </form>
-
-            <div class="market-filter-summary"><span class="market-product-count" data-market-count><?= $listingTotal ?> produk</span></div>
 
             <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
                 <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
