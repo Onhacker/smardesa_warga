@@ -49,12 +49,6 @@ $productId = static function (array $item) {
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
 
-    <?php if ($canManage): ?>
-        <section class="market-quick-actions" aria-label="Menu Pasar Digital">
-            <a href="<?= site_url('pasar/tokoku') ?>" class="market-action market-action-primary"><i class="fa fa-store color-white" aria-hidden="true"></i><span class="color-white">Tokoku</span></a>
-        </section>
-    <?php endif; ?>
-
     <section class="card card-style market-filter-card" aria-labelledby="market-filter-title">
         <div class="content mb-0">
             <div class="market-section-heading">
