@@ -35,8 +35,18 @@ $contactArea = $village['name'] ?? $heroLocation;
         <nav class="community-v22-slider splide double-slider visible-slider slider-no-dots" id="community-services-slider" aria-label="Layanan utama">
             <div class="splide__track">
                 <div class="splide__list">
+            <a class="community-v22-slide splide__slide is-marketplace" href="<?= site_url('pasar') ?>">
+                <img src="<?= base_url('assets/v22/images/pictures/pasar-layanan.webp') ?>" alt="Ilustrasi Pasar Digital <?= e($institutionLabel) ?>" loading="eager" decoding="async" width="1200" height="676">
+                <span class="community-v22-slide-overlay" aria-hidden="true"></span>
+                <span class="community-v22-slide-icon"><i class="fa fa-store" aria-hidden="true"></i></span>
+                <span class="community-v22-slide-copy">
+                    <small>Ekonomi <?= e($institutionLower) ?></small>
+                    <strong>Pasar Digital <?= e($institutionLabel) ?></strong>
+                    <span>Temukan produk warga <?= e($institutionLower) ?></span>
+                </span>
+            </a>
             <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>">
-                <img src="<?= base_url('assets/v22/images/pictures/surat-layanan.webp') ?>" alt="Ilustrasi layanan surat" loading="eager" decoding="async" width="1200" height="799">
+                <img src="<?= base_url('assets/v22/images/pictures/surat-layanan.webp') ?>" alt="Ilustrasi layanan surat" loading="lazy" decoding="async" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
