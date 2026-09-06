@@ -2580,6 +2580,12 @@ html {
 .warga-site-footer-action.is-youtube { background: #e34b4b; }
 .warga-site-footer-action.is-whatsapp { background: #22b875; }
 .warga-site-footer-action.is-top { background: var(--warga-teal-dark); }
+.warga-site-footer-action.is-top > i { font-size: 15px; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
 
 .warga-site-footer-divider {
   height: 1px;

@@ -6,3 +6,4 @@
 body #page .page-content .warga-letters-head .warga-intro-icon,body #page .page-content .warga-letters-head .warga-intro-icon>i{color:#fff!important}
 #footer-bar.footer-bar-6 .circle-nav>i{width:24px!important;min-width:24px;text-align:center;transform:translateY(-20px) translateX(0)!important}
 @keyframes footerAni{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.05)}}
+.warga-site-footer-action.is-top>i{font-size:15px}html{scroll-behavior:smooth}@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
