@@ -94,6 +94,41 @@ class Marketplace extends Public_Controller
         ));
     }
 
+    /**
+     * Store a public product rating asynchronously. The catalogue and detail
+     * pages remain readable without login; only submitting a review requires
+     * an authenticated warga/staff account.
+     */
+    public function rating($id)
+    {
+        if (strtoupper($this->input->method(TRUE)) !== 'POST') {
+            return $this->json(array('success' => FALSE, 'message' => 'Metode permintaan tidak diizinkan.'), 405);
+        }
+        if (!$this->currentUser || empty($this->currentUser['id'])) {
+            $this->session->set_userdata('intended_url', site_url('pasar/produk/' . rawurlencode((string) $id)));
+            return $this->json(array(
+                'success' => FALSE,
+                'message' => 'Silakan masuk terlebih dahulu untuk memberi rating.',
+                'login_url' => site_url('login')
+            ), 401);
+        }
+        $result = $this->marketplace->save_review(
+            $this->currentUser,
+            $id,
+            $this->input->post('rating', TRUE),
+            $this->input->post('comment', TRUE)
+        );
+        if (empty($result['success'])) return $this->json($result, 422);
+        $review = isset($result['review']) && is_array($result['review']) ? $result['review'] : array();
+        return $this->json(array(
+            'success' => TRUE,
+            'message' => 'Rating dan komentar berhasil disimpan.',
+            'summary' => isset($result['summary']) ? $result['summary'] : array(),
+            'review' => $review,
+            'review_html' => $this->load->view('marketplace/review_item', array('review' => $review), TRUE)
+        ));
+    }
+
     public function create()
     {
         $this->require_authentication();

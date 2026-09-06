@@ -37,6 +37,11 @@ $phoneDigits = trim((string) $phoneDigits);
 $waText = rawurlencode('Halo, saya tertarik dengan produk ' . ($product['name'] ?? 'ini') . '. Apakah masih tersedia?');
 $waHref = $phoneDigits !== '' ? 'https://wa.me/' . $phoneDigits . '?text=' . $waText : '#';
 $telHref = $phoneDigits !== '' ? 'tel:+' . $phoneDigits : '#';
+$ratingAverage = max(0, min(5, (float) ($product['rating_average'] ?? 0)));
+$ratingCount = max(0, (int) ($product['rating_count'] ?? 0));
+$ratingRounded = $ratingCount > 0 ? (int) round($ratingAverage) : 0;
+$reviews = isset($product['reviews']) && is_array($product['reviews']) ? $product['reviews'] : array();
+$productId = (string) ($product['id'] ?? '');
 ?>
 
 <div class="marketplace-page marketplace-product-page">
@@ -62,6 +67,31 @@ $telHref = $phoneDigits !== '' ? 'tel:+' . $phoneDigits : '#';
         </div>
     </section>
 
+    <section class="card card-style market-review-card" data-market-review-summary data-review-product-id="<?= e($productId) ?>" aria-labelledby="market-review-summary-title">
+        <div class="content">
+            <p class="market-eyebrow market-eyebrow-blue">WHAT CUSTOMERS SAY</p>
+            <h2 id="market-review-summary-title">Ulasan produk</h2>
+            <div class="market-review-summary-row">
+                <div class="market-review-score">
+                    <strong data-market-rating-average><?= e(number_format($ratingAverage, 1, ',', '.')) ?></strong>
+                    <span> dari 5</span>
+                    <span class="market-rating-stars market-review-summary-stars" data-market-rating-stars aria-label="<?= e(number_format($ratingAverage, 1, ',', '.') . ' dari 5 bintang') ?>"><?php for ($star = 1; $star <= 5; $star++): ?><i class="fa fa-star <?= $star <= $ratingRounded ? 'is-filled' : 'is-empty' ?>" aria-hidden="true"></i><?php endfor; ?></span>
+                    <small data-market-rating-count><?= $ratingCount ? e($ratingCount . ' ulasan') : 'Belum ada ulasan' ?></small>
+                </div>
+                <button type="button" class="market-review-open-button" data-market-review-open data-review-url="<?= e(site_url('pasar/produk/' . rawurlencode($productId) . '/rating')) ?>" data-review-product-id="<?= e($productId) ?>" data-review-product-name="<?= e($product['name'] ?? 'Produk warga') ?>"><i class="fa fa-star" aria-hidden="true"></i><span>Beri rating</span></button>
+            </div>
+            <div class="market-review-list" data-market-review-list>
+                <?php if ($reviews): ?>
+                    <?php foreach ($reviews as $review): ?>
+                        <?php $this->load->view('marketplace/review_item', array('review' => $review)); ?>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <p class="market-review-empty" data-market-review-empty>Belum ada komentar. Jadilah warga pertama yang memberi ulasan.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
     <section class="card card-style market-store-card" aria-labelledby="market-store-title">
         <div class="content">
             <p class="market-eyebrow market-eyebrow-blue">TOKO WARGA</p>
@@ -72,3 +102,4 @@ $telHref = $phoneDigits !== '' ? 'tel:+' . $phoneDigits : '#';
         </div>
     </section>
 </div>
+<?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>

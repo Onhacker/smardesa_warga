@@ -9,6 +9,13 @@ $listingFilters = isset($listing['filters']) && is_array($listing['filters']) ? 
 $search = trim((string) ($listingFilters['q'] ?? ''));
 $selectedCategory = (string) ($listingFilters['category_id'] ?? '');
 $selectedSort = (string) ($listingFilters['sort'] ?? 'newest');
+$selectedCategoryName = 'Semua produk';
+foreach ($categories as $categoryOption) {
+    if ((string) ($categoryOption['id'] ?? '') === $selectedCategory) {
+        $selectedCategoryName = trim((string) ($categoryOption['name'] ?? ($categoryOption['label'] ?? 'Semua produk')));
+        break;
+    }
+}
 $listingPages = max(1, (int) ($listing['pages'] ?? 1));
 $listingPage = max(1, (int) ($listing['page'] ?? 1));
 $listingTotal = max(0, (int) ($listing['total'] ?? count($products)));
@@ -90,7 +97,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
 
     <section class="market-products" aria-labelledby="market-products-title">
         <div class="market-section-heading market-products-heading">
-            <div><p class="market-eyebrow market-eyebrow-blue">PILIHAN WARGA</p><h2 id="market-products-title">Semua produk</h2></div>
+            <div><h2 id="market-products-title" data-market-products-title><?= e($selectedCategoryName) ?></h2></div>
             <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
         </div>
 
@@ -119,4 +126,5 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
             </nav>
         <?php endif; ?>
     </section>
+    <?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>
 </div>

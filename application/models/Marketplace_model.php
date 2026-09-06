@@ -167,6 +167,7 @@ class Marketplace_model extends CI_Model
             });
             $total = count($rows);
             $items = array_slice($rows, ($page - 1) * $perPage, $perPage);
+            $items = $this->attach_review_summaries($items);
             return array('items' => array_map(array($this, 'decorate_product'), $items), 'total' => $total,
                 'page' => $page, 'pages' => max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
                 'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort));
@@ -197,6 +198,7 @@ class Marketplace_model extends CI_Model
         else $this->db->order_by('p.updated_at', 'DESC');
         $rows = $this->db->order_by('p.name', 'ASC')->limit($perPage, ($page - 1) * $perPage)->get()->result_array();
         $rows = $this->attach_images($rows);
+        $rows = $this->attach_review_summaries($rows);
         return array('items' => array_map(array($this, 'decorate_product'), $rows), 'total' => $total,
             'page' => $page, 'pages' => max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
             'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => TRUE);
@@ -211,7 +213,8 @@ class Marketplace_model extends CI_Model
             foreach ($this->demo_products() as $row) {
                 if ((string) $row['id'] !== $id || (!$publicAll && (string) $row['village_id'] !== $this->user_village($user))) continue;
                 if ((string) $row['status'] !== 'published' && !($canManage && (int) $row['seller_user_id'] === (int) $user['id'])) return NULL;
-                return $this->decorate_product($row);
+                $row = $this->decorate_product($row);
+                return $this->attach_product_reviews($row);
             }
             return NULL;
         }
@@ -227,7 +230,8 @@ class Marketplace_model extends CI_Model
         $row = $this->db->limit(1)->get()->row_array();
         if (!$row) return NULL;
         $row['images'] = $this->images_for_product($id);
-        return $this->decorate_product($row);
+        $row = $this->decorate_product($row);
+        return $this->attach_product_reviews($row);
     }
 
     /**
@@ -386,7 +390,144 @@ class Marketplace_model extends CI_Model
         $phone = (string) ($product['store_whatsapp'] ?? ($product['store_phone'] ?? ''));
         $product['whatsapp_url'] = $this->phone_url($phone, TRUE);
         $product['phone_url'] = $this->phone_url((string) ($product['store_phone'] ?? $phone), FALSE);
+        $product['rating_average'] = isset($product['rating_average']) ? round((float) $product['rating_average'], 2) : 0;
+        $product['rating_count'] = max(0, (int) ($product['rating_count'] ?? 0));
         return $product;
+    }
+
+    /**
+     * Return published reviews for one public product. Reviews are optional
+     * so an installation that has not run the reviews migration can still
+     * use the catalogue normally.
+     */
+    public function reviews_for_product($productId)
+    {
+        $productId = trim((string) $productId);
+        if ($productId === '') return array();
+        if (warga_demo_mode()) {
+            $state = $this->demo_state();
+            $items = isset($state['reviews'][$productId]) && is_array($state['reviews'][$productId])
+                ? $state['reviews'][$productId] : array();
+            usort($items, function ($a, $b) {
+                return strcmp((string) ($b['created_at'] ?? ''), (string) ($a['created_at'] ?? ''));
+            });
+            return array_slice($items, 0, 50);
+        }
+        if (!$this->reviews_ready()) return array();
+        return $this->db->select('id,product_id,user_id,reviewer_name,rating,comment,created_at,updated_at')
+            ->where(array('product_id' => $productId, 'status' => 'published'))
+            ->order_by('created_at', 'DESC')->order_by('id', 'DESC')->limit(50)
+            ->get('marketplace_product_reviews')->result_array();
+    }
+
+    public function review_summary($productId)
+    {
+        $productId = trim((string) $productId);
+        if ($productId === '') return array('rating_average' => 0, 'rating_count' => 0);
+        if (warga_demo_mode()) {
+            $reviews = $this->reviews_for_product($productId);
+            $count = count($reviews);
+            $total = 0;
+            foreach ($reviews as $review) $total += (int) ($review['rating'] ?? 0);
+            return array('rating_average' => $count ? round($total / $count, 2) : 0, 'rating_count' => $count);
+        }
+        if (!$this->reviews_ready()) return array('rating_average' => 0, 'rating_count' => 0);
+        $row = $this->db->select('COUNT(*) AS rating_count, COALESCE(AVG(rating), 0) AS rating_average', FALSE)
+            ->where(array('product_id' => $productId, 'status' => 'published'))
+            ->limit(1)->get('marketplace_product_reviews')->row_array();
+        return array('rating_average' => round((float) ($row['rating_average'] ?? 0), 2), 'rating_count' => (int) ($row['rating_count'] ?? 0));
+    }
+
+    /**
+     * Save one rating/comment per account and return the normalized review and
+     * updated aggregate. Re-submitting updates that user's existing review.
+     */
+    public function save_review(array $user, $productId, $rating, $comment)
+    {
+        $productId = trim((string) $productId);
+        $userId = (int) ($user['id'] ?? 0);
+        $rating = (int) $rating;
+        $comment = trim((string) $comment);
+        if ($userId < 1) return array('success' => FALSE, 'message' => 'Silakan masuk terlebih dahulu untuk memberi rating.');
+        if ($productId === '' || !$this->product($productId, array(), TRUE)) return array('success' => FALSE, 'message' => 'Produk yang dinilai tidak ditemukan.');
+        if ($rating < 1 || $rating > 5) return array('success' => FALSE, 'message' => 'Pilih rating antara 1 sampai 5 bintang.');
+        if ($comment === '' || mb_strlen($comment, 'UTF-8') < 3) return array('success' => FALSE, 'message' => 'Komentar minimal 3 karakter.');
+        if (mb_strlen($comment, 'UTF-8') > 1000) return array('success' => FALSE, 'message' => 'Komentar maksimal 1.000 karakter.');
+        $reviewer = trim((string) ($user['name'] ?? ($user['username'] ?? 'Warga')));
+        if ($reviewer === '') $reviewer = 'Warga';
+        $now = date('Y-m-d H:i:s');
+        if (warga_demo_mode()) {
+            $state = $this->demo_state();
+            if (!isset($state['reviews'][$productId]) || !is_array($state['reviews'][$productId])) $state['reviews'][$productId] = array();
+            $review = NULL;
+            foreach ($state['reviews'][$productId] as $index => $existing) {
+                if ((int) ($existing['user_id'] ?? 0) === $userId) {
+                    $review = array_merge($existing, array('rating' => $rating, 'comment' => $comment, 'reviewer_name' => $reviewer, 'updated_at' => $now));
+                    $state['reviews'][$productId][$index] = $review;
+                    break;
+                }
+            }
+            if (!$review) {
+                $review = array('id' => function_exists('random_int') ? random_int(100000000, 999999999) : mt_rand(100000000, 999999999), 'product_id' => $productId, 'user_id' => $userId, 'reviewer_name' => $reviewer, 'rating' => $rating, 'comment' => $comment, 'status' => 'published', 'created_at' => $now, 'updated_at' => $now);
+                $state['reviews'][$productId][] = $review;
+            }
+            $this->save_demo_state($state);
+            return array('success' => TRUE, 'review' => $review, 'summary' => $this->review_summary($productId));
+        }
+        if (!$this->reviews_ready()) return array('success' => FALSE, 'message' => 'Fitur rating belum diaktifkan pada database. Jalankan migrasi ulasan Pasar Digital terlebih dahulu.');
+        $existing = $this->db->where(array('product_id' => $productId, 'user_id' => $userId))->limit(1)->get('marketplace_product_reviews')->row_array();
+        $values = array('reviewer_name' => $reviewer, 'rating' => $rating, 'comment' => $comment, 'status' => 'published', 'updated_at' => $now);
+        if ($existing) {
+            $ok = $this->db->where('id', $existing['id'])->update('marketplace_product_reviews', $values);
+            $reviewId = $existing['id'];
+        } else {
+            $values['product_id'] = $productId; $values['user_id'] = $userId; $values['created_at'] = $now;
+            $ok = $this->db->insert('marketplace_product_reviews', $values);
+            $reviewId = $this->db->insert_id();
+        }
+        if (!$ok) return array('success' => FALSE, 'message' => 'Rating belum dapat disimpan. Coba lagi.');
+        $review = $this->db->select('id,product_id,user_id,reviewer_name,rating,comment,created_at,updated_at')->where('id', $reviewId)->limit(1)->get('marketplace_product_reviews')->row_array();
+        return array('success' => TRUE, 'review' => $review ?: array_merge($values, array('id' => $reviewId)), 'summary' => $this->review_summary($productId));
+    }
+
+    private function attach_product_reviews(array $product)
+    {
+        $summary = $this->review_summary($product['id'] ?? '');
+        $product['rating_average'] = $summary['rating_average'];
+        $product['rating_count'] = $summary['rating_count'];
+        $product['reviews'] = $this->reviews_for_product($product['id'] ?? '');
+        return $product;
+    }
+
+    private function attach_review_summaries(array $rows)
+    {
+        if (!$rows) return $rows;
+        $ids = array(); foreach ($rows as $row) $ids[] = (string) ($row['id'] ?? '');
+        $byProduct = array();
+        if (warga_demo_mode()) {
+            $state = $this->demo_state();
+            foreach ($ids as $id) {
+                $reviews = isset($state['reviews'][$id]) && is_array($state['reviews'][$id]) ? $state['reviews'][$id] : array();
+                $total = 0; foreach ($reviews as $review) $total += (int) ($review['rating'] ?? 0);
+                $byProduct[$id] = array('rating_average' => $reviews ? round($total / count($reviews), 2) : 0, 'rating_count' => count($reviews));
+            }
+        } elseif ($this->reviews_ready()) {
+            $query = $this->db->select('product_id,COUNT(*) AS rating_count,COALESCE(AVG(rating),0) AS rating_average', FALSE)
+                ->where('status', 'published')->where_in('product_id', $ids)
+                ->group_by('product_id')->get('marketplace_product_reviews')->result_array();
+            foreach ($query as $summary) $byProduct[(string) $summary['product_id']] = array('rating_average' => round((float) $summary['rating_average'], 2), 'rating_count' => (int) $summary['rating_count']);
+        }
+        foreach ($rows as &$row) {
+            $summary = $byProduct[(string) ($row['id'] ?? '')] ?? array('rating_average' => 0, 'rating_count' => 0);
+            $row['rating_average'] = $summary['rating_average']; $row['rating_count'] = $summary['rating_count'];
+        }
+        unset($row);
+        return $rows;
+    }
+
+    private function reviews_ready()
+    {
+        return warga_demo_mode() || (warga_database_available() && $this->db->table_exists('marketplace_product_reviews'));
     }
 
     private function normalize_price($value)
@@ -466,6 +607,7 @@ class Marketplace_model extends CI_Model
         if (!is_array($state)) $state = array();
         if (!isset($state['stores']) || !is_array($state['stores'])) $state['stores'] = array();
         if (!isset($state['products']) || !is_array($state['products'])) $state['products'] = $this->demo_products_seed();
+        if (!isset($state['reviews']) || !is_array($state['reviews'])) $state['reviews'] = array();
         return $state;
     }
 

@@ -104,7 +104,12 @@ body.market-search-open { overflow: hidden; }
 .market-product-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .market-product-badge { position: absolute; right: 6px; bottom: 6px; max-width: calc(100% - 12px); padding: 3px 6px; overflow: hidden; border-radius: 5px; background: rgba(15,44,78,.78); color: #fff; font-size: 8px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .market-product-copy { display: flex; min-width: 0; flex-direction: column; align-items: flex-start; }
-.market-product-stars { display: flex; gap: 2px; margin-bottom: 5px; color: #f6b73c; font-size: 10px; }
+.market-product-stars { display: inline-flex; align-items: center; gap: 2px; margin-bottom: 5px; color: #f0b323 !important; font-size: 10px; }
+.market-product-stars i, .market-rating-stars i { color: #f0b323 !important; font-style: normal; }
+.market-rating-stars i.is-empty { color: #f3d58b !important; opacity: .9; }
+.market-product-rating-trigger { width: fit-content; max-width: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; line-height: 1; text-align: left; }
+.market-product-rating-trigger:hover, .market-product-rating-trigger:focus-visible { outline: 0; text-decoration: underline; text-decoration-color: #f0b323; text-underline-offset: 3px; }
+.market-product-rating-count { margin-left: 3px; color: var(--market-muted); font-size: 9px; font-weight: 700; line-height: 1; }
 .market-product-name { display: -webkit-box; overflow: hidden; color: var(--market-ink); font-size: 15px; font-weight: 800; line-height: 1.26; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .market-product-store { display: block; max-width: 100%; margin-top: 4px; overflow: hidden; color: var(--market-muted); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 .market-product-store i { margin-right: 4px; color: var(--market-blue); }
@@ -189,6 +194,57 @@ body.market-search-open { overflow: hidden; }
 .market-store-card p { margin: 0; color: var(--market-muted); font-size: 12px; line-height: 1.5; }
 .market-store-address { display: block; margin-top: 9px; color: var(--market-muted); font-size: 11px; }
 .market-store-address i { margin-right: 5px; color: var(--market-blue); }
+
+/* AppKit-inspired product ratings and comments. */
+.market-review-card { margin-top: 16px; }
+.market-review-card .content { padding: 19px 15px 16px; }
+.market-review-card h2 { margin: 4px 0 13px; color: var(--market-ink); font-size: 21px; font-weight: 850; line-height: 1.15; }
+.market-review-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--market-line); }
+.market-review-score { min-width: 0; }
+.market-review-score > strong { color: var(--market-ink); font-size: 34px; font-weight: 900; line-height: 1; }
+.market-review-score > span:not(.market-rating-stars) { color: var(--market-muted); font-size: 11px; }
+.market-review-summary-stars { display: block; margin-top: 7px; font-size: 14px; }
+.market-review-score > small { display: block; margin-top: 4px; color: var(--market-muted); font-size: 10px; }
+.market-review-open-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 12px; border: 1px solid #efbd49; border-radius: 10px; background: #fff8e7; color: #9a6816; font: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.market-review-open-button i { color: #f0b323; }
+.market-review-open-button:hover, .market-review-open-button:focus-visible { border-color: #dfa31c; background: #fff1c9; outline: 0; }
+.market-review-list { margin-top: 2px; }
+.market-review-item { padding: 14px 0 13px; border-bottom: 1px solid var(--market-line); }
+.market-review-item:last-child { border-bottom: 0; padding-bottom: 2px; }
+.market-review-item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.market-review-item-head > div { min-width: 0; }
+.market-review-item strong { display: block; color: var(--market-ink); font-size: 13px; font-weight: 800; }
+.market-review-item time { flex: 0 0 auto; color: var(--market-muted); font-size: 10px; }
+.market-review-stars { display: block; margin-top: 4px; font-size: 11px; }
+.market-review-item p { margin: 8px 0 0; color: var(--market-muted); font-size: 12px; line-height: 1.55; }
+.market-review-empty { margin: 14px 0 1px; color: var(--market-muted); font-size: 12px; line-height: 1.5; }
+.market-review-modal { position: fixed; z-index: 10000; inset: 0; display: grid; place-items: start center; padding: max(18px, env(safe-area-inset-top)) 15px 18px; }
+.market-review-modal[hidden] { display: none; }
+.market-review-backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; border: 0; background: rgba(12, 30, 52, .58); cursor: pointer; }
+.market-review-dialog { position: relative; z-index: 1; width: min(100%, 450px); margin-top: min(13vh, 105px); padding: 19px 16px 16px; border: 1px solid var(--market-line); border-radius: 19px; background: var(--market-surface); box-shadow: 0 20px 55px rgba(13, 36, 66, .28); color: var(--market-ink); }
+.market-review-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+.market-review-dialog h2 { margin: 3px 0 0; color: var(--market-ink); font-size: 23px; font-weight: 850; line-height: 1.15; }
+.market-review-close { display: grid; flex: 0 0 33px; width: 33px; height: 33px; place-items: center; border: 1px solid var(--market-line); border-radius: 9px; background: transparent; color: var(--market-muted); font-size: 14px; cursor: pointer; }
+.market-review-close:hover, .market-review-close:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
+.market-review-product-label { margin: 0 0 13px; color: var(--market-muted); font-size: 12px; line-height: 1.45; }
+.market-review-picker { display: flex; align-items: center; gap: 8px; }
+.market-review-star-button { display: grid; width: 39px; height: 39px; place-items: center; padding: 0; border: 1px solid #f1d58f; border-radius: 11px; background: #fffaf0; color: #e5c06d; font-size: 19px; cursor: pointer; transition: transform .16s ease, background .16s ease, color .16s ease, border-color .16s ease; }
+.market-review-star-button:hover, .market-review-star-button:focus-visible, .market-review-star-button.is-selected { border-color: #e1ab2f; background: #fff1c9; color: #f0b323; outline: 0; transform: translateY(-1px); }
+.market-review-rating-label { min-height: 16px; margin: 8px 0 13px; color: #a16c16; font-size: 11px; font-weight: 800; }
+.market-review-comment-field { display: block; }
+.market-review-comment-field > span { display: block; margin-bottom: 5px; color: var(--market-ink); font-size: 12px; font-weight: 800; }
+.market-review-comment-field textarea { display: block; width: 100%; min-height: 92px; box-sizing: border-box; padding: 10px 11px; resize: vertical; border: 1px solid var(--market-line); border-radius: 10px; outline: 0; background: var(--market-surface); color: var(--market-ink); font: inherit; font-size: 12px; line-height: 1.45; }
+.market-review-comment-field textarea:focus { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
+.market-review-status { min-height: 17px; margin: 8px 0 0; color: var(--market-muted); font-size: 11px; line-height: 1.4; }
+.market-review-status.is-error { color: #ad3843; }
+.market-review-status.is-success { color: #267842; }
+.market-review-status a { color: var(--market-blue); font-weight: 800; text-decoration: underline; }
+.market-review-actions { display: flex; gap: 9px; margin-top: 13px; }
+.market-review-actions button { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 6px; min-height: 43px; padding: 8px 10px; border-radius: 10px; font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+.market-review-cancel { border: 1px solid var(--market-line); background: transparent; color: var(--market-muted); }
+.market-review-submit { border: 0; background: var(--market-blue); color: #fff; }
+.market-review-submit:disabled { cursor: wait; opacity: .65; }
+body.market-review-open { overflow: hidden; }
 
 /* Product/store forms */
 .market-form-card { margin-bottom: 25px; }
@@ -281,6 +337,13 @@ body.theme-dark .market-search-trigger:hover, body.theme-dark .market-search-tri
 body.theme-dark .market-search-dialog { background: var(--market-surface); color: var(--market-ink); }
 body.theme-dark .market-search-dialog h2, body.theme-dark .market-filter-status strong { color: var(--market-ink); }
 body.theme-dark .market-product-skeleton-media, body.theme-dark .market-product-skeleton-line { background: linear-gradient(110deg, #213c5a 25%, #2b4054 37%, #213c5a 63%); background-size: 400% 100%; }
+body.theme-dark .market-review-card, body.theme-dark .market-review-dialog { background: var(--market-surface); color: var(--market-ink); }
+body.theme-dark .market-review-card h2, body.theme-dark .market-review-score > strong, body.theme-dark .market-review-item strong, body.theme-dark .market-review-dialog h2, body.theme-dark .market-review-comment-field > span { color: var(--market-ink); }
+body.theme-dark .market-review-open-button { background: #4c3b1e; color: #f4d58d; }
+body.theme-dark .market-review-star-button { background: #3c3425; border-color: #7e6730; }
+body.theme-dark .market-review-star-button:hover, body.theme-dark .market-review-star-button:focus-visible, body.theme-dark .market-review-star-button.is-selected { background: #5a4822; }
+body.theme-dark .market-review-comment-field textarea { background: var(--market-surface); color: var(--market-ink); }
+body.theme-dark .market-review-cancel { background: #22303b; }
 
 @media (max-width: 560px) {
   .market-auto-filters { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 43px; gap: 7px; }
@@ -291,6 +354,8 @@ body.theme-dark .market-product-skeleton-media, body.theme-dark .market-product-
   .market-product-price { font-size: 15px; }
   .market-product-stars { font-size: 9px; }
   .market-result-note { display: none; }
+  .market-review-summary-row { align-items: flex-start; flex-direction: column; }
+  .market-review-open-button { width: 100%; }
 }
 @media (max-width: 380px) {
   .market-hero { padding: 20px 17px; }

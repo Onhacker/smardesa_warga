@@ -30,6 +30,7 @@ $route['pasar/toko/simpan'] = 'marketplace/store_settings';
 $route['pasar/gambar/(:num)'] = 'marketplace/image/$1';
 $route['pasar/produk/(:any)/ubah'] = 'marketplace/edit/$1';
 $route['pasar/produk/(:any)/arsipkan'] = 'marketplace/archive/$1';
+$route['pasar/produk/(:any)/rating'] = 'marketplace/rating/$1';
 $route['pasar/produk/(:any)'] = 'marketplace/show/$1';
 $route['notifikasi/ringkasan'] = 'notifications/summary';
 $route['notifikasi/baca'] = 'notifications/read';

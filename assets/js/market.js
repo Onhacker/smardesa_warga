@@ -85,6 +85,7 @@
     var queryField = root.querySelector('[data-market-query-field]');
     var status = root.querySelector('[data-market-filter-status]');
     var queryLabel = root.querySelector('[data-market-query-label]');
+    var productsTitle = root.querySelector('[data-market-products-title]');
     var modal = root.querySelector('[data-market-search-modal]');
     var searchInput = root.querySelector('[data-market-search-input]');
     var searchForm = root.querySelector('[data-market-search-form]');
@@ -125,6 +126,16 @@
       setHidden(status, state.query === '');
       if (modalCategory) modalCategory.value = state.category;
       if (modalSort) modalSort.value = state.sort;
+    }
+
+    function syncCategoryTitle() {
+      if (!productsTitle) return;
+      var title = 'Semua produk';
+      if (categorySelect && categorySelect.value) {
+        var option = categorySelect.options[categorySelect.selectedIndex];
+        if (option && option.textContent.trim()) title = option.textContent.trim();
+      }
+      productsTitle.textContent = title;
     }
 
     function syncUrl() {
@@ -195,6 +206,7 @@
         state.hasMore = data.has_more === true || state.page < state.pages;
         updateCount(data.count);
         syncStatus();
+        syncCategoryTitle();
         syncPagination();
         if (sentinel) setHidden(sentinel, !state.hasMore);
         if (updateHistory) syncUrl();
@@ -237,6 +249,7 @@
         state.category = categorySelect ? categorySelect.value : '';
         state.sort = sortSelect ? sortSelect.value : 'newest';
         syncStatus();
+        syncCategoryTitle();
         requestCatalog(1, false, true);
       });
     });
@@ -300,9 +313,184 @@
       }, { passive: true });
     }
     syncStatus();
+    syncCategoryTitle();
     syncPagination();
     updateCount(parseInt((count && count.textContent) || '0', 10));
     if (sentinel) setHidden(sentinel, !state.hasMore);
+  }
+
+  function bindReviewModals() {
+    var modal = document.querySelector('[data-market-review-modal]');
+    if (!modal || modal.getAttribute('data-market-review-bound') === '1') return;
+    modal.setAttribute('data-market-review-bound', '1');
+    var form = modal.querySelector('[data-market-review-form]');
+    var picker = modal.querySelector('.market-review-picker');
+    var title = modal.querySelector('[data-market-review-title]');
+    var productLabel = modal.querySelector('[data-market-review-product-label]');
+    var ratingLabel = modal.querySelector('[data-market-review-rating-label]');
+    var comment = modal.querySelector('[data-market-review-comment]');
+    var status = modal.querySelector('[data-market-review-status]');
+    var submit = modal.querySelector('.market-review-submit');
+    var selectedRating = 0;
+    var lastFocus = null;
+
+    function setStatus(message, type, loginUrl) {
+      if (!status) return;
+      status.textContent = '';
+      status.className = 'market-review-status' + (type ? ' is-' + type : '');
+      if (message) status.appendChild(document.createTextNode(message));
+      if (loginUrl) {
+        var link = document.createElement('a');
+        link.href = loginUrl;
+        link.textContent = 'Masuk sekarang';
+        status.appendChild(document.createTextNode(' '));
+        status.appendChild(link);
+      }
+    }
+
+    function updatePicker() {
+      if (!picker) return;
+      picker.querySelectorAll('[data-review-rating]').forEach(function (button) {
+        var value = parseInt(button.getAttribute('data-review-rating') || '0', 10);
+        button.classList.toggle('is-selected', value <= selectedRating);
+        button.setAttribute('aria-checked', value === selectedRating ? 'true' : 'false');
+      });
+      if (ratingLabel) ratingLabel.textContent = selectedRating ? selectedRating + ' dari 5 bintang' : 'Pilih bintang';
+    }
+
+    function updateStars(container, average) {
+      if (!container) return;
+      var rounded = Math.max(0, Math.min(5, Math.round(parseFloat(average) || 0)));
+      container.querySelectorAll('i.fa-star').forEach(function (star, index) {
+        star.classList.toggle('is-filled', index < rounded);
+        star.classList.toggle('is-empty', index >= rounded);
+      });
+    }
+
+    function updateProductRating(productId, summary) {
+      var average = summary && summary.rating_average !== undefined ? parseFloat(summary.rating_average) || 0 : 0;
+      var count = summary && summary.rating_count !== undefined ? parseInt(summary.rating_count, 10) || 0 : 0;
+      document.querySelectorAll('[data-market-review-open]').forEach(function (trigger) {
+        if ((trigger.getAttribute('data-review-product-id') || '') !== productId) return;
+        updateStars(trigger.querySelector('[data-market-rating-stars]'), average);
+        var countNode = trigger.querySelector('[data-market-rating-count]');
+        if (countNode) countNode.textContent = count ? (average.toFixed(1).replace('.', ',') + ' (' + count + ')') : 'Beri rating';
+      });
+      var summaryRoot = document.querySelector('[data-market-review-summary]');
+      if (!summaryRoot || (summaryRoot.getAttribute('data-review-product-id') || productId) !== productId) return;
+      var averageNode = summaryRoot.querySelector('[data-market-rating-average]');
+      var countNode = summaryRoot.querySelector('[data-market-rating-count]');
+      if (averageNode) averageNode.textContent = average.toFixed(1).replace('.', ',');
+      if (countNode) countNode.textContent = count ? count + ' ulasan' : 'Belum ada ulasan';
+      updateStars(summaryRoot.querySelector('[data-market-rating-stars]'), average);
+    }
+
+    function updateReviewList(data) {
+      var list = document.querySelector('[data-market-review-list]');
+      if (!list || !data || !data.review_html) return;
+      var reviewId = data.review && String(data.review.id || '');
+      list.querySelectorAll('[data-review-id]').forEach(function (item) {
+        if (reviewId && item.getAttribute('data-review-id') === reviewId) item.remove();
+      });
+      var empty = list.querySelector('[data-market-review-empty]');
+      if (empty) empty.remove();
+      list.insertAdjacentHTML('afterbegin', data.review_html);
+    }
+
+    function open(trigger) {
+      if (!form || !trigger) return;
+      lastFocus = document.activeElement;
+      selectedRating = 0;
+      form.setAttribute('data-review-url', trigger.getAttribute('data-review-url') || '');
+      form.setAttribute('data-review-product-id', trigger.getAttribute('data-review-product-id') || '');
+      var name = trigger.getAttribute('data-review-product-name') || 'produk ini';
+      if (title) title.textContent = 'Beri rating';
+      if (productLabel) productLabel.textContent = 'Bagaimana pengalaman Anda dengan ' + name + '?';
+      if (comment) comment.value = '';
+      setStatus('', '');
+      updatePicker();
+      modal.hidden = false;
+      document.body.classList.add('market-review-open');
+      var first = picker && picker.querySelector('[data-review-rating]');
+      if (first) setTimeout(function () { first.focus(); }, 20);
+    }
+
+    function close() {
+      modal.hidden = true;
+      document.body.classList.remove('market-review-open');
+      if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      lastFocus = null;
+    }
+
+    if (picker) picker.querySelectorAll('[data-review-rating]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        selectedRating = parseInt(button.getAttribute('data-review-rating') || '0', 10) || 0;
+        updatePicker();
+      });
+    });
+    modal.querySelectorAll('[data-market-review-close]').forEach(function (button) { button.addEventListener('click', close); });
+    document.addEventListener('click', function (event) {
+      var trigger = event.target.closest ? event.target.closest('[data-market-review-open]') : null;
+      if (trigger) {
+        event.preventDefault();
+        event.stopPropagation();
+        open(trigger);
+        return;
+      }
+      var closeButton = event.target.closest ? event.target.closest('[data-market-review-close]') : null;
+      if (closeButton && modal.contains(closeButton)) close();
+    });
+    document.addEventListener('keydown', function (event) {
+      var trigger = event.target.closest ? event.target.closest('[data-market-review-open]') : null;
+      if (trigger && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        open(trigger);
+      } else if (event.key === 'Escape' && !modal.hidden) {
+        event.preventDefault();
+        close();
+      }
+    });
+    if (form) form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (!selectedRating) { setStatus('Pilih jumlah bintang terlebih dahulu.', 'error'); return; }
+      var text = comment ? comment.value.trim() : '';
+      if (text.length < 3) { setStatus('Komentar minimal 3 karakter.', 'error'); if (comment) comment.focus(); return; }
+      var endpoint = form.getAttribute('data-review-url') || '';
+      if (!endpoint || typeof window.fetch !== 'function') { setStatus('Rating belum dapat dikirim. Coba muat ulang halaman.', 'error'); return; }
+      var config = window.SDW || {};
+      var body = new URLSearchParams();
+      if (config.csrfName) body.set(config.csrfName, config.csrfHash || '');
+      body.set('rating', String(selectedRating));
+      body.set('comment', text);
+      if (submit) submit.disabled = true;
+      setStatus('Menyimpan ulasan…', '');
+      window.fetch(endpoint, { method: 'POST', credentials: 'same-origin', body: body, cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+        .then(function (response) {
+          return response.text().then(function (raw) {
+            var data = null;
+            try { data = raw ? JSON.parse(raw) : null; } catch (_) {}
+            if (data && data.csrf) { config.csrfName = data.csrf.name; config.csrfHash = data.csrf.hash; }
+            if (!response.ok || !data || data.success !== true) {
+              var error = new Error(data && data.message ? data.message : 'Rating belum dapat disimpan.');
+              error.payload = data || {};
+              throw error;
+            }
+            return data;
+          });
+        })
+        .then(function (data) {
+          var productId = form.getAttribute('data-review-product-id') || '';
+          updateProductRating(productId, data.summary || {});
+          updateReviewList(data);
+          setStatus(data.message || 'Rating dan komentar berhasil disimpan.', 'success');
+          window.setTimeout(close, 850);
+        })
+        .catch(function (error) {
+          var payload = error && error.payload ? error.payload : {};
+          setStatus(error && error.message ? error.message : 'Rating belum dapat disimpan.', 'error', payload.login_url || '');
+        })
+        .then(function () { if (submit) submit.disabled = false; });
+    });
   }
 
   function bind() {
@@ -327,6 +515,7 @@
       });
     });
     document.querySelectorAll('[data-market-catalog]').forEach(bindCatalog);
+    bindReviewModals();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
