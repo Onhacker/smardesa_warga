@@ -129,10 +129,13 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
                 <span aria-hidden="true"><i class="fa fa-sliders-h"></i></span>
             </header>
 
-            <a href="#" data-toggle-theme>
+            <a href="#" data-toggle-theme class="warga-account-theme-row">
                 <span class="warga-setting-icon is-dark"><i class="fa fa-moon" aria-hidden="true"></i></span>
                 <div><strong>Mode Tampilan</strong><small>Gunakan tema terang atau gelap</small></div>
-                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                <div class="custom-control small-switch ios-switch warga-account-theme-switch">
+                    <input data-toggle-theme type="checkbox" class="ios-input" id="switch-account-dark-mode" aria-label="Aktifkan mode gelap">
+                    <label class="custom-control-label" for="switch-account-dark-mode" aria-hidden="true"></label>
+                </div>
             </a>
             <div class="warga-account-notification-row">
                 <span class="warga-setting-icon is-red"><i class="fa fa-bell" aria-hidden="true"></i></span>

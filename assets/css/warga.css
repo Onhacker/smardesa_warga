@@ -3767,7 +3767,8 @@ body #page .page-content .warga-account-page .warga-settings-list small {
   font-size: 10px;
 }
 
-.warga-account-page .warga-account-notification-switch {
+.warga-account-page .warga-account-notification-switch,
+.warga-account-page .warga-account-theme-switch {
   position: relative;
   top: auto;
   right: auto;
@@ -3781,12 +3782,14 @@ body #page .page-content .warga-account-page .warga-settings-list small {
   transform-origin: right center;
 }
 
-.warga-account-page .warga-account-notification-switch .custom-control-label {
+.warga-account-page .warga-account-notification-switch .custom-control-label,
+.warga-account-page .warga-account-theme-switch .custom-control-label {
   margin: 0;
   cursor: pointer;
 }
 
-.warga-account-page .warga-account-notification-switch .ios-input:disabled + .custom-control-label {
+.warga-account-page .warga-account-notification-switch .ios-input:disabled + .custom-control-label,
+.warga-account-page .warga-account-theme-switch .ios-input:disabled + .custom-control-label {
   cursor: wait;
   opacity: .55;
 }
