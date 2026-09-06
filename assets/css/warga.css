@@ -2899,7 +2899,14 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
   position: relative;
   z-index: 2;
   display: inline-block;
-  width: auto;
+  /* Keep the active and inactive store glyphs in the same fixed box.  The
+   * AppKit rule above gives an active icon `width: 1em`, while the inactive
+   * icon falls back to its Font Awesome advance width.  Those two widths make
+   * the glyph look like it jumps when navigating between pages even though
+   * the five footer columns are equal. */
+  width: 24px !important;
+  min-width: 24px;
+  text-align: center;
   color: #fff !important;
   font-size: 20px !important;
   opacity: 1 !important;
