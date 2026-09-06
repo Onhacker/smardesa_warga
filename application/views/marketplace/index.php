@@ -6,40 +6,23 @@ $categories = isset($categories) && is_array($categories) ? $categories : array(
 $canManage = !empty($canManage);
 $marketplaceReady = isset($marketplaceReady) ? (bool) $marketplaceReady : TRUE;
 $listingFilters = isset($listing['filters']) && is_array($listing['filters']) ? $listing['filters'] : array();
-$search = (string) ($listingFilters['q'] ?? '');
+$search = trim((string) ($listingFilters['q'] ?? ''));
 $selectedCategory = (string) ($listingFilters['category_id'] ?? '');
 $selectedSort = (string) ($listingFilters['sort'] ?? 'newest');
 $listingPages = max(1, (int) ($listing['pages'] ?? 1));
 $listingPage = max(1, (int) ($listing['page'] ?? 1));
-
-$marketUrl = static function ($value, $fallback = '') {
-    $value = trim((string) $value);
-    if ($value === '') return $fallback;
-    if (preg_match('#^(?:https?:)?//#i', $value) || strpos($value, 'data:') === 0) return $value;
-    if ($value[0] === '/') return base_url(ltrim($value, '/'));
-    return base_url($value);
-};
-$productImage = static function (array $item) use ($marketUrl) {
-    $candidate = $item['cover_url'] ?? ($item['image_url'] ?? ($item['cover_image'] ?? ($item['image'] ?? '')));
-    if ($candidate === '' && !empty($item['images']) && is_array($item['images'])) {
-        $first = reset($item['images']);
-        $candidate = is_array($first) ? ($first['url'] ?? ($first['image_url'] ?? ($first['path'] ?? ''))) : $first;
-    }
-    return $marketUrl($candidate, base_url('assets/images/market-product-placeholder.svg'));
-};
-$productPrice = static function ($value) {
-    $value = is_numeric($value) ? (float) $value : 0;
-    return 'Rp ' . number_format($value, 0, ',', '.');
-};
-$productCategory = static function (array $item) {
-    return trim((string) ($item['category_name'] ?? ($item['category'] ?? ($item['category_label'] ?? 'Produk warga'))));
-};
-$productId = static function (array $item) {
-    return (string) ($item['id'] ?? ($item['product_id'] ?? ''));
-};
+$listingTotal = max(0, (int) ($listing['total'] ?? count($products)));
+$listingPerPage = max(1, (int) ($listing['per_page'] ?? 12));
+$ajaxEndpoint = site_url('pasar/data');
 ?>
 
-<div class="marketplace-page marketplace-listing-page">
+<div class="marketplace-page marketplace-listing-page"
+     data-market-catalog
+     data-market-endpoint="<?= e($ajaxEndpoint) ?>"
+     data-market-page="<?= $listingPage ?>"
+     data-market-pages="<?= $listingPages ?>"
+     data-market-per-page="<?= $listingPerPage ?>"
+     data-market-ready="<?= $marketplaceReady ? '1' : '0' ?>">
     <section class="market-hero" aria-labelledby="market-title">
         <div class="market-hero-copy">
             <p class="market-eyebrow color-white">EKONOMI <?= e($institutionUpper ?? 'KAMPUNG') ?></p>
@@ -51,58 +34,93 @@ $productId = static function (array $item) {
 
     <section class="card card-style market-filter-card" aria-labelledby="market-filter-title">
         <div class="content mb-0">
-            <div class="market-section-heading">
-                <div><p class="market-eyebrow market-eyebrow-blue">KATALOG PRODUK</p><h2 id="market-filter-title">Cari produk</h2></div>
-                <span class="market-product-count" data-market-count><?= count($products) ?> produk</span>
+            <div class="market-section-heading market-filter-heading">
+                <div>
+                    <p class="market-eyebrow market-eyebrow-blue">KATALOG PRODUK</p>
+                    <h2 id="market-filter-title">Produk warga</h2>
+                </div>
+                <div class="market-filter-actions">
+                    <span class="market-product-count" data-market-count><?= $listingTotal ?> produk</span>
+                    <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari produk" aria-haspopup="dialog" aria-controls="market-search-modal">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
+
             <form method="get" action="<?= site_url('pasar') ?>" class="market-filter-form" data-market-filter>
-                <label class="market-field market-field-search" for="market-search">
-                    <span>Nama produk</span>
-                    <span class="market-input-wrap"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="market-search" name="q" value="<?= e($search) ?>" placeholder="Cari produk warga" autocomplete="off"></span>
-                </label>
-                <label class="market-field" for="market-category">
-                    <span>Kategori</span>
-                    <span class="market-input-wrap"><i class="fa fa-tags" aria-hidden="true"></i><select id="market-category" name="category_id"><option value="">Semua kategori</option><?php foreach ($categories as $category): ?><?php $categoryValue = (string) ($category['id'] ?? ''); ?><option value="<?= e($categoryValue) ?>" <?= $selectedCategory === $categoryValue ? 'selected' : '' ?>><?= e($category['name'] ?? ($category['label'] ?? $categoryValue)) ?></option><?php endforeach; ?></select></span>
-                </label>
-                <label class="market-field" for="market-sort">
-                    <span>Urutkan</span>
-                    <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" name="sort"><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
-                </label>
-                <button type="submit" class="market-filter-submit"><i class="fa fa-search color-white" aria-hidden="true"></i><span class="color-white">Cari</span></button>
+                <div class="market-auto-filters">
+                    <label class="market-field" for="market-category">
+                        <span>Kategori</span>
+                        <span class="market-input-wrap"><i class="fa fa-tags" aria-hidden="true"></i><select id="market-category" name="category_id" data-market-auto-filter><option value="">Semua kategori</option><?php foreach ($categories as $category): ?><?php $categoryValue = (string) ($category['id'] ?? ''); ?><option value="<?= e($categoryValue) ?>" <?= $selectedCategory === $categoryValue ? 'selected' : '' ?>><?= e($category['name'] ?? ($category['label'] ?? $categoryValue)) ?></option><?php endforeach; ?></select></span>
+                    </label>
+                    <label class="market-field" for="market-sort">
+                        <span>Urutkan</span>
+                        <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" name="sort" data-market-auto-filter><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
+                    </label>
+                </div>
+                <input type="hidden" name="q" value="<?= e($search) ?>" data-market-query-field>
+                <noscript><button type="submit" class="market-filter-submit"><i class="fa fa-filter color-white" aria-hidden="true"></i><span class="color-white">Terapkan</span></button></noscript>
             </form>
+
+            <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
+                <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
+                <button type="button" data-market-query-clear>Hapus</button>
+            </div>
         </div>
     </section>
 
+    <div class="market-search-modal" id="market-search-modal" data-market-search-modal hidden>
+        <button type="button" class="market-search-backdrop" data-market-search-close aria-label="Tutup pencarian"></button>
+        <section class="market-search-dialog" role="dialog" aria-modal="true" aria-labelledby="market-search-title">
+            <div class="market-search-dialog-head">
+                <div>
+                    <p class="market-eyebrow market-eyebrow-blue">PENCARIAN</p>
+                    <h2 id="market-search-title">Cari produk</h2>
+                </div>
+                <button type="button" class="market-search-close" data-market-search-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+            </div>
+            <form method="get" action="<?= site_url('pasar') ?>" data-market-search-form>
+                <label class="market-field" for="market-search-input">
+                    <span>Nama produk</span>
+                    <span class="market-input-wrap market-search-input-wrap"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="market-search-input" name="q" value="<?= e($search) ?>" placeholder="Contoh: kopi, sayur, kerajinan" autocomplete="off" data-market-search-input></span>
+                </label>
+                <input type="hidden" name="category_id" value="<?= e($selectedCategory) ?>" data-market-modal-category>
+                <input type="hidden" name="sort" value="<?= e($selectedSort) ?>" data-market-modal-sort>
+                <div class="market-search-dialog-actions">
+                    <button type="button" class="market-search-clear" data-market-search-clear>Reset</button>
+                    <button type="submit" class="market-filter-submit"><i class="fa fa-search color-white" aria-hidden="true"></i><span class="color-white">Cari produk</span></button>
+                </div>
+            </form>
+        </section>
+    </div>
+
     <section class="market-products" aria-labelledby="market-products-title">
         <div class="market-section-heading market-products-heading">
-            <div><p class="market-eyebrow market-eyebrow-blue">PILIHAN WARGA</p><h2 id="market-products-title">Produk terbaru</h2></div>
-            <span class="market-result-note"><?= count($products) ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
+            <div><p class="market-eyebrow market-eyebrow-blue">PILIHAN WARGA</p><h2 id="market-products-title">Semua produk</h2></div>
+            <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
         </div>
-        <?php if ($products): ?>
-            <div class="market-product-grid" data-market-product-list>
-                <?php foreach ($products as $product): ?>
-                    <?php if (!is_array($product)) continue; $id = $productId($product); if ($id === '') continue; $category = $productCategory($product); $storeName = trim((string) ($product['store_name'] ?? ($product['seller_name'] ?? ''))); $villageName = trim((string) ($product['village_name'] ?? '')); ?>
-                    <a class="market-product-card" href="<?= site_url('pasar/produk/' . rawurlencode($id)) ?>" data-market-product data-name="<?= e(strtolower((string) ($product['name'] ?? ''))) ?>" data-category="<?= e(strtolower($category)) ?>">
-                        <figure class="market-product-media"><img src="<?= e($productImage($product)) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" loading="lazy"><span class="market-product-badge color-white"><?= e($category) ?></span></figure>
-                        <span class="market-product-copy">
-                            <span class="market-product-stars" aria-label="Produk warga"><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i><i class="fa fa-star" aria-hidden="true"></i></span>
-                            <strong class="market-product-name"><?= e($product['name'] ?? 'Produk warga') ?></strong>
-                            <small class="market-product-store"><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName !== '' ? $storeName : 'Toko warga') ?></small>
-                            <?php if ($villageName !== ''): ?><small class="market-product-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></small><?php endif; ?>
-                            <b class="market-product-price"><?= e($productPrice($product['price'] ?? 0)) ?></b>
-                            <?php if (!empty($product['stock']) || isset($product['stock'])): ?><small class="market-product-stock <?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'Stok habis' : 'Tersedia' ?></small><?php endif; ?>
-                        </span>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php else: ?>
-            <div class="market-empty-state"><span class="market-empty-icon"><i class="fa <?= $marketplaceReady ? 'fa-store-slash' : 'fa-database' ?>" aria-hidden="true"></i></span><h3><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar Digital belum siap' ?></h3><p><?= $marketplaceReady ? 'Produk warga akan tampil di sini setelah diterbitkan.' : 'Jalankan database/migrations/016_marketplace.sql di server untuk mengaktifkan katalog.' ?></p><?php if ($canManage && $marketplaceReady): ?><a href="<?= site_url('pasar/buat') ?>" class="btn btn-s bg-blue-dark color-white rounded-s"><i class="fa fa-plus color-white" aria-hidden="true"></i> <span class="color-white">Tambah produk</span></a><?php endif; ?></div>
-        <?php endif; ?>
+
+        <div class="market-product-grid" data-market-product-list aria-live="polite">
+            <?php if ($products): ?>
+                <?php $this->load->view('marketplace/product_cards', array('products' => $products, 'eagerFirst' => TRUE)); ?>
+            <?php else: ?>
+                <?php $this->load->view('marketplace/empty_state', array('marketplaceReady' => $marketplaceReady, 'canManage' => $canManage)); ?>
+            <?php endif; ?>
+        </div>
+
+        <div class="market-loading-state" data-market-loading hidden role="status" aria-live="polite">
+            <span class="market-loading-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span>Memuat produk…</span>
+        </div>
+        <div class="market-infinite-sentinel" data-market-sentinel<?= $listingPage >= $listingPages ? ' hidden' : '' ?> aria-hidden="true">
+            <span class="market-sentinel-spinner"></span>
+        </div>
+
         <?php if ($listingPages > 1): ?>
-            <nav class="market-pagination" aria-label="Halaman produk">
+            <nav class="market-pagination" aria-label="Halaman produk" data-market-pagination>
                 <?php for ($page = 1; $page <= $listingPages; $page++): ?>
                     <?php $params = array('page' => $page); if ($search !== '') $params['q'] = $search; if ($selectedCategory !== '') $params['category_id'] = $selectedCategory; if ($selectedSort !== '') $params['sort'] = $selectedSort; ?>
-                    <a href="<?= e(site_url('pasar') . '?' . http_build_query($params)) ?>" class="<?= $page === $listingPage ? 'is-active' : '' ?>" aria-label="Halaman <?= $page ?>" <?= $page === $listingPage ? 'aria-current="page"' : '' ?>><?= $page ?></a>
+                    <a href="<?= e(site_url('pasar') . '?' . http_build_query($params)) ?>" class="<?= $page === $listingPage ? 'is-active' : '' ?>" aria-label="Halaman <?= $page ?>" <?= $page === $listingPage ? 'aria-current="page"' : '' ?> data-market-page-link="<?= $page ?>"><?= $page ?></a>
                 <?php endfor; ?>
             </nav>
         <?php endif; ?>

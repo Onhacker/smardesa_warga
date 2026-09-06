@@ -23,7 +23,9 @@ class Marketplace extends Public_Controller
             'page' => $this->input->get('page', TRUE),
             'per_page' => 12
         );
-        $viewer = is_array($this->currentUser) ? $this->currentUser : array();
+        // Katalog selalu memakai visibilitas publik. Produk draf milik penjual
+        // tetap dikelola dari Tokoku dan tidak bercampur dengan katalog umum.
+        $viewer = array();
         $listing = $this->marketplace->products($viewer, array_merge($filters, array('public_all' => TRUE)));
         $this->render('marketplace/index', array(
             'pageTitle' => 'Pasar Digital',
@@ -33,6 +35,46 @@ class Marketplace extends Public_Controller
             'store' => $this->currentUser ? $this->marketplace->store_for_user($this->currentUser) : NULL,
             'canManage' => $this->currentUser ? $this->marketplace->can_manage($this->currentUser) : FALSE,
             'marketplaceReady' => $this->marketplace->is_ready()
+        ));
+    }
+
+    /**
+     * Potongan katalog publik untuk filter dan infinite scroll. Respons hanya
+     * berisi kartu produk agar browser tidak perlu membangun ulang layout.
+     */
+    public function list_ajax()
+    {
+        $filters = array(
+            'q' => $this->input->get('q', TRUE),
+            'category_id' => $this->input->get('category_id', TRUE),
+            'sort' => $this->input->get('sort', TRUE),
+            'page' => $this->input->get('page', TRUE),
+            'per_page' => $this->input->get('per_page', TRUE) ?: 12,
+            'public_all' => TRUE
+        );
+        $listing = $this->marketplace->products(array(), $filters);
+        $itemsHtml = $this->load->view('marketplace/product_cards', array(
+            'products' => $listing['items'],
+            'eagerFirst' => FALSE
+        ), TRUE);
+        $emptyHtml = $this->load->view('marketplace/empty_state', array(
+            'marketplaceReady' => $this->marketplace->is_ready(),
+            'canManage' => $this->currentUser ? $this->marketplace->can_manage($this->currentUser) : FALSE
+        ), TRUE);
+        $page = max(1, (int) ($listing['page'] ?? 1));
+        $pages = max(1, (int) ($listing['pages'] ?? 1));
+
+        return $this->json(array(
+            'success' => TRUE,
+            'items_html' => $itemsHtml,
+            'empty_html' => $emptyHtml,
+            'count' => max(0, (int) ($listing['total'] ?? 0)),
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => max(1, (int) ($listing['per_page'] ?? 12)),
+            'has_more' => $page < $pages,
+            'ready' => !isset($listing['ready']) || (bool) $listing['ready'],
+            'filters' => isset($listing['filters']) && is_array($listing['filters']) ? $listing['filters'] : array()
         ));
     }
 

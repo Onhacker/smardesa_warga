@@ -20,6 +20,7 @@ $route['pengaduan/(:any)'] = 'community/complaint/$1';
 $route['kontak'] = 'community/contact';
 $route['pasar'] = 'marketplace/index';
 $route['pasar-digital'] = 'marketplace/index';
+$route['pasar/data'] = 'marketplace/list_ajax';
 $route['pasar/buat'] = 'marketplace/create';
 $route['pasar/simpan'] = 'marketplace/store';
 $route['pasar/tokoku'] = 'marketplace/tokoku';
