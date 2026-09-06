@@ -36,14 +36,10 @@ $ajaxEndpoint = site_url('pasar/data');
         <div class="content mb-0">
             <div class="market-section-heading market-filter-heading">
                 <div>
-                    <p class="market-eyebrow market-eyebrow-blue">KATALOG PRODUK</p>
                     <h2 id="market-filter-title">Produk warga</h2>
                 </div>
                 <div class="market-filter-actions">
                     <span class="market-product-count" data-market-count><?= $listingTotal ?> produk</span>
-                    <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari produk" aria-haspopup="dialog" aria-controls="market-search-modal">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                    </button>
                 </div>
             </div>
 
@@ -57,6 +53,9 @@ $ajaxEndpoint = site_url('pasar/data');
                         <span>Urutkan</span>
                         <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" name="sort" data-market-auto-filter><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
                     </label>
+                    <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari produk" aria-haspopup="dialog" aria-controls="market-search-modal">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </button>
                 </div>
                 <input type="hidden" name="q" value="<?= e($search) ?>" data-market-query-field>
                 <noscript><button type="submit" class="market-filter-submit"><i class="fa fa-filter color-white" aria-hidden="true"></i><span class="color-white">Terapkan</span></button></noscript>
