@@ -3673,6 +3673,21 @@ body #page .page-content .warga-account-page .warga-account-row > div > small {
   line-height: 1.4;
 }
 
+/* The theme row contains the same full-size switch as the notification row.
+ * Give it a real trailing grid track so the switch is not squeezed into the
+ * generic chevron column (and clipped outside the settings card). */
+.warga-account-page .warga-settings-list .warga-account-theme-row {
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  overflow: visible;
+}
+
+.warga-account-page .warga-account-theme-row > .warga-account-theme-switch {
+  grid-column: 3;
+  justify-self: end;
+  min-width: 0;
+}
+
 .warga-account-page .warga-setting-icon {
   width: 46px;
   height: 46px;
