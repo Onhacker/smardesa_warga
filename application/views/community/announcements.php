@@ -2,6 +2,7 @@
 <?php
 $isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
 $announcementArea = $isAuthenticated ? (string) ($currentUser['village_name'] ?? '') : 'Semua kampung';
+$announcementInstitution = function_exists('mb_strtoupper') ? mb_strtoupper((string) $institutionLower, 'UTF-8') : strtoupper((string) $institutionLower);
 ?>
 <div class="warga-community community-v22-page community-v22-announcement-page">
     <header class="community-heading community-v22-page-hero" aria-labelledby="announcement-page-title">
@@ -40,13 +41,23 @@ $announcementArea = $isAuthenticated ? (string) ($currentUser['village_name'] ??
             </div>
             <?php endif; ?>
             <?php foreach ($items as $item): ?>
-            <article class="community-item community-v22-feed-item">
-                <div class="community-v22-feed-item-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
-                <div class="community-v22-feed-item-copy">
-                        <div class="community-meta"><time><?= e(tanggal_id($item['created_at'])) ?></time><span><?= e($item['village_name'] ?? ($item['status'] === 'archived' ? 'Diarsipkan' : ($item['author_name'] ?? '')) ) ?></span></div>
-                    <h2><a href="<?= site_url('pengumuman/'.$item['id']) ?>"><?= e($item['title']) ?></a></h2>
-                    <p><?= e(mb_strimwidth($item['body'], 0, 220, '...')) ?></p>
-                    <a class="community-text-link" href="<?= site_url('pengumuman/'.$item['id']) ?>">Selengkapnya <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            <?php
+            $announcementAuthor = trim((string) ($item['village_name'] ?? ''));
+            if ($announcementAuthor === '') $announcementAuthor = trim((string) ($item['author_name'] ?? ''));
+            if ($announcementAuthor === '' && ($item['status'] ?? '') === 'archived') $announcementAuthor = 'Diarsipkan';
+            ?>
+            <article class="community-v22-announcement-card">
+                <a class="community-v22-announcement-card-head" href="<?= site_url('pengumuman/'.$item['id']) ?>">
+                    <span class="community-v22-announcement-card-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
+                    <span class="community-v22-announcement-card-copy">
+                        <span class="community-v22-announcement-card-eyebrow">PENGUMUMAN <?= e($announcementInstitution) ?></span>
+                        <strong><?= e($item['title']) ?></strong>
+                        <span class="community-v22-announcement-card-meta"><time><?= e(tanggal_id($item['created_at'])) ?></time><?php if ($announcementAuthor !== ''): ?><span><?= e($announcementAuthor) ?></span><?php endif; ?></span>
+                    </span>
+                </a>
+                <div class="community-v22-announcement-card-body">
+                    <p><?= e(mb_strimwidth((string) $item['body'], 0, 220, '...')) ?></p>
+                    <a class="community-text-link" href="<?= site_url('pengumuman/'.$item['id']) ?>">Baca selengkapnya <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
             </article>
             <?php endforeach; ?>

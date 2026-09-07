@@ -33,6 +33,16 @@
   var status = document.querySelector('[data-push-status]');
   var subscribed = false;
   function message(text) { if (status) status.textContent = text; }
+  function permissionMessage(permission) {
+    if (permission === 'denied') {
+      var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      return standalone
+        ? 'Izin diblokir. Buka Info aplikasi > Notifikasi, pilih Izinkan, lalu coba lagi.'
+        : 'Izin diblokir oleh browser. Buka Pengaturan situs > Notifikasi, pilih Izinkan, lalu coba lagi.';
+    }
+    if (permission === 'default') return 'Klik sakelar untuk memberi izin notifikasi pada browser.';
+    return '';
+  }
   function updateCsrf(csrf) {
     if (!csrf || !csrf.name || !csrf.hash) return;
     config.csrfName = csrf.name;
@@ -45,7 +55,14 @@
     var data = new URLSearchParams(values);
     data.set(config.csrfName, config.csrfHash);
     return fetch(base + path, {method:'POST', credentials:'same-origin', body:data, cache:'no-store', headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'}})
-      .then(function (r) { if (!r.ok) throw new Error('Permintaan belum dapat disimpan. Muat ulang halaman lalu coba lagi.'); return r.json(); })
+      .then(function (r) {
+        return r.text().then(function (text) {
+          var payload = null;
+          try { payload = text ? JSON.parse(text) : null; } catch (_) {}
+          if (!r.ok) throw new Error(payload && payload.message ? payload.message : 'Permintaan belum dapat disimpan. Muat ulang halaman lalu coba lagi.');
+          return payload || {};
+        });
+      })
       .then(function (data) { updateCsrf(data.csrf); return data; });
   }
   function keyBytes(value) {
@@ -68,6 +85,7 @@
     if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
     else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
     else {
+      if (Notification.permission !== 'granted') message(permissionMessage(Notification.permission));
       navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
         .then(function (sub) { updateButton(!!sub); if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); })
         .catch(function () { message('Status notifikasi belum dapat diperiksa.'); });
@@ -75,10 +93,14 @@
         var previous = subscribed;
         setDisabled(true);
         try {
-          var permission = desired ? (subscribed ? 'granted' : await Notification.requestPermission()) : 'granted';
+          var permission = 'granted';
+          if (desired && !subscribed) {
+            permission = Notification.permission;
+            if (permission === 'default') permission = await Notification.requestPermission();
+          }
           if (permission !== 'granted') {
             updateButton(previous);
-            message('Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
+            message(permissionMessage(permission) || 'Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
             return;
           }
           var reg = await navigator.serviceWorker.ready;
@@ -89,11 +111,12 @@
           } else if (desired) {
             sub = sub || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:keyBytes(config.vapidPublicKey)});
             await post('notifikasi/push', {subscription:JSON.stringify(sub)});
-            updateButton(true); message('Notifikasi perangkat aktif.');
+            updateButton(true); message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
           } else updateButton(false);
         } catch (error) {
           updateButton(previous);
-          message(error.message || 'Notifikasi belum dapat diaktifkan.');
+          if (Notification.permission === 'denied') message(permissionMessage('denied'));
+          else message(error.message || 'Notifikasi belum dapat diaktifkan.');
         } finally { setDisabled(false); }
       }
       if (checkbox) {

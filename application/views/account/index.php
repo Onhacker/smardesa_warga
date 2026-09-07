@@ -141,7 +141,7 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
                 <span class="warga-setting-icon is-red"><i class="fa fa-bell" aria-hidden="true"></i></span>
                 <div class="warga-account-notification-copy">
                     <strong>Notifikasi</strong>
-                    <small>Aktifkan pemberitahuan status layanan</small>
+                    <small>Aktifkan pemberitahuan status layanan; suara dan getar mengikuti pengaturan perangkat</small>
                     <span class="warga-account-notification-status" data-push-status role="status" aria-live="polite"></span>
                     <a class="warga-account-notification-history" href="<?= site_url('notifikasi') ?>">Lihat riwayat notifikasi <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                 </div>

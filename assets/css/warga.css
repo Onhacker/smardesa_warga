@@ -2826,6 +2826,10 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
   margin-left: 15px;
   margin-right: 0;
 }
+#page .warga-page-title .warga-page-title-menu {
+  margin-left: 15px;
+  margin-right: 0;
+}
 
 .theme-dark #page .warga-page-title h1 {
   color: #f1f5f7 !important;
@@ -4072,6 +4076,42 @@ body.theme-dark #page .warga-account-notification-history {
 /* The bell replaces the theme shortcut in every page header. Its badge is
  * hidden at zero and stays anchored to the icon in both header variants. */
 #page .warga-header-notification {
+  position: relative;
+}
+
+/* The compact AppKit header uses absolutely positioned icon slots.  Keep the
+ * notification link in that positioning context: the generic relative rule
+ * above is only appropriate for the page-title row, and otherwise makes the
+ * bell participate in normal document flow (which is why it can appear at
+ * the far left after scrolling). */
+#page > .header.header-logo-center {
+  right: 0;
+  left: 0;
+  width: 100%;
+  max-width: none;
+  transform: none;
+}
+#page > .header.header-logo-center .header-icon-1 {
+  right: auto !important;
+  left: 0 !important;
+}
+#page > .header.header-logo-center .header-icon-2 {
+  right: auto !important;
+  left: 45px !important;
+}
+#page > .header.header-logo-center .header-icon-3 {
+  right: 45px !important;
+  left: auto !important;
+}
+#page > .header.header-logo-center .header-icon-4 {
+  right: 0 !important;
+  left: auto !important;
+}
+#page > .header.header-logo-center .warga-header-notification {
+  position: absolute !important;
+  z-index: 3;
+}
+#page > .page-title .warga-header-notification {
   position: relative;
 }
 

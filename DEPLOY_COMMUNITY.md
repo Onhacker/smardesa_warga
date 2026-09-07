@@ -43,3 +43,11 @@ Warga mengaktifkan notifikasi dari menu Akun. Android kemudian menampilkan
 notifikasi pada status bar; bunyi dan getar mengikuti pengaturan kanal notifikasi
 Android/browser. Worker tidak menaruh NIK, isi pengaduan, atau isi surat pada
 lock screen.
+
+Jika aplikasi menampilkan **Izin diblokir**, izin sebelumnya pernah ditolak.
+Pada PWA Android buka **Info aplikasi → Notifikasi → Izinkan** (dan pilih kanal
+notifikasi yang tidak disetel Senyap), lalu kembali ke menu Akun dan aktifkan
+toggle lagi. Pada browser desktop gunakan **Pengaturan situs → Notifikasi →
+Izinkan**, kemudian pastikan suara notifikasi browser dan sistem operasi tidak
+dibisukan. Web Push tidak dapat memilih file suara sendiri; suara/getar memang
+dikendalikan oleh kanal notifikasi perangkat.

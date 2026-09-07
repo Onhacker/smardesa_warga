@@ -24,8 +24,8 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=103">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=18">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=104">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=19">
     <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=19">
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
@@ -61,10 +61,14 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </nav>
 
     <section class="page-title page-title-fixed warga-page-title<?= $showBackButton ? ' has-back' : '' ?>" aria-label="Judul halaman">
-        <?php if ($showBackButton): ?><a href="<?= e($backUrl) ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-back" aria-label="Kembali"><i class="fa fa-arrow-left"></i></a><?php endif; ?>
+        <?php if ($showBackButton): ?>
+            <a href="<?= e($backUrl) ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-back" aria-label="Kembali"><i class="fa fa-arrow-left"></i></a>
+        <?php else: ?>
+            <a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-menu" aria-label="Buka menu"><i class="fa fa-bars"></i></a>
+        <?php endif; ?>
         <h1><?= e($pageTitle) ?></h1>
         <a href="<?= $notificationUrl ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-header-notification" aria-label="<?= e($notificationLabel) ?>"><i class="fa fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a>
-        <a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme" aria-label="Buka menu"><i class="fa fa-bars"></i></a>
+        <?php if ($showBackButton): ?><a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme" aria-label="Buka menu"><i class="fa fa-bars"></i></a><?php endif; ?>
     </section>
     <div class="page-title-clear" aria-hidden="true"></div>
 
@@ -86,12 +90,12 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     </aside>
     <div class="menu-hider"></div>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=61') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=62') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>
 <script src="<?= base_url('assets/js/warga.min.js') ?>?v=19"></script>
-<script src="<?= base_url('assets/js/community.min.js') ?>?v=11"></script>
+<script src="<?= base_url('assets/js/community.min.js') ?>?v=12"></script>
 <script src="<?= base_url('assets/js/market.js') ?>?v=9"></script>
 </body>
 </html>

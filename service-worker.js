@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-07-notification-67';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-07-notification-68';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -17,12 +17,12 @@ const precache = [
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=103',
+  'assets/css/warga.min.css?v=104',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=3',
   'assets/js/warga.min.js?v=19',
-  'assets/js/community.min.js?v=11',
-  'assets/css/community.min.css?v=18',
+  'assets/js/community.min.js?v=12',
+  'assets/css/community.min.css?v=19',
   'assets/css/market.css?v=19',
   'assets/js/market.js?v=9',
   'assets/images/market-product-placeholder.svg',
@@ -79,7 +79,8 @@ self.addEventListener('push', function (event) {
     body: data.body || 'Ada pembaruan layanan untuk Anda.',
     icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
     badge: new URL('assets/pwa/icon-192.png',scopeUrl).href,
-    tag: data.tag || 'sdw-notification', vibrate: [200,100,200],
+    tag: data.tag || 'sdw-notification', renotify: true, silent: false,
+    vibrate: [200,100,200],
     data: {url:url.href}
   }));
 });

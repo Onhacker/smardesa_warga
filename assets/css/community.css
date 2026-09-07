@@ -634,6 +634,90 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
 #page .community-v22-feed-item p { margin: 0 0 8px; color: var(--warga-muted); font-size: 13px; line-height: 1.55; }
 #page .community-v22-feed-item .community-text-link { font-size: 12px; }
 
+/* Announcement cards use the same two-layer treatment as the mobile
+ * announcement preview: a strong blue information header followed by a
+ * readable white summary. Keeping the head as a link makes the whole visual
+ * card discoverable while the summary link remains keyboard accessible. */
+#page .community-v22-announcement-card {
+  overflow: hidden;
+  margin: 0 0 16px;
+  border: 1px solid var(--warga-line);
+  border-radius: 20px;
+  background: var(--warga-surface, #fff);
+  box-shadow: 0 9px 23px rgba(31,45,56,.09);
+}
+#page .community-v22-announcement-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  min-width: 0;
+  padding: 21px 20px 20px;
+  background: linear-gradient(135deg, #1d4f8a, #235fa4 68%, #3f7cc8);
+  color: #fff;
+  text-decoration: none;
+}
+#page .community-v22-announcement-card-head:hover { filter: brightness(1.04); }
+#page .community-v22-announcement-card-icon {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 17px;
+  background: rgba(255,255,255,.16);
+  color: #fff !important;
+  font-size: 23px;
+}
+#page .community-v22-announcement-card-copy { display: flex; min-width: 0; flex-direction: column; }
+#page .community-v22-announcement-card-eyebrow {
+  color: rgba(255,255,255,.82) !important;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  line-height: 1.3;
+}
+#page .community-v22-announcement-card-copy strong {
+  margin-top: 4px;
+  color: #fff !important;
+  font-size: clamp(22px, 4vw, 29px);
+  font-weight: 850;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+#page .community-v22-announcement-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 28px;
+  margin-top: 14px;
+  color: rgba(255,255,255,.84) !important;
+  font-size: 12px;
+  line-height: 1.35;
+}
+#page .community-v22-announcement-card-meta time,
+#page .community-v22-announcement-card-meta span { color: inherit !important; }
+#page .community-v22-announcement-card-body {
+  padding: 19px 20px 18px;
+  background: var(--warga-surface, #fff);
+}
+#page .community-v22-announcement-card-body p {
+  margin: 0 0 12px;
+  color: var(--warga-ink);
+  font-size: 16px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+#page .community-v22-announcement-card-body .community-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--warga-teal-dark);
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+#page .community-v22-announcement-card-body .community-text-link i { font-size: 11px; }
+
 #page .community-v22-detail { max-width: 760px; margin: 0 auto; padding: 0 15px 30px; }
 #page .community-v22-detail > .community-detail,
 #page .community-v22-detail.community-detail {
@@ -681,6 +765,7 @@ body.theme-dark #page .community-v22-page-hero,
 body.theme-dark #page .community-v22-detail-hero { color: #fff; }
 body.theme-dark #page .community-v22-compose,
 body.theme-dark #page .community-v22-feed-item,
+body.theme-dark #page .community-v22-announcement-card,
 body.theme-dark #page .community-v22-detail > .community-detail,
 body.theme-dark #page .community-v22-detail.community-detail,
 body.theme-dark #page .community-v22-detail .community-replies .community-item,
@@ -690,6 +775,8 @@ body.theme-dark #page .community-v22-form-title,
 body.theme-dark #page .community-v22-feed-heading h2,
 body.theme-dark #page .community-v22-feed-item h2 a,
 body.theme-dark #page .community-v22-detail-body .community-prose { color: #f1f5f7; }
+body.theme-dark #page .community-v22-announcement-card-body,
+body.theme-dark #page .community-v22-announcement-card-body p { color: #f1f5f7; }
 
 /* Bootstrap/simp-v22 includes a broad light-theme rule for plain paragraphs.
    Keep the colored hero copy white with an equally explicit theme scope. */
@@ -746,4 +833,31 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   #page .community-v22-detail-hero { padding: 18px; }
   #page .community-v22-detail-body { padding: 17px 18px 20px; }
   #page .community-v22-detail-hero h1 { font-size: 22px; }
+  #page .community-v22-announcement-page .community-v22-feed-heading { margin-right: 1px; margin-left: 1px; }
+  #page .community-v22-announcement-page .community-v22-feed-item { grid-template-columns: 42px minmax(0, 1fr); gap: 11px; padding: 13px; border-radius: 15px; }
+  #page .community-v22-announcement-page .community-v22-feed-item-icon { width: 42px; height: 42px; border-radius: 13px; font-size: 16px; }
+  #page .community-v22-announcement-page .community-v22-feed-item .community-meta { justify-content: flex-start; gap: 3px 9px; line-height: 1.35; }
+  #page .community-v22-announcement-page .community-v22-feed-item h2 { margin-top: 4px; font-size: 17px; line-height: 1.28; }
+  #page .community-v22-announcement-page .community-v22-feed-item p { margin-bottom: 7px; font-size: 13px; line-height: 1.5; }
+  #page .community-v22-announcement-card-head { gap: 12px; padding: 17px 16px 16px; }
+  #page .community-v22-announcement-card-icon { flex-basis: 49px; width: 49px; height: 49px; border-radius: 15px; font-size: 19px; }
+  #page .community-v22-announcement-card-copy strong { font-size: 22px; }
+  #page .community-v22-announcement-card-meta { gap: 4px 16px; margin-top: 10px; font-size: 11px; }
+  #page .community-v22-announcement-card-body { padding: 16px; }
+  #page .community-v22-announcement-card-body p { font-size: 15px; }
+  #page .community-v22-announcement-detail .community-v22-detail-hero { gap: 12px; padding: 17px; }
+  #page .community-v22-announcement-detail .community-v22-detail-body { padding: 17px 16px 20px; }
+  #page .community-v22-announcement-detail .community-v22-detail-body .community-prose { font-size: 15px; line-height: 1.7; }
+}
+
+@media (max-width: 360px) {
+  #page .community-v22-announcement-page .community-v22-page-hero { gap: 12px; padding: 16px; }
+  #page .community-v22-announcement-page .community-v22-page-hero-icon { flex-basis: 44px; width: 44px; height: 44px; border-radius: 13px; font-size: 17px; }
+  #page .community-v22-announcement-page .community-v22-page-hero h1 { font-size: 22px; }
+  #page .community-v22-announcement-page .community-v22-feed-item { grid-template-columns: 38px minmax(0, 1fr); gap: 10px; padding: 12px; }
+  #page .community-v22-announcement-page .community-v22-feed-item-icon { width: 38px; height: 38px; border-radius: 12px; font-size: 14px; }
+  #page .community-v22-announcement-card-head { gap: 10px; padding: 15px 13px; }
+  #page .community-v22-announcement-card-icon { flex-basis: 43px; width: 43px; height: 43px; border-radius: 13px; font-size: 17px; }
+  #page .community-v22-announcement-card-copy strong { font-size: 20px; }
+  #page .community-v22-announcement-card-body { padding: 14px 13px; }
 }
