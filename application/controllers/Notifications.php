@@ -16,7 +16,16 @@ class Notifications extends Public_Controller
             'page' => $this->input->get('page', TRUE)
         ));
         $notifications = $listing['items'];
-        $data = array('pageTitle' => 'Notifikasi', 'notifications' => $notifications, 'listing' => $listing, 'listUrl' => site_url('notifikasi'));
+        $data = array(
+            'pageTitle' => 'Notifikasi',
+            'notifications' => $notifications,
+            'listing' => $listing,
+            'listUrl' => site_url('notifikasi'),
+            // The AJAX response renders the results partial directly instead
+            // of passing through render(), so provide the shared institution
+            // label here as well as on the full page.
+            'institutionLabel' => $this->institution_label()
+        );
         $this->output->set_header('Cache-Control: no-store, private');
         if ($this->input->is_ajax_request()) {
             return $this->json(array(
