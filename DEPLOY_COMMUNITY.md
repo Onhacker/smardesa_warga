@@ -39,10 +39,22 @@ Pilih jadwal setiap menit. Lima tanda `*` berada pada kolom jadwal cron, bukan
 pada kolom perintah ataupun terminal SSH. Tidak perlu membuat cron kedua jika
 worker tersebut sudah dijadwalkan.
 
-Warga mengaktifkan notifikasi dari menu Akun. Android kemudian menampilkan
-notifikasi pada status bar; bunyi dan getar mengikuti pengaturan kanal notifikasi
-Android/browser. Worker tidak menaruh NIK, isi pengaduan, atau isi surat pada
-lock screen.
+Pada instalasi PWA/TWA pertama, aplikasi menampilkan informasi **Aktifkan
+notifikasi layanan** setelah aplikasi dibuka. Dialog izin sistem baru diminta
+setelah warga menekan tombol **Izinkan Notifikasi**; proses ini memang tidak
+dapat ditampilkan oleh layar installer APK. Langganan yang dibuat sebelum
+login akan dikaitkan otomatis ke akun setelah warga berhasil masuk. Menu Akun
+tetap menyediakan toggle sebagai jalur pengaktifan ulang.
+
+Untuk menguji ulang onboarding pada perangkat yang pernah menekan **Nanti
+saja**, hapus data situs/aplikasi atau hapus `localStorage` key
+`sdw-notification-onboarding-v1`. Pastikan `WARGA_VAPID_PUBLIC_KEY` dan pasangan
+kunci VAPID di server sudah lengkap; tanpa konfigurasi itu dialog tidak akan
+ditampilkan.
+
+Android kemudian menampilkan notifikasi pada status bar; bunyi dan getar
+mengikuti pengaturan kanal notifikasi Android/browser. Worker tidak menaruh NIK,
+isi pengaduan, atau isi surat pada lock screen.
 
 Jika aplikasi menampilkan **Izin diblokir**, izin sebelumnya pernah ditolak.
 Pada PWA Android buka **Info aplikasi → Notifikasi → Izinkan** (dan pilih kanal

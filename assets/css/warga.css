@@ -6101,6 +6101,127 @@ body.theme-dark #page .warga-list-status a[data-list-filter="issued"].active {
 .warga-confirm-actions { display: flex; justify-content: center; gap: 9px; }
 .warga-confirm-actions .btn { min-width: 112px; min-height: 42px; margin: 0; border-radius: 10px; font-size: 14px; font-weight: 750; }
 .warga-confirm-actions .warga-confirm-cancel { border: 1px solid var(--warga-line); background: var(--warga-page); color: var(--warga-ink) !important; }
+.warga-notification-onboarding[hidden] { display: none !important; }
+.warga-notification-onboarding {
+  position: fixed;
+  z-index: 4100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .62);
+  overscroll-behavior: contain;
+}
+.warga-notification-onboarding-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+.warga-notification-onboarding-panel {
+  position: relative;
+  z-index: 1;
+  width: min(390px, 100%);
+  padding: 27px 23px 22px;
+  border: 1px solid var(--warga-line);
+  border-radius: 24px;
+  background: var(--warga-surface);
+  box-shadow: 0 22px 64px rgba(15, 23, 42, .3);
+  text-align: center;
+}
+.warga-notification-onboarding-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #4a89dc, #235fa4);
+  color: #fff;
+  font-size: 26px;
+  box-shadow: 0 11px 24px rgba(35, 95, 164, .25);
+}
+.warga-notification-onboarding-eyebrow {
+  margin: 0 0 6px;
+  color: var(--warga-blue);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .08em !important;
+}
+.warga-notification-onboarding-panel h2 {
+  margin: 0;
+  color: var(--warga-ink);
+  font-size: 22px;
+  line-height: 1.25;
+}
+.warga-notification-onboarding-panel > p[data-notification-onboarding-message] {
+  margin: 9px 0 13px;
+  color: var(--warga-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.warga-notification-onboarding-note {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 7px;
+  margin: 0 auto 20px;
+  color: var(--warga-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.warga-notification-onboarding-note i {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--warga-blue);
+}
+.warga-notification-onboarding-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 9px;
+}
+.warga-notification-onboarding-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 44px;
+  margin: 0;
+  padding: 9px 12px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.warga-notification-onboarding-later {
+  border: 1px solid var(--warga-line);
+  background: var(--warga-page);
+  color: var(--warga-ink) !important;
+}
+.warga-notification-onboarding-actions .btn:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+body.theme-dark .warga-notification-onboarding-panel {
+  border-color: #34444e;
+  background: #1a2229;
+}
+body.theme-dark .warga-notification-onboarding-panel h2 {
+  color: #f1f5f7;
+}
+body.theme-dark .warga-notification-onboarding-later {
+  border-color: #41525d;
+  background: #202b32;
+  color: #f1f5f7 !important;
+}
+@media (max-width: 420px) {
+  .warga-notification-onboarding-panel { padding: 24px 17px 18px; border-radius: 20px; }
+  .warga-notification-onboarding-panel h2 { font-size: 20px; }
+  .warga-notification-onboarding-panel > p[data-notification-onboarding-message] { font-size: 14px; }
+  .warga-notification-onboarding-actions .btn { font-size: 12px; }
+}
 .warga-dialog-open { overflow: hidden; }
 body.theme-dark .warga-account-form-input { border-color: #41525d; background: #202b32; }
 body.theme-dark .warga-form-demo-note { border-color: #315f95; background: #172f51; color: #a9c8ee; }

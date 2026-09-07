@@ -31,17 +31,34 @@
   var button = document.querySelector('[data-push-toggle]');
   var checkbox = button && button.matches('input[type="checkbox"]');
   var status = document.querySelector('[data-push-status]');
+  var onboarding = document.querySelector('[data-notification-onboarding]');
   var subscribed = false;
+  var onboardingKey = 'sdw-notification-onboarding-v1';
   function message(text) { if (status) status.textContent = text; }
+  function isInstalledExperience() {
+    var installedMode = false;
+    try {
+      installedMode = ['standalone', 'minimal-ui', 'fullscreen', 'window-controls-overlay'].some(function (mode) {
+        return !!(window.matchMedia && window.matchMedia('(display-mode: ' + mode + ')').matches);
+      });
+    } catch (_) {}
+    return installedMode || window.navigator.standalone === true || /^android-app:\/\//i.test(document.referrer || '');
+  }
   function permissionMessage(permission) {
     if (permission === 'denied') {
-      var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+      var standalone = isInstalledExperience();
       return standalone
         ? 'Izin diblokir. Buka Info aplikasi > Notifikasi, pilih Izinkan, lalu coba lagi.'
         : 'Izin diblokir oleh browser. Buka Pengaturan situs > Notifikasi, pilih Izinkan, lalu coba lagi.';
     }
     if (permission === 'default') return 'Klik sakelar untuk memberi izin notifikasi pada browser.';
     return '';
+  }
+  function storageGet(key) {
+    try { return window.localStorage.getItem(key); } catch (_) { return null; }
+  }
+  function storageSet(key, value) {
+    try { window.localStorage.setItem(key, value); } catch (_) {}
   }
   function updateCsrf(csrf) {
     if (!csrf || !csrf.name || !csrf.hash) return;
@@ -81,55 +98,144 @@
   }
   function setDisabled(disabled) { if (button) button.disabled = !!disabled; }
   var supported = window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  async function enableSubscription() {
+    var permission = Notification.permission;
+    // Keep this call in the click/change call stack so the browser can show
+    // its native prompt.  Do not move it behind a timer or an unrelated fetch.
+    if (permission === 'default') permission = await Notification.requestPermission();
+    if (permission !== 'granted') return {active:false, permission:permission};
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    sub = sub || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:keyBytes(config.vapidPublicKey)});
+    if (isAuthenticated) await post('notifikasi/push', {subscription:JSON.stringify(sub)});
+    return {active:true, permission:permission, subscription:sub};
+  }
+  async function disableSubscription() {
+    var reg = await navigator.serviceWorker.ready;
+    var sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      if (isAuthenticated) await post('notifikasi/push/hapus', {endpoint:sub.endpoint});
+      await sub.unsubscribe();
+    }
+    return {active:false};
+  }
+  async function toggleSubscription(desired) {
+    var previous = subscribed;
+    setDisabled(true);
+    try {
+      if (!desired) {
+        await disableSubscription();
+        updateButton(false); message('Notifikasi perangkat dinonaktifkan.');
+        return;
+      }
+      var result = await enableSubscription();
+      if (!result.active) {
+        updateButton(previous);
+        message(permissionMessage(result.permission) || 'Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
+        return;
+      }
+      updateButton(true); message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
+    } catch (error) {
+      updateButton(previous);
+      if (Notification.permission === 'denied') message(permissionMessage('denied'));
+      else message(error.message || 'Notifikasi belum dapat diaktifkan.');
+    } finally { setDisabled(false); }
+  }
   if (button) {
     if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
     else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
     else {
       if (Notification.permission !== 'granted') message(permissionMessage(Notification.permission));
       navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
-        .then(function (sub) { updateButton(!!sub); if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); })
+        .then(function (sub) { updateButton(!!sub); if (sub && isAuthenticated) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); })
         .catch(function () { message('Status notifikasi belum dapat diperiksa.'); });
-      async function toggleSubscription(desired) {
-        var previous = subscribed;
-        setDisabled(true);
-        try {
-          var permission = 'granted';
-          if (desired && !subscribed) {
-            permission = Notification.permission;
-            if (permission === 'default') permission = await Notification.requestPermission();
-          }
-          if (permission !== 'granted') {
-            updateButton(previous);
-            message(permissionMessage(permission) || 'Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
-            return;
-          }
-          var reg = await navigator.serviceWorker.ready;
-          var sub = await reg.pushManager.getSubscription();
-          if (!desired && subscribed && sub) {
-            await post('notifikasi/push/hapus', {endpoint:sub.endpoint});
-            await sub.unsubscribe(); updateButton(false); message('Notifikasi perangkat dinonaktifkan.');
-          } else if (desired) {
-            sub = sub || await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:keyBytes(config.vapidPublicKey)});
-            await post('notifikasi/push', {subscription:JSON.stringify(sub)});
-            updateButton(true); message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
-          } else updateButton(false);
-        } catch (error) {
-          updateButton(previous);
-          if (Notification.permission === 'denied') message(permissionMessage('denied'));
-          else message(error.message || 'Notifikasi belum dapat diaktifkan.');
-        } finally { setDisabled(false); }
-      }
-      if (checkbox) {
-        button.addEventListener('change', function () { toggleSubscription(button.checked); });
-      } else {
-        button.addEventListener('click', function () { toggleSubscription(!subscribed); });
-      }
+      if (checkbox) button.addEventListener('change', function () { toggleSubscription(button.checked); });
+      else button.addEventListener('click', function () { toggleSubscription(!subscribed); });
     }
   }
   // Rebind an existing subscription after switching accounts; no permission prompt.
   if (isAuthenticated && supported && config.vapidPublicKey && !button) navigator.serviceWorker.ready
     .then(function (reg) { return reg.pushManager.getSubscription(); })
     .then(function (sub) { if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); }).catch(function () {});
+
+  function closeNotificationOnboarding(markSeen) {
+    if (!onboarding) return;
+    if (markSeen) storageSet(onboardingKey, 'seen');
+    onboarding.hidden = true;
+    document.body.classList.remove('warga-dialog-open');
+    var previous = onboarding.__previousFocus;
+    onboarding.__previousFocus = null;
+    if (previous && typeof previous.focus === 'function') previous.focus();
+  }
+  function showNotificationOnboarding() {
+    if (!onboarding || storageGet(onboardingKey)) return;
+    var blocked = Notification.permission === 'denied';
+    var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
+    var note = onboarding.querySelector('[data-notification-onboarding-note]');
+    var enable = onboarding.querySelector('[data-notification-onboarding-enable]');
+    var label = onboarding.querySelector('[data-notification-onboarding-enable-label]');
+    var later = onboarding.querySelector('[data-notification-onboarding-close].warga-notification-onboarding-later');
+    if (messageNode) messageNode.textContent = blocked
+      ? 'Izin notifikasi saat ini diblokir. Aktifkan melalui Info aplikasi > Notifikasi agar pembaruan layanan dapat diterima.'
+      : 'Izinkan notifikasi agar Anda segera mengetahui status surat dan pembaruan layanan Anda.';
+    if (note) note.innerHTML = blocked
+      ? '<i class="fa fa-info-circle" aria-hidden="true"></i>Buka pengaturan aplikasi, pilih Notifikasi, lalu aktifkan Izinkan notifikasi.'
+      : '<i class="fa fa-shield-alt" aria-hidden="true"></i>Notifikasi hanya digunakan untuk pembaruan layanan akun Anda.';
+    if (label) label.textContent = blocked ? 'Mengerti' : 'Izinkan Notifikasi';
+    if (later) later.hidden = blocked;
+    if (enable) enable.setAttribute('data-notification-onboarding-blocked', blocked ? '1' : '0');
+    onboarding.__previousFocus = document.activeElement;
+    onboarding.hidden = false;
+    document.body.classList.add('warga-dialog-open');
+    window.setTimeout(function () { if (enable && !onboarding.hidden) enable.focus(); }, 30);
+  }
+  function scheduleNotificationOnboarding() {
+    // Ask on the first installed-app launch even before login. The browser
+    // subscription is safely bound to the account by the existing rebind flow
+    // after authentication.
+    if (!onboarding || !isInstalledExperience() || !supported || !config.vapidPublicKey || storageGet(onboardingKey)) return;
+    navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); }).then(function (sub) {
+      if (sub) { storageSet(onboardingKey, 'seen'); return; }
+      window.setTimeout(showNotificationOnboarding, 650);
+    }).catch(function () {});
+  }
+  if (onboarding) {
+    onboarding.addEventListener('click', function (event) {
+      var close = event.target.closest('[data-notification-onboarding-close]');
+      if (close) { event.preventDefault(); closeNotificationOnboarding(true); return; }
+      var enable = event.target.closest('[data-notification-onboarding-enable]');
+      if (!enable || enable.disabled) return;
+      event.preventDefault();
+      if (enable.getAttribute('data-notification-onboarding-blocked') === '1') { closeNotificationOnboarding(true); return; }
+      var icon = enable.querySelector('i');
+      var label = enable.querySelector('[data-notification-onboarding-enable-label]');
+      enable.disabled = true;
+      if (icon) icon.className = 'fa fa-spinner fa-spin';
+      if (label) label.textContent = 'Mengaktifkan…';
+      enableSubscription().then(function (result) {
+        if (!result.active) {
+          if (result.permission === 'denied') storageSet(onboardingKey, 'seen');
+          var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
+          if (messageNode) messageNode.textContent = permissionMessage(result.permission) || 'Izin notifikasi belum diberikan. Anda dapat mengaktifkannya dari menu Akun.';
+          if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
+          return;
+        }
+        updateButton(true);
+        storageSet(onboardingKey, 'seen');
+        closeNotificationOnboarding(true);
+        message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
+      }).catch(function (error) {
+        if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
+        var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
+        if (messageNode) messageNode.textContent = error && error.message ? error.message : 'Notifikasi belum dapat diaktifkan. Periksa koneksi lalu coba lagi.';
+      });
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !onboarding.hidden) { event.preventDefault(); closeNotificationOnboarding(true); }
+    });
+    if (document.readyState === 'complete') scheduleNotificationOnboarding();
+    else window.addEventListener('load', scheduleNotificationOnboarding, {once:true});
+  }
   function setUnreadCount(value) {
     var unread = Math.max(0, parseInt(value, 10) || 0);
     document.querySelectorAll('[data-notification-count]').forEach(function (element) {
