@@ -43,6 +43,26 @@ Untuk deployment berikutnya, jalankan `git pull --ff-only`, `composer install`, 
 `rsync` yang sama. File `.env` produksi dibuat langsung pada document root dan tidak pernah
 disimpan dalam Git.
 
+Setelah source tersalin, pastikan Digital Asset Links ikut tersedia pada document root PWA:
+
+```bash
+ASSETLINKS_ROOT="$HOME/domains/warga-smartdesa.mediaverse.co.id/public_html/.well-known"
+mkdir -p "$ASSETLINKS_ROOT"
+cp .well-known/assetlinks.json "$ASSETLINKS_ROOT/assetlinks.json"
+chmod 644 "$ASSETLINKS_ROOT/assetlinks.json"
+```
+
+File tersebut harus dipublikasikan tanpa redirect dan berisi dua relasi serta empat fingerprint
+yang disiapkan Google Play. Verifikasi dari komputer Anda:
+
+```bash
+curl -i https://warga-smartdesa.mediaverse.co.id/.well-known/assetlinks.json
+```
+
+Respons harus `HTTP/2 200`, `Content-Type: application/json`, dan memuat
+`delegate_permission/common.get_login_creds`. Jika LiteSpeed masih mengembalikan ETag lama,
+purge cache domain atau tunggu cache kedaluwarsa sebelum menguji ulang di Play Console.
+
 Setelah API dan PWA selesai dipasang pertama kali, deployment rutin keduanya dapat dijalankan
 dari repository API dengan satu perintah. Skrip tersebut juga membuat backup dan menjalankan
 migrasi database yang aman diulang:
