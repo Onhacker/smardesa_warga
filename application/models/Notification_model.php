@@ -52,6 +52,26 @@ class Notification_model extends CI_Model
         if ($this->ready()) $this->db->where('user_id',$userId)->where('read_at',null)->update('notifications',array('read_at'=>date('Y-m-d H:i:s')));
     }
 
+    /** Return one notification belonging to the signed-in user. */
+    public function find_for_user($notificationId, $userId)
+    {
+        if (!$this->ready()) return null;
+        return $this->db->select('n.*, t.target_path')
+            ->from('notifications n')
+            ->join('warga_notification_targets t', 't.notification_id=n.id', 'left')
+            ->where(array('n.id' => (string) $notificationId, 'n.user_id' => (int) $userId))
+            ->limit(1)->get()->row_array();
+    }
+
+    /** Mark only this user's notification as read, idempotently. */
+    public function mark_read($userId, $notificationId)
+    {
+        if (!$this->ready()) return false;
+        return $this->db->where(array('id' => (string) $notificationId, 'user_id' => (int) $userId))
+            ->where('read_at', null)
+            ->update('notifications', array('read_at' => date('Y-m-d H:i:s')));
+    }
+
     public function subscribe($userId, array $data)
     {
         if (!$this->ready()) return false;

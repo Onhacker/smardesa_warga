@@ -33,6 +33,7 @@ $route['pasar/produk/(:any)/arsipkan'] = 'marketplace/archive/$1';
 $route['pasar/produk/(:any)/rating'] = 'marketplace/rating/$1';
 $route['pasar/produk/(:any)'] = 'marketplace/show/$1';
 $route['notifikasi/ringkasan'] = 'notifications/summary';
+$route['notifikasi/buka/(:any)'] = 'notifications/open/$1';
 $route['notifikasi/baca'] = 'notifications/read';
 $route['notifikasi/push'] = 'notifications/subscribe';
 $route['notifikasi/push/hapus'] = 'notifications/unsubscribe';

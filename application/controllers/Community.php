@@ -61,17 +61,40 @@ class Community extends Public_Controller
 
     public function submit()
     {
+        if (!$this->currentUser && $this->wants_json()) {
+            return $this->json(array('success' => FALSE, 'message' => 'Sesi login berakhir. Silakan masuk kembali.', 'login_url' => site_url('login')), 401);
+        }
         $this->require_authentication();
         $this->require_post();
-        if (($this->currentUser['role_slug'] ?? '') !== 'warga') show_error('Akses ditolak.', 403);
+        if (($this->currentUser['role_slug'] ?? '') !== 'warga') {
+            if ($this->wants_json()) return $this->json(array('success' => FALSE, 'message' => 'Akun ini tidak memiliki akses untuk membuat pengaduan.'), 403);
+            show_error('Akses ditolak.', 403);
+        }
         $this->form_validation->set_rules('title', 'Judul', 'trim|required|max_length[180]');
         $this->form_validation->set_rules('body', 'Isi pengaduan', 'trim|required|min_length[10]|max_length[5000]');
         $this->form_validation->set_rules('location', 'Lokasi', 'trim|max_length[255]');
-        if (!$this->form_validation->run()) $this->redirect_with('pengaduan', 'error', trim(strip_tags(validation_errors())));
+        if (!$this->form_validation->run()) {
+            $message = trim(strip_tags(validation_errors())) ?: 'Periksa kembali data pengaduan.';
+            if ($this->wants_json()) return $this->json(array('success' => FALSE, 'message' => $message), 422);
+            $this->redirect_with('pengaduan', 'error', $message);
+        }
         $id = $this->community->submit_complaint($this->currentUser, trim((string)$this->input->post('title')),
             trim((string)$this->input->post('body')), trim((string)$this->input->post('location')));
-        $this->redirect_with($id ? 'pengaduan/'.$id : 'pengaduan', $id ? 'success' : 'error',
-            $id ? 'Pengaduan dikirim kepada Kepala ' . $this->institution_label() . ' dan Sekretaris ' . $this->institution_label() . '.' : 'Pengaduan belum dapat dikirim. Pastikan akun terverifikasi dan batas 10 pengaduan per hari belum tercapai.');
+        $message = $id
+            ? 'Pengaduan dikirim kepada Kepala ' . $this->institution_label() . ' dan Sekretaris ' . $this->institution_label() . '.'
+            : 'Pengaduan belum dapat dikirim. Pastikan akun terverifikasi dan batas 10 pengaduan per hari belum tercapai.';
+        if ($this->wants_json()) {
+            if (!$id) return $this->json(array('success' => FALSE, 'message' => $message), 422);
+            $item = $this->community->complaint($id, $this->currentUser);
+            return $this->json(array(
+                'success' => TRUE,
+                'message' => $message,
+                'id' => $id,
+                'url' => site_url('pengaduan/'.$id),
+                'item_html' => $this->load->view('community/complaint_item', array('item' => $item, 'canManage' => FALSE), TRUE)
+            ));
+        }
+        $this->redirect_with($id ? 'pengaduan/'.$id : 'pengaduan', $id ? 'success' : 'error', $message);
     }
 
     public function complaint($id)
@@ -86,13 +109,37 @@ class Community extends Public_Controller
 
     public function reply($id)
     {
+        if (!$this->currentUser && $this->wants_json()) {
+            return $this->json(array('success' => FALSE, 'message' => 'Sesi login berakhir. Silakan masuk kembali.', 'login_url' => site_url('login')), 401);
+        }
         $this->require_authentication();
         $this->require_post();
-        if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
+        if (!$this->community->can_manage($this->currentUser)) {
+            if ($this->wants_json()) return $this->json(array('success' => FALSE, 'message' => 'Akun ini tidak memiliki akses untuk menanggapi pengaduan.'), 403);
+            show_error('Akses ditolak.', 403);
+        }
         $this->form_validation->set_rules('message', 'Tanggapan', 'trim|required|min_length[5]|max_length[3000]');
-        if (!$this->form_validation->run()) $this->redirect_with('pengaduan/'.$id, 'error', trim(strip_tags(validation_errors())));
+        if (!$this->form_validation->run()) {
+            $message = trim(strip_tags(validation_errors())) ?: 'Periksa kembali isi tanggapan.';
+            if ($this->wants_json()) return $this->json(array('success' => FALSE, 'message' => $message), 422);
+            $this->redirect_with('pengaduan/'.$id, 'error', $message);
+        }
         $ok = $this->community->reply($id, $this->currentUser, trim((string)$this->input->post('message')), $this->input->post('status'));
-        $this->redirect_with('pengaduan/'.$id, $ok ? 'success' : 'error', $ok ? 'Tanggapan dikirim.' : 'Tanggapan belum dapat disimpan.');
+        $message = $ok ? 'Tanggapan berhasil dikirim.' : 'Tanggapan belum dapat disimpan.';
+        if ($this->wants_json()) {
+            if (!$ok) return $this->json(array('success' => FALSE, 'message' => $message), 422);
+            $item = $this->community->complaint($id, $this->currentUser);
+            $replies = $this->community->replies($id);
+            return $this->json(array(
+                'success' => TRUE,
+                'message' => $message,
+                'status' => $item['status'],
+                'status_label' => warga_complaint_status($item['status']),
+                'reply_count' => count($replies),
+                'replies_html' => $this->load->view('community/reply_items', array('replies' => $replies), TRUE)
+            ));
+        }
+        $this->redirect_with('pengaduan/'.$id, $ok ? 'success' : 'error', $message);
     }
 
     public function contact()
@@ -176,5 +223,11 @@ class Community extends Public_Controller
     {
         $email = trim((string) (getenv('PUBLIC_ACCOUNT_DELETION_EMAIL') ?: 'admin@mediaverse.co.id'));
         return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'admin@mediaverse.co.id';
+    }
+
+    private function wants_json()
+    {
+        if ($this->input->is_ajax_request()) return TRUE;
+        return stripos((string) $this->input->get_request_header('Accept', TRUE), 'application/json') !== FALSE;
     }
 }

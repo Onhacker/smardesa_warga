@@ -4069,6 +4069,132 @@ body.theme-dark #page .warga-account-notification-history {
   color: #a9c8ee !important;
 }
 
+/* The bell replaces the theme shortcut in every page header. Its badge is
+ * hidden at zero and stays anchored to the icon in both header variants. */
+#page .warga-header-notification {
+  position: relative;
+}
+
+#page .warga-header-notification [data-notification-count] {
+  position: absolute !important;
+  top: 4px;
+  right: 1px;
+  z-index: 2;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  place-items: center;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #c43340 !important;
+  color: #fff !important;
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+#page .warga-page-title .warga-header-notification [data-notification-count] {
+  top: -4px;
+  right: -4px;
+}
+
+#page .warga-header-notification [data-notification-count][hidden],
+#page .warga-header-notification [data-notification-count]:empty {
+  display: none !important;
+}
+
+body.theme-dark #page .warga-header-notification [data-notification-count] {
+  border-color: #21252a;
+}
+
+/* Unread notifications are deliberately more prominent, while every card
+ * carries an explicit Indonesian read-state label for clarity. */
+#page .warga-notification-item {
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  transition: border-color .18s ease, background-color .18s ease, opacity .18s ease, transform .18s ease;
+}
+
+#page .warga-notification-item.is-unread {
+  border-color: #8eb3dc;
+  background: #f3f8fe;
+}
+
+#page .warga-notification-item.is-unread::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--warga-teal-dark);
+  content: '';
+}
+
+#page .warga-notification-item.is-read {
+  opacity: .84;
+}
+
+#page .warga-notification-state {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin: 2px 0 5px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #edf0f3;
+  color: #677484;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+#page .warga-notification-item.is-unread .warga-notification-state {
+  background: #deebfa;
+  color: #235fa4;
+}
+
+body.theme-dark #page .warga-notification-item.is-unread {
+  border-color: #456f9d;
+  background: #1d3348;
+}
+
+body.theme-dark #page .warga-notification-item.is-read {
+  opacity: .78;
+}
+
+body.theme-dark #page .warga-notification-state {
+  background: #303b44;
+  color: #bdc8d1;
+}
+
+body.theme-dark #page .warga-notification-item.is-unread .warga-notification-state {
+  background: #294e76;
+  color: #d7e9fb;
+}
+
+/* AJAX complaint feedback reuses the logout-dialog shell. */
+.warga-confirm-icon.is-success {
+  background: #e3f5e9;
+  color: #247843;
+}
+
+.warga-confirm-actions .bg-teal-dark,
+.warga-confirm-actions .bg-teal-dark:hover,
+.warga-confirm-actions .bg-teal-dark:focus {
+  color: #fff !important;
+}
+
+body.theme-dark .warga-confirm-icon.is-success {
+  background: #214c35;
+  color: #a5e0b8;
+}
+
+[data-complaint-form][aria-busy="true"] button[type="submit"],
+[data-complaint-reply-form][aria-busy="true"] button[type="submit"] {
+  cursor: wait;
+  opacity: .84;
+}
+
 #page .warga-account-page .warga-install-card .content {
   padding: 18px;
 }

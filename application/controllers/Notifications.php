@@ -56,6 +56,17 @@ class Notifications extends Public_Controller
         redirect('notifikasi');
     }
 
+    /** Open one notification, consume its unread state, then follow its target. */
+    public function open($id)
+    {
+        $this->require_authentication();
+        $this->load->model('Notification_model');
+        $notification = $this->Notification_model->find_for_user($id, $this->currentUser['id']);
+        if (!$notification) show_404();
+        $this->Notification_model->mark_read($this->currentUser['id'], $id);
+        redirect($this->Notification_model->target($notification, $this->currentUser));
+    }
+
     public function subscribe()
     {
         if (!$this->require_json_authentication()) return;

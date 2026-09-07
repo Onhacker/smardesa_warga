@@ -12,7 +12,7 @@
     <?php if (!$staffMode && $ready): ?>
     <details class="community-compose community-v22-compose">
         <summary><i class="fa fa-plus" aria-hidden="true"></i><span>Buat Pengaduan</span><i class="fa fa-chevron-down" aria-hidden="true"></i></summary>
-        <form method="post" action="<?= site_url('pengaduan/kirim') ?>" data-disable-submit>
+        <form method="post" action="<?= site_url('pengaduan/kirim') ?>" data-complaint-form>
             <?= csrf_field() ?>
             <label for="complaint-title">Judul</label>
             <input id="complaint-title" name="title" maxlength="180" required>
@@ -26,10 +26,10 @@
     <?php endif; ?>
 
     <section class="community-v22-feed" aria-label="Daftar pengaduan">
-        <div class="community-v22-feed-heading"><h2>Daftar pengaduan</h2><span><?= count($items) ?> laporan</span></div>
-        <div class="community-list">
+        <div class="community-v22-feed-heading"><h2>Daftar pengaduan</h2><span data-complaint-count><?= count($items) ?> laporan</span></div>
+        <div class="community-list" data-complaint-list>
             <?php if (!$items): ?>
-            <div class="community-v22-empty-card" role="status">
+            <div class="community-v22-empty-card" role="status" data-complaint-empty>
                 <span class="community-v22-empty-icon is-complaint" aria-hidden="true"><i class="fa fa-comments"></i></span>
                 <span class="community-v22-empty-copy">
                     <strong>Belum ada pengaduan</strong>
@@ -38,16 +38,7 @@
             </div>
             <?php endif; ?>
             <?php foreach ($items as $item): ?>
-            <article class="community-item community-v22-feed-item">
-                <div class="community-v22-feed-item-icon is-complaint"><i class="fa fa-comments" aria-hidden="true"></i></div>
-                <div class="community-v22-feed-item-copy">
-                    <div class="community-meta"><time><?= e(tanggal_id($item['created_at'], true)) ?></time><span class="community-status"><?= e(warga_complaint_status($item['status'])) ?></span></div>
-                    <h2><a href="<?= site_url('pengaduan/'.$item['id']) ?>"><?= e($item['title']) ?></a></h2>
-                    <?php if ($canManage): ?><p><?= e($item['citizen_name']) ?></p><?php endif; ?>
-                    <p><?= e(mb_strimwidth($item['body'], 0, 180, '...')) ?></p>
-                    <a class="community-text-link" href="<?= site_url('pengaduan/'.$item['id']) ?>">Lihat Pengaduan <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
-                </div>
-            </article>
+                <?php $this->load->view('community/complaint_item', array('item' => $item, 'canManage' => $canManage)); ?>
             <?php endforeach; ?>
         </div>
     </section>

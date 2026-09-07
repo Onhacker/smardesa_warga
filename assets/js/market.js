@@ -40,6 +40,19 @@
     target.appendChild(image);
   }
 
+  function formatPriceInput(input) {
+    if (!input) return;
+    var digits = String(input.value || '').replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 13);
+    input.value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
+  function bindPriceInput(input) {
+    if (!input || input.getAttribute('data-market-price-bound') === '1') return;
+    input.setAttribute('data-market-price-bound', '1');
+    formatPriceInput(input);
+    input.addEventListener('input', function () { formatPriceInput(input); });
+  }
+
   function debounce(fn, delay) {
     var timer = null;
     return function () {
@@ -568,6 +581,7 @@
   }
 
   function bind() {
+    document.querySelectorAll('[data-market-price]').forEach(bindPriceInput);
     document.querySelectorAll('[data-market-images]').forEach(function (input) {
       var form = input.closest('form');
       var preview = form && form.querySelector('[data-market-image-preview]');

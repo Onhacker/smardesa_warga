@@ -4,9 +4,10 @@
         <div class="warga-empty-state"><span><i class="fa fa-bell-slash" aria-hidden="true"></i></span><h3><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Notifikasi tidak ditemukan' : 'Belum ada notifikasi' ?></h3><p><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Coba nama surat atau tanggal lainnya.' : 'Pembaruan permohonan Anda akan tampil di sini.' ?></p></div>
     <?php endif; ?>
     <?php foreach ($notifications as $notification): ?>
-        <a href="<?= site_url($notification['target_path']) ?>" class="warga-notification-item">
+        <?php $isUnread = empty($notification['read_at']); ?>
+        <a href="<?= site_url('notifikasi/buka/'.rawurlencode((string) $notification['id'])) ?>" class="warga-notification-item <?= $isUnread ? 'is-unread' : 'is-read' ?>" data-notification-open data-notification-id="<?= e($notification['id']) ?>" aria-label="<?= e(($isUnread ? 'Belum dibaca: ' : 'Sudah dibaca: ').$notification['title']) ?>">
             <span class="warga-notification-icon surat-icon-teal"><i class="fa fa-bell" aria-hidden="true"></i></span>
-            <span><strong><?= e($notification['title']) ?></strong><p><?= e(warga_replace_institution($notification['message'], $institutionLabel)) ?></p><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span>
+            <span><strong><?= e($notification['title']) ?></strong><p><?= e(warga_replace_institution($notification['message'], $institutionLabel)) ?></p><span class="warga-notification-state"><?= $isUnread ? 'Belum dibaca' : 'Sudah dibaca' ?></span><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span>
             <i class="fa fa-chevron-right" aria-hidden="true"></i>
         </a>
     <?php endforeach; ?>
