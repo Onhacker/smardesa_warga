@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-06-home-products-63';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-07-auth-footer-65';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -17,10 +17,10 @@ const precache = [
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=99',
+  'assets/css/warga.min.css?v=101',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=3',
-  'assets/js/warga.min.js?v=17',
+  'assets/js/warga.min.js?v=19',
   'assets/js/community.min.js?v=10',
   'assets/css/community.min.css?v=18',
   'assets/css/market.css?v=18',

@@ -19,7 +19,7 @@ $registrationErrorHtml = !empty($error)
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"><meta name="theme-color" content="#235fa4">
     <title><?= e($pageTitle) ?></title>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=99"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=101"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
@@ -67,14 +67,14 @@ $registrationErrorHtml = !empty($error)
             </div>
             <div class="warga-region-hint" id="register-region-hint" aria-live="polite">Pilih distrik/kecamatan terlebih dahulu. Kode wilayah disimpan otomatis.</div>
             <?php if (!$registrationRegions): ?><div class="warga-region-empty" role="alert"><i class="fa fa-info-circle"></i><span>Daftar wilayah belum tersedia. Hubungi administrator pusat.</span></div><?php endif; ?>
-            <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-lock"></i><input type="password" class="form-control" id="register-password" name="password" placeholder="Kata Sandi" required minlength="8" autocomplete="new-password"><label for="register-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
-            <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-check-circle"></i><input type="password" class="form-control" id="register-confirm" name="password_confirm" placeholder="Ulangi Kata Sandi" required minlength="8" autocomplete="new-password"><label for="register-confirm" class="color-highlight">Ulangi Kata Sandi</label><em>*</em></div>
+            <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-lock"></i><input type="password" class="form-control" id="register-password" name="password" placeholder="Kata Sandi" required minlength="8" autocomplete="new-password"><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="register-password" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="register-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
+            <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-check-circle"></i><input type="password" class="form-control" id="register-confirm" name="password_confirm" placeholder="Ulangi Kata Sandi" required minlength="8" autocomplete="new-password"><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="register-confirm" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="register-confirm" class="color-highlight">Ulangi Kata Sandi</label><em>*</em></div>
             <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Daftar Akun</span><i class="fa fa-arrow-right ms-2"></i></button>
         </form>
         <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="color-highlight font-600" href="<?= site_url('login') ?>">Masuk</a></p>
     </div></section>
 </main></div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=57') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=17"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=59') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=19"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

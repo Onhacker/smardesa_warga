@@ -1926,6 +1926,51 @@ body #page .page-content .warga-auth-error-item {
   font-size: 11px;
 }
 
+#page .warga-auth-card .warga-auth-password-field input {
+  padding-right: 58px !important;
+}
+
+#page .warga-auth-card .warga-auth-password-field .warga-password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--warga-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+#page .warga-auth-card .warga-auth-password-field .warga-password-toggle:hover {
+  background: rgba(35, 95, 164, .1);
+  color: var(--warga-teal-dark);
+}
+
+#page .warga-auth-card .warga-auth-password-field .warga-password-toggle:focus-visible {
+  outline: 2px solid var(--warga-teal-dark);
+  outline-offset: 1px;
+}
+
+#page .warga-auth-card .warga-auth-password-field .warga-password-toggle > i {
+  position: static;
+  width: auto;
+  margin: 0;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+}
+
+#page .warga-auth-card .warga-auth-password-field > em {
+  right: 51px;
+}
+
 #page .page-content.warga-auth-page .warga-auth-card button[type="submit"] {
   min-height: 52px;
   border-radius: 13px;
@@ -2859,8 +2904,15 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
 #footer-bar.footer-bar-6 > a > i {
   position: relative;
   z-index: 2;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 18px !important;
+  min-width: 18px;
+  height: 18px !important;
   color: #6b7280;
   font-size: 18px;
+  line-height: 18px;
+  text-align: center;
   opacity: .82;
   transform: translateY(-2px);
 }
@@ -2923,9 +2975,11 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
    * the five footer columns are equal. */
   width: 24px !important;
   min-width: 24px;
+  height: 20px !important;
   text-align: center;
   color: #fff !important;
   font-size: 20px !important;
+  line-height: 20px;
   opacity: 1 !important;
   /* Keep the glyph centred without moving its navigation column sideways. */
   transform: translateY(-20px) translateX(0) !important;
@@ -6145,15 +6199,15 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
   position: relative;
   display: inline-block;
   box-sizing: border-box;
-  width: 14px !important;
-  min-width: 14px !important;
-  height: 14px !important;
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
   border: 0 !important;
   border-radius: 0;
   background: transparent !important;
   color: transparent !important;
-  font-size: 0 !important;
-  line-height: 1 !important;
+  font-size: 18px !important;
+  line-height: 18px !important;
   opacity: 1 !important;
   transform: translateY(-2px) !important;
   animation: none !important;
@@ -6172,10 +6226,19 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
 }
 
 #footer-bar.footer-bar-6 .circle-nav.is-navigating > i {
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 20px !important;
+  font-size: 20px !important;
+  line-height: 20px !important;
   transform: translateY(-20px) translateX(0) !important;
 }
 
 #footer-bar.footer-bar-6 .circle-nav.is-navigating > i::after {
+  top: 0;
+  right: 2px;
+  bottom: 0;
+  left: 2px;
   border-color: rgba(255, 255, 255, .38);
   border-top-color: #fff;
 }

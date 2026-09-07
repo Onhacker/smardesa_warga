@@ -744,18 +744,22 @@
     });
   }());
 
-  document.querySelectorAll('[data-password-toggle]').forEach(function (toggle) {
-    toggle.addEventListener('click', function () {
-      var id = toggle.getAttribute('aria-controls');
-      var input = id ? document.getElementById(id) : null;
-      if (!input) return;
-      var visible = input.type === 'text';
-      input.type = visible ? 'password' : 'text';
-      toggle.setAttribute('aria-pressed', visible ? 'false' : 'true');
-      toggle.setAttribute('aria-label', visible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
-      var icon = toggle.querySelector('i');
-      if (icon) icon.className = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
-    });
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    var toggle = target && typeof target.closest === 'function'
+      ? target.closest('[data-password-toggle]')
+      : null;
+    if (!toggle) return;
+    event.preventDefault();
+    var id = toggle.getAttribute('aria-controls');
+    var input = id ? document.getElementById(id) : null;
+    if (!input) return;
+    var visible = input.type === 'text';
+    input.type = visible ? 'password' : 'text';
+    toggle.setAttribute('aria-pressed', visible ? 'false' : 'true');
+    toggle.setAttribute('aria-label', visible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+    var icon = toggle.querySelector('i');
+    if (icon) icon.className = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
   });
 
   (function initLogoutConfirmation() {
