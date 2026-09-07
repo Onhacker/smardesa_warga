@@ -1,11 +1,17 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "id.co.mediaverse.smartkampung",
       "sha256_cert_fingerprints": [
-        "09:84:AF:5A:7B:20:25:2B:00:C2:E7:FE:87:EA:8D:D1:16:1C:4D:8F:FC:CF:C2:1C:42:51:17:91:9F:76:F8:A4"
+        "09:84:AF:5A:7B:20:25:2B:00:C2:E7:FE:87:EA:8D:D1:16:1C:4D:8F:FC:CF:C2:1C:42:51:17:91:9F:76:F8:A4",
+        "90:1A:33:AB:1C:3A:4E:1C:12:2A:96:75:42:2D:77:34:06:DA:1D:FF:B6:75:16:33:16:99:A9:6C:B7:6F:88:D5",
+        "B5:76:D4:5E:34:B7:5D:AC:C3:CA:8C:8E:9B:C0:D3:99:99:F4:20:64:FA:02:EA:05:5E:E6:61:AC:DA:AC:61:FC",
+        "B3:06:96:16:54:85:84:BD:93:36:0D:48:C8:CA:2A:93:8C:FA:6B:36:EB:64:25:5F:E4:0D:A4:C3:AD:69:E7:B7"
       ]
     }
   }
