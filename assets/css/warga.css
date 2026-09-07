@@ -1905,10 +1905,16 @@ body #page .page-content .warga-auth-error-item {
   height: 58px;
   border-radius: 14px;
   background: #f7fafb;
-  font-size: 17px !important;
+  font-size: 18px !important;
   line-height: 58px;
   padding-right: 14px;
   padding-left: 42px;
+}
+
+#page .warga-auth-card .input-style.has-icon input::placeholder {
+  color: var(--warga-ink);
+  font-size: 18px !important;
+  opacity: 1;
 }
 
 #page .warga-auth-card .input-style.has-icon > i:first-child {
@@ -1969,6 +1975,11 @@ body #page .page-content .warga-auth-error-item {
 
 #page .warga-auth-card .warga-auth-password-field > em {
   right: 51px;
+}
+
+#page .warga-auth-card .warga-auth-password-field > .invalid,
+#page .warga-auth-card .warga-auth-password-field > .valid {
+  right: 74px;
 }
 
 #page .page-content.warga-auth-page .warga-auth-card button[type="submit"] {

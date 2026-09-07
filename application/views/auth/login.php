@@ -15,7 +15,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=101">
+    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=102">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -52,8 +52,8 @@ $loginBrand = 'Smart ' . $loginInstitution;
                 <?php endif; ?>
                 <form method="post" action="<?= site_url('login') ?>" autocomplete="on" data-disable-submit>
                     <?= csrf_field() ?>
-                    <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="login-identity" name="identity" value="<?= e(old('identity', $demoMode ? 'warga' : '')) ?>" placeholder="Email atau Nomor Telepon" required autocomplete="username"><label for="login-identity" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
-                    <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-lock"></i><input type="password" class="form-control" id="login-password" name="password" value="<?= $demoMode ? 'demo12345' : '' ?>" placeholder="Kata Sandi" required autocomplete="current-password"><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="login-password" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="login-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
+                    <div class="input-style no-borders has-icon mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="login-identity" name="identity" value="<?= e(old('identity', $demoMode ? 'warga' : '')) ?>" placeholder="Email atau Nomor Telepon" required autocomplete="username"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="login-identity" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
+                    <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-lock"></i><input type="password" class="form-control" id="login-password" name="password" value="<?= $demoMode ? 'demo12345' : '' ?>" placeholder="Kata Sandi" required autocomplete="current-password"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="login-password" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="login-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
                     <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
                 </form>
                 <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>
@@ -64,7 +64,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=59') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=60') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=19"></script>
 </body>
 </html>
