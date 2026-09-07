@@ -54,4 +54,5 @@ $route['akun/edit'] = 'account/edit';
 $route['akun/ganti-password'] = 'account/password';
 $route['kebijakan-privasi'] = 'community/privacy';
 $route['syarat-ketentuan'] = 'community/terms';
+$route['permintaan-hapus-akun'] = 'community/account_deletion';
 $route['api/health'] = 'api/health';

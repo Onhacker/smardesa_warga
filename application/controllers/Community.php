@@ -112,6 +112,7 @@ class Community extends Public_Controller
         $this->render('community/privacy', array(
             'pageTitle' => 'Kebijakan Privasi',
             'village' => $village,
+            'supportEmail' => $this->public_support_email(),
             'showBackButton' => TRUE,
             'backUrl' => $this->currentUser ? site_url('akun') : site_url('dashboard')
         ));
@@ -124,6 +125,27 @@ class Community extends Public_Controller
         $this->render('community/terms', array(
             'pageTitle' => 'Syarat & Ketentuan',
             'village' => $village,
+            'supportEmail' => $this->public_support_email(),
+            'showBackButton' => TRUE,
+            'backUrl' => $this->currentUser ? site_url('akun') : site_url('dashboard')
+        ));
+    }
+
+    public function account_deletion()
+    {
+        // Google Play links directly to this page, so it must remain available
+        // without a resident session. Requests go to the developer's dedicated
+        // support address and are verified before any account data is changed.
+        $supportEmail = $this->public_support_email();
+
+        $developerName = trim((string) (getenv('PUBLIC_DEVELOPER_NAME') ?: 'PT. MediaVerse Inovasi Nusantara'));
+        if ($developerName === '') $developerName = 'PT. MediaVerse Inovasi Nusantara';
+
+        $this->render('community/account_deletion', array(
+            'pageTitle' => 'Permintaan Penghapusan Akun',
+            'village' => $this->legal_village_context(),
+            'supportEmail' => $supportEmail,
+            'developerName' => $developerName,
             'showBackButton' => TRUE,
             'backUrl' => $this->currentUser ? site_url('akun') : site_url('dashboard')
         ));
@@ -148,5 +170,11 @@ class Community extends Public_Controller
             'institution' => $this->institution_label(),
             'contact' => array()
         );
+    }
+
+    private function public_support_email()
+    {
+        $email = trim((string) (getenv('PUBLIC_ACCOUNT_DELETION_EMAIL') ?: 'admin@mediaverse.co.id'));
+        return filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'admin@mediaverse.co.id';
     }
 }

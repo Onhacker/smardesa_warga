@@ -160,6 +160,11 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
                 <div><strong>Ganti Password</strong><small>Perbarui kata sandi akun</small></div>
                 <i class="fa fa-chevron-right" aria-hidden="true"></i>
             </a>
+            <a href="<?= site_url('permintaan-hapus-akun') ?>">
+                <span class="warga-setting-icon is-red"><i class="fa fa-user-times" aria-hidden="true"></i></span>
+                <div><strong>Hapus Akun</strong><small>Ajukan penghapusan akun dan data terkait</small></div>
+                <i class="fa fa-chevron-right" aria-hidden="true"></i>
+            </a>
         </div>
     </section>
 

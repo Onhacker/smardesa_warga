@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; ?>
 <article class="warga-legal-page">
     <header class="warga-legal-hero">
         <div class="warga-legal-hero-icon"><i class="fa fa-file-signature" aria-hidden="true"></i></div>
@@ -44,7 +44,7 @@
         </section>
         <section>
             <h2>7. Hubungi kami</h2>
-            <p>Untuk pertanyaan, koreksi data, atau kendala layanan, silakan buka halaman <a href="<?= site_url('kontak') ?>">Kontak</a> dan gunakan informasi kantor yang tercantum di sana.</p>
+            <p>Untuk pertanyaan, koreksi data, atau kendala layanan, kirim email ke <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>. Permintaan penghapusan akun dijelaskan pada halaman <a href="<?= site_url('permintaan-hapus-akun') ?>">Permintaan Penghapusan Akun</a>.</p>
         </section>
     </div>
 </article>

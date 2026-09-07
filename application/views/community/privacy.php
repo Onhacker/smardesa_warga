@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; ?>
 <article class="warga-legal-page">
     <header class="warga-legal-hero">
         <div class="warga-legal-hero-icon"><i class="fa fa-shield-alt" aria-hidden="true"></i></div>
@@ -40,11 +40,11 @@
         </section>
         <section>
             <h2>6. Hak Anda</h2>
-            <p>Anda dapat memeriksa dan memperbarui data kontak melalui menu Akun, meminta koreksi data yang keliru, serta menghubungi kantor <?= e($institutionLower) ?> untuk pertanyaan tentang pemrosesan data. Permintaan penghapusan dapat dibatasi jika data masih diperlukan untuk pelayanan atau kewajiban hukum.</p>
+            <p>Anda dapat memeriksa dan memperbarui data kontak melalui menu Akun, meminta koreksi data yang keliru, serta menghubungi kantor <?= e($institutionLower) ?> untuk pertanyaan tentang pemrosesan data. Permintaan penghapusan akun dapat diajukan melalui halaman <a href="<?= site_url('permintaan-hapus-akun') ?>">Permintaan Hapus Akun</a>. Penghapusan data tertentu dapat dibatasi jika data masih diperlukan untuk pelayanan, kearsipan pemerintahan, atau kewajiban hukum.</p>
         </section>
         <section>
             <h2>7. Perubahan kebijakan</h2>
-            <p>Kebijakan ini dapat diperbarui ketika fitur atau aturan layanan berubah. Versi terbaru akan ditampilkan di halaman ini. Untuk pertanyaan, gunakan halaman <a href="<?= site_url('kontak') ?>">Kontak</a> yang tersedia di aplikasi.</p>
+            <p>Kebijakan ini dapat diperbarui ketika fitur atau aturan layanan berubah. Versi terbaru akan ditampilkan di halaman ini. Untuk pertanyaan tentang privasi atau penghapusan akun, kirim email ke <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a> atau buka halaman <a href="<?= site_url('permintaan-hapus-akun') ?>">Permintaan Penghapusan Akun</a>.</p>
         </section>
     </div>
 </article>
