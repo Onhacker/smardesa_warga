@@ -4144,6 +4144,27 @@ body.theme-dark #page .warga-account-notification-history {
   display: none !important;
 }
 
+/* Once the compact fixed header is shown after scrolling, keep the bell's
+ * footprint stable by replacing the number with a small notification dot.
+ * The full count remains visible in the page-title header at the top of the
+ * page.  The text is only visually hidden (not removed) so assistive
+ * technology can still expose the unread count. */
+#page > .header.header-logo-center .warga-header-notification [data-notification-count]:not([hidden]):not(:empty) {
+  top: 3px;
+  right: 2px;
+  width: 10px;
+  min-width: 10px;
+  height: 10px;
+  padding: 0;
+  padding-left: 0 !important;
+  border-width: 2px;
+  color: transparent !important;
+  font-size: 0;
+  line-height: 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+}
+
 body.theme-dark #page .warga-header-notification [data-notification-count] {
   border-color: #21252a;
 }

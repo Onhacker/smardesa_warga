@@ -48,7 +48,7 @@
     if (permission === 'denied') {
       var standalone = isInstalledExperience();
       return standalone
-        ? 'Izin diblokir. Buka Info aplikasi > Notifikasi, pilih Izinkan, lalu coba lagi.'
+        ? 'Izin notifikasi belum tersinkron. Pastikan Info aplikasi > Notifikasi aktif, kembali ke aplikasi, lalu aktifkan sakelar. Jika masih gagal, buka ulang aplikasi.'
         : 'Izin diblokir oleh browser. Buka Pengaturan situs > Notifikasi, pilih Izinkan, lalu coba lagi.';
     }
     if (permission === 'default') return 'Klik sakelar untuk memberi izin notifikasi pada browser.';
@@ -102,7 +102,14 @@
     var permission = Notification.permission;
     // Keep this call in the click/change call stack so the browser can show
     // its native prompt.  Do not move it behind a timer or an unrelated fetch.
-    if (permission === 'default') permission = await Notification.requestPermission();
+    // Android can grant the app-level permission while the web origin still
+    // reports `denied` until it is queried again.  Calling requestPermission
+    // from the explicit toggle action lets Chrome/Trusted Web Activity
+    // resynchronise that state instead of permanently locking the switch.
+    if (permission !== 'granted') {
+      try { permission = await Notification.requestPermission(); }
+      catch (error) { return {active:false, permission:Notification.permission, error:error}; }
+    }
     if (permission !== 'granted') return {active:false, permission:permission};
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
@@ -141,16 +148,48 @@
       else message(error.message || 'Notifikasi belum dapat diaktifkan.');
     } finally { setDisabled(false); }
   }
+  var pushRefreshTimer = 0, pushRefreshing = false;
+  async function refreshPushState(rebind) {
+    if (!button || !supported || !config.vapidPublicKey || pushRefreshing) return;
+    pushRefreshing = true;
+    try {
+      var permission = Notification.permission;
+      var reg = await navigator.serviceWorker.ready;
+      var sub = await reg.pushManager.getSubscription();
+      // A subscription left over from before the Android permission change is
+      // not usable while the origin is denied.  Reflect the real state in the
+      // switch, then let the next user click request/synchronise permission.
+      var active = permission === 'granted' && !!sub;
+      updateButton(active);
+      if (active) {
+        if (rebind && isAuthenticated) await post('notifikasi/push', {subscription:JSON.stringify(sub)});
+      } else if (permission === 'granted') {
+        message('Izin notifikasi sudah diberikan. Aktifkan sakelar untuk menerima pembaruan.');
+      } else {
+        message(permissionMessage(permission));
+      }
+    } catch (_) {
+      message('Status notifikasi belum dapat diperiksa.');
+    } finally { pushRefreshing = false; }
+  }
+  function schedulePushRefresh() {
+    if (!button || document.hidden) return;
+    clearTimeout(pushRefreshTimer);
+    pushRefreshTimer = window.setTimeout(function () { refreshPushState(false); }, 120);
+  }
   if (button) {
     if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
     else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
     else {
-      if (Notification.permission !== 'granted') message(permissionMessage(Notification.permission));
-      navigator.serviceWorker.ready.then(function (reg) { return reg.pushManager.getSubscription(); })
-        .then(function (sub) { updateButton(!!sub); if (sub && isAuthenticated) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); })
-        .catch(function () { message('Status notifikasi belum dapat diperiksa.'); });
+      refreshPushState(true);
       if (checkbox) button.addEventListener('change', function () { toggleSubscription(button.checked); });
       else button.addEventListener('click', function () { toggleSubscription(!subscribed); });
+      // Returning from Android's app-info/notification settings does not
+      // reload the page.  Re-read Notification.permission and the browser
+      // subscription whenever the TWA becomes visible/focused again.
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) schedulePushRefresh(); });
+      window.addEventListener('focus', schedulePushRefresh);
+      window.addEventListener('pageshow', schedulePushRefresh);
     }
   }
   // Rebind an existing subscription after switching accounts; no permission prompt.
