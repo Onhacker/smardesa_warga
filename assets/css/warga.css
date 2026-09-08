@@ -4151,7 +4151,7 @@ body.theme-dark #page .warga-account-notification-history {
  * technology can still expose the unread count. */
 #page > .header.header-logo-center .warga-header-notification [data-notification-count]:not([hidden]):not(:empty) {
   top: 3px;
-  right: 2px;
+  right: 7px;
   width: 10px;
   min-width: 10px;
   height: 10px;

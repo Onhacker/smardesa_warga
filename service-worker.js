@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-08-notification-70';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-08-notification-71';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -12,12 +12,13 @@ const precache = [
   'assets/pwa/icon-192.png',
   'assets/pwa/icon-512.png',
   'assets/pwa/icon-maskable-512.png',
+  'assets/pwa/notification-badge.png',
   'assets/v22/styles/bootstrap.min.css',
   'assets/v22/fonts/css/fontawesome-all.min.css',
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=106',
+  'assets/css/warga.min.css?v=107',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=3',
   'assets/js/warga.min.js?v=19',
@@ -78,7 +79,7 @@ self.addEventListener('push', function (event) {
   event.waitUntil(self.registration.showNotification(data.title || 'SmartDesa Warga', {
     body: data.body || 'Ada pembaruan layanan untuk Anda.',
     icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
-    badge: new URL('assets/pwa/icon-192.png',scopeUrl).href,
+    badge: new URL('assets/pwa/notification-badge.png',scopeUrl).href,
     tag: data.tag || 'sdw-notification', renotify: true, silent: false,
     vibrate: [200,100,200],
     data: {url:url.href}
