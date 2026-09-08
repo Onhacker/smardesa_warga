@@ -25,6 +25,6 @@
     <?php if ($canManage): ?><form class="community-compose community-v22-compose" method="post" action="<?= site_url('pengaduan/'.$item['id'].'/tanggapan') ?>" data-complaint-reply-form>
         <?= csrf_field() ?><div class="community-v22-form-title"><i class="fa fa-reply" aria-hidden="true"></i> Kirim tanggapan</div>
         <label for="complaint-status">Status</label><select id="complaint-status" name="status"><?php foreach (array('received','processing','resolved','rejected') as $status): ?><option value="<?= $status ?>" <?= $item['status'] === $status ? 'selected' : '' ?>><?= e(warga_complaint_status($status)) ?></option><?php endforeach; ?></select>
-        <label for="reply-message">Tanggapan</label><textarea id="reply-message" name="message" rows="4" minlength="5" maxlength="3000" required></textarea><button type="submit" class="community-button"><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Kirim Tanggapan</span></button>
+        <label for="reply-message">Tanggapan</label><textarea id="reply-message" name="message" rows="4" minlength="5" maxlength="3000" required></textarea><button type="submit" class="community-button community-submit-button color-white"><i class="fa fa-paper-plane color-white" aria-hidden="true"></i><span class="color-white">Kirim Tanggapan</span></button>
     </form><?php endif; ?>
 </div>

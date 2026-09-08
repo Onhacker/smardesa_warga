@@ -390,15 +390,17 @@
       form.setAttribute('aria-busy', 'true');
       submit.disabled = true;
       submit.setAttribute('aria-busy', 'true');
+      submit.classList.add('is-loading');
       if (label) { label.setAttribute('data-original-label', label.textContent || 'Kirim'); label.textContent = 'Mengirim…'; }
-      if (icon) { icon.setAttribute('data-original-class', icon.className || 'fa fa-paper-plane'); icon.className = 'fa fa-spinner fa-spin'; }
+      if (icon) { icon.setAttribute('data-original-class', icon.className || 'fa fa-paper-plane color-white'); icon.className = 'fa fa-spinner fa-spin color-white'; }
     } else {
       form.removeAttribute('data-ajax-submitting');
       form.removeAttribute('aria-busy');
       submit.disabled = false;
       submit.removeAttribute('aria-busy');
+      submit.classList.remove('is-loading');
       if (label) { label.textContent = label.getAttribute('data-original-label') || 'Kirim'; label.removeAttribute('data-original-label'); }
-      if (icon) { icon.className = icon.getAttribute('data-original-class') || 'fa fa-paper-plane'; icon.removeAttribute('data-original-class'); }
+      if (icon) { icon.className = icon.getAttribute('data-original-class') || 'fa fa-paper-plane color-white'; icon.removeAttribute('data-original-class'); }
     }
   }
 

@@ -25,8 +25,8 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=111">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=24">
-    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=19">
+    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=25">
+    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=21">
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
@@ -91,12 +91,12 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <div class="menu-hider"></div>
     <?php $this->load->view('layouts/notification_onboarding'); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=73') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=75') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>
 <script src="<?= base_url('assets/js/warga.min.js') ?>?v=21"></script>
-<script src="<?= base_url('assets/js/community.min.js') ?>?v=16"></script>
-<script src="<?= base_url('assets/js/market.js') ?>?v=9"></script>
+<script src="<?= base_url('assets/js/community.min.js') ?>?v=17"></script>
+<script src="<?= base_url('assets/js/market.js') ?>?v=10"></script>
 </body>
 </html>

@@ -17,6 +17,22 @@
 #page .community-compose textarea{resize:vertical}
 .community-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:10px 16px;margin-top:18px;border:0;border-radius:6px;background:#235fa4;color:#fff;font-size:15px;font-weight:700}
 .community-button.is-secondary{background:#e8eff8;color:#244f80}
+#page .community-submit-button,
+#page .community-submit-button:hover,
+#page .community-submit-button:focus,
+#page .community-submit-button > i,
+#page .community-submit-button > span {
+  color: #fff !important;
+}
+#page .community-submit-button.is-loading {
+  cursor: wait;
+  opacity: .84;
+}
+#page .community-submit-button.is-loading .fa-spinner {
+  transform-origin: center;
+  animation: community-submit-spin .72s linear infinite !important;
+}
+@keyframes community-submit-spin { to { transform: rotate(360deg); } }
 .community-empty{padding:24px 0;color:var(--warga-muted);font-size:15px}
 .community-contact{margin:0}.community-contact>div{padding:16px 0;border-bottom:1px solid var(--warga-line)}
 .community-contact dt{font-size:14px;color:var(--warga-muted)}.community-contact dd{font-size:17px;margin:5px 0 0;overflow-wrap:anywhere}

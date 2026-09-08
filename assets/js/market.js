@@ -349,6 +349,64 @@
     if (sentinel) setHidden(sentinel, !state.hasMore);
   }
 
+  function bindContactModal() {
+    var modal = document.querySelector('[data-market-contact-modal]');
+    if (!modal || modal.getAttribute('data-market-contact-bound') === '1') return;
+    modal.setAttribute('data-market-contact-bound', '1');
+    var lastFocus = null;
+
+    function focusableItems() {
+      return Array.prototype.slice.call(modal.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+        .filter(function (item) { return item.offsetParent !== null; });
+    }
+
+    function open(trigger) {
+      lastFocus = trigger || document.activeElement;
+      modal.hidden = false;
+      document.body.classList.add('market-contact-open');
+      var items = focusableItems();
+      var preferred = modal.querySelector('[data-market-contact-action]') || modal.querySelector('[data-market-contact-close]');
+      window.setTimeout(function () {
+        if (preferred && items.indexOf(preferred) !== -1) preferred.focus();
+      }, 20);
+    }
+
+    function close() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      document.body.classList.remove('market-contact-open');
+      if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      lastFocus = null;
+    }
+
+    document.querySelectorAll('[data-market-contact-open]').forEach(function (button) {
+      button.addEventListener('click', function () { open(button); });
+    });
+    modal.querySelectorAll('[data-market-contact-close]').forEach(function (button) {
+      button.addEventListener('click', close);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (modal.hidden) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
   function bindReviewModals() {
     var modal = document.querySelector('[data-market-review-modal]');
     if (!modal || modal.getAttribute('data-market-review-bound') === '1') return;
@@ -605,6 +663,7 @@
     });
     document.querySelectorAll('[data-market-catalog]').forEach(bindCatalog);
     bindMediaSkeletons(document);
+    bindContactModal();
     bindReviewModals();
   }
 

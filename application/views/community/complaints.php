@@ -20,7 +20,7 @@
             <input id="complaint-location" name="location" maxlength="255">
             <label for="complaint-body">Isi pengaduan</label>
             <textarea id="complaint-body" name="body" rows="6" minlength="10" maxlength="5000" required></textarea>
-            <button class="community-button" type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Kirim Pengaduan</span></button>
+            <button class="community-button community-submit-button color-white" type="submit"><i class="fa fa-paper-plane color-white" aria-hidden="true"></i><span class="color-white">Kirim Pengaduan</span></button>
         </form>
     </details>
     <?php endif; ?>

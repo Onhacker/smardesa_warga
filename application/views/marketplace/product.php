@@ -30,13 +30,23 @@ $category = trim((string) ($product['category_name'] ?? ($product['category'] ??
 $storeName = trim((string) ($product['store_name'] ?? ($store['name'] ?? ($product['seller_name'] ?? 'Toko warga'))));
 $villageName = trim((string) ($product['village_name'] ?? ''));
 $description = trim((string) ($product['description'] ?? ($product['body'] ?? '')));
-$phoneRaw = trim((string) ($product['whatsapp'] ?? ($product['store_whatsapp'] ?? ($store['whatsapp'] ?? ($product['phone'] ?? ($store['phone'] ?? ''))))));
-$phoneDigits = preg_replace('/[^0-9]/', '', $phoneRaw);
-if (strpos($phoneDigits, '0') === 0) $phoneDigits = '62' . substr($phoneDigits, 1);
-$phoneDigits = trim((string) $phoneDigits);
+$normalizeContactDigits = static function ($value) {
+    $digits = preg_replace('/[^0-9]/', '', trim((string) $value));
+    if (strpos($digits, '0') === 0) $digits = '62' . substr($digits, 1);
+    return preg_match('/^[0-9]{8,15}$/D', (string) $digits) ? (string) $digits : '';
+};
+$whatsappRaw = trim((string) ($product['whatsapp'] ?? ($product['store_whatsapp'] ?? ($store['whatsapp'] ?? ''))));
+$telephoneRaw = trim((string) ($product['phone'] ?? ($product['store_phone'] ?? ($store['phone'] ?? ''))));
+$whatsappDigits = $normalizeContactDigits($whatsappRaw);
+$telephoneDigits = $normalizeContactDigits($telephoneRaw);
+// A WhatsApp number remains a valid telephone fallback when the seller did
+// not provide a second telephone number.
+if ($telephoneDigits === '') $telephoneDigits = $whatsappDigits;
 $waText = rawurlencode('Halo, saya tertarik dengan produk ' . ($product['name'] ?? 'ini') . '. Apakah masih tersedia?');
-$waHref = $phoneDigits !== '' ? 'https://wa.me/' . $phoneDigits . '?text=' . $waText : '#';
-$telHref = $phoneDigits !== '' ? 'tel:+' . $phoneDigits : '#';
+$waHref = $whatsappDigits !== '' ? 'https://wa.me/' . $whatsappDigits . '?text=' . $waText : '';
+$waCallHref = $whatsappDigits !== '' ? 'whatsapp://call?phone=' . $whatsappDigits : '';
+$telHref = $telephoneDigits !== '' ? 'tel:+' . $telephoneDigits : '';
+$hasContact = $waHref !== '' || $telHref !== '';
 $ratingAverage = max(0, min(5, (float) ($product['rating_average'] ?? 0)));
 $ratingCount = max(0, (int) ($product['rating_count'] ?? 0));
 $ratingRounded = $ratingCount > 0 ? (int) round($ratingAverage) : 0;
@@ -57,13 +67,16 @@ $productId = (string) ($product['id'] ?? '');
             <span class="market-product-category"><i class="fa fa-tag" aria-hidden="true"></i><?= e($category) ?></span>
             <h1 id="market-product-title"><?= e($product['name'] ?? 'Produk warga') ?></h1>
             <p class="market-product-detail-description"><?= e($description !== '' ? $description : 'Produk pilihan warga dari ' . ($institutionLower ?? 'kampung') . '.') ?></p>
-            <div class="market-product-detail-meta"><strong><?= e($priceLabel) ?></strong><?php if ($storeName !== ''): ?><span><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName) ?><?php if ($villageName !== ''): ?><br><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?><?php endif; ?></span><?php endif; ?></div>
-            <?php if (isset($product['stock'])): ?><span class="market-stock-pill <?= (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><i class="fa fa-box" aria-hidden="true"></i><?= (int) $product['stock'] < 1 ? 'Stok habis' : 'Stok tersedia' ?></span><?php endif; ?>
-            <div class="market-contact-actions" aria-label="Hubungi penjual">
-                <a href="<?= e($waHref) ?>" class="market-contact-button market-contact-whatsapp <?= $phoneDigits === '' ? 'is-disabled' : '' ?>" <?= $phoneDigits !== '' ? 'target="_blank" rel="noopener"' : 'aria-disabled="true"' ?>><i class="fab fa-whatsapp color-white" aria-hidden="true"></i><span class="color-white">Chat WhatsApp</span></a>
-                <a href="<?= e($telHref) ?>" class="market-contact-button market-contact-call <?= $phoneDigits === '' ? 'is-disabled' : '' ?>" <?= $phoneDigits === '' ? 'aria-disabled="true"' : '' ?>><i class="fa fa-phone color-white" aria-hidden="true"></i><span class="color-white">Telepon WhatsApp</span></a>
+            <div class="market-product-detail-meta">
+                <strong><?= e($priceLabel) ?></strong>
+                <?php if ($storeName !== '' || $villageName !== ''): ?><div class="market-product-seller-meta">
+                    <?php if ($storeName !== ''): ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?>
+                    <?php if ($villageName !== ''): ?><span class="market-product-seller-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></span><?php endif; ?>
+                </div><?php endif; ?>
             </div>
-            <?php if ($phoneDigits === ''): ?><p class="market-contact-note"><i class="fa fa-info-circle" aria-hidden="true"></i>Nomor kontak penjual belum tersedia.</p><?php endif; ?>
+            <?php if (isset($product['stock'])): ?><span class="market-stock-pill <?= (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><i class="fa fa-box" aria-hidden="true"></i><?= (int) $product['stock'] < 1 ? 'Stok habis' : 'Stok tersedia' ?></span><?php endif; ?>
+            <button type="button" class="market-contact-trigger" data-market-contact-open aria-haspopup="dialog" aria-controls="market-contact-dialog"><i class="fa fa-phone-alt color-white" aria-hidden="true"></i><span class="color-white">Hubungi</span><i class="fa fa-chevron-right color-white" aria-hidden="true"></i></button>
+            <?php if (!$hasContact): ?><p class="market-contact-note"><i class="fa fa-info-circle" aria-hidden="true"></i>Nomor kontak penjual belum tersedia.</p><?php endif; ?>
         </div>
     </section>
 
@@ -86,7 +99,7 @@ $productId = (string) ($product['id'] ?? '');
                         <?php $this->load->view('marketplace/review_item', array('review' => $review)); ?>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <p class="market-review-empty" data-market-review-empty>Belum ada komentar. Jadilah warga pertama yang memberi ulasan.</p>
+                    <p class="market-review-empty" data-market-review-empty>Belum ada ulasan. Jadilah warga pertama yang memberi ulasan.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -99,6 +112,28 @@ $productId = (string) ($product['id'] ?? '');
             <?php $storeDescription = trim((string) ($product['store_description'] ?? ($store['description'] ?? ''))); $storeAddress = trim((string) ($product['store_address'] ?? ($store['address'] ?? ''))); ?>
             <?php if ($storeDescription !== ''): ?><p><?= e($storeDescription) ?></p><?php endif; ?>
             <?php if ($storeAddress !== ''): ?><span class="market-store-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($storeAddress) ?></span><?php endif; ?>
+        </div>
+    </section>
+</div>
+<div class="market-contact-modal" data-market-contact-modal hidden>
+    <button type="button" class="market-contact-backdrop" data-market-contact-close aria-label="Tutup pilihan kontak"></button>
+    <section class="market-contact-dialog" id="market-contact-dialog" role="dialog" aria-modal="true" aria-labelledby="market-contact-title" aria-describedby="market-contact-description">
+        <div class="market-contact-dialog-head">
+            <div>
+                <p class="market-eyebrow market-eyebrow-blue">KONTAK PENJUAL</p>
+                <h2 id="market-contact-title">Hubungi penjual</h2>
+            </div>
+            <button type="button" class="market-contact-close" data-market-contact-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+        </div>
+        <div class="market-contact-seller">
+            <span class="market-contact-seller-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
+            <span class="market-contact-seller-copy"><strong><?= e($storeName !== '' ? $storeName : 'Toko warga') ?></strong><?php if ($villageName !== ''): ?><small><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></small><?php endif; ?></span>
+        </div>
+        <p class="market-contact-description" id="market-contact-description">Pilih cara yang paling nyaman untuk menghubungi penjual.</p>
+        <div class="market-contact-options" aria-label="Pilihan kontak penjual">
+            <?php if ($waHref !== ''): ?><a href="<?= e($waHref) ?>" class="market-contact-option is-whatsapp" data-market-contact-action target="_blank" rel="noopener"><span class="market-contact-option-icon"><i class="fa fa-comments" aria-hidden="true"></i></span><span><strong>Chat WhatsApp</strong><small>Kirim pesan kepada penjual</small></span><i class="fa fa-chevron-right" aria-hidden="true"></i></a><?php else: ?><span class="market-contact-option is-disabled" aria-disabled="true"><span class="market-contact-option-icon"><i class="fa fa-comments" aria-hidden="true"></i></span><span><strong>Chat WhatsApp</strong><small>Nomor WhatsApp belum tersedia</small></span></span><?php endif; ?>
+            <?php if ($waCallHref !== ''): ?><a href="<?= e($waCallHref) ?>" class="market-contact-option is-whatsapp-call" data-market-contact-action><span class="market-contact-option-icon"><i class="fa fa-phone" aria-hidden="true"></i></span><span><strong>Telepon WhatsApp</strong><small>Panggilan suara melalui WhatsApp</small></span><i class="fa fa-chevron-right" aria-hidden="true"></i></a><?php else: ?><span class="market-contact-option is-disabled" aria-disabled="true"><span class="market-contact-option-icon"><i class="fa fa-phone" aria-hidden="true"></i></span><span><strong>Telepon WhatsApp</strong><small>Nomor WhatsApp belum tersedia</small></span></span><?php endif; ?>
+            <?php if ($telHref !== ''): ?><a href="<?= e($telHref) ?>" class="market-contact-option is-phone" data-market-contact-action><span class="market-contact-option-icon"><i class="fa fa-phone" aria-hidden="true"></i></span><span><strong>Telepon</strong><small>Hubungi melalui jaringan seluler</small></span><i class="fa fa-chevron-right" aria-hidden="true"></i></a><?php else: ?><span class="market-contact-option is-disabled" aria-disabled="true"><span class="market-contact-option-icon"><i class="fa fa-phone" aria-hidden="true"></i></span><span><strong>Telepon</strong><small>Nomor telepon belum tersedia</small></span></span><?php endif; ?>
         </div>
     </section>
 </div>
