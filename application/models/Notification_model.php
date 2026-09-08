@@ -89,7 +89,7 @@ class Notification_model extends CI_Model
         $ids = array();
         foreach ($rows as $row) $ids[] = (string) $row['id'];
         if (!$ids) return true;
-        return $this->db->where_in('id', $ids)->where('read_at', null)
+        return $this->db->where_in('id', $ids)->where('user_id', (int) $userId)->where('read_at', null)
             ->update('notifications', array('read_at' => date('Y-m-d H:i:s')));
     }
 
