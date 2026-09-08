@@ -72,6 +72,27 @@ class Notification_model extends CI_Model
             ->update('notifications', array('read_at' => date('Y-m-d H:i:s')));
     }
 
+    /** Mark unread notifications that point to a specific resource as read. */
+    public function mark_target_read($userId, $targetPath)
+    {
+        if (!$this->ready()) return false;
+        $targetPath = trim((string) $targetPath);
+        if ($targetPath === '') return false;
+        // Resolve IDs first instead of relying on UPDATE ... JOIN syntax;
+        // this keeps the mutation portable across the MySQL/MariaDB drivers
+        // used by the local and hosted installations.
+        $rows = $this->db->select('n.id')->from('notifications n')
+            ->join('warga_notification_targets t', 't.notification_id=n.id')
+            ->where(array('n.user_id' => (int) $userId, 't.target_path' => $targetPath))
+            ->where('n.read_at', null)
+            ->get()->result_array();
+        $ids = array();
+        foreach ($rows as $row) $ids[] = (string) $row['id'];
+        if (!$ids) return true;
+        return $this->db->where_in('id', $ids)->where('read_at', null)
+            ->update('notifications', array('read_at' => date('Y-m-d H:i:s')));
+    }
+
     public function subscribe($userId, array $data)
     {
         if (!$this->ready()) return false;

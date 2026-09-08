@@ -27,6 +27,15 @@ class Community extends Public_Controller
             ? $this->community->announcement($id, $this->currentUser)
             : $this->community->public_announcement($id);
         if (!$item) show_404();
+        // Opening an announcement directly from the announcement catalogue
+        // must consume the same notification that would be consumed through
+        // /notifikasi/buka/{id}.  The target is tenant- and user-scoped by
+        // Notification_model, so public visitors and unrelated notifications
+        // remain untouched.
+        if ($this->currentUser) {
+            $this->load->model('Notification_model');
+            $this->Notification_model->mark_target_read($this->currentUser['id'], 'pengumuman/' . (string) $id);
+        }
         $this->render('community/announcement', array('pageTitle' => 'Pengumuman', 'item' => $item,
             'canManage' => $this->currentUser ? $this->community->can_manage($this->currentUser) : FALSE, 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
     }
