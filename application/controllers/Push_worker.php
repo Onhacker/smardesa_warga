@@ -46,8 +46,11 @@ class Push_worker extends CI_Controller
                     $subscription = \Minishlink\WebPush\Subscription::create(array('endpoint'=>$row['endpoint'],
                         'publicKey'=>$row['public_key'],'authToken'=>$row['auth_token'],'contentEncoding'=>'aes128gcm'));
                     // Keep personal details and complaint content off the lock screen.
+                    // Route through the notification opener so a panel click marks this
+                    // exact notification as read before redirecting to its detail page.
+                    $openUrl = site_url('notifikasi/buka/' . rawurlencode((string)$row['notification_id']));
                     $payload=json_encode(array('title'=>'SmartDesa Warga','body'=>'Ada pembaruan layanan untuk Anda.',
-                        'tag'=>'sdw-'.$row['notification_id'],'url'=>site_url($this->Notification_model->target($row,$row))));
+                        'tag'=>'sdw-'.$row['notification_id'],'url'=>$openUrl));
                     $report=$webPush->sendOneNotification($subscription,$payload);
                     if ($report->isSubscriptionExpired()) {
                         $this->db->where('id',$row['subscription_id'])->delete('warga_push_subscriptions'); continue;
