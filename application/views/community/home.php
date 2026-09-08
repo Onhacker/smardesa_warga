@@ -14,10 +14,6 @@ $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $pu
                 <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>
                 <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($heroLocation) ?></p>
             </div>
-            <a class="community-v22-hero-action" href="<?= site_url('notifikasi') ?>" aria-label="Buka notifikasi surat">
-                <i class="fa fa-bell" aria-hidden="true"></i>
-                <span data-notification-count></span>
-            </a>
         </div>
 
     </section>

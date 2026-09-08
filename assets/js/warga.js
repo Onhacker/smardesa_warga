@@ -762,17 +762,32 @@
     if (icon) icon.className = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
   });
 
-  (function initLogoutConfirmation() {
+  (function initConfirmations() {
     var activeForm = null;
     var activeTrigger = null;
     var dialog = null;
+    var activeIsLogout = false;
+
+    function toneOptions(tone) {
+      var tones = {
+        danger: { icon: 'fa-trash-alt', color: 'color-red-dark', button: 'bg-red-dark color-white' },
+        warning: { icon: 'fa-exclamation-circle', color: 'color-yellow-dark', button: 'bg-yellow-dark color-white' },
+        success: { icon: 'fa-check-circle', color: 'color-green-dark', button: 'bg-green-dark color-white' },
+        info: { icon: 'fa-info-circle', color: 'color-blue-dark', button: 'bg-blue-dark color-white' }
+      };
+      return tones[tone] || { icon: 'fa-question-circle', color: 'color-blue-dark', button: 'bg-blue-dark color-white' };
+    }
+
     function close() {
       if (!dialog) return;
       dialog.hidden = true;
       document.body.classList.remove('warga-dialog-open');
       if (activeTrigger && typeof activeTrigger.focus === 'function') activeTrigger.focus();
-      activeForm = null; activeTrigger = null;
+      activeForm = null;
+      activeTrigger = null;
+      activeIsLogout = false;
     }
+
     function ensureDialog() {
       if (dialog) return dialog;
       dialog = document.createElement('div');
@@ -781,33 +796,74 @@
       dialog.setAttribute('role', 'dialog');
       dialog.setAttribute('aria-modal', 'true');
       dialog.setAttribute('aria-labelledby', 'warga-confirm-title');
-      dialog.innerHTML = '<button type="button" class="warga-confirm-backdrop" data-confirm-cancel aria-label="Tutup"></button><div class="warga-confirm-panel"><span class="warga-confirm-icon" aria-hidden="true"><i class="fa fa-sign-out-alt"></i></span><h2 id="warga-confirm-title">Keluar dari akun?</h2><p>Anda yakin ingin keluar dari akun ini?</p><div class="warga-confirm-actions"><button type="button" class="btn warga-confirm-cancel" data-confirm-cancel>Tidak</button><button type="button" class="btn bg-red-dark color-white" data-confirm-accept>Ya, keluar</button></div></div>';
+      dialog.innerHTML = '<button type="button" class="warga-confirm-backdrop" data-confirm-cancel aria-label="Tutup"></button><div class="warga-confirm-panel"><span class="warga-confirm-icon" aria-hidden="true"><i></i></span><h2 id="warga-confirm-title"></h2><p data-confirm-message></p><div class="warga-confirm-actions"><button type="button" class="btn warga-confirm-cancel" data-confirm-cancel>Tidak</button><button type="button" class="btn color-white" data-confirm-accept></button></div></div>';
       document.body.appendChild(dialog);
       dialog.addEventListener('click', function (event) {
         var target = event.target.closest('[data-confirm-cancel], [data-confirm-accept]');
         if (!target) return;
-        if (target.hasAttribute('data-confirm-cancel')) { event.preventDefault(); close(); return; }
-        if (!activeForm) return;
         event.preventDefault();
+        if (target.hasAttribute('data-confirm-cancel')) { close(); return; }
+        if (!activeForm) return;
         var form = activeForm;
+        var trigger = activeTrigger;
+        var isLogout = activeIsLogout;
         close();
-        form.setAttribute('data-logout-confirmed', 'true');
-        if (HTMLFormElement.prototype.submit) HTMLFormElement.prototype.submit.call(form);
+        if (isLogout) {
+          form.setAttribute('data-logout-confirmed', 'true');
+          if (HTMLFormElement.prototype.submit) HTMLFormElement.prototype.submit.call(form);
+          return;
+        }
+        form.setAttribute('data-confirmed', 'true');
+        if (typeof form.requestSubmit === 'function') {
+          if (trigger && trigger.form === form) form.requestSubmit(trigger);
+          else form.requestSubmit();
+        }
+        else if (HTMLFormElement.prototype.submit) HTMLFormElement.prototype.submit.call(form);
       });
       return dialog;
     }
-    document.addEventListener('submit', function (event) {
-      var form = event.target;
-      if (!form || !form.matches('[data-logout-form]') || form.getAttribute('data-logout-confirmed') === 'true') return;
-      event.preventDefault();
+
+    function open(form, trigger, isLogout) {
       activeForm = form;
-      activeTrigger = form.querySelector('button[type="submit"]');
+      activeTrigger = trigger || form.querySelector('button[type="submit"]');
+      activeIsLogout = !!isLogout;
       var box = ensureDialog();
+      var tone = toneOptions(isLogout ? 'danger' : (form.getAttribute('data-confirm-tone') || 'danger'));
+      var icon = box.querySelector('.warga-confirm-icon i');
+      var title = box.querySelector('#warga-confirm-title');
+      var message = box.querySelector('[data-confirm-message]');
+      var accept = box.querySelector('[data-confirm-accept]');
+      if (icon) icon.className = 'fa ' + tone.icon;
+      if (title) title.textContent = isLogout ? 'Keluar dari akun?' : (form.getAttribute('data-confirm-title') || 'Mohon konfirmasi');
+      if (message) message.textContent = isLogout ? 'Anda yakin ingin keluar dari akun ini?' : (form.getAttribute('data-confirm') || 'Lanjutkan tindakan ini?');
+      if (accept) {
+        accept.textContent = isLogout ? 'Ya, keluar' : (form.getAttribute('data-confirm-button') || 'Lanjutkan');
+        accept.className = 'btn ' + tone.button;
+      }
       box.hidden = false;
       document.body.classList.add('warga-dialog-open');
       var cancel = box.querySelector('[data-confirm-cancel]:not(.warga-confirm-backdrop)');
       if (cancel) cancel.focus();
-    });
+    }
+
+    // Capture before form-level submit listeners (including the submit loader),
+    // so the destructive form stays enabled while the confirmation is open.
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (!form || !form.matches('form')) return;
+      if (form.matches('[data-logout-form]') && form.getAttribute('data-logout-confirmed') !== 'true') {
+        event.preventDefault();
+        event.stopPropagation();
+        open(form, event.submitter, true);
+      } else if (form.matches('[data-confirm]') && form.getAttribute('data-confirmed') !== 'true') {
+        event.preventDefault();
+        event.stopPropagation();
+        open(form, event.submitter, false);
+      } else if (form.getAttribute('data-confirmed') === 'true') {
+        form.removeAttribute('data-confirmed');
+      }
+    }, true);
+
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && dialog && !dialog.hidden) { event.preventDefault(); close(); }
       if (event.key === 'Tab' && dialog && !dialog.hidden) {

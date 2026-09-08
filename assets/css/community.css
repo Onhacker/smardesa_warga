@@ -65,7 +65,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 
 #page .community-v22-hero-main {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 48px;
+  grid-template-columns: 84px minmax(0, 1fr);
   align-items: center;
   gap: 16px;
 }
@@ -468,7 +468,7 @@ body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !importa
 @media (max-width: 480px) {
   #page .community-v22-home { padding-right: 12px; padding-left: 12px; }
   #page .community-v22-hero { padding: 18px; border-radius: 21px; }
-  #page .community-v22-hero-main { grid-template-columns: 64px minmax(0,1fr) 42px; gap: 11px; }
+  #page .community-v22-hero-main { grid-template-columns: 64px minmax(0,1fr); gap: 11px; }
   #page .community-v22-hero-logo { width: 64px; height: 64px; border-radius: 18px; }
   #page .community-v22-hero h1 { font-size: 23px; }
   #page .community-v22-location { font-size: 13px; }

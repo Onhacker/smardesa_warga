@@ -203,6 +203,16 @@ class Marketplace extends Public_Controller
         redirect('pasar/tokoku');
     }
 
+    public function delete_product($id)
+    {
+        $this->require_authentication();
+        $this->require_post();
+        $this->require_manager();
+        $ok = $this->marketplace->delete_product($id, $this->currentUser);
+        $this->session->set_flashdata($ok ? 'success' : 'error', $ok ? 'Produk berhasil dihapus.' : 'Produk tidak ditemukan atau tidak dapat dihapus.');
+        redirect('pasar/tokoku');
+    }
+
     public function store_settings()
     {
         $this->require_authentication();

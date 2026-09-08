@@ -143,11 +143,42 @@ class Community_model extends CI_Model
         return $this->db->trans_status() ? $id : false;
     }
 
-    public function archive_announcement($id, array $user)
+    public function delete_announcement($id, array $user)
     {
         if (!$this->can_manage($user) || !$this->ready()) return false;
-        return $this->db->where(array('id' => $id, 'village_id' => $user['village_id']))
-            ->update('warga_announcements', array('status' => 'archived'));
+        $path = 'pengumuman/' . $id;
+        $this->db->trans_begin();
+
+        // Lock the tenant-scoped row first so another request cannot delete a
+        // different tenant's announcement or leave its notification behind.
+        $announcement = $this->db->query(
+            'SELECT * FROM warga_announcements WHERE id=? AND village_id=? FOR UPDATE',
+            array($id, $user['village_id'])
+        )->row_array();
+        if (!$announcement) {
+            $this->db->trans_rollback();
+            return false;
+        }
+
+        // A notification target is shared by the notification inbox and the
+        // announcement link. Remove only this tenant's matching notifications;
+        // the FK then also cleans up push-delivery rows safely.
+        $notificationRows = $this->db->select('n.id')->from('notifications n')
+            ->join('warga_notification_targets t', 't.notification_id=n.id')
+            ->join('users u', 'u.id=n.user_id')
+            ->where(array('t.target_path' => $path, 'u.village_id' => $user['village_id']))
+            ->get()->result_array();
+        $notificationIds = array();
+        foreach ($notificationRows as $row) $notificationIds[] = $row['id'];
+        if ($notificationIds) $this->db->where_in('id', $notificationIds)->delete('notifications');
+
+        $this->db->where(array('id' => $id, 'village_id' => $user['village_id']))->delete('warga_announcements');
+        if (!$this->db->trans_status()) {
+            $this->db->trans_rollback();
+            return false;
+        }
+        $this->db->trans_commit();
+        return true;
     }
 
     public function complaints(array $user)

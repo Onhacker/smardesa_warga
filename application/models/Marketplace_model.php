@@ -326,6 +326,61 @@ class Marketplace_model extends CI_Model
         return (bool) $this->db->where(array('id' => $id, 'village_id' => $this->user_village($user), 'seller_user_id' => (int) $user['id']))->update('marketplace_products', array('status' => 'archived'));
     }
 
+    /**
+     * Permanently remove a product and its dependent rows. Sellers may remove
+     * their own products; village marketplace staff may remove any product in
+     * their village. Uploaded files are deleted only after the DB commit and
+     * only when their resolved paths remain inside this marketplace storage.
+     */
+    public function delete_product($id, array $user)
+    {
+        $id = trim((string) $id);
+        $villageId = $this->user_village($user);
+        if ($id === '' || $villageId === '' || !$this->can_manage($user)) return FALSE;
+        $role = trim((string) ($user['role_slug'] ?? ''));
+        $staffDelete = in_array($role, array('sekdes', 'kepala-desa'), TRUE);
+
+        if (warga_demo_mode()) {
+            $state = $this->demo_state();
+            $paths = array(); $found = FALSE; $allowed = FALSE;
+            foreach ($state['products'] as $row) {
+                if ((string) ($row['id'] ?? '') !== $id || (string) ($row['village_id'] ?? '') !== $villageId) continue;
+                $found = TRUE;
+                $allowed = $staffDelete || (int) ($row['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0);
+                foreach (($row['images'] ?? array()) as $image) if (!empty($image['storage_path'])) $paths[] = $image['storage_path'];
+                break;
+            }
+            if (!$found || !$allowed) return FALSE;
+            $state['products'] = array_values(array_filter($state['products'], function ($row) use ($id) {
+                return (string) ($row['id'] ?? '') !== $id;
+            }));
+            if (isset($state['reviews'][$id])) unset($state['reviews'][$id]);
+            $this->save_demo_state($state);
+            $this->cleanup_product_paths($paths, $id);
+            return TRUE;
+        }
+        if (!$this->ready()) return FALSE;
+
+        $product = $this->db->select('id,seller_user_id')->where(array('id' => $id, 'village_id' => $villageId))
+            ->limit(1)->get('marketplace_products')->row_array();
+        if (!$product || (!$staffDelete && (int) $product['seller_user_id'] !== (int) ($user['id'] ?? 0))) return FALSE;
+        $images = $this->db->select('storage_path')->where('product_id', $id)->get('marketplace_product_images')->result_array();
+        $paths = array(); foreach ($images as $image) if (!empty($image['storage_path'])) $paths[] = $image['storage_path'];
+        if (!$this->db->trans_begin()) return FALSE;
+        $ok = $this->db->where('product_id', $id)->delete('marketplace_product_images');
+        if ($ok && $this->db->table_exists('marketplace_product_reviews')) {
+            $ok = $this->db->where('product_id', $id)->delete('marketplace_product_reviews');
+        }
+        if ($ok) $ok = $this->db->where(array('id' => $id, 'village_id' => $villageId))->delete('marketplace_products');
+        if (!$ok || !$this->db->trans_status()) {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+        $this->db->trans_commit();
+        $this->cleanup_product_paths($paths, $id);
+        return TRUE;
+    }
+
     public function image_for_user($imageId, array $user, $publicAll = FALSE)
     {
         $imageId = (int) $imageId;
@@ -595,6 +650,22 @@ class Marketplace_model extends CI_Model
     }
 
     private function cleanup_paths(array $paths) { foreach ($paths as $path) if (is_string($path) && is_file($path)) @unlink($path); }
+
+    private function cleanup_product_paths(array $paths, $productId)
+    {
+        $root = $this->private_storage_path();
+        if ($root === NULL) return;
+        $marketRoot = realpath($root . DIRECTORY_SEPARATOR . 'marketplace');
+        if ($marketRoot === FALSE || !is_dir($marketRoot)) return;
+        $prefix = rtrim($marketRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $namePrefix = (string) $productId . '-';
+        foreach ($paths as $path) {
+            if (!is_string($path) || $path === '' || is_link($path)) continue;
+            $real = realpath($path);
+            if ($real === FALSE || !is_file($real) || strpos($real, $prefix) !== 0 || strpos(basename($real), $namePrefix) !== 0) continue;
+            @unlink($real);
+        }
+    }
 
     private function demo_categories()
     {

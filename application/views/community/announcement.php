@@ -14,6 +14,6 @@ if ($announcementAuthor === '') $announcementAuthor = trim((string) ($item['auth
     </header>
     <div class="community-v22-detail-body">
         <div class="community-prose"><?= nl2br(e($item['body'])) ?></div>
-        <?php if ($canManage && $item['status'] === 'published'): ?><form method="post" action="<?= site_url('pengumuman/'.$item['id'].'/arsipkan') ?>"><?= csrf_field() ?><button class="community-button is-secondary"><i class="fa fa-archive" aria-hidden="true"></i> Arsipkan</button></form><?php endif; ?>
+        <?php if ($canManage): ?><form method="post" action="<?= site_url('pengumuman/'.$item['id'].'/hapus') ?>" data-confirm="Pengumuman ini akan dihapus secara permanen. Lanjutkan?" data-confirm-title="Hapus pengumuman?" data-confirm-button="Hapus" data-confirm-tone="danger" data-disable-submit><?= csrf_field() ?><button class="community-button bg-red-dark color-white"><i class="fa fa-trash" aria-hidden="true"></i><span>Hapus</span></button></form><?php endif; ?>
     </div>
 </article>

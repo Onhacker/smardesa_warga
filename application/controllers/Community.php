@@ -43,13 +43,13 @@ class Community extends Public_Controller
         $this->redirect_with($id ? 'pengumuman/'.$id : 'pengumuman', $id ? 'success' : 'error', $id ? 'Pengumuman diterbitkan.' : 'Pengumuman belum dapat disimpan.');
     }
 
-    public function archive($id)
+    public function delete($id)
     {
         $this->require_authentication();
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
-        $ok = $this->community->archive_announcement($id, $this->currentUser);
-        $this->redirect_with('pengumuman', $ok ? 'success' : 'error', $ok ? 'Pengumuman diarsipkan.' : 'Pengumuman tidak ditemukan.');
+        $ok = $this->community->delete_announcement($id, $this->currentUser);
+        $this->redirect_with('pengumuman', $ok ? 'success' : 'error', $ok ? 'Pengumuman dihapus.' : 'Pengumuman tidak ditemukan.');
     }
 
     public function complaints()

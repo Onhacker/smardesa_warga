@@ -6621,8 +6621,8 @@ body.warga-is-navigating { overflow: hidden; cursor: progress; }
 
 .warga-page-skeleton {
   position: fixed;
-  z-index: 97;
-  inset: calc(56px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 96;
+  inset: calc(90px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
   background: var(--warga-page);
   pointer-events: auto;
@@ -6631,9 +6631,12 @@ body.warga-is-navigating { overflow: hidden; cursor: progress; }
 .warga-page-skeleton[hidden] { display: none !important; }
 .warga-page-skeleton-inner { width: min(100%, 820px); margin: 0 auto; padding: 20px 15px 30px; }
 #preloader.warga-initial-skeleton {
+  position: fixed;
+  z-index: 96;
+  inset: calc(90px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
   display: block;
   overflow: hidden;
-  padding-top: calc(56px + env(safe-area-inset-top, 0px));
+  padding-top: 0;
   background: var(--warga-page);
 }
 #preloader.warga-initial-skeleton .warga-page-skeleton-inner { height: 100%; overflow: hidden; }
