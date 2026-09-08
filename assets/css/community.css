@@ -763,6 +763,12 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   background: var(--warga-surface, #fff);
   box-shadow: 0 9px 23px rgba(31,45,56,.08);
 }
+#page .community-v22-detail.community-v22-announcement-detail {
+  box-sizing: border-box;
+  width: calc(100% - 30px);
+  max-width: 730px;
+  margin: 0 auto 30px;
+}
 #page .community-v22-detail-hero {
   display: flex;
   align-items: flex-start;
@@ -859,6 +865,9 @@ body.theme-light #page .community-v22-detail-hero .community-meta time,
 body.theme-light #page .community-v22-detail-hero .community-meta span { color: #fff !important; }
 
 @media (max-width: 480px) {
+  #page .community-v22-detail.community-v22-announcement-detail {
+    width: calc(100% - 24px);
+  }
   #page .community-v22-announcement-detail .community-v22-detail-hero {
     grid-template-columns: 49px minmax(0, 1fr);
   }
