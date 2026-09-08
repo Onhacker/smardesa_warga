@@ -1689,20 +1689,56 @@ body {
   background: #f0f5f6;
 }
 
-#menu-main .warga-menu-list .ios-switch {
+#menu-main .warga-menu-list > a.warga-menu-toggle-row {
+  grid-template-columns: 38px minmax(0, 1fr) 58px;
+}
+
+#menu-main .warga-menu-list > a.warga-menu-toggle-row > .warga-menu-toggle-control,
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control {
   position: relative;
   top: auto;
   right: auto;
   float: none;
-  width: 42px;
-  height: 26px;
+  display: block;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 32px;
+  box-sizing: border-box;
   margin: 0 !important;
-  padding: 0;
+  padding: 0 !important;
   transform: none;
+  justify-self: end;
 }
 
-#menu-main .warga-menu-list .ios-switch label {
-  margin: 0;
+#menu-main .warga-menu-list > a.warga-menu-toggle-row > .warga-menu-toggle-control > .custom-control-label,
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control > .custom-control-label {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 58px;
+  height: 32px;
+  margin: 0 !important;
+  padding: 0;
+  line-height: 0;
+}
+
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::before,
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  margin: 0 !important;
+}
+
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::before {
+  width: 58px !important;
+  height: 32px !important;
+}
+
+#menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::after {
+  width: 30px !important;
+  height: 30px !important;
 }
 
 #menu-main .warga-logout-form {
@@ -3923,7 +3959,7 @@ body #page .page-content .warga-account-page .warga-account-row > div > small {
  * Give it a real trailing grid track so the switch is not squeezed into the
  * generic chevron column (and clipped outside the settings card). */
 .warga-account-page .warga-settings-list .warga-account-theme-row {
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  grid-template-columns: 48px minmax(0, 1fr) 58px;
   align-items: center;
   overflow: visible;
 }
@@ -3931,7 +3967,7 @@ body #page .page-content .warga-account-page .warga-account-row > div > small {
 .warga-account-page .warga-account-theme-row > .warga-account-theme-switch {
   grid-column: 3;
   /* Match the notification switch's intrinsic grid alignment exactly. */
-  justify-self: auto;
+  justify-self: end;
   min-width: 0;
 }
 
@@ -3973,7 +4009,7 @@ body #page .page-content .warga-account-page .warga-settings-list small {
  * second account preference. */
 .warga-account-page .warga-account-notification-row {
   display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  grid-template-columns: 48px minmax(0, 1fr) 58px;
   align-items: center;
   gap: 14px;
   min-height: 80px;
@@ -4035,19 +4071,51 @@ body #page .page-content .warga-account-page .warga-settings-list small {
   top: auto;
   right: auto;
   display: block;
-  flex: 0 0 42px;
-  width: 42px;
-  height: 26px;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 32px;
+  box-sizing: border-box;
   margin: 0 !important;
-  padding: 0;
+  padding: 0 !important;
   transform: scale(.8);
   transform-origin: right center;
+  justify-self: end;
 }
 
 .warga-account-page .warga-account-notification-switch .custom-control-label,
 .warga-account-page .warga-account-theme-switch .custom-control-label {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 58px;
+  height: 32px;
   margin: 0;
+  padding: 0;
+  line-height: 0;
   cursor: pointer;
+}
+
+.warga-account-page .warga-account-notification-switch .custom-control-label::before,
+.warga-account-page .warga-account-notification-switch .custom-control-label::after,
+.warga-account-page .warga-account-theme-switch .custom-control-label::before,
+.warga-account-page .warga-account-theme-switch .custom-control-label::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  margin: 0 !important;
+}
+
+.warga-account-page .warga-account-notification-switch .custom-control-label::before,
+.warga-account-page .warga-account-theme-switch .custom-control-label::before {
+  width: 58px !important;
+  height: 32px !important;
+}
+
+.warga-account-page .warga-account-notification-switch .custom-control-label::after,
+.warga-account-page .warga-account-theme-switch .custom-control-label::after {
+  width: 30px !important;
+  height: 30px !important;
 }
 
 .warga-account-page .warga-account-notification-switch .ios-input:disabled + .custom-control-label,

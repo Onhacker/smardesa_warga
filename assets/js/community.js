@@ -28,13 +28,16 @@
     window.__SDWCommunitySplideTuned = true;
   }());
   var config = window.SDW || {}, base = config.baseUrl || '/', isAuthenticated = config.isAuthenticated === true || config.isAuthenticated === 1 || config.isAuthenticated === '1';
-  var button = document.querySelector('[data-push-toggle]');
-  var checkbox = button && button.matches('input[type="checkbox"]');
-  var status = document.querySelector('[data-push-status]');
+  // The account page and the navigation drawer can both expose the same
+  // device-level preference. Keep every visible switch in sync instead of
+  // binding only the first one found in the DOM.
+  var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-push-toggle]'));
+  var checkboxes = buttons.filter(function (control) { return control.matches('input[type="checkbox"]'); });
+  var statuses = Array.prototype.slice.call(document.querySelectorAll('[data-push-status]'));
   var onboarding = document.querySelector('[data-notification-onboarding]');
   var subscribed = false;
   var onboardingKey = 'sdw-notification-onboarding-v1';
-  function message(text) { if (status) status.textContent = text; }
+  function message(text) { statuses.forEach(function (node) { node.textContent = text; }); }
   function isInstalledExperience() {
     var installedMode = false;
     try {
@@ -88,15 +91,16 @@
   }
   function updateButton(active) {
     subscribed = !!active;
-    if (!button) return;
-    if (checkbox) {
-      button.checked = subscribed;
-      button.setAttribute('aria-checked', subscribed ? 'true' : 'false');
-    } else {
-      button.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi');
-    }
+    buttons.forEach(function (control) {
+      if (control.matches('input[type="checkbox"]')) {
+        control.checked = subscribed;
+        control.setAttribute('aria-checked', subscribed ? 'true' : 'false');
+      } else {
+        control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi');
+      }
+    });
   }
-  function setDisabled(disabled) { if (button) button.disabled = !!disabled; }
+  function setDisabled(disabled) { buttons.forEach(function (control) { control.disabled = !!disabled; }); }
   var supported = window.isSecureContext && 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
   async function enableSubscription() {
     var permission = Notification.permission;
@@ -150,7 +154,7 @@
   }
   var pushRefreshTimer = 0, pushRefreshing = false;
   async function refreshPushState(rebind) {
-    if (!button || !supported || !config.vapidPublicKey || pushRefreshing) return;
+    if (!buttons.length || !supported || !config.vapidPublicKey || pushRefreshing) return;
     pushRefreshing = true;
     try {
       var permission = Notification.permission;
@@ -173,17 +177,21 @@
     } finally { pushRefreshing = false; }
   }
   function schedulePushRefresh() {
-    if (!button || document.hidden) return;
+    if (!buttons.length || document.hidden) return;
     clearTimeout(pushRefreshTimer);
     pushRefreshTimer = window.setTimeout(function () { refreshPushState(false); }, 120);
   }
-  if (button) {
+  if (buttons.length) {
     if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
     else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
     else {
       refreshPushState(true);
-      if (checkbox) button.addEventListener('change', function () { toggleSubscription(button.checked); });
-      else button.addEventListener('click', function () { toggleSubscription(!subscribed); });
+      checkboxes.forEach(function (control) {
+        control.addEventListener('change', function () { toggleSubscription(control.checked); });
+      });
+      buttons.filter(function (control) { return !control.matches('input[type="checkbox"]'); }).forEach(function (control) {
+        control.addEventListener('click', function () { toggleSubscription(!subscribed); });
+      });
       // Returning from Android's app-info/notification settings does not
       // reload the page.  Re-read Notification.permission and the browser
       // subscription whenever the TWA becomes visible/focused again.
@@ -193,7 +201,7 @@
     }
   }
   // Rebind an existing subscription after switching accounts; no permission prompt.
-  if (isAuthenticated && supported && config.vapidPublicKey && !button) navigator.serviceWorker.ready
+  if (isAuthenticated && supported && config.vapidPublicKey && !buttons.length) navigator.serviceWorker.ready
     .then(function (reg) { return reg.pushManager.getSubscription(); })
     .then(function (sub) { if (sub) return post('notifikasi/push', {subscription:JSON.stringify(sub)}); }).catch(function () {});
 
