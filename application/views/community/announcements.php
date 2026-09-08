@@ -52,7 +52,7 @@ $announcementInstitution = function_exists('mb_strtoupper') ? mb_strtoupper((str
                     <span class="community-v22-announcement-card-copy">
                         <span class="community-v22-announcement-card-eyebrow">PENGUMUMAN <?= e($announcementInstitution) ?></span>
                         <strong><?= e($item['title']) ?></strong>
-                        <span class="community-v22-announcement-card-meta"><time><?= e(tanggal_id($item['created_at'])) ?></time><?php if ($announcementAuthor !== ''): ?><span><?= e($announcementAuthor) ?></span><?php endif; ?></span>
+                        <span class="community-v22-announcement-card-meta"><span class="community-v22-announcement-card-meta-item"><i class="far fa-calendar-alt" aria-hidden="true"></i><time><?= e(tanggal_id($item['created_at'])) ?></time></span><?php if ($announcementAuthor !== ''): ?><span class="community-v22-announcement-card-meta-item"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($announcementAuthor) ?></span></span><?php endif; ?></span>
                     </span>
                 </a>
                 <div class="community-v22-announcement-card-body">

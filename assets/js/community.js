@@ -311,7 +311,11 @@
     link.classList.remove('is-unread');
     link.classList.add('is-read');
     var state = link.querySelector('.warga-notification-state');
-    if (state) state.textContent = 'Sudah dibaca';
+    if (state) {
+      state.textContent = 'Sudah dibaca';
+      state.classList.remove('is-danger');
+      state.classList.add('is-success');
+    }
     var count = document.querySelector('[data-notification-count]:not([hidden])');
     if (count) setUnreadCount((parseInt(count.textContent, 10) || 1) - 1);
   });

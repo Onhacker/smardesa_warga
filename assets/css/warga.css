@@ -4233,6 +4233,51 @@ body.theme-dark #page .warga-notification-item.is-unread .warga-notification-sta
   color: #d7e9fb;
 }
 
+/* Keep every notification control/card on the same horizontal track as the
+ * page hero. The shared list components normally add their own side margins,
+ * which creates a visibly narrower stack inside the v22 page shell. */
+#page .community-v22-notification-page .warga-notification-actions,
+#page .community-v22-notification-page .warga-list-search,
+#page .community-v22-notification-page .warga-notification-list,
+#page .community-v22-notification-page .warga-list-pagination {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+#page .community-v22-notification-page .warga-notification-actions {
+  margin-bottom: 16px;
+}
+
+/* Read state uses the same semantic success/danger treatment as the other
+ * account status badges. */
+#page .warga-notification-item .warga-notification-state.is-success,
+#page .warga-notification-item .warga-notification-state.is-danger {
+  border: 1px solid transparent;
+  color: #fff !important;
+}
+
+#page .warga-notification-item .warga-notification-state.is-success {
+  border-color: #2d783b;
+  background: #2d783b;
+}
+
+#page .warga-notification-item .warga-notification-state.is-danger {
+  border-color: #b5333e;
+  background: #b5333e;
+}
+
+body.theme-dark #page .warga-notification-item .warga-notification-state.is-success {
+  border-color: #4d9a5a;
+  background: #347d42;
+  color: #fff !important;
+}
+
+body.theme-dark #page .warga-notification-item .warga-notification-state.is-danger {
+  border-color: #d86770;
+  background: #b94550;
+  color: #fff !important;
+}
+
 /* AJAX complaint feedback reuses the logout-dialog shell. */
 .warga-confirm-icon.is-success {
   background: #e3f5e9;

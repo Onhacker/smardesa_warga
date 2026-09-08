@@ -657,6 +657,8 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   text-decoration: none;
 }
 #page .community-v22-announcement-card-head:hover { filter: brightness(1.04); }
+#page .community-v22-announcement-card-head,
+#page .community-v22-announcement-card-head * { color: #fff !important; }
 #page .community-v22-announcement-card-icon {
   display: grid;
   flex: 0 0 58px;
@@ -688,11 +690,22 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
 #page .community-v22-announcement-card-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 5px 28px;
   margin-top: 14px;
   color: rgba(255,255,255,.84) !important;
   font-size: 12px;
   line-height: 1.35;
+}
+#page .community-v22-announcement-card-meta-item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  gap: 6px;
+}
+#page .community-v22-announcement-card-meta-item i {
+  flex: 0 0 auto;
+  font-size: 10px;
 }
 #page .community-v22-announcement-card-meta time,
 #page .community-v22-announcement-card-meta span { color: inherit !important; }
@@ -735,6 +748,26 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   padding: 21px;
   background: linear-gradient(135deg, #1d4f8a, #235fa4);
   color: #fff;
+}
+#page .community-v22-announcement-detail .community-v22-detail-hero,
+#page .community-v22-announcement-detail .community-v22-detail-hero * {
+  color: #fff !important;
+}
+#page .community-v22-announcement-detail .community-v22-detail-hero {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: start;
+}
+#page .community-v22-announcement-detail .community-v22-detail-hero > div:last-child {
+  min-width: 0;
+}
+#page .community-v22-announcement-detail .community-v22-announcement-detail-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px 20px;
+  margin-top: 2px;
+  color: rgba(255,255,255,.84) !important;
 }
 #page .community-v22-complaint-detail .community-v22-detail-hero { background: linear-gradient(135deg, #285ca8, #3e79c5); }
 #page .community-v22-detail-hero h1 { margin: 2px 0 8px; color: #fff !important; font-size: clamp(22px, 4vw, 30px); line-height: 1.2; overflow-wrap: anywhere; }
@@ -787,6 +820,12 @@ body.theme-light #page .community-v22-detail-hero .community-v22-eyebrow,
 body.theme-light #page .community-v22-detail-hero .community-meta,
 body.theme-light #page .community-v22-detail-hero .community-meta time,
 body.theme-light #page .community-v22-detail-hero .community-meta span { color: #fff !important; }
+
+@media (max-width: 480px) {
+  #page .community-v22-announcement-detail .community-v22-detail-hero {
+    grid-template-columns: 49px minmax(0, 1fr);
+  }
+}
 
 /* Use the same Splide geometry as v22's double-slider. The template's
  * custom.min.js supplies the loop/autoplay behaviour; these rules only keep
