@@ -3,6 +3,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard extends Public_Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        // The authenticated dashboard contains tenant-specific counts and
+        // announcement summaries.  Never let a browser/proxy reuse one
+        // village's HTML after logout or when another resident signs in.
+        $this->output->set_header('Cache-Control: no-store, private');
+        $this->output->set_header('Pragma: no-cache');
+    }
+
     public function index()
     {
         if ($this->currentUser && warga_is_staff($this->currentUser)) redirect('petugas');
@@ -16,7 +26,10 @@ class Dashboard extends Public_Controller
         } else {
             $summary = array('total' => 0, 'active' => 0, 'issued' => 0, 'revision' => 0);
             $village = array('name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya', 'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung', 'contact' => array());
-            $announcements = $this->Community_model->public_announcements(3);
+            // Announcement content is tenant-private. Guests may still use
+            // the other public services, but never receive a count or item
+            // sourced from another village.
+            $announcements = array();
         }
         // Keep the dashboard preview lightweight while the public catalogue
         // remains available from the dedicated Pasar page.  The marketplace

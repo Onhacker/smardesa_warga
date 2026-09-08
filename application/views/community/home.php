@@ -50,7 +50,7 @@ $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $pu
                     <span><?= number_format($summary['active']) ?> permohonan diproses</span>
                 </span>
             </a>
-            <a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>" data-dashboard-media-card>
+            <?php if ($isAuthenticated): ?><a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/pengumuman-layanan.webp') ?>" alt="Ilustrasi layanan pengumuman" loading="lazy" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
@@ -59,7 +59,7 @@ $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $pu
                     <strong>Pengumuman</strong>
                     <span><?= $announcements ? number_format(count($announcements)) . ' informasi terbaru' : 'Belum ada informasi terbaru' ?></span>
                 </span>
-            </a>
+            </a><?php endif; ?>
             <a class="community-v22-slide splide__slide is-complaint" href="<?= site_url('pengaduan') ?>" data-dashboard-media-card>
                 <img src="<?= base_url('assets/v22/images/pictures/pengaduan-layanan.webp') ?>" alt="Ilustrasi layanan pengaduan" loading="lazy" width="1200" height="799">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
@@ -136,7 +136,7 @@ $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $pu
     </section>
 
     <section class="community-v22-quick-cards" aria-label="Informasi dan aspirasi warga">
-        <a class="community-v22-quick-card is-announcement" href="<?= site_url('pengumuman') ?>">
+        <?php if ($isAuthenticated): ?><a class="community-v22-quick-card is-announcement" href="<?= site_url('pengumuman') ?>">
             <span class="community-v22-quick-card-head">
                 <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
                 <strong>Pengumuman</strong>
@@ -144,7 +144,7 @@ $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $pu
             <span class="community-v22-quick-card-copy">
                 <?= $announcements ? number_format(count($announcements)) . ' informasi terbaru.' : 'Belum ada informasi terbaru.' ?>
             </span>
-        </a>
+        </a><?php endif; ?>
         <a class="community-v22-quick-card is-complaint" href="<?= site_url('pengaduan') ?>">
             <span class="community-v22-quick-card-head">
                 <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-comment-dots"></i></span>

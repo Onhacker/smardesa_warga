@@ -44,7 +44,22 @@
     <button type="button" class="warga-letter-modal-backdrop" data-warga-letter-close aria-label="Tutup surat"></button>
     <section class="warga-letter-modal-panel" role="document">
         <header class="warga-letter-modal-header"><div><span>Surat Resmi</span><h2 id="warga-letter-modal-title"><?= e($request['service_name']) ?></h2></div><button type="button" class="warga-letter-icon-button" data-warga-letter-close aria-label="Tutup surat"><i class="fa fa-times"></i></button></header>
-        <div class="warga-letter-modal-frame-wrap"><div class="warga-letter-modal-status" data-warga-letter-status role="status">Memuat surat...</div><iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="" hidden></iframe></div>
+        <div class="warga-letter-modal-frame-wrap">
+            <div class="warga-letter-modal-status" data-warga-letter-status role="status">Memuat surat...</div>
+            <div class="warga-letter-modal-scroll" data-warga-letter-viewport>
+                <div class="warga-letter-modal-canvas" data-warga-letter-canvas hidden>
+                    <iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="" hidden></iframe>
+                </div>
+            </div>
+            <div class="warga-letter-modal-gesture-layer" data-warga-letter-gesture-layer hidden aria-label="Cubit untuk memperbesar surat"></div>
+            <div class="warga-letter-modal-zoom" data-warga-letter-zoom hidden role="group" aria-label="Kontrol zoom surat">
+                <button type="button" class="warga-letter-zoom-button" data-warga-letter-zoom-out aria-label="Perkecil surat"><i class="fa fa-minus" aria-hidden="true"></i></button>
+                <output data-warga-letter-zoom-level aria-live="polite">100%</output>
+                <button type="button" class="warga-letter-zoom-button" data-warga-letter-zoom-reset aria-label="Atur ukuran surat"><i class="fa fa-expand-arrows-alt" aria-hidden="true"></i></button>
+                <button type="button" class="warga-letter-zoom-button" data-warga-letter-zoom-in aria-label="Perbesar surat"><i class="fa fa-plus" aria-hidden="true"></i></button>
+            </div>
+            <p class="warga-letter-modal-zoom-hint" data-warga-letter-zoom-hint hidden>Cubit untuk memperbesar atau memperkecil surat.</p>
+        </div>
         <footer class="warga-letter-modal-footer"><button type="button" class="btn btn-s warga-letter-secondary" data-warga-letter-close><i class="fa fa-times"></i><span>Tutup</span></button><button type="button" class="btn btn-s bg-green-dark color-white" data-warga-letter-download disabled><i class="fa fa-download"></i><span>Unduh Surat</span></button></footer>
     </section>
 </div>

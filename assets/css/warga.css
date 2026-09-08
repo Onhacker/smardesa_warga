@@ -5498,9 +5498,19 @@ body.theme-dark #page .page-content .warga-detail-head > .warga-detail-icon[clas
 .warga-letter-modal-header h2 { margin: 3px 0 0; color: #0f172a; font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
 .warga-letter-icon-button { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid #cbd5e1; border-radius: 50%; background: #fff; color: #334155; cursor: pointer; }
 .warga-letter-icon-button:hover, .warga-letter-icon-button:focus-visible { border-color: #235fa4; background: #ecfdf5; color: #235fa4; }
-.warga-letter-modal-frame-wrap { position: relative; flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; background: #e5e7eb; padding: 14px; }
-.warga-letter-modal-frame { display: block; width: 100%; min-width: 794px; height: 100%; min-height: 1123px; border: 0; background: #fff; }
-.warga-letter-modal-status { display: grid; place-items: center; min-height: 180px; color: #475569; font-size: 15px; text-align: center; }
+.warga-letter-modal-frame-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #e5e7eb; }
+.warga-letter-modal-scroll { position: absolute; inset: 0; box-sizing: border-box; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 14px; }
+.warga-letter-modal-canvas { position: relative; flex: 0 0 auto; width: 794px; height: 1123px; margin: 0 auto; background: #fff; box-shadow: 0 2px 12px rgba(15,23,42,.14); }
+.warga-letter-modal-frame { position: absolute; top: 0; left: 0; display: block; width: 794px; height: 1123px; min-width: 0; min-height: 0; border: 0; background: #fff; transform-origin: top left; pointer-events: none; }
+.warga-letter-modal-gesture-layer { position: absolute; inset: 0; z-index: 3; touch-action: none; cursor: grab; }
+.warga-letter-modal-gesture-layer:active { cursor: grabbing; }
+.warga-letter-modal-zoom { position: absolute; top: 12px; right: 12px; z-index: 4; display: inline-flex; align-items: center; gap: 2px; min-height: 38px; padding: 3px; border: 1px solid rgba(148,163,184,.72); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: 0 5px 18px rgba(15,23,42,.16); }
+.warga-letter-modal-zoom output { min-width: 48px; color: #334155; font-size: 12px; font-weight: 800; line-height: 30px; text-align: center; }
+.warga-letter-zoom-button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #235fa4; cursor: pointer; }
+.warga-letter-zoom-button:hover, .warga-letter-zoom-button:focus-visible { background: #eaf2fb; }
+.warga-letter-zoom-button:disabled { opacity: .4; cursor: default; }
+.warga-letter-modal-zoom-hint { position: absolute; right: 14px; bottom: 12px; z-index: 4; max-width: calc(100% - 28px); margin: 0; padding: 6px 10px; border-radius: 999px; background: rgba(15,23,42,.72); color: #fff; font-size: 11px; line-height: 1.3; pointer-events: none; }
+.warga-letter-modal-status { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; padding: 24px; color: #475569; font-size: 15px; text-align: center; pointer-events: none; }
 .warga-letter-modal-status.is-error { color: #b91c1c; }
 .warga-letter-modal-footer { display: flex; flex-shrink: 0; justify-content: flex-end; gap: 10px; padding: 12px 18px; border-top: 1px solid #e5e7eb; background: #fff; }
 .warga-letter-modal-footer .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; }
@@ -5512,7 +5522,9 @@ body.theme-dark #page .page-content .warga-detail-head > .warga-detail-icon[clas
   .warga-letter-modal-panel { height: calc(100vh - 12px); height: calc(100dvh - 12px); }
   .warga-letter-modal-header { padding: 12px 14px; }
   .warga-letter-modal-header h2 { font-size: 17px; }
-  .warga-letter-modal-frame-wrap { padding: 8px; }
+  .warga-letter-modal-scroll { padding: 8px; }
+  .warga-letter-modal-zoom { top: 8px; right: 8px; }
+  .warga-letter-modal-zoom-hint { right: 8px; bottom: 8px; }
   .warga-letter-modal-footer { padding: 10px 12px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
   .warga-letter-modal-footer .btn { flex: 1; justify-content: center; }
 }

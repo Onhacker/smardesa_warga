@@ -1,7 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php
-$isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
-$announcementArea = $isAuthenticated ? (string) ($currentUser['village_name'] ?? '') : 'Semua kampung';
+$announcementArea = (string) ($currentUser['village_name'] ?? '');
 $announcementInstitution = function_exists('mb_strtoupper') ? mb_strtoupper((string) $institutionLower, 'UTF-8') : strtoupper((string) $institutionLower);
 ?>
 <div class="warga-community community-v22-page community-v22-announcement-page">

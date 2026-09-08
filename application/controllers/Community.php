@@ -12,32 +12,36 @@ class Community extends Public_Controller
 
     public function announcements()
     {
-        $items = $this->currentUser
-            ? $this->community->announcements($this->currentUser)
-            : $this->community->public_announcements(100);
+        // Announcements contain tenant-scoped information.  Do not expose a
+        // public catalogue: the model query below always filters by the
+        // authenticated user's village_id.
+        $this->require_authentication();
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        $items = $this->community->announcements($this->currentUser);
         $this->render('community/announcements', array('pageTitle' => 'Pengumuman',
             'items' => $items,
-            'canManage' => $this->currentUser ? $this->community->can_manage($this->currentUser) : FALSE,
+            'canManage' => $this->community->can_manage($this->currentUser),
             'ready' => $this->community->ready()));
     }
 
     public function announcement($id)
     {
-        $item = $this->currentUser
-            ? $this->community->announcement($id, $this->currentUser)
-            : $this->community->public_announcement($id);
+        // Detail pages use the same tenant guard as the catalogue.  This is
+        // deliberately checked before looking up the record so an anonymous
+        // visitor cannot probe announcement IDs across villages.
+        $this->require_authentication();
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        $item = $this->community->announcement($id, $this->currentUser);
         if (!$item) show_404();
         // Opening an announcement directly from the announcement catalogue
         // must consume the same notification that would be consumed through
         // /notifikasi/buka/{id}.  The target is tenant- and user-scoped by
         // Notification_model, so public visitors and unrelated notifications
         // remain untouched.
-        if ($this->currentUser) {
-            $this->load->model('Notification_model');
-            $this->Notification_model->mark_target_read($this->currentUser['id'], 'pengumuman/' . (string) $id);
-        }
+        $this->load->model('Notification_model');
+        $this->Notification_model->mark_target_read($this->currentUser['id'], 'pengumuman/' . (string) $id);
         $this->render('community/announcement', array('pageTitle' => 'Pengumuman', 'item' => $item,
-            'canManage' => $this->currentUser ? $this->community->can_manage($this->currentUser) : FALSE, 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
+            'canManage' => $this->community->can_manage($this->currentUser), 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
     }
 
     public function publish()

@@ -650,6 +650,15 @@
     if (!opener || !modal) return;
     if (modal.parentNode !== document.body) document.body.appendChild(modal);
     var frame = modal.querySelector('[data-warga-letter-frame]');
+    var viewport = modal.querySelector('[data-warga-letter-viewport]');
+    var canvas = modal.querySelector('[data-warga-letter-canvas]');
+    var gestureLayer = modal.querySelector('[data-warga-letter-gesture-layer]');
+    var zoomControls = modal.querySelector('[data-warga-letter-zoom]');
+    var zoomOut = modal.querySelector('[data-warga-letter-zoom-out]');
+    var zoomIn = modal.querySelector('[data-warga-letter-zoom-in]');
+    var zoomReset = modal.querySelector('[data-warga-letter-zoom-reset]');
+    var zoomLevel = modal.querySelector('[data-warga-letter-zoom-level]');
+    var zoomHint = modal.querySelector('[data-warga-letter-zoom-hint]');
     var status = modal.querySelector('[data-warga-letter-status]');
     var download = modal.querySelector('[data-warga-letter-download]');
     var activeOpener = null;
@@ -659,6 +668,144 @@
     var sequence = 0;
     var pageContent = document.getElementById('page');
     var pageWasInert = false;
+    var baseWidth = 794;
+    var baseHeight = 1123;
+    var minScale = 0.25;
+    var maxScale = 3;
+    var fitScale = 1;
+    var currentScale = 1;
+    var pointers = {};
+    var panStart = null;
+    var pinchStart = null;
+
+    function clampScale(value) {
+      return Math.max(minScale, Math.min(maxScale, Number(value) || 1));
+    }
+
+    function updateZoomLabel() {
+      if (zoomLevel) zoomLevel.textContent = Math.round(currentScale * 100) + '%';
+      if (zoomOut) zoomOut.disabled = currentScale <= minScale + 0.001;
+      if (zoomIn) zoomIn.disabled = currentScale >= maxScale - 0.001;
+    }
+
+    function setCanvasScale(value, focus) {
+      if (!viewport || !canvas || !frame) return;
+      var nextScale = clampScale(value);
+      var previousScale = currentScale || nextScale;
+      var rect = viewport.getBoundingClientRect();
+      var focusX = focus && Number.isFinite(focus.x) ? focus.x - rect.left : null;
+      var focusY = focus && Number.isFinite(focus.y) ? focus.y - rect.top : null;
+      var oldLeft = canvas.offsetLeft;
+      var oldTop = canvas.offsetTop;
+      var contentX = focusX === null ? null : (viewport.scrollLeft - oldLeft + focusX) / previousScale;
+      var contentY = focusY === null ? null : (viewport.scrollTop - oldTop + focusY) / previousScale;
+      var width = baseWidth * nextScale;
+      var height = baseHeight * nextScale;
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      frame.style.width = baseWidth + 'px';
+      frame.style.height = baseHeight + 'px';
+      frame.style.transform = 'scale(' + nextScale + ')';
+      currentScale = nextScale;
+      updateZoomLabel();
+      if (contentX !== null) {
+        viewport.scrollLeft = Math.max(0, canvas.offsetLeft + contentX * nextScale - focusX);
+        viewport.scrollTop = Math.max(0, canvas.offsetTop + contentY * nextScale - focusY);
+      }
+    }
+
+    function calculateFitScale() {
+      if (!viewport) return 1;
+      var styles = window.getComputedStyle ? window.getComputedStyle(viewport) : null;
+      var horizontalPadding = styles
+        ? (parseFloat(styles.paddingLeft) || 0) + (parseFloat(styles.paddingRight) || 0)
+        : 0;
+      var available = Math.max(240, viewport.clientWidth - horizontalPadding);
+      return Math.max(minScale, Math.min(1, available / baseWidth));
+    }
+
+    function resetZoom() {
+      fitScale = calculateFitScale();
+      setCanvasScale(fitScale);
+      if (viewport) {
+        viewport.scrollLeft = 0;
+        viewport.scrollTop = 0;
+      }
+    }
+
+    function zoomBy(multiplier, event) {
+      var focus = null;
+      if (event && Number.isFinite(event.clientX)) {
+        focus = { x: event.clientX, y: event.clientY };
+      } else if (viewport) {
+        var rect = viewport.getBoundingClientRect();
+        focus = { x: rect.left + viewport.clientWidth / 2, y: rect.top + viewport.clientHeight / 2 };
+      }
+      setCanvasScale(currentScale * multiplier, focus);
+    }
+
+    function pointerDistance(first, second) {
+      var dx = first.x - second.x;
+      var dy = first.y - second.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function pointerMidpoint(first, second) {
+      return { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
+    }
+
+    function pointerList() {
+      return Object.keys(pointers).map(function (key) { return pointers[key]; });
+    }
+
+    function handlePointerDown(event) {
+      if (!gestureLayer) return;
+      event.preventDefault();
+      pointers[event.pointerId] = { x: event.clientX, y: event.clientY };
+      try { gestureLayer.setPointerCapture(event.pointerId); } catch (ignore) {}
+      var points = pointerList();
+      if (points.length === 1) {
+        panStart = { x: event.clientX, y: event.clientY, left: viewport.scrollLeft, top: viewport.scrollTop };
+        pinchStart = null;
+      } else if (points.length >= 2) {
+        var midpoint = pointerMidpoint(points[0], points[1]);
+        pinchStart = { distance: Math.max(1, pointerDistance(points[0], points[1])), scale: currentScale };
+        panStart = null;
+        // Keep the initial midpoint as a stable anchor while the fingers move.
+        pinchStart.midpoint = midpoint;
+      }
+    }
+
+    function handlePointerMove(event) {
+      if (!Object.prototype.hasOwnProperty.call(pointers, event.pointerId)) return;
+      event.preventDefault();
+      pointers[event.pointerId] = { x: event.clientX, y: event.clientY };
+      var points = pointerList();
+      if (points.length >= 2) {
+        if (!pinchStart) {
+          var initialMidpoint = pointerMidpoint(points[0], points[1]);
+          pinchStart = { distance: Math.max(1, pointerDistance(points[0], points[1])), scale: currentScale, midpoint: initialMidpoint };
+        }
+        var distance = pointerDistance(points[0], points[1]);
+        var midpoint = pointerMidpoint(points[0], points[1]);
+        setCanvasScale(pinchStart.scale * distance / pinchStart.distance, midpoint);
+      } else if (points.length === 1 && panStart && viewport) {
+        viewport.scrollLeft = Math.max(0, panStart.left - (event.clientX - panStart.x));
+        viewport.scrollTop = Math.max(0, panStart.top - (event.clientY - panStart.y));
+      }
+    }
+
+    function handlePointerEnd(event) {
+      delete pointers[event.pointerId];
+      try { gestureLayer.releasePointerCapture(event.pointerId); } catch (ignore) {}
+      var points = pointerList();
+      if (points.length < 2) pinchStart = null;
+      if (points.length === 1 && viewport) {
+        panStart = { x: points[0].x, y: points[0].y, left: viewport.scrollLeft, top: viewport.scrollTop };
+      } else if (!points.length) {
+        panStart = null;
+      }
+    }
 
     function close() {
       sequence++;
@@ -669,6 +816,13 @@
       document.body.classList.remove('warga-letter-modal-open');
       if (pageContent) pageContent.inert = pageWasInert;
       if (frame) { frame.hidden = true; frame.srcdoc = ''; }
+      if (canvas) { canvas.hidden = true; canvas.style.width = ''; canvas.style.height = ''; }
+      if (gestureLayer) gestureLayer.hidden = true;
+      if (zoomControls) zoomControls.hidden = true;
+      if (zoomHint) zoomHint.hidden = true;
+      pointers = {};
+      panStart = null;
+      pinchStart = null;
       currentHtml = '';
       if (download) download.disabled = true;
       if (activeOpener && typeof activeOpener.focus === 'function') activeOpener.focus();
@@ -684,6 +838,10 @@
       currentHtml = '';
       currentName = (button.getAttribute('data-html-name') || 'surat-resmi.html').replace(/[\\/:*?"<>|]+/g, '-');
       if (!/\.html?$/i.test(currentName)) currentName += '.html';
+      pointers = {};
+      panStart = null;
+      pinchStart = null;
+      currentScale = 1;
       modal.hidden = false;
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('warga-letter-modal-open');
@@ -691,6 +849,10 @@
       modal.querySelector('.warga-letter-icon-button').focus();
       frame.hidden = true;
       frame.srcdoc = '';
+      if (canvas) canvas.hidden = true;
+      if (gestureLayer) gestureLayer.hidden = true;
+      if (zoomControls) zoomControls.hidden = true;
+      if (zoomHint) zoomHint.hidden = true;
       status.classList.remove('is-error');
       status.hidden = false;
       status.textContent = 'Memuat surat...';
@@ -709,7 +871,14 @@
         currentHtml = html;
         frame.srcdoc = html;
         frame.hidden = false;
+        if (canvas) canvas.hidden = false;
+        if (gestureLayer) gestureLayer.hidden = false;
+        if (zoomControls) zoomControls.hidden = false;
+        if (zoomHint) zoomHint.hidden = false;
         status.hidden = true;
+        window.requestAnimationFrame(function () {
+          if (requestNumber === sequence && !modal.hidden) resetZoom();
+        });
         if (download) download.disabled = false;
       }).catch(function (error) {
         if (error.name === 'AbortError' || requestNumber !== sequence || modal.hidden) return;
@@ -720,10 +889,13 @@
     }
 
     document.addEventListener('click', function (event) {
-      var button = event.target.closest('[data-warga-letter-open], [data-warga-letter-close], [data-warga-letter-download]');
+      var button = event.target.closest('[data-warga-letter-open], [data-warga-letter-close], [data-warga-letter-download], [data-warga-letter-zoom-in], [data-warga-letter-zoom-out], [data-warga-letter-zoom-reset]');
       if (!button) return;
       if (button.hasAttribute('data-warga-letter-open')) { event.preventDefault(); open(button); }
       else if (button.hasAttribute('data-warga-letter-close')) { event.preventDefault(); close(); }
+      else if (button.hasAttribute('data-warga-letter-zoom-in')) { event.preventDefault(); zoomBy(1.2); }
+      else if (button.hasAttribute('data-warga-letter-zoom-out')) { event.preventDefault(); zoomBy(1 / 1.2); }
+      else if (button.hasAttribute('data-warga-letter-zoom-reset')) { event.preventDefault(); resetZoom(); }
       else if (button.hasAttribute('data-warga-letter-download') && currentHtml) {
         event.preventDefault();
         var blobUrl = URL.createObjectURL(new Blob([currentHtml], { type: 'text/html;charset=utf-8' }));
@@ -736,12 +908,37 @@
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && !modal.hidden) { event.preventDefault(); close(); }
       if (event.key === 'Tab' && !modal.hidden) {
-        var buttons = Array.prototype.slice.call(modal.querySelectorAll('.warga-letter-modal-panel button:not(:disabled)'));
+        var buttons = Array.prototype.slice.call(modal.querySelectorAll('.warga-letter-modal-panel button:not(:disabled)')).filter(function (button) {
+          return !button.hidden && button.offsetParent !== null;
+        });
         var first = buttons[0], last = buttons[buttons.length - 1];
+        if (!first || !last) return;
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       }
     });
+    if (gestureLayer && viewport) {
+      gestureLayer.addEventListener('pointerdown', handlePointerDown);
+      gestureLayer.addEventListener('pointermove', handlePointerMove);
+      gestureLayer.addEventListener('pointerup', handlePointerEnd);
+      gestureLayer.addEventListener('pointercancel', handlePointerEnd);
+      gestureLayer.addEventListener('dblclick', function (event) {
+        event.preventDefault();
+        if (currentScale > fitScale + 0.05) resetZoom();
+        else setCanvasScale(Math.min(1.5, Math.max(fitScale * 1.8, 1)), event);
+      });
+      viewport.addEventListener('wheel', function (event) {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        zoomBy(event.deltaY < 0 ? 1.1 : 1 / 1.1, event);
+      }, { passive: false });
+      window.addEventListener('resize', function () {
+        if (!modal.hidden && canvas && !canvas.hidden) {
+          fitScale = calculateFitScale();
+          if (currentScale < fitScale) setCanvasScale(fitScale);
+        }
+      });
+    }
   }());
 
   document.addEventListener('click', function (event) {
