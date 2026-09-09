@@ -93,8 +93,8 @@ foreach (array(
                 <span>Unduh untuk Android atau tambahkan ke Layar Utama iPhone.</span>
             </div>
             <div class="warga-footer-install-actions">
-                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SmartDesa Warga di Google Play"><img src="<?= base_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
-                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SmartDesa Warga di iOS"><img src="<?= base_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
+                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SmartDesa Warga di Google Play"><img src="<?= warga_asset_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
+                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SmartDesa Warga di iOS"><img src="<?= warga_asset_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
             </div>
         </section>
     </div>

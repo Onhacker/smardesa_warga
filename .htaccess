@@ -3,10 +3,17 @@ DirectoryIndex index.php
 
 <IfModule mod_mime.c>
     AddType application/manifest+json .webmanifest
+    AddType font/woff2 .woff2
+    AddType font/woff .woff
 </IfModule>
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # warga_asset_url() appends a per-file version. Mark only those requests
+    # immutable; legacy/unversioned files keep the host's shorter default TTL.
+    RewriteCond %{QUERY_STRING} (^|&)v=[^&]+ [NC]
+    RewriteRule \.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$ - [E=SDW_VERSIONED_ASSET:1]
 
     # Framework, schema, runtime secrets, and generated files are never
     # public resources. Keep these rules before the front-controller fallback.
@@ -25,10 +32,21 @@ DirectoryIndex index.php
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Versioned static URLs may be retained for a year without risking stale
+    # CSS, JavaScript, fonts, or images after a deployment.
+    <FilesMatch "\.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$">
+        Header always set Cache-Control "public, max-age=31536000, immutable" env=SDW_VERSIONED_ASSET
+    </FilesMatch>
+    <FilesMatch "\.webmanifest$">
+        Header always set Cache-Control "public, max-age=3600"
+    </FilesMatch>
 </IfModule>
 
 <FilesMatch "^service-worker\.js$">
     <IfModule mod_headers.c>
-        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header always unset Cache-Control
+        Header always set Cache-Control "no-cache, no-store, must-revalidate"
+        Header always set Service-Worker-Allowed "/"
     </IfModule>
 </FilesMatch>

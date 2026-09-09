@@ -4,6 +4,16 @@
   var body = document.body;
   var config = window.SDW || {};
 
+  // The authentication screens intentionally omit the large AppKit runtime.
+  // Keep the initial skeleton lifecycle in the application bundle so those
+  // routes still reveal their content at the same point as the full shell.
+  var initialPreloader = document.getElementById('preloader');
+  if (initialPreloader) {
+    window.setTimeout(function () {
+      initialPreloader.classList.add('preloader-hide');
+    }, 150);
+  }
+
   /*
    * AppKit's theme handler is normally initialised by its dynamic menu
    * loader. SmartDesa renders the menu server-side, so that loader does not
@@ -957,6 +967,20 @@
     toggle.setAttribute('aria-label', visible ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
     var icon = toggle.querySelector('i');
     if (icon) icon.className = visible ? 'fa fa-eye' : 'fa fa-eye-slash';
+  });
+
+  // Flash alerts only need a lightweight dismiss action; keeping it here
+  // avoids loading the complete Bootstrap JavaScript bundle on every route.
+  document.addEventListener('click', function (event) {
+    var target = event.target;
+    var close = target && typeof target.closest === 'function'
+      ? target.closest('.warga-flash-close')
+      : null;
+    if (!close) return;
+    var alert = close.closest('.warga-flash');
+    if (!alert) return;
+    event.preventDefault();
+    alert.remove();
   });
 
   (function initConfirmations() {

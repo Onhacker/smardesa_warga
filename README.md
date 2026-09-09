@@ -41,6 +41,8 @@ disertai thumbnail 640 px untuk kartu produk. URL gambar memakai token versi dan
 dicache oleh service worker; gambar lama dibuatkan thumbnail saat pertama kali dipakai.
 
 Panduan pemasangan dua subdomain tersedia pada [DEPLOY_HOSTINGER.md](DEPLOY_HOSTINGER.md).
+Ringkasan temuan, optimasi tiga batch, dan pemeriksaan rilis tersedia pada
+[PERFORMANCE_AUDIT.md](PERFORMANCE_AUDIT.md).
 
 ## Repository
 

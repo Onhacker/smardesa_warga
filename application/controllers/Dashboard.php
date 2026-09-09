@@ -34,12 +34,7 @@ class Dashboard extends Public_Controller
         // Keep the dashboard preview lightweight while the public catalogue
         // remains available from the dedicated Pasar page.  The marketplace
         // model applies the same published/public visibility rules here.
-        $marketListing = $this->marketplace->products(array(), array(
-            'public_all' => TRUE,
-            'sort' => 'newest',
-            'page' => 1,
-            'per_page' => 4
-        ));
+        $marketListing = $this->marketplace->latest_public_products(4);
         $this->render('community/home', array('pageTitle'=>'Beranda',
             'village'=>$village, 'summary'=>$summary, 'announcements'=>$announcements,
             'marketplaceProducts'=>array_slice(isset($marketListing['items']) && is_array($marketListing['items']) ? $marketListing['items'] : array(), 0, 4),

@@ -1,58 +1,30 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-footer-install-share-89';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-performance-91';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
+const assetPath = new URL('assets/', scopeUrl).pathname;
+const marketplaceImagePath = new URL('pasar/gambar/', scopeUrl).pathname;
 const offlineUrl = new URL('offline.html', scopeUrl).href;
 const precache = [
   'offline.html',
-  'manifest.webmanifest',
-  'assets/pwa/icon-180.png',
   'assets/pwa/icon-192.png',
-  'assets/pwa/icon-512.png',
-  'assets/pwa/icon-maskable-512.png',
-  'assets/pwa/notification-badge.png',
-  'assets/pwa/share-preview.png',
-  'assets/pwa/google-play.webp',
-  'assets/pwa/install-ios.webp',
-  'assets/v22/styles/bootstrap.min.css',
-  'assets/v22/fonts/css/fontawesome-all.min.css',
-  'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
-  'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
-  'assets/css/simp-v22.min.css?v=1',
-  'assets/css/warga.min.css?v=113',
-  'assets/css/footer-share.css?v=4',
-  'assets/v22/scripts/bootstrap.min.js',
-  'assets/v22/scripts/custom.min.js?v=3',
-  'assets/js/warga.min.js?v=22',
-  'assets/js/footer-actions.js?v=2',
-  'assets/js/community.min.js?v=17',
-  'assets/css/community.min.css?v=25',
-  'assets/css/market.css?v=22',
-  'assets/js/market.js?v=12',
-  'assets/images/market-product-placeholder.svg',
-  'assets/v22/images/pictures/pasar-layanan.webp',
-  'assets/v22/images/pictures/surat-layanan.webp',
-  'assets/v22/images/pictures/pengaduan-layanan.webp',
-  'assets/v22/images/pictures/pengumuman-layanan.webp',
-  'assets/v22/images/pictures/notifikasi-layanan.webp',
-  'assets/v22/images/pictures/kontak-lembaga.webp'
+  'assets/pwa/notification-badge.png'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {
-  if (request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(appPath + 'assets/')) return false;
+  if (request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(assetPath)) return false;
   if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
   return /\.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname);
 }
 
 function isMarketplaceImage(request, url) {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return false;
-  var route = appPath + 'pasar/gambar/';
-  if (!url.pathname.startsWith(route) || !/^\d+$/.test(url.pathname.slice(route.length))) return false;
+  if (!url.pathname.startsWith(marketplaceImagePath) || !/^\d+$/.test(url.pathname.slice(marketplaceImagePath.length))) return false;
   if (!/^[a-f0-9]{20}$/i.test(url.searchParams.get('v') || '')) return false;
   if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
   return true;
@@ -67,9 +39,13 @@ self.addEventListener('install', function (event) {
 });
 
 self.addEventListener('activate', function (event) {
-  event.waitUntil(caches.keys().then(function (keys) {
+  var enableNavigationPreload = self.registration.navigationPreload
+    ? self.registration.navigationPreload.enable().catch(function () {})
+    : Promise.resolve();
+  var removeOldCaches = caches.keys().then(function (keys) {
     return Promise.all(keys.map(function (key) { return key.startsWith(SDW_CACHE_PREFIX) && key !== SDW_CACHE ? caches.delete(key) : false; }));
-  }).then(function () { return self.clients.claim(); }));
+  });
+  event.waitUntil(Promise.all([enableNavigationPreload, removeOldCaches]).then(function () { return self.clients.claim(); }));
 });
 
 self.addEventListener('fetch', function (event) {
@@ -78,7 +54,11 @@ self.addEventListener('fetch', function (event) {
   var url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).catch(function () { return caches.match(offlineUrl).then(function (response) { return response || Response.error(); }); }));
+    event.respondWith(Promise.resolve(event.preloadResponse).then(function (preloaded) {
+      return preloaded || fetch(request);
+    }).catch(function () {
+      return caches.match(offlineUrl).then(function (response) { return response || Response.error(); });
+    }));
     return;
   }
   if (isMarketplaceImage(request, url)) {

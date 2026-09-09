@@ -17,7 +17,7 @@ $productImage = static function (array $item) use ($marketUrl) {
         $first = reset($item['images']);
         $candidate = is_array($first) ? ($first['thumbnail_url'] ?? ($first['url'] ?? ($first['image_url'] ?? ($first['path'] ?? '')))) : $first;
     }
-    return $marketUrl($candidate, base_url('assets/images/market-product-placeholder.svg'));
+    return $marketUrl($candidate, warga_asset_url('assets/images/market-product-placeholder.svg'));
 };
 $productPrice = static function ($value) {
     $value = is_numeric($value) ? (float) $value : 0;

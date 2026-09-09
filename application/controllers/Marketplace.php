@@ -83,7 +83,7 @@ class Marketplace extends Public_Controller
         $viewer = is_array($this->currentUser) ? $this->currentUser : array();
         $product = $this->marketplace->product($id, $viewer, TRUE);
         if (!$product) show_404();
-        $related = $this->marketplace->products($viewer, array('category_id' => $product['category_id'], 'per_page' => 4, 'public_all' => TRUE));
+        $related = $this->marketplace->products($viewer, array('category_id' => $product['category_id'], 'per_page' => 4, 'public_all' => TRUE, 'skip_total' => TRUE));
         $this->render('marketplace/product', array(
             'pageTitle' => (string) $product['name'],
             'product' => $product,

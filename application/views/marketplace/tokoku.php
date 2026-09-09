@@ -4,7 +4,7 @@ $store = isset($store) && is_array($store) ? $store : array();
 $products = isset($products) && is_array($products) ? $products : array();
 $marketUrl = static function ($value) {
     $value = trim((string) $value);
-    if ($value === '') return base_url('assets/images/market-product-placeholder.svg');
+    if ($value === '') return warga_asset_url('assets/images/market-product-placeholder.svg');
     if (preg_match('#^(?:https?:)?//#i', $value)) return $value;
     return base_url(ltrim($value, '/'));
 };

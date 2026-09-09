@@ -87,7 +87,7 @@ class MY_Controller extends CI_Controller
         $data['shareUrl'] = isset($data['shareUrl']) && filter_var((string) $data['shareUrl'], FILTER_VALIDATE_URL)
             ? (string) $data['shareUrl'] : base_url();
         $data['shareImage'] = isset($data['shareImage']) && filter_var((string) $data['shareImage'], FILTER_VALIDATE_URL)
-            ? (string) $data['shareImage'] : base_url('assets/pwa/share-preview.png');
+            ? (string) $data['shareImage'] : warga_asset_url('assets/pwa/share-preview.png');
         $data['shareImageAlt'] = isset($data['shareImageAlt']) ? (string) $data['shareImageAlt'] : $publicBrand . ', layanan digital warga';
         $data['shareImageWidth'] = isset($data['shareImageWidth']) ? (int) $data['shareImageWidth'] : 1200;
         $data['shareImageHeight'] = isset($data['shareImageHeight']) ? (int) $data['shareImageHeight'] : 630;
@@ -105,6 +105,18 @@ class MY_Controller extends CI_Controller
         if (!isset($data['backUrl'])) {
             $data['backUrl'] = $view === 'staff/show' ? site_url('petugas') : site_url('permohonan');
         }
+        // Page-specific bundles keep marketplace/community code out of routes
+        // that do not use it. The dashboard home intentionally needs both:
+        // community owns its slider while marketplace owns the product cards.
+        $data['loadCommunityStyles'] = array_key_exists('loadCommunityStyles', $data)
+            ? (bool) $data['loadCommunityStyles']
+            : (strpos($view, 'community/') === 0 || strpos($view, 'notifications/') === 0);
+        $data['loadCommunityScript'] = array_key_exists('loadCommunityScript', $data)
+            ? (bool) $data['loadCommunityScript']
+            : (strpos($view, 'community/') === 0);
+        $data['loadMarketplaceAssets'] = array_key_exists('loadMarketplaceAssets', $data)
+            ? (bool) $data['loadMarketplaceAssets']
+            : (strpos($view, 'marketplace/') === 0 || $view === 'community/home');
         $data['contentView'] = $view;
         $this->load->view('layouts/app', $data);
     }

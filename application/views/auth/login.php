@@ -16,7 +16,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
     $shareTitle = 'Smart ' . $loginInstitution . ' ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
     $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.';
     $shareUrl = base_url();
-    $shareImage = base_url('assets/pwa/share-preview.png');
+    $shareImage = warga_asset_url('assets/pwa/share-preview.png');
     $this->load->view('layouts/social_meta', array(
         'shareTitle' => $shareTitle,
         'shareDescription' => $shareDescription,
@@ -27,14 +27,14 @@ $loginBrand = 'Smart ' . $loginInstitution;
         'shareImageHeight' => 630
     ));
     ?>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=113">
-    <link rel="stylesheet" href="<?= base_url('assets/css/footer-share.css') ?>?v=4">
-    <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
-    <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
-    <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
+    <link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>">
+    <link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
+    <link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?>
@@ -49,7 +49,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
     </nav>
     <main class="page-content header-clear-medium warga-auth-page">
         <section class="warga-auth-brand">
-            <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
+            <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
             <div><p>LAYANAN DIGITAL WARGA</p><h1><?= e($loginBrand) ?></h1><span><?= e($loginInstitution) ?> terhubung, layanan lebih dekat.</span></div>
         </section>
         <section class="card card-style warga-auth-card">
@@ -80,8 +80,8 @@ $loginBrand = 'Smart ' . $loginInstitution;
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=89') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script>
-<script src="<?= base_url('assets/js/footer-actions.js') ?>?v=2"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>
+<script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
 </body>
 </html>

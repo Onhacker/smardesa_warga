@@ -1395,7 +1395,11 @@ document[_0xb873[37]](_0xb873[5], () => {
             });
         }
         var _0x14e3xb2 = document[_0xb873[24]](_0xb873[285]);
-        if (_0x14e3xb2[_0xb873[12]]) {
+        // Bootstrap's optional toast markup is not part of the warga shell.
+        // Keep this compatibility hook guarded so pages do not require the
+        // 147 KB Bootstrap runtime just because a third-party component adds
+        // a toast later.
+        if (_0x14e3xb2[_0xb873[12]] && typeof bootstrap !== 'undefined' && bootstrap.Toast) {
             _0x14e3xb2[_0xb873[22]]((_0x14e3xc) => {
                 return _0x14e3xc[_0xb873[37]](_0xb873[64], (_0x14e3x6d) => {
                     var _0x14e3xb3 = _0x14e3xc[_0xb873[47]](_0xb873[286]);
@@ -1406,7 +1410,7 @@ document[_0xb873[37]](_0xb873[5], () => {
             });
         }
         var _0x14e3xb5 = [][_0xb873[290]][_0xb873[289]](document[_0xb873[24]](_0xb873[288]));
-        if (_0x14e3xb5[_0xb873[12]]) {
+        if (_0x14e3xb5[_0xb873[12]] && typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
             var _0x14e3xb6 = _0x14e3xb5[_0xb873[291]](function (_0x14e3xb7) {
                 return new bootstrap.Dropdown(_0x14e3xb7);
             });

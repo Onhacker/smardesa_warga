@@ -5,7 +5,7 @@ $citizenVerified = !empty($citizenVerified);
 <div class="warga-services-page">
     <section class="warga-page-intro warga-services-intro">
         <div><p>PELAYANAN <?= e($institutionUpper) ?></p><h1>Semua Surat</h1><span>Temukan surat administrasi yang Anda perlukan.</span></div>
-        <span class="warga-intro-icon"><i class="ti ti-mail" aria-hidden="true"></i></span>
+        <span class="warga-intro-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
     </section>
 
     <section class="warga-service-catalog" aria-labelledby="warga-catalog-title">

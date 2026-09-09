@@ -1,6 +1,26 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+if (!function_exists('warga_asset_url')) {
+    /**
+     * Return a cache-safe URL for a public static asset.
+     *
+     * The per-file modification time changes only when that asset is deployed,
+     * so browsers may retain immutable responses without keeping an old build.
+     */
+    function warga_asset_url($path)
+    {
+        static $versions = array();
+        $path = ltrim((string) $path, '/');
+        if (!isset($versions[$path])) {
+            $absolute = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $path);
+            $versions[$path] = is_file($absolute) ? (string) @filemtime($absolute) : '1';
+        }
+        $version = $versions[$path];
+        return base_url($path) . '?v=' . rawurlencode($version !== '' ? $version : '1');
+    }
+}
+
 if (!function_exists('e')) {
     function e($value) { return html_escape((string) $value); }
 }
@@ -173,78 +193,78 @@ if (!function_exists('warga_service_icon')) {
         $haystack = trim($slug . ' ' . $name . ' ' . $shortName);
         $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack, 'UTF-8') : strtolower($haystack);
         $rules = array(
-            array(array('pendamping pasien'), 'ti ti-heart-handshake', 'surat-icon-rose'),
-            array(array('verifikasi data kesejahteraan', 'dtks', 'siks-ng'), 'ti ti-database-heart', 'surat-icon-teal'),
-            array(array('persetujuan kepala suku', 'pemilik hak ulayat', 'kepala suku hak ulayat'), 'ti ti-flag-2', 'surat-icon-amber'),
-            array(array('pelepasan hak tanah adat', 'tanah adat/ulayat', 'tanah adat ulayat'), 'ti ti-map-2', 'surat-icon-amber'),
-            array(array('perubahan elemen data kependudukan', 'f-1.05', 'f105'), 'ti ti-file-pencil', 'surat-icon-blue'),
-            array(array('penebusan pupuk', 'pupuk bersubsidi'), 'ti ti-plant-2', 'surat-icon-green'),
-            array(array('kesepakatan batas tanah adat'), 'ti ti-map-pin-share', 'surat-icon-teal'),
-            array(array('pernyataan batas tanah', 'tetangga sempadan'), 'ti ti-vector-bezier-2', 'surat-icon-teal'),
-            array(array('tanah garapan'), 'ti ti-plant-2', 'surat-icon-green'),
-            array(array('penguasaan fisik bidang tanah', 'sppfbt'), 'ti ti-map-2', 'surat-icon-amber'),
-            array(array('kartu identitas anak', 'penerbitan kia'), 'ti ti-id-badge-2', 'surat-icon-cyan'),
-            array(array('penerbitan ktp-el', 'penerbitan ktp el'), 'ti ti-id', 'surat-icon-blue'),
-            array(array('lansia', 'lanjut usia'), 'ti ti-user-heart', 'surat-icon-green'),
-            array(array('disabilitas', 'difabel'), 'ti ti-accessible', 'surat-icon-teal'),
-            array(array('janda', 'duda'), 'ti ti-heart-broken', 'surat-icon-purple'),
-            array(array('masih hidup'), 'ti ti-heartbeat', 'surat-icon-green'),
-            array(array('yatim', 'piatu'), 'ti ti-user-heart', 'surat-icon-rose'),
-            array(array('kelahiran', 'lahir'), 'ti ti-baby-carriage', 'surat-icon-cyan'),
-            array(array('penguburan', 'kubur'), 'ti ti-cross', 'surat-icon-slate'),
-            array(array('kematian', 'mati'), 'ti ti-ribbon-health', 'surat-icon-slate'),
-            array(array('pindah-datang', 'pindah datang'), 'ti ti-home-plus', 'surat-icon-green'),
-            array(array('pindah'), 'ti ti-truck-delivery', 'surat-icon-orange'),
-            array(array('kartu keluarga'), 'ti ti-users-group', 'surat-icon-blue'),
-            array(array('ktp'), 'ti ti-id', 'surat-icon-blue'),
-            array(array('paspor'), 'ti ti-plane', 'surat-icon-blue'),
-            array(array('catatan kriminal', 'skck'), 'ti ti-shield-check', 'surat-icon-indigo'),
-            array(array('kehilangan'), 'ti ti-alert-triangle', 'surat-icon-red'),
-            array(array('bantuan sosial lainnya', 'blt dana desa', 'blt-dana-desa'), 'ti ti-cash-banknote', 'surat-icon-green'),
-            array(array('rekomendasi bantuan sosial', 'bantuan sosial tunai', 'bst', 'bansos'), 'ti ti-cash', 'surat-icon-green'),
-            array(array('tidak mampu', 'jamkesos'), 'ti ti-heart-handshake', 'surat-icon-rose'),
-            array(array('beda nama'), 'ti ti-file-diff', 'surat-icon-purple'),
-            array(array('ahli waris'), 'ti ti-users-group', 'surat-icon-purple'),
-            array(array('wali'), 'ti ti-user-shield', 'surat-icon-indigo'),
-            array(array('pencatatan perkawinan non-muslim', 'perkawinan non-muslim'), 'ti ti-heart-handshake', 'surat-icon-pink'),
-            array(array('paket surat nikah', 'surat-nikah-n1-n5', 'n1-n5'), 'ti ti-hearts', 'surat-icon-pink'),
-            array(array('pengantar nikah'), 'ti ti-heart', 'surat-icon-pink'),
-            array(array('pencatatan isbat', 'isbat'), 'ti ti-certificate', 'surat-icon-purple'),
-            array(array('calon pengantin', 'pengantin-n4'), 'ti ti-hearts', 'surat-icon-pink'),
-            array(array('perjanjian damai'), 'ti ti-heart-handshake', 'surat-icon-green'),
-            array(array('pbb'), 'ti ti-receipt-tax', 'surat-icon-green'),
-            array(array('tidak sengketa'), 'ti ti-shield-check', 'surat-icon-green'),
-            array(array('sporadik', 'riwayat tanah', 'pencocokan data'), 'ti ti-map-pin', 'surat-icon-amber'),
-            array(array('beda luas'), 'ti ti-ruler-measure', 'surat-icon-amber'),
-            array(array('kepemilikan rumah/tanah', 'kepemilikan rumah / tanah'), 'ti ti-home-check', 'surat-icon-green'),
-            array(array('harga tanah'), 'ti ti-home-dollar', 'surat-icon-green'),
-            array(array('hubungan keluarga'), 'ti ti-users-group', 'surat-icon-purple'),
-            array(array('gudang'), 'ti ti-building-warehouse', 'surat-icon-slate'),
-            array(array('kendaraan'), 'ti ti-car', 'surat-icon-blue'),
-            array(array('penduduk sementara', 'sktps'), 'ti ti-id-badge', 'surat-icon-teal'),
-            array(array('hewan ternak', 'ternak'), 'ti ti-horse-toy', 'surat-icon-amber'),
-            array(array('pengantar barang'), 'ti ti-package', 'surat-icon-orange'),
-            array(array('bbm', 'solar'), 'ti ti-gas-station', 'surat-icon-orange'),
-            array(array('surat umum'), 'ti ti-file-pencil', 'surat-icon-blue'),
-            array(array('belum memiliki rumah'), 'ti ti-home-off', 'surat-icon-orange'),
-            array(array('rumah tidak layak huni', 'rtlh', 'rehabilitasi rumah', 'bedah rumah'), 'ti ti-home', 'surat-icon-amber'),
-            array(array('korban bencana', 'kebakaran rumah', 'banjir bandang', 'puting beliung'), 'ti ti-cloud-storm', 'surat-icon-red'),
-            array(array('belum bekerja'), 'ti ti-briefcase-off', 'surat-icon-amber'),
-            array(array('belum menikah'), 'ti ti-user-heart', 'surat-icon-pink'),
-            array(array('beasiswa'), 'ti ti-school', 'surat-icon-blue'),
-            array(array('penduduk aktif sekolah', 'aktif sekolah'), 'ti ti-school', 'surat-icon-blue'),
-            array(array('penghasilan'), 'ti ti-cash-banknote', 'surat-icon-green'),
-            array(array('usaha', 'domisili usaha'), 'ti ti-building-store', 'surat-icon-teal'),
-            array(array('jual beli'), 'ti ti-arrows-exchange', 'surat-icon-purple'),
-            array(array('keramaian'), 'ti ti-speakerphone', 'surat-icon-orange'),
-            array(array('domisili'), 'ti ti-map-pin', 'surat-icon-blue')
+            array(array('pendamping pasien'), 'fa fa-hands-helping', 'surat-icon-rose'),
+            array(array('verifikasi data kesejahteraan', 'dtks', 'siks-ng'), 'fa fa-database', 'surat-icon-teal'),
+            array(array('persetujuan kepala suku', 'pemilik hak ulayat', 'kepala suku hak ulayat'), 'fa fa-flag', 'surat-icon-amber'),
+            array(array('pelepasan hak tanah adat', 'tanah adat/ulayat', 'tanah adat ulayat'), 'fa fa-map-marked-alt', 'surat-icon-amber'),
+            array(array('perubahan elemen data kependudukan', 'f-1.05', 'f105'), 'fa fa-file-signature', 'surat-icon-blue'),
+            array(array('penebusan pupuk', 'pupuk bersubsidi'), 'fa fa-seedling', 'surat-icon-green'),
+            array(array('kesepakatan batas tanah adat'), 'fa fa-map-marked-alt', 'surat-icon-teal'),
+            array(array('pernyataan batas tanah', 'tetangga sempadan'), 'fa fa-draw-polygon', 'surat-icon-teal'),
+            array(array('tanah garapan'), 'fa fa-seedling', 'surat-icon-green'),
+            array(array('penguasaan fisik bidang tanah', 'sppfbt'), 'fa fa-map-marked-alt', 'surat-icon-amber'),
+            array(array('kartu identitas anak', 'penerbitan kia'), 'fa fa-id-card', 'surat-icon-cyan'),
+            array(array('penerbitan ktp-el', 'penerbitan ktp el'), 'fa fa-id-card', 'surat-icon-blue'),
+            array(array('lansia', 'lanjut usia'), 'fa fa-user-friends', 'surat-icon-green'),
+            array(array('disabilitas', 'difabel'), 'fa fa-wheelchair', 'surat-icon-teal'),
+            array(array('janda', 'duda'), 'fa fa-heart-broken', 'surat-icon-purple'),
+            array(array('masih hidup'), 'fa fa-heartbeat', 'surat-icon-green'),
+            array(array('yatim', 'piatu'), 'fa fa-user-friends', 'surat-icon-rose'),
+            array(array('kelahiran', 'lahir'), 'fa fa-baby-carriage', 'surat-icon-cyan'),
+            array(array('penguburan', 'kubur'), 'fa fa-cross', 'surat-icon-slate'),
+            array(array('kematian', 'mati'), 'fa fa-ribbon', 'surat-icon-slate'),
+            array(array('pindah-datang', 'pindah datang'), 'fa fa-home', 'surat-icon-green'),
+            array(array('pindah'), 'fa fa-truck', 'surat-icon-orange'),
+            array(array('kartu keluarga'), 'fa fa-users', 'surat-icon-blue'),
+            array(array('ktp'), 'fa fa-id-card', 'surat-icon-blue'),
+            array(array('paspor'), 'fa fa-passport', 'surat-icon-blue'),
+            array(array('catatan kriminal', 'skck'), 'fa fa-shield-alt', 'surat-icon-indigo'),
+            array(array('kehilangan'), 'fa fa-exclamation-triangle', 'surat-icon-red'),
+            array(array('bantuan sosial lainnya', 'blt dana desa', 'blt-dana-desa'), 'fa fa-money-bill-wave', 'surat-icon-green'),
+            array(array('rekomendasi bantuan sosial', 'bantuan sosial tunai', 'bst', 'bansos'), 'fa fa-money-bill-wave', 'surat-icon-green'),
+            array(array('tidak mampu', 'jamkesos'), 'fa fa-hands-helping', 'surat-icon-rose'),
+            array(array('beda nama'), 'fa fa-file-alt', 'surat-icon-purple'),
+            array(array('ahli waris'), 'fa fa-users', 'surat-icon-purple'),
+            array(array('wali'), 'fa fa-user-shield', 'surat-icon-indigo'),
+            array(array('pencatatan perkawinan non-muslim', 'perkawinan non-muslim'), 'fa fa-hands-helping', 'surat-icon-pink'),
+            array(array('paket surat nikah', 'surat-nikah-n1-n5', 'n1-n5'), 'fa fa-heart', 'surat-icon-pink'),
+            array(array('pengantar nikah'), 'fa fa-heart', 'surat-icon-pink'),
+            array(array('pencatatan isbat', 'isbat'), 'fa fa-certificate', 'surat-icon-purple'),
+            array(array('calon pengantin', 'pengantin-n4'), 'fa fa-heart', 'surat-icon-pink'),
+            array(array('perjanjian damai'), 'fa fa-hands-helping', 'surat-icon-green'),
+            array(array('pbb'), 'fa fa-receipt', 'surat-icon-green'),
+            array(array('tidak sengketa'), 'fa fa-shield-alt', 'surat-icon-green'),
+            array(array('sporadik', 'riwayat tanah', 'pencocokan data'), 'fa fa-map-marker-alt', 'surat-icon-amber'),
+            array(array('beda luas'), 'fa fa-ruler-combined', 'surat-icon-amber'),
+            array(array('kepemilikan rumah/tanah', 'kepemilikan rumah / tanah'), 'fa fa-home', 'surat-icon-green'),
+            array(array('harga tanah'), 'fa fa-home', 'surat-icon-green'),
+            array(array('hubungan keluarga'), 'fa fa-users', 'surat-icon-purple'),
+            array(array('gudang'), 'fa fa-warehouse', 'surat-icon-slate'),
+            array(array('kendaraan'), 'fa fa-car', 'surat-icon-blue'),
+            array(array('penduduk sementara', 'sktps'), 'fa fa-id-card', 'surat-icon-teal'),
+            array(array('hewan ternak', 'ternak'), 'fa fa-paw', 'surat-icon-amber'),
+            array(array('pengantar barang'), 'fa fa-box', 'surat-icon-orange'),
+            array(array('bbm', 'solar'), 'fa fa-gas-pump', 'surat-icon-orange'),
+            array(array('surat umum'), 'fa fa-file-signature', 'surat-icon-blue'),
+            array(array('belum memiliki rumah'), 'fa fa-home', 'surat-icon-orange'),
+            array(array('rumah tidak layak huni', 'rtlh', 'rehabilitasi rumah', 'bedah rumah'), 'fa fa-home', 'surat-icon-amber'),
+            array(array('korban bencana', 'kebakaran rumah', 'banjir bandang', 'puting beliung'), 'fa fa-cloud-showers-heavy', 'surat-icon-red'),
+            array(array('belum bekerja'), 'fa fa-briefcase', 'surat-icon-amber'),
+            array(array('belum menikah'), 'fa fa-user-friends', 'surat-icon-pink'),
+            array(array('beasiswa'), 'fa fa-school', 'surat-icon-blue'),
+            array(array('penduduk aktif sekolah', 'aktif sekolah'), 'fa fa-school', 'surat-icon-blue'),
+            array(array('penghasilan'), 'fa fa-money-bill-wave', 'surat-icon-green'),
+            array(array('usaha', 'domisili usaha'), 'fa fa-store', 'surat-icon-teal'),
+            array(array('jual beli'), 'fa fa-exchange-alt', 'surat-icon-purple'),
+            array(array('keramaian'), 'fa fa-bullhorn', 'surat-icon-orange'),
+            array(array('domisili'), 'fa fa-map-marker-alt', 'surat-icon-blue')
         );
         foreach ($rules as $rule) {
             foreach ($rule[0] as $needle) {
                 if (strpos($haystack, $needle) !== FALSE) return array('icon' => $rule[1], 'class' => $rule[2]);
             }
         }
-        return array('icon' => 'ti ti-file-description', 'class' => 'surat-icon-neutral');
+        return array('icon' => 'fa fa-file-alt', 'class' => 'surat-icon-neutral');
     }
 }
 

@@ -62,63 +62,10 @@ class Request_model extends CI_Model
 
     private function ensure_catalog_schema()
     {
-        if ($this->catalog_schema_ready || !warga_database_available()) return;
-        if (!$this->db->table_exists('village_service_catalog')) {
-            $this->db->query("CREATE TABLE IF NOT EXISTS `village_service_catalog` (
-                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `village_id` CHAR(36) NOT NULL,
-                `service_key` VARCHAR(80) NOT NULL,
-                `name` VARCHAR(180) NOT NULL,
-                `short_name` VARCHAR(100) NOT NULL,
-                `icon` VARCHAR(80) NOT NULL DEFAULT 'fa-file-alt',
-                `description` VARCHAR(1000) DEFAULT NULL,
-                `requirements_json` LONGTEXT NULL,
-                `form_schema_json` LONGTEXT NULL,
-                `template_key` VARCHAR(120) DEFAULT NULL,
-                `schema_version` INT UNSIGNED NOT NULL DEFAULT 1,
-                `sort_order` INT NOT NULL DEFAULT 0,
-                `is_active` TINYINT(1) NOT NULL DEFAULT 1,
-                `submission_enabled` TINYINT(1) NOT NULL DEFAULT 1,
-                `availability_note` VARCHAR(500) DEFAULT NULL,
-                `source_updated_at` DATETIME NULL,
-                `published_at` DATETIME NULL,
-                `source_hash` CHAR(64) DEFAULT NULL,
-                `source_revision` BIGINT UNSIGNED NOT NULL DEFAULT 0,
-                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                PRIMARY KEY (`id`),
-                UNIQUE KEY `uniq_village_service_key` (`village_id`, `service_key`),
-                KEY `idx_village_service_active` (`village_id`, `is_active`, `sort_order`),
-                CONSTRAINT `fk_village_service_village` FOREIGN KEY (`village_id`) REFERENCES `village_tenants` (`id`) ON DELETE CASCADE
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-        } else {
-            $this->ensure_field('village_service_catalog', 'description', "ALTER TABLE `village_service_catalog` ADD `description` VARCHAR(1000) DEFAULT NULL");
-            $this->ensure_field('village_service_catalog', 'requirements_json', "ALTER TABLE `village_service_catalog` ADD `requirements_json` LONGTEXT NULL");
-            $this->ensure_field('village_service_catalog', 'form_schema_json', "ALTER TABLE `village_service_catalog` ADD `form_schema_json` LONGTEXT NULL");
-            $this->ensure_field('village_service_catalog', 'template_key', "ALTER TABLE `village_service_catalog` ADD `template_key` VARCHAR(120) DEFAULT NULL");
-            $this->ensure_field('village_service_catalog', 'schema_version', "ALTER TABLE `village_service_catalog` ADD `schema_version` INT UNSIGNED NOT NULL DEFAULT 1");
-            $this->ensure_field('village_service_catalog', 'sort_order', "ALTER TABLE `village_service_catalog` ADD `sort_order` INT NOT NULL DEFAULT 0");
-            $this->ensure_field('village_service_catalog', 'is_active', "ALTER TABLE `village_service_catalog` ADD `is_active` TINYINT(1) NOT NULL DEFAULT 1");
-            $this->ensure_field('village_service_catalog', 'source_updated_at', "ALTER TABLE `village_service_catalog` ADD `source_updated_at` DATETIME NULL");
-            $this->ensure_field('village_service_catalog', 'published_at', "ALTER TABLE `village_service_catalog` ADD `published_at` DATETIME NULL");
-            $this->ensure_field('village_service_catalog', 'source_hash', "ALTER TABLE `village_service_catalog` ADD `source_hash` CHAR(64) DEFAULT NULL");
-            $this->ensure_field('village_service_catalog', 'submission_enabled', "ALTER TABLE `village_service_catalog` ADD `submission_enabled` TINYINT(1) NOT NULL DEFAULT 1");
-            $this->ensure_field('village_service_catalog', 'availability_note', "ALTER TABLE `village_service_catalog` ADD `availability_note` VARCHAR(500) DEFAULT NULL");
-            $this->ensure_field('village_service_catalog', 'source_revision', "ALTER TABLE `village_service_catalog` ADD `source_revision` BIGINT UNSIGNED NOT NULL DEFAULT 0");
-        }
-        if ($this->db->table_exists('service_requests')) {
-            $this->ensure_field('service_requests', 'catalog_service_id', "ALTER TABLE `service_requests` ADD `catalog_service_id` BIGINT UNSIGNED NULL");
-            $this->ensure_field('service_requests', 'form_schema_version', "ALTER TABLE `service_requests` ADD `form_schema_version` INT UNSIGNED NULL");
-            $this->ensure_field('service_requests', 'event_version', "ALTER TABLE `service_requests` ADD `event_version` BIGINT UNSIGNED NOT NULL DEFAULT 1");
-            $this->ensure_index('service_requests', 'idx_requests_catalog', 'KEY `idx_requests_catalog` (`catalog_service_id`)');
-        }
-        if ($this->db->table_exists('sync_messages')) {
-            $this->ensure_field('sync_messages', 'event_version', "ALTER TABLE `sync_messages` ADD `event_version` BIGINT UNSIGNED NOT NULL DEFAULT 0 AFTER `operation`");
-        }
-        if ($this->db->table_exists('request_documents')) {
-            $this->ensure_field('request_documents', 'field_key', "ALTER TABLE `request_documents` ADD `field_key` VARCHAR(100) NULL");
-            $this->ensure_index('request_documents', 'idx_request_documents_field', 'KEY `idx_request_documents_field` (`request_id`, `field_key`)');
-        }
+        // Database schema changes are performed by deployment migrations,
+        // never during a user-facing request. Keep this guard only for
+        // backwards-compatible call sites; it now has zero DB overhead.
+        if ($this->catalog_schema_ready) return;
         $this->catalog_schema_ready = true;
     }
 
@@ -370,7 +317,7 @@ class Request_model extends CI_Model
         if (!warga_database_available()) return array();
         $this->ensure_catalog_schema();
         $villageId = trim((string) $villageId);
-        if ($villageId !== '' && $this->db->table_exists('village_service_catalog')) {
+        if ($villageId !== '') {
             $rows = $this->db->select('c.*, st.id AS legacy_service_type_id')
                 ->from('village_service_catalog c')
                 ->join('service_types st', 'st.slug=c.service_key', 'left')
@@ -434,8 +381,6 @@ class Request_model extends CI_Model
     {
         $legacyId = isset($row['legacy_service_type_id']) ? (int) $row['legacy_service_type_id'] : 0;
         if ($legacyId > 0) return $legacyId;
-        if (!$this->db->table_exists('service_types')) return 0;
-
         $slug = strtolower(trim((string) (isset($row['service_key']) ? $row['service_key'] : '')));
         if ($slug === '') return 0;
         $existing = $this->db->where('slug', $slug)->limit(1)->get('service_types')->row_array();
@@ -476,7 +421,7 @@ class Request_model extends CI_Model
         $slug = strtolower(trim((string) $slug));
         $villageId = trim((string) $villageId);
         $this->ensure_catalog_schema();
-        if ($villageId !== '' && $this->db->table_exists('village_service_catalog')) {
+        if ($villageId !== '') {
             $row = $this->db->select('c.*, st.id AS legacy_service_type_id')
                 ->from('village_service_catalog c')->join('service_types st', 'st.slug=c.service_key', 'left')
                 ->where(array('c.village_id' => $villageId, 'c.service_key' => $slug, 'c.is_active' => 1))
@@ -660,14 +605,26 @@ class Request_model extends CI_Model
 
     public function summary($userId)
     {
-        $rows = $this->for_user($userId);
-        $summary = array('total' => count($rows), 'active' => 0, 'issued' => 0, 'revision' => 0);
-        foreach ($rows as $row) {
-            if (in_array($row['status'], array('submitted', 'verified', 'approved', 'syncing'), TRUE)) $summary['active']++;
-            if ($row['status'] === 'issued') $summary['issued']++;
-            if ($row['status'] === 'revision') $summary['revision']++;
+        if (warga_demo_mode()) {
+            $rows = $this->for_user($userId);
+            $summary = array('total' => count($rows), 'active' => 0, 'issued' => 0, 'revision' => 0);
+            foreach ($rows as $row) {
+                if (in_array($row['status'], array('submitted', 'verified', 'approved', 'syncing'), TRUE)) $summary['active']++;
+                if ($row['status'] === 'issued') $summary['issued']++;
+                if ($row['status'] === 'revision') $summary['revision']++;
+            }
+            return $summary;
         }
-        return $summary;
+        if (!warga_database_available()) return array('total' => 0, 'active' => 0, 'issued' => 0, 'revision' => 0);
+        // The dashboard only needs counters. Avoid loading and normalizing
+        // every historical request just to calculate four numbers.
+        $row = $this->db->select("COUNT(*) AS total,
+                SUM(CASE WHEN status IN ('submitted','verified','approved','syncing') THEN 1 ELSE 0 END) AS active,
+                SUM(CASE WHEN status = 'issued' THEN 1 ELSE 0 END) AS issued,
+                SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) AS revision", FALSE)
+            ->where('citizen_user_id', (int) $userId)->limit(1)->get('service_requests')->row_array();
+        return array('total' => (int) ($row['total'] ?? 0), 'active' => (int) ($row['active'] ?? 0),
+            'issued' => (int) ($row['issued'] ?? 0), 'revision' => (int) ($row['revision'] ?? 0));
     }
 
     public function find_for_user($id, $userId)
@@ -1124,7 +1081,6 @@ class Request_model extends CI_Model
     public function official_document_for_user($requestId, $userId)
     {
         if (warga_demo_mode() || !warga_database_available()) return NULL;
-        if (!$this->db->field_exists('document_sha256', 'service_requests')) return NULL;
         return $this->db->select('r.document_path, r.document_sha256, r.local_reference')->from('service_requests r')
             ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued'))
             ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
@@ -1133,25 +1089,9 @@ class Request_model extends CI_Model
     public function official_html_for_user($requestId, $userId)
     {
         if (warga_demo_mode() || !warga_database_available()) return NULL;
-        if (!$this->db->field_exists('document_format', 'service_requests')) return NULL;
         return $this->db->select('r.document_path, r.document_sha256, r.local_reference, r.document_format')->from('service_requests r')
             ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued', 'r.document_format' => 'html'))
             ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
     }
 
-    private function ensure_field($table, $field, $sql)
-    {
-        if (!$this->db->field_exists($field, $table)) $this->db->query($sql);
-    }
-
-    private function ensure_index($table, $name, $definition)
-    {
-        $query = $this->db->query('SHOW INDEX FROM `' . $table . '`');
-        if ($query) {
-            foreach ($query->result_array() as $row) {
-                if (isset($row['Key_name']) && (string) $row['Key_name'] === $name) return;
-            }
-        }
-        $this->db->query('ALTER TABLE `' . $table . '` ADD ' . $definition);
-    }
 }

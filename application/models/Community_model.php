@@ -3,9 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Community_model extends CI_Model
 {
+    private $readyState = NULL;
+
     public function ready()
     {
-        return warga_database_available() && $this->db->table_exists('warga_announcements')
+        if ($this->readyState !== NULL) return $this->readyState;
+        return $this->readyState = warga_database_available() && $this->db->table_exists('warga_announcements')
             && $this->db->table_exists('warga_notification_targets');
     }
 

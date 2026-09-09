@@ -32,7 +32,7 @@ fs.mkdirSync(output, { recursive: true });
           const body = await page.locator('body').innerText();
           if (/A PHP Error|Fatal error|Undefined (?:variable|array key)|Severity: Warning/.test(body)) throw new Error('PHP error on ' + route);
           const labels = await page.locator('#footer-bar > a > span').allTextContents();
-          if (labels.join('|') !== 'Beranda|Pengumuman|Surat|Pengaduan|Akun') throw new Error('Wrong footer: ' + labels);
+          if (labels.join('|') !== 'Beranda|Surat|Pasar|Pengumuman|Akun') throw new Error('Wrong footer: ' + labels);
           const overflow = await page.evaluate(() => ({
             width: document.documentElement.clientWidth,
             scroll: document.documentElement.scrollWidth,

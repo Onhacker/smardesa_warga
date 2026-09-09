@@ -12,5 +12,5 @@ $flashIcon = $flashType === 'error' ? 'fa-exclamation' : 'fa-check';
         <strong><?= e($flashTitle) ?></strong>
         <div class="warga-flash-message"><?= !empty($flashAllowHtml) ? $flashMessage : e($flashMessage) ?></div>
     </div>
-    <button type="button" class="warga-flash-close" data-bs-dismiss="alert" aria-label="Tutup notifikasi"><i class="fa fa-times" aria-hidden="true"></i></button>
+    <button type="button" class="warga-flash-close" aria-label="Tutup notifikasi"><i class="fa fa-times" aria-hidden="true"></i></button>
 </div>

@@ -160,17 +160,13 @@ class Auth_model extends CI_Model
         if (!$this->session->userdata('warga_logged_in') || !$this->session->userdata('warga_user_id')) return NULL;
         if (warga_demo_mode()) return $this->demo_user((int) $this->session->userdata('warga_user_id'));
         if (!warga_database_available()) return NULL;
-        $identityReady = $this->ensure_identity_schema();
+        $this->ensure_identity_schema();
         $select = 'u.id,u.role_id,u.name,u.username,u.email,u.phone,u.is_active,u.last_login_at,u.village_id,r.name AS role_name,r.slug AS role_slug,v.village_code,v.name AS village_name,v.district_name,v.regency_code,v.regency_name';
-        if ($identityReady) {
-            $select .= ',cp.verification_status AS citizen_verification_status,cp.local_citizen_key';
-        } else {
-            $select .= ",'unverified' AS citizen_verification_status,NULL AS local_citizen_key";
-        }
+        $select .= ',cp.verification_status AS citizen_verification_status,cp.local_citizen_key';
         $this->db->select($select, FALSE)->from('users u')
             ->join('roles r', 'r.id=u.role_id')
-            ->join('village_tenants v', 'v.id=u.village_id', 'left');
-        if ($identityReady) $this->db->join('citizen_profiles cp', 'cp.user_id=u.id', 'left');
+            ->join('village_tenants v', 'v.id=u.village_id', 'left')
+            ->join('citizen_profiles cp', 'cp.user_id=u.id', 'left');
         return $this->db
             ->where(array('u.id' => (int) $this->session->userdata('warga_user_id'), 'u.is_active' => 1))
             ->get()->row_array();
@@ -321,23 +317,10 @@ class Auth_model extends CI_Model
             return $empty;
         }
 
-        $profileFields = array();
-        foreach (array('birth_date', 'gender', 'address_snapshot', 'verification_status', 'nik_encrypted', 'kk_encrypted') as $field) {
-            if ($this->db->field_exists($field, 'citizen_profiles')) $profileFields[] = 'cp.' . $field;
-        }
-        if (!$profileFields) {
-            $empty['identity_note'] = 'Profil kependudukan belum tersedia pada server.';
-            return $empty;
-        }
-
-        $this->db->select(implode(',', $profileFields), FALSE)->from('citizen_profiles cp');
-        $hasDirectory = $this->db->table_exists('village_resident_directory')
-            && $this->db->field_exists('local_citizen_key', 'citizen_profiles');
-        if ($hasDirectory && $this->db->field_exists('birth_date', 'village_resident_directory')
-            && $this->db->field_exists('gender', 'village_resident_directory')) {
-            $this->db->select('d.birth_date AS directory_birth_date,d.gender AS directory_gender', FALSE)
-                ->join('village_resident_directory d', 'd.village_id=cp.village_id AND d.local_citizen_key=cp.local_citizen_key', 'left');
-        }
+        $this->db->select('cp.birth_date,cp.gender,cp.address_snapshot,cp.verification_status,cp.nik_encrypted,cp.kk_encrypted', FALSE)
+            ->select('d.birth_date AS directory_birth_date,d.gender AS directory_gender', FALSE)
+            ->from('citizen_profiles cp')
+            ->join('village_resident_directory d', 'd.village_id=cp.village_id AND d.local_citizen_key=cp.local_citizen_key', 'left');
         $row = $this->db->where('cp.user_id', $userId)->limit(1)->get()->row_array();
         if (!$row) {
             $empty['identity_note'] = 'Profil kependudukan belum tersedia.';
@@ -454,16 +437,14 @@ class Auth_model extends CI_Model
             'updated_at' => $now
         );
         // Keep the documents available to the account owner without putting
-        // plaintext identity values in the database.  Older installations
-        // may not have the optional columns yet; ensure_identity_schema()
-        // adds them lazily and the conditional checks keep registration
-        // compatible with a read-only/legacy schema.
+        // plaintext identity values in the database. Required identity
+        // columns are installed by the deployment migrations.
         $encryptedNik = $this->encrypt_identity($nik);
         $encryptedKk = $this->encrypt_identity($kk);
-        if ($encryptedNik !== NULL && $this->db->field_exists('nik_encrypted', 'citizen_profiles')) {
+        if ($encryptedNik !== NULL) {
             $profile['nik_encrypted'] = $encryptedNik;
         }
-        if ($encryptedKk !== NULL && $this->db->field_exists('kk_encrypted', 'citizen_profiles')) {
+        if ($encryptedKk !== NULL) {
             $profile['kk_encrypted'] = $encryptedKk;
         }
         if (!$this->db->insert('citizen_profiles', $profile) || !$this->db->trans_status()) {
@@ -479,8 +460,7 @@ class Auth_model extends CI_Model
     public function citizen_is_verified($userId, $villageId = '')
     {
         if (warga_demo_mode()) return TRUE;
-        if (!warga_database_available() || !$this->ensure_identity_schema()
-            || !$this->db->table_exists('village_resident_directory')) return FALSE;
+        if (!warga_database_available() || !$this->ensure_identity_schema()) return FALSE;
         $this->db->select('cp.user_id AS verified_user_id', FALSE)
             ->from('citizen_profiles cp')
             ->join('users u', 'u.id=cp.user_id AND u.village_id=cp.village_id')
@@ -494,64 +474,11 @@ class Auth_model extends CI_Model
 
     private function ensure_identity_schema()
     {
-        if ($this->identity_schema_ready) return TRUE;
-        if (!warga_database_available() || !$this->db->table_exists('citizen_profiles')) return FALSE;
-        if (!$this->db->field_exists('local_citizen_key', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `local_citizen_key` VARCHAR(120) DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('name_hash', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `name_hash` CHAR(64) DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('verification_status', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `verification_status` VARCHAR(30) NOT NULL DEFAULT 'unverified'");
-        }
-        if (!$this->db->field_exists('nik_encrypted', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `nik_encrypted` VARBINARY(512) DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('kk_encrypted', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `kk_encrypted` VARBINARY(512) DEFAULT NULL AFTER `nik_encrypted`");
-        }
-        if (!$this->db->field_exists('birth_date', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `birth_date` DATE DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('gender', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `gender` VARCHAR(20) DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('address_snapshot', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `address_snapshot` TEXT DEFAULT NULL");
-        }
-        if (!$this->db->field_exists('nik_hash', 'citizen_profiles')) {
-            $this->db->query("ALTER TABLE `citizen_profiles` ADD `nik_hash` CHAR(64) DEFAULT NULL");
-        }
-        $query = $this->db->query('SHOW INDEX FROM `citizen_profiles`');
-        $hasUniqueIndex = FALSE;
-        $hasGlobalNikIndex = FALSE;
-        if ($query) foreach ($query->result_array() as $row) {
-            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_source') $hasUniqueIndex = TRUE;
-            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_nik_global') $hasGlobalNikIndex = TRUE;
-        }
-        if (!$hasUniqueIndex && $this->db->field_exists('village_id', 'citizen_profiles') && $this->db->field_exists('local_citizen_key', 'citizen_profiles')) {
-            $this->db->query('ALTER TABLE `citizen_profiles` ADD UNIQUE KEY `uniq_citizen_source` (`village_id`, `local_citizen_key`)');
-        }
-        if (!$hasGlobalNikIndex && $this->db->field_exists('nik_hash', 'citizen_profiles')) {
-            $previousDebug = $this->db->db_debug;
-            $this->db->db_debug = FALSE;
-            $this->db->query('ALTER TABLE `citizen_profiles` ADD UNIQUE KEY `uniq_citizen_nik_global` (`nik_hash`)');
-            $this->db->db_debug = $previousDebug;
-        }
-        $indexQuery = $this->db->query('SHOW INDEX FROM `citizen_profiles`');
-        $hasUniqueIndex = FALSE;
-        $hasGlobalNikIndex = FALSE;
-        if ($indexQuery) foreach ($indexQuery->result_array() as $row) {
-            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_source') $hasUniqueIndex = TRUE;
-            if (isset($row['Key_name']) && $row['Key_name'] === 'uniq_citizen_nik_global') $hasGlobalNikIndex = TRUE;
-        }
-        $this->identity_schema_ready = $this->db->field_exists('local_citizen_key', 'citizen_profiles')
-            && $this->db->field_exists('name_hash', 'citizen_profiles')
-            && $this->db->field_exists('verification_status', 'citizen_profiles')
-            && $hasUniqueIndex
-            && $hasGlobalNikIndex;
-        return $this->identity_schema_ready;
+        // Identity columns and unique indexes are installed by migrations
+        // 007, 008, 012, and 018 during deployment. Never issue DDL from an
+        // HTTP request; this guard is retained for existing call sites.
+        if (!warga_database_available()) return FALSE;
+        return $this->identity_schema_ready = TRUE;
     }
 
     private function verify_resident_central($villageCode, $name, $nik, $kk)

@@ -12,6 +12,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Marketplace_model extends CI_Model
 {
     private $tableReady = NULL;
+    private $reviewsReady = NULL;
+    private $publicPreviewCache = NULL;
 
     private function ready()
     {
@@ -116,6 +118,7 @@ class Marketplace_model extends CI_Model
             $values['updated_at'] = date('Y-m-d H:i:s');
             $state['stores'][(string) $userId] = array_merge($existing, $values);
             $this->save_demo_state($state);
+            $this->invalidate_public_preview_cache();
             return array('success' => TRUE, 'id' => $values['id'], 'store' => $this->decorate_store($state['stores'][(string) $userId]));
         }
         if (!$this->ready()) return array('success' => FALSE, 'message' => 'Fitur Pasar Digital belum diaktifkan pada database. Jalankan migrasi marketplace terlebih dahulu.');
@@ -128,7 +131,9 @@ class Marketplace_model extends CI_Model
             $values['id'] = $id;
             $ok = $this->db->insert('marketplace_stores', $values);
         }
-        return $ok ? array('success' => TRUE, 'id' => $id, 'store' => $this->store_for_user($user)) : array('success' => FALSE, 'message' => 'Identitas toko belum dapat disimpan.');
+        if (!$ok) return array('success' => FALSE, 'message' => 'Identitas toko belum dapat disimpan.');
+        $this->invalidate_public_preview_cache();
+        return array('success' => TRUE, 'id' => $id, 'store' => $this->store_for_user($user));
     }
 
     /**
@@ -145,6 +150,7 @@ class Marketplace_model extends CI_Model
         if (!in_array($sort, array('newest', 'price_low', 'price_high', 'name'), TRUE)) $sort = 'newest';
         $publicAll = !empty($filters['public_all']);
         $onlyOwn = !empty($filters['only_own']);
+        $skipTotal = !empty($filters['skip_total']);
         $villageId = $this->user_village($user);
         $canManage = $this->can_manage($user);
         if (warga_demo_mode()) {
@@ -165,24 +171,27 @@ class Marketplace_model extends CI_Model
                 if ($sort === 'name') return strcasecmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
                 return strcmp((string) ($b['updated_at'] ?? ''), (string) ($a['updated_at'] ?? ''));
             });
-            $total = count($rows);
             $items = array_slice($rows, ($page - 1) * $perPage, $perPage);
             $items = $this->attach_review_summaries($items);
+            $total = $skipTotal ? count($items) : count($rows);
             return array('items' => array_map(array($this, 'decorate_product'), $items), 'total' => $total,
-                'page' => $page, 'pages' => max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
+                'page' => $page, 'pages' => $skipTotal ? 1 : max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
                 'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort));
         }
         if (!$this->ready()) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage,
             'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => FALSE);
         if ($villageId === '' && !$publicAll) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage, 'filters' => array('q' => $q, 'category_id' => $category));
-        $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
-            ->join('marketplace_stores s', 's.id=p.store_id');
-        if (!$publicAll) $this->db->where('p.village_id', $villageId);
-        if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
-        else $this->apply_product_visibility($user, $canManage);
-        if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
-        if ($category > 0) $this->db->where('p.category_id', $category);
-        $total = (int) $this->db->count_all_results();
+        $total = 0;
+        if (!$skipTotal) {
+            $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
+                ->join('marketplace_stores s', 's.id=p.store_id');
+            if (!$publicAll) $this->db->where('p.village_id', $villageId);
+            if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
+            else $this->apply_product_visibility($user, $canManage);
+            if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
+            if ($category > 0) $this->db->where('p.category_id', $category);
+            $total = (int) $this->db->count_all_results();
+        }
         $this->db->select('p.*,c.slug AS category_slug,c.name AS category_name,s.name AS store_name,s.whatsapp AS store_whatsapp,s.phone AS store_phone,s.address AS store_address,v.name AS village_name');
         $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
             ->join('marketplace_stores s', 's.id=p.store_id')
@@ -199,9 +208,53 @@ class Marketplace_model extends CI_Model
         $rows = $this->db->order_by('p.name', 'ASC')->limit($perPage, ($page - 1) * $perPage)->get()->result_array();
         $rows = $this->attach_images($rows);
         $rows = $this->attach_review_summaries($rows);
+        if ($skipTotal) $total = count($rows);
         return array('items' => array_map(array($this, 'decorate_product'), $rows), 'total' => $total,
-            'page' => $page, 'pages' => max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
+            'page' => $page, 'pages' => $skipTotal ? 1 : max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
             'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => TRUE);
+    }
+
+    /**
+     * Lightweight home-page catalogue. A short file cache prevents the same
+     * four-row query (and its review aggregate) from running on every visit.
+     */
+    public function latest_public_products($limit = 4)
+    {
+        $limit = max(1, min(12, (int) $limit));
+        if (warga_demo_mode()) {
+            return $this->products(array(), array('public_all' => TRUE, 'sort' => 'newest', 'page' => 1, 'per_page' => $limit, 'skip_total' => TRUE));
+        }
+        $cache = $this->preview_cache_driver();
+        $key = 'marketplace-public-preview-v2-' . $limit;
+        if ($cache) {
+            $cached = $cache->get($key);
+            if (is_array($cached) && isset($cached['items'])) return $cached;
+        }
+        $listing = $this->products(array(), array('public_all' => TRUE, 'sort' => 'newest', 'page' => 1, 'per_page' => $limit, 'skip_total' => TRUE));
+        if ($cache && !empty($listing['ready'])) $cache->save($key, $listing, 45);
+        return $listing;
+    }
+
+    private function preview_cache_driver()
+    {
+        if ($this->publicPreviewCache !== NULL) return $this->publicPreviewCache;
+        try {
+            $this->load->driver('cache', array('adapter' => 'file', 'backup' => 'dummy', 'key_prefix' => 'sdw-'));
+            // CI_Model exposes loaded libraries through __get(); using isset()
+            // here would skip that proxy and incorrectly disable the cache.
+            $this->publicPreviewCache = $this->cache;
+        } catch (Throwable $exception) {
+            $this->publicPreviewCache = FALSE;
+        }
+        return $this->publicPreviewCache;
+    }
+
+    private function invalidate_public_preview_cache()
+    {
+        if (warga_demo_mode()) return;
+        $cache = $this->preview_cache_driver();
+        if (!$cache) return;
+        for ($limit = 1; $limit <= 12; $limit++) $cache->delete('marketplace-public-preview-v2-' . $limit);
     }
 
     public function product($id, array $user, $publicAll = FALSE)
@@ -284,6 +337,7 @@ class Marketplace_model extends CI_Model
             foreach ($state['products'] as $index => $row) if ((string) $row['id'] === $productId) { $state['products'][$index] = array_merge($row, $values); $found = TRUE; break; }
             if (!$found) $state['products'][] = $values;
             $this->save_demo_state($state);
+            $this->invalidate_public_preview_cache();
             return array('success' => TRUE, 'id' => $productId, 'paths' => $upload['paths'], 'product' => $this->decorate_product($values));
         }
         if (!$this->db->trans_begin()) { $this->cleanup_paths($upload['paths']); return array('success' => FALSE, 'message' => 'Produk belum dapat disimpan.'); }
@@ -296,6 +350,7 @@ class Marketplace_model extends CI_Model
         }
         if (!$this->db->trans_status()) { $this->db->trans_rollback(); $this->cleanup_paths($upload['paths']); return array('success' => FALSE, 'message' => 'Produk belum dapat disimpan.'); }
         $this->db->trans_commit();
+        $this->invalidate_public_preview_cache();
         return array('success' => TRUE, 'id' => $productId, 'paths' => $upload['paths'], 'product' => $this->product($productId, $user));
     }
 
@@ -321,10 +376,12 @@ class Marketplace_model extends CI_Model
         if (warga_demo_mode()) {
             $state = $this->demo_state();
             foreach ($state['products'] as $index => $row) if ((string) $row['id'] === (string) $id) { $state['products'][$index]['status'] = 'archived'; $state['products'][$index]['updated_at'] = date('Y-m-d H:i:s'); }
-            $this->save_demo_state($state); return TRUE;
+            $this->save_demo_state($state); $this->invalidate_public_preview_cache(); return TRUE;
         }
         if (!$this->ready()) return FALSE;
-        return (bool) $this->db->where(array('id' => $id, 'village_id' => $this->user_village($user), 'seller_user_id' => (int) $user['id']))->update('marketplace_products', array('status' => 'archived'));
+        $ok = (bool) $this->db->where(array('id' => $id, 'village_id' => $this->user_village($user), 'seller_user_id' => (int) $user['id']))->update('marketplace_products', array('status' => 'archived'));
+        if ($ok) $this->invalidate_public_preview_cache();
+        return $ok;
     }
 
     /**
@@ -358,6 +415,7 @@ class Marketplace_model extends CI_Model
             if (isset($state['reviews'][$id])) unset($state['reviews'][$id]);
             $this->save_demo_state($state);
             $this->cleanup_product_paths($paths, $id);
+            $this->invalidate_public_preview_cache();
             return TRUE;
         }
         if (!$this->ready()) return FALSE;
@@ -379,6 +437,7 @@ class Marketplace_model extends CI_Model
         }
         $this->db->trans_commit();
         $this->cleanup_product_paths($paths, $id);
+        $this->invalidate_public_preview_cache();
         return TRUE;
     }
 
@@ -594,6 +653,7 @@ class Marketplace_model extends CI_Model
                 $state['reviews'][$productId][] = $review;
             }
             $this->save_demo_state($state);
+            $this->invalidate_public_preview_cache();
             return array('success' => TRUE, 'review' => $review, 'summary' => $this->review_summary($productId));
         }
         if (!$this->reviews_ready()) return array('success' => FALSE, 'message' => 'Fitur rating belum diaktifkan pada database. Jalankan migrasi ulasan Pasar Digital terlebih dahulu.');
@@ -609,6 +669,7 @@ class Marketplace_model extends CI_Model
         }
         if (!$ok) return array('success' => FALSE, 'message' => 'Rating belum dapat disimpan. Coba lagi.');
         $review = $this->db->select('id,product_id,user_id,reviewer_name,rating,comment,created_at,updated_at')->where('id', $reviewId)->limit(1)->get('marketplace_product_reviews')->row_array();
+        $this->invalidate_public_preview_cache();
         return array('success' => TRUE, 'review' => $review ?: array_merge($values, array('id' => $reviewId)), 'summary' => $this->review_summary($productId));
     }
 
@@ -649,7 +710,8 @@ class Marketplace_model extends CI_Model
 
     private function reviews_ready()
     {
-        return warga_demo_mode() || (warga_database_available() && $this->db->table_exists('marketplace_product_reviews'));
+        if ($this->reviewsReady !== NULL) return $this->reviewsReady;
+        return $this->reviewsReady = warga_demo_mode() || (warga_database_available() && $this->db->table_exists('marketplace_product_reviews'));
     }
 
     private function normalize_price($value)

@@ -29,23 +29,22 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         'shareImageWidth' => $shareImageWidth,
         'shareImageHeight' => $shareImageHeight
     )); ?>
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=113">
-    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/footer-share.css') ?>?v=4">
-    <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=25">
-    <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=22">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
+    <?php if (!empty($loadCommunityStyles)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/community.min.css') ?>"><?php endif; ?>
+    <?php if (!empty($loadMarketplaceAssets)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/market.css') ?>"><?php endif; ?>
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
             color: #fff !important;
         }
     </style>
-    <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
-    <link rel="icon" type="image/png" sizes="192x192" href="<?= base_url('assets/pwa/icon-192.png') ?>">
-    <link rel="apple-touch-icon" sizes="180x180" href="<?= base_url('assets/pwa/icon-180.png') ?>">
+    <link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light" data-highlight="highlight-teal" data-base-url="<?= e(base_url()) ?>" data-csrf-name="<?= e($this->security->get_csrf_token_name()) ?>" data-csrf-hash="<?= e($this->security->get_csrf_hash()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?>
@@ -107,13 +106,17 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <div class="menu-hider"></div>
     <?php $this->load->view('layouts/notification_onboarding'); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=89') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
-<script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
-<script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>
-<script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script>
-<script src="<?= base_url('assets/js/community.min.js') ?>?v=17"></script>
-<script src="<?= base_url('assets/js/market.js') ?>?v=12"></script>
-<script src="<?= base_url('assets/js/footer-actions.js') ?>?v=2"></script>
+<script src="<?= warga_asset_url('assets/v22/scripts/appkit-core.min.js') ?>"></script>
+<script src="<?= warga_asset_url('assets/v22/scripts/custom.min.js') ?>"></script>
+<script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>
+<?php if (!empty($loadCommunityScript)): ?>
+<script src="<?= warga_asset_url('assets/js/community.min.js') ?>"></script>
+<?php else: ?>
+<script src="<?= warga_asset_url('assets/js/notifications.min.js') ?>"></script>
+<?php endif; ?>
+<?php if (!empty($loadMarketplaceAssets)): ?><script src="<?= warga_asset_url('assets/js/market.js') ?>"></script><?php endif; ?>
+<script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
 </body>
 </html>

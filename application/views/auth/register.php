@@ -18,7 +18,7 @@ $registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: '
 $registerShareTitle = 'Smart ' . $registerInstitution . ' ' . $registerArea . ' — Layanan Digital Warga';
 $registerShareDescription = 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.';
 $registerShareUrl = base_url();
-$registerShareImage = base_url('assets/pwa/share-preview.png');
+$registerShareImage = warga_asset_url('assets/pwa/share-preview.png');
 $registerFooterVillage = array('name' => $registerArea, 'institution' => $registerInstitution, 'contact' => array());
 ?>
 <!DOCTYPE HTML>
@@ -35,13 +35,13 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     )); ?>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=113"><link rel="stylesheet" href="<?= base_url('assets/css/footer-share.css') ?>?v=4"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>"><link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
 <header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat notifikasi"><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
 <main class="page-content header-clear-medium warga-auth-page">
-    <section class="warga-auth-brand compact"><img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
+    <section class="warga-auth-brand compact"><img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">
         <?php if ($registrationErrorHtml !== ''): ?>
             <div class="warga-auth-error" role="alert" aria-live="assertive">
@@ -92,7 +92,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
 </main>
 <?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl)); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=89') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script><script src="<?= base_url('assets/js/footer-actions.js') ?>?v=2"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script><script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

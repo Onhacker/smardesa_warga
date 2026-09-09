@@ -7,7 +7,7 @@ $menuArea = $menuIsAuthenticated ? (string) ($currentUser['village_name'] ?? '')
 ?>
 <div class="warga-menu-head">
     <div class="warga-menu-brand-row">
-        <img src="<?= base_url('assets/pwa/icon-192.png') ?>" alt="Logo Smart <?= e($menuInstitution) ?>" width="56" height="56">
+        <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Smart <?= e($menuInstitution) ?>" width="56" height="56">
         <button type="button" class="close-menu warga-menu-close" aria-label="Tutup menu"><i class="fa fa-times" aria-hidden="true"></i></button>
     </div>
     <div class="warga-menu-brand-copy">
@@ -25,7 +25,7 @@ $menuArea = $menuIsAuthenticated ? (string) ($currentUser['village_name'] ?? '')
         <a href="<?= site_url('petugas?status=issued') ?>"><i class="fa fa-file-pdf warga-menu-icon is-purple"></i><span>Surat Terbit</span><i class="fa fa-angle-right"></i></a>
     <?php else: ?>
         <a class="<?= nav_is('dashboard') ? 'active-nav' : '' ?>" href="<?= site_url('dashboard') ?>"><i class="fa fa-home warga-menu-icon is-green"></i><span>Beranda</span><i class="fa fa-angle-right"></i></a>
-        <a class="<?= nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="ti ti-mail warga-menu-icon is-teal"></i><span>Surat</span><i class="fa fa-angle-right"></i></a>
+        <a class="<?= nav_is('layanan') ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="fa fa-envelope warga-menu-icon is-teal"></i><span>Surat</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('permohonan') && $this->router->fetch_method() === 'create' ? 'active-nav' : '' ?>" href="<?= site_url('layanan') ?>"><i class="fa fa-plus warga-menu-icon is-blue"></i><span>Permohonan Baru</span><i class="fa fa-angle-right"></i></a>
         <a class="<?= nav_is('permohonan') && $this->router->fetch_method() !== 'create' ? 'active-nav' : '' ?>" href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt warga-menu-icon is-sand"></i><span>Riwayat Permohonan</span><i class="fa fa-angle-right"></i></a>
         <?php if ($menuIsAuthenticated): ?><a class="<?= nav_is('notifications') ? 'active-nav' : '' ?>" href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell warga-menu-icon is-red"></i><span>Notifikasi</span><i class="fa fa-angle-right"></i></a><?php endif; ?>

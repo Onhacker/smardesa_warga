@@ -95,12 +95,38 @@ smartdesa-warga/database/schema.sql
 smartdesa-warga/database/seed.sql
 ```
 
-Jika database sudah pernah dibuat, impor semua berkas pada `database/migrations` dari
-`001_*.sql` sampai `016_*.sql` sesuai urutan. Rangkaian ini menambahkan autentikasi sinkron,
+Jika database sudah pernah dibuat, impor berkas pada `database/migrations` sesuai urutan dan
+catat migration yang sudah pernah dijalankan. Jangan mengimpor ulang migration lama yang tidak
+idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `019_*.sql` dan
+menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
 penyimpanan terenkripsi NIK dan No. KK untuk ditampilkan kepada pemilik akun, serta tabel
-Pasar Digital untuk toko, produk, kategori, dan gambar privat.
+Pasar Digital untuk toko, produk, kategori, dan gambar privat. Untuk rilis ini, migration
+`016_marketplace.sql` wajib dijalankan lebih dahulu, lalu `017_marketplace_reviews.sql` untuk
+rating/ulasan. `018_global_nik_uniqueness.sql` dan `019_monitoring_auth.sql` dijalankan sesuai
+kebutuhan instalasi setelah migration pendahulunya selesai.
+
+Contoh menjalankan dua migration Pasar Digital dari root repository (password dimasukkan pada
+prompt `mysql`, tidak ditulis di terminal history):
+
+```bash
+DB_HOST='localhost'
+DB_USER='USER_DATABASE'
+DB_NAME='smartdesa_warga'
+REPO="$HOME/repositories/smardesa_warga"
+
+cd "$REPO" || exit 1
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/016_marketplace.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/017_marketplace_reviews.sql"
+```
+
+Kode aplikasi tidak lagi menjalankan `CREATE TABLE`, `ALTER TABLE`, atau pemeriksaan metadata
+berulang pada setiap request. Karena itu, selesaikan migration sebelum membuka aplikasi untuk
+pengguna; bila schema belum lengkap, request terkait akan gagal secara aman dan deployment harus
+diperbaiki, bukan mengandalkan DDL runtime.
 
 ## 4. Konfigurasi API
 
@@ -215,6 +241,27 @@ Tool provisioning dan kode sekali pakai hanya dipakai sebagai pemulihan instalas
 - `PRIVATE_STORAGE_PATH` berada di luar `public_html`.
 - Nilai `PRIVATE_STORAGE_PATH` API dan PWA sama persis dan writable oleh kedua aplikasi.
 - Database API dan PWA terhubung, tetapi user database tetap terpisah bila memungkinkan.
-- Migrasi `001` sampai `010` sudah selesai.
+- Migration prasyarat `001` sampai `015` sudah selesai; `016` dan `017` sudah dijalankan untuk
+  Pasar Digital; `018` dan `019` selesai bila fitur terkait diaktifkan.
 - Akun demo tidak digunakan di produksi.
 - Backup database dan folder privat dibuat sebelum onboarding desa pertama.
+
+## 8. Catatan performa PWA
+
+Rilis ini memakai bundle CSS Bootstrap yang sudah dipangkas, runtime AppKit hanya untuk fitur
+yang dipakai, bundle notifikasi terpisah, gambar hero responsif, dan URL aset berversi. Header
+cache satu tahun hanya diberikan pada URL yang memiliki `?v=...`; berkas lama tanpa versi tetap
+mengikuti TTL host. Service worker melakukan navigation preload, menyimpan shell minimum untuk
+mode offline, dan mencache gambar produk publik berdasarkan URL versi/varian. Setelah deploy,
+verifikasi worker dan header aset:
+
+```bash
+PWA_ROOT="$HOME/domains/warga-smartdesa.mediaverse.co.id/public_html"
+curl -fsSI "https://warga-smartdesa.mediaverse.co.id/service-worker.js" | sed -n '1,12p'
+curl -fsSI "https://warga-smartdesa.mediaverse.co.id/assets/js/warga.min.js?v=1" | sed -n '1,12p'
+curl -fsS "https://warga-smartdesa.mediaverse.co.id/.well-known/assetlinks.json" >/dev/null
+```
+
+`service-worker.js` harus mengirim `Cache-Control: no-cache`/`no-store`, sedangkan aset berversi
+boleh mengirim `immutable`. Bila worker lama masih terlihat, tutup semua tab PWA lalu buka ulang
+sekali agar worker baru mengambil alih.

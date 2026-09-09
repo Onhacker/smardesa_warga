@@ -13,9 +13,9 @@ $marketUrl = static function ($value, $fallback = '') {
 };
 $imageUrl = static function ($image) use ($marketUrl) {
     if (is_array($image)) $image = $image['url'] ?? ($image['image_url'] ?? ($image['path'] ?? ($image['storage_path'] ?? '')));
-    return $marketUrl($image, base_url('assets/images/market-product-placeholder.svg'));
+    return $marketUrl($image, warga_asset_url('assets/images/market-product-placeholder.svg'));
 };
-$fallbackImage = base_url('assets/images/market-product-placeholder.svg');
+$fallbackImage = warga_asset_url('assets/images/market-product-placeholder.svg');
 $cover = $product['cover_url'] ?? ($product['image_url'] ?? ($product['cover_image'] ?? ($product['image'] ?? '')));
 if ($cover !== '') array_unshift($images, $cover);
 $galleryImages = array();
