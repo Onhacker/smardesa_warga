@@ -172,6 +172,41 @@ a { color: inherit; }
 .warga-section-head > div { min-width: 0; }
 .warga-section-head > a { flex: 0 0 auto; }
 
+/* Surat shortcuts are part of the shared warga shell.  Keep their layout in
+ * this always-loaded stylesheet so the Surat page does not depend on the
+ * optional community bundle for its two primary actions. */
+.warga-letter-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 15px 20px;
+}
+.warga-letter-shortcuts > a {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px 14px;
+  border: 1px solid var(--warga-line);
+  border-radius: 8px;
+  background: var(--warga-surface, #fff);
+  color: var(--warga-ink);
+  font-size: 15px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.warga-letter-shortcuts > a:first-child { color: var(--warga-ink); }
+.warga-letter-shortcuts > a:last-child { background: var(--warga-teal-dark); color: #fff; }
+.warga-letter-shortcuts > a > i { flex: 0 0 auto; color: var(--warga-teal-dark); font-size: 22px; }
+.warga-letter-shortcuts > a:last-child > i { color: #fff; }
+body.theme-dark .warga-letter-shortcuts > a:first-child { background: #202a30; color: #f1f5f7; }
+body.theme-dark .warga-letter-shortcuts > a:first-child > i { color: #9fc5f8; }
+
+@media (max-width: 380px) {
+  .warga-letter-shortcuts > a { padding: 14px 10px; font-size: 14px; }
+}
+
 .warga-service-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
