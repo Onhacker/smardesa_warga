@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-performance-92';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-performance-93';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
@@ -10,6 +10,7 @@ const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.p
 const assetPath = new URL('assets/', scopeUrl).pathname;
 const marketplaceImagePath = new URL('pasar/gambar/', scopeUrl).pathname;
 const offlineUrl = new URL('offline.html', scopeUrl).href;
+const notificationFallbackUrl = new URL('notifikasi', scopeUrl);
 const precache = [
   'offline.html',
   'assets/pwa/icon-192.png',
@@ -32,6 +33,67 @@ function isMarketplaceImage(request, url) {
 
 function marketplaceImageFamily(url) {
   return url.pathname + '::' + (url.searchParams.get('variant') === 'thumb' ? 'thumb' : 'full');
+}
+
+function notificationUrl(value) {
+  try {
+    var url = new URL(typeof value === 'string' && value.trim() ? value : 'notifikasi', scopeUrl);
+    if (url.origin !== scopeUrl.origin || !url.pathname.startsWith(appPath)) return notificationFallbackUrl;
+    return url;
+  } catch (_) {
+    return notificationFallbackUrl;
+  }
+}
+
+function isAppWindow(client) {
+  try {
+    var url = new URL(client.url);
+    return url.origin === scopeUrl.origin && url.pathname.startsWith(appPath);
+  } catch (_) {
+    return false;
+  }
+}
+
+async function openNotificationTarget(url) {
+  var windows;
+  try {
+    windows = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
+  } catch (_) {
+    return self.clients.openWindow(url.href);
+  }
+  var appWindows = windows.filter(isAppWindow);
+
+  // Reuse an already-open detail page first. Comparing href preserves the
+  // notification id, query string and hash instead of only matching a route.
+  for (var i = 0; i < appWindows.length; i += 1) {
+    if (appWindows[i].url === url.href && 'focus' in appWindows[i]) {
+      try {
+        var existing = await appWindows[i].focus();
+        if (existing) return existing;
+      } catch (_) {}
+    }
+  }
+
+  // Navigating the active PWA window keeps an installed app in standalone
+  // mode. A failed/stale WindowClient must not abort the click event: try the
+  // next client and finally open the exact target in a new app window.
+  appWindows.sort(function (left, right) {
+    return Number(Boolean(right.focused)) - Number(Boolean(left.focused)) ||
+      Number(right.visibilityState === 'visible') - Number(left.visibilityState === 'visible');
+  });
+  for (var j = 0; j < appWindows.length; j += 1) {
+    var client = appWindows[j];
+    if (!('navigate' in client)) continue;
+    try {
+      var navigated = await client.navigate(url.href);
+      if (navigated && 'focus' in navigated) {
+        var focused = await navigated.focus();
+        if (focused) return focused;
+      }
+    } catch (_) {}
+  }
+
+  return self.clients.openWindow(url.href);
 }
 
 self.addEventListener('install', function (event) {
@@ -102,25 +164,19 @@ self.addEventListener('message', function (event) { if (event.data && event.data
 self.addEventListener('push', function (event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch (_) {}
-  var url = new URL(data.url || 'notifikasi', scopeUrl);
-  if (url.origin !== scopeUrl.origin || !url.pathname.startsWith(appPath)) url = new URL('notifikasi', scopeUrl);
+  var url = notificationUrl(data.url);
   event.waitUntil(self.registration.showNotification(data.title || 'SmartDesa Warga', {
     body: data.body || 'Ada pembaruan layanan untuk Anda.',
     icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
     badge: new URL('assets/pwa/notification-badge.png',scopeUrl).href,
     tag: data.tag || 'sdw-notification', renotify: true, silent: false,
     vibrate: [200,100,200],
+    navigate: url.href,
     data: {url:url.href}
   }));
 });
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
-  var url = new URL(event.notification.data && event.notification.data.url || 'notifikasi',scopeUrl);
-  if (url.origin !== scopeUrl.origin || !url.pathname.startsWith(appPath)) url = new URL('notifikasi',scopeUrl);
-  event.waitUntil(self.clients.matchAll({type:'window',includeUncontrolled:true}).then(async function(clients) {
-    for (var client of clients) {
-      if (client.url.startsWith(scopeUrl.href) && 'focus' in client) { await client.navigate(url.href); return client.focus(); }
-    }
-    return self.clients.openWindow(url.href);
-  }));
+  var data = event.notification.data || {};
+  event.waitUntil(openNotificationTarget(notificationUrl(data.url)));
 });

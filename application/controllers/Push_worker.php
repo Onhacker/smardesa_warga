@@ -48,9 +48,16 @@ class Push_worker extends CI_Controller
                     // Keep personal details and complaint content off the lock screen.
                     // Route through the notification opener so a panel click marks this
                     // exact notification as read before redirecting to its detail page.
-                    $openUrl = site_url('notifikasi/buka/' . rawurlencode((string)$row['notification_id']));
+                    // Send a scope-relative route instead of an absolute URL.  This
+                    // worker runs from CLI, where a stale APP_URL can otherwise put
+                    // the wrong host or installation path into an already delivered
+                    // push.  The service worker resolves this route against its own
+                    // registered scope before opening it.
+                    $openPath = 'notifikasi/buka/' . rawurlencode((string)$row['notification_id']);
                     $payload=json_encode(array('title'=>'SmartDesa Warga','body'=>'Ada pembaruan layanan untuk Anda.',
-                        'tag'=>'sdw-'.$row['notification_id'],'url'=>$openUrl));
+                        'tag'=>'sdw-'.$row['notification_id'],'url'=>$openPath,
+                        'notificationId'=>(string)$row['notification_id']), JSON_UNESCAPED_SLASHES);
+                    if (!is_string($payload)) throw new RuntimeException('Payload push tidak valid.');
                     $report=$webPush->sendOneNotification($subscription,$payload);
                     if ($report->isSubscriptionExpired()) {
                         $this->db->where('id',$row['subscription_id'])->delete('warga_push_subscriptions'); continue;
