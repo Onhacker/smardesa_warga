@@ -7,16 +7,28 @@ $socialImage = trim((string) ($shareImage ?? base_url('assets/pwa/share-preview.
 $socialImageAlt = trim((string) ($shareImageAlt ?? 'SmartDesa Warga, layanan digital warga'));
 $socialImageWidth = max(1, (int) ($shareImageWidth ?? 1200));
 $socialImageHeight = max(1, (int) ($shareImageHeight ?? 630));
+$socialSiteName = 'Kabupaten Jayawijaya';
 
 if ($socialTitle === '') $socialTitle = 'SmartDesa Warga — Layanan Digital Warga';
 if ($socialDescription === '') $socialDescription = 'Akses layanan warga dalam satu aplikasi.';
 if (!filter_var($socialUrl, FILTER_VALIDATE_URL)) $socialUrl = base_url();
 if (!filter_var($socialImage, FILTER_VALIDATE_URL)) $socialImage = base_url('assets/pwa/share-preview.png');
+$socialWebsiteUrl = rtrim((string) base_url(), '/') . '/';
+$socialStructuredData = array(
+    '@context' => 'https://schema.org',
+    '@type' => 'WebSite',
+    '@id' => $socialWebsiteUrl . '#website',
+    'url' => $socialWebsiteUrl,
+    'name' => $socialSiteName,
+    'alternateName' => 'SmartDesa Warga',
+    'description' => $socialDescription,
+    'inLanguage' => 'id-ID'
+);
 ?>
 <meta name="description" content="<?= e($socialDescription) ?>">
 <meta property="og:locale" content="id_ID">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="SmartDesa Warga">
+<meta property="og:site_name" content="<?= e($socialSiteName) ?>">
 <meta property="og:title" content="<?= e($socialTitle) ?>">
 <meta property="og:description" content="<?= e($socialDescription) ?>">
 <meta property="og:url" content="<?= e($socialUrl) ?>">
@@ -31,3 +43,4 @@ if (!filter_var($socialImage, FILTER_VALIDATE_URL)) $socialImage = base_url('ass
 <meta name="twitter:title" content="<?= e($socialTitle) ?>">
 <meta name="twitter:description" content="<?= e($socialDescription) ?>">
 <meta name="twitter:image" content="<?= e($socialImage) ?>">
+<script type="application/ld+json"><?= json_encode($socialStructuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>

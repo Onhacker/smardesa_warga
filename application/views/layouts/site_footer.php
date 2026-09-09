@@ -34,6 +34,7 @@ $footerShareDescription = trim((string) ($shareDescription ?? 'Akses layanan sur
 $footerShareMessage = $footerShareTitle . "\n" . $footerShareDescription . "\n\n" . $footerShareUrl;
 $footerWhatsappShare = 'https://wa.me/?text=' . rawurlencode($footerShareMessage);
 $footerFacebookShare = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($footerShareUrl);
+$footerPlayStoreUrl = 'https://play.google.com/store/apps/details?id=id.co.mediaverse.smartkampung';
 
 $footerAddress = trim((string) ($footerContact['address'] ?? ''));
 
@@ -78,27 +79,22 @@ foreach (array(
             <p class="warga-site-footer-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($footerAddress) ?></span></p>
         <?php endif; ?>
 
-        <?php if ($footerActions): ?>
-            <div class="warga-site-footer-actions" aria-label="Kontak <?= e($footerBrand) ?>">
-                <?php foreach ($footerActions as $action): ?>
-                    <a class="warga-site-footer-action <?= e($action['class']) ?>" href="<?= e($action['href']) ?>" aria-label="<?= e($action['label']) ?>"<?= !empty($action['external']) ? ' target="_blank" rel="noopener noreferrer"' : '' ?>><i class="<?= e($action['icon']) ?>" aria-hidden="true"></i></a>
-                <?php endforeach; ?>
-                <a class="warga-site-footer-action is-top back-to-top" href="#page" aria-label="Kembali ke atas"><i class="fa fa-arrow-up" aria-hidden="true"></i></a>
-            </div>
-        <?php else: ?>
-            <div class="warga-site-footer-actions" aria-label="Navigasi halaman">
-                <a class="warga-site-footer-action is-top back-to-top" href="#page" aria-label="Kembali ke atas"><i class="fa fa-arrow-up" aria-hidden="true"></i></a>
-            </div>
-        <?php endif; ?>
+        <div class="warga-site-footer-actions" aria-label="<?= $footerActions ? 'Kontak dan navigasi ' . e($footerBrand) : 'Navigasi halaman' ?>">
+            <?php foreach ($footerActions as $action): ?>
+                <a class="warga-site-footer-action <?= e($action['class']) ?>" href="<?= e($action['href']) ?>" aria-label="<?= e($action['label']) ?>"<?= !empty($action['external']) ? ' target="_blank" rel="noopener noreferrer"' : '' ?>><i class="<?= e($action['icon']) ?>" aria-hidden="true"></i></a>
+            <?php endforeach; ?>
+            <button type="button" class="warga-site-footer-action is-share" data-footer-share-open aria-controls="warga-footer-share-dialog" aria-haspopup="dialog" aria-label="Bagikan aplikasi"><i class="fa fa-share-alt" aria-hidden="true"></i></button>
+            <a class="warga-site-footer-action is-top back-to-top" href="#page" aria-label="Kembali ke atas"><i class="fa fa-arrow-up" aria-hidden="true"></i></a>
+        </div>
 
-        <section class="warga-site-footer-share" aria-labelledby="warga-footer-share-title">
-            <div class="warga-site-footer-share-copy">
-                <strong id="warga-footer-share-title">Bagikan aplikasi</strong>
-                <span>Ajak warga lain menggunakan layanan digital ini.</span>
+        <section class="warga-footer-install" data-footer-install-panel aria-labelledby="warga-footer-install-title">
+            <div class="warga-footer-install-copy">
+                <strong id="warga-footer-install-title">Pasang aplikasi warga</strong>
+                <span>Unduh untuk Android atau tambahkan ke Layar Utama iPhone.</span>
             </div>
-            <div class="warga-site-footer-share-actions">
-                <a class="warga-site-footer-share-button is-whatsapp" href="<?= e($footerWhatsappShare) ?>" target="_blank" rel="noopener noreferrer" aria-label="Bagikan SmartDesa Warga ke WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i><span class="color-white">WhatsApp</span></a>
-                <a class="warga-site-footer-share-button is-facebook" href="<?= e($footerFacebookShare) ?>" target="_blank" rel="noopener noreferrer" aria-label="Bagikan SmartDesa Warga ke Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i><span class="color-white">Facebook</span></a>
+            <div class="warga-footer-install-actions">
+                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SmartDesa Warga di Google Play"><img src="<?= base_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
+                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SmartDesa Warga di iOS"><img src="<?= base_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
             </div>
         </section>
     </div>
@@ -108,3 +104,33 @@ foreach (array(
         <a href="<?= site_url('syarat-ketentuan') ?>">Syarat &amp; Ketentuan</a>
     </nav>
 </footer>
+
+<div class="warga-footer-modal" id="warga-footer-share-dialog" data-footer-modal hidden aria-hidden="true">
+    <button type="button" class="warga-footer-modal-backdrop" data-footer-modal-close tabindex="-1" aria-label="Tutup pilihan berbagi"></button>
+    <section class="warga-footer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="warga-footer-share-heading">
+        <button type="button" class="warga-footer-modal-close" data-footer-modal-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+        <span class="warga-footer-modal-icon is-share" aria-hidden="true"><i class="fa fa-share-alt"></i></span>
+        <h2 id="warga-footer-share-heading">Bagikan aplikasi</h2>
+        <p>Ajak warga lain menggunakan <?= e($footerBrand) ?>.</p>
+        <div class="warga-footer-modal-actions">
+            <a class="warga-site-footer-share-button is-whatsapp" href="<?= e($footerWhatsappShare) ?>" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp" aria-hidden="true"></i><span>Bagikan ke WhatsApp</span></a>
+            <a class="warga-site-footer-share-button is-facebook" href="<?= e($footerFacebookShare) ?>" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f" aria-hidden="true"></i><span>Bagikan ke Facebook</span></a>
+        </div>
+    </section>
+</div>
+
+<div class="warga-footer-modal" id="warga-footer-ios-dialog" data-footer-modal hidden aria-hidden="true">
+    <button type="button" class="warga-footer-modal-backdrop" data-footer-modal-close tabindex="-1" aria-label="Tutup petunjuk instalasi"></button>
+    <section class="warga-footer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="warga-footer-ios-heading">
+        <button type="button" class="warga-footer-modal-close" data-footer-modal-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+        <span class="warga-footer-modal-icon is-ios" aria-hidden="true"><i class="fab fa-apple"></i></span>
+        <h2 id="warga-footer-ios-heading">Instal di iPhone atau iPad</h2>
+        <p class="warga-footer-ios-note" data-footer-ios-note>Buka halaman ini menggunakan Safari, lalu ikuti langkah berikut.</p>
+        <ol class="warga-footer-install-steps">
+            <li><span aria-hidden="true">1</span>Ketuk ikon <strong>Bagikan</strong> di Safari.</li>
+            <li><span aria-hidden="true">2</span>Pilih <strong>Tambahkan ke Layar Utama</strong>.</li>
+            <li><span aria-hidden="true">3</span>Ketuk <strong>Tambah</strong>.</li>
+        </ol>
+        <button type="button" class="warga-footer-modal-done" data-footer-modal-close>Mengerti</button>
+    </section>
+</div>

@@ -35,7 +35,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     )); ?>
-    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=113"><link rel="stylesheet" href="<?= base_url('assets/css/footer-share.css') ?>?v=2"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1"><link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=113"><link rel="stylesheet" href="<?= base_url('assets/css/footer-share.css') ?>?v=4"><link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
@@ -92,7 +92,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
 </main>
 <?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl)); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=86') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=89') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=1"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script><script src="<?= base_url('assets/js/footer-actions.js') ?>?v=2"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

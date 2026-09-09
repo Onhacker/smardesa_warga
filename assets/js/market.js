@@ -1,10 +1,22 @@
 (function () {
   'use strict';
 
-  function updatePreview(input, target) {
-    if (!input || !target) return;
+  function productImageInputs(form) {
+    return form ? Array.prototype.slice.call(form.querySelectorAll('[data-market-images]')) : [];
+  }
+
+  function productImageFiles(form) {
+    var files = [];
+    productImageInputs(form).forEach(function (input) {
+      files = files.concat(Array.prototype.slice.call(input.files || []));
+    });
+    return files;
+  }
+
+  function updatePreview(form, target) {
+    if (!form || !target) return;
     target.innerHTML = '';
-    var files = Array.prototype.slice.call(input.files || []);
+    var files = productImageFiles(form);
     if (!files.length) {
       var empty = document.createElement('span');
       empty.textContent = 'Belum ada foto dipilih.';
@@ -640,10 +652,34 @@
 
   function bind() {
     document.querySelectorAll('[data-market-price]').forEach(bindPriceInput);
-    document.querySelectorAll('[data-market-images]').forEach(function (input) {
-      var form = input.closest('form');
-      var preview = form && form.querySelector('[data-market-image-preview]');
-      input.addEventListener('change', function () { updatePreview(input, preview); });
+    document.querySelectorAll('[data-market-product-form]').forEach(function (form) {
+      var inputs = productImageInputs(form);
+      var primaryInput = form.querySelector('#market-product-images') || inputs[0];
+      var preview = form.querySelector('[data-market-image-preview]');
+      var imagesRequired = form.getAttribute('data-market-images-required') === '1';
+      var existingImageCount = Math.max(0, Number(form.getAttribute('data-market-existing-images')) || 0);
+
+      function validateImages() {
+        var count = productImageFiles(form).length;
+        var message = '';
+        if (existingImageCount + count > 6) message = 'Maksimal enam foto dapat digunakan untuk satu produk.';
+        else if (imagesRequired && count < 1) message = 'Ambil atau pilih minimal satu foto produk.';
+        if (primaryInput) primaryInput.setCustomValidity(message);
+        return message === '';
+      }
+
+      inputs.forEach(function (input) {
+        input.addEventListener('change', function () {
+          validateImages();
+          updatePreview(form, preview);
+        });
+      });
+      validateImages();
+      form.addEventListener('submit', function (event) {
+        if (validateImages()) return;
+        event.preventDefault();
+        if (primaryInput) primaryInput.reportValidity();
+      });
     });
     document.querySelectorAll('[data-market-logo]').forEach(function (input) {
       var form = input.closest('form');

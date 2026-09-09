@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-social-share-preview-86';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-footer-install-share-89';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
@@ -17,20 +17,23 @@ const precache = [
   'assets/pwa/icon-maskable-512.png',
   'assets/pwa/notification-badge.png',
   'assets/pwa/share-preview.png',
+  'assets/pwa/google-play.webp',
+  'assets/pwa/install-ios.webp',
   'assets/v22/styles/bootstrap.min.css',
   'assets/v22/fonts/css/fontawesome-all.min.css',
   'assets/vendor/tabler-icons/tabler-warga.min.css?v=1',
   'assets/vendor/tabler-icons/fonts/tabler-icons8aff.woff2',
   'assets/css/simp-v22.min.css?v=1',
   'assets/css/warga.min.css?v=113',
-  'assets/css/footer-share.css?v=2',
+  'assets/css/footer-share.css?v=4',
   'assets/v22/scripts/bootstrap.min.js',
   'assets/v22/scripts/custom.min.js?v=3',
   'assets/js/warga.min.js?v=22',
+  'assets/js/footer-actions.js?v=2',
   'assets/js/community.min.js?v=17',
   'assets/css/community.min.css?v=25',
-  'assets/css/market.css?v=21',
-  'assets/js/market.js?v=10',
+  'assets/css/market.css?v=22',
+  'assets/js/market.js?v=12',
   'assets/images/market-product-placeholder.svg',
   'assets/v22/images/pictures/pasar-layanan.webp',
   'assets/v22/images/pictures/surat-layanan.webp',

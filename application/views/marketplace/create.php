@@ -3,6 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $categories = isset($categories) && is_array($categories) ? $categories : array();
 $product = isset($product) && is_array($product) ? $product : array();
 $editMode = !empty($editMode);
+$existingImageCount = $editMode && !empty($product['images']) && is_array($product['images']) ? count($product['images']) : 0;
 $values = isset($formValues) && is_array($formValues) ? $formValues : array();
 $values = array_merge(array(
     'category_id' => $product['category_id'] ?? '',
@@ -25,7 +26,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
     <section class="card card-style market-form-card">
         <div class="content">
             <?php if (!empty($errors['form'])): ?><div class="market-form-alert" role="alert"><i class="fa fa-exclamation-circle" aria-hidden="true"></i><?= e($errors['form']) ?></div><?php endif; ?>
-            <form method="post" action="<?= site_url('pasar/simpan') ?>" enctype="multipart/form-data" data-market-product-form data-disable-submit>
+            <form method="post" action="<?= site_url('pasar/simpan') ?>" enctype="multipart/form-data" data-market-product-form data-market-images-required="<?= $editMode ? '0' : '1' ?>" data-market-existing-images="<?= (int) $existingImageCount ?>" data-disable-submit>
                 <?= csrf_field() ?>
                 <?php if ($editMode && !empty($product['id'])): ?><input type="hidden" name="product_id" value="<?= e($product['id']) ?>"><?php endif; ?>
                 <div class="market-form-section-title"><span class="color-white">1</span><div><h2>Informasi produk</h2><p>Lengkapi informasi dasar yang akan dilihat warga.</p></div></div>
@@ -36,8 +37,13 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                 <label class="market-form-field" for="market-product-description"><span>Deskripsi produk <em>(opsional)</em></span><textarea id="market-product-description" name="description" rows="4" maxlength="5000" placeholder="Jelaskan ukuran, bahan, rasa, atau informasi penting lainnya."><?= e($value('description')) ?></textarea></label>
 
                 <div class="market-form-section-title market-form-section-gap"><span class="color-white">2</span><div><h2>Foto produk</h2><p>Tambahkan beberapa foto agar produk lebih menarik.</p></div></div>
-                <label class="market-upload-zone" for="market-product-images"><i class="fa fa-images" aria-hidden="true"></i><strong>Pilih beberapa foto produk</strong><span>JPG, PNG, atau WEBP · maksimal 6 foto · 5 MB per foto</span></label>
-                <input class="market-file-input" type="file" id="market-product-images" name="product_images[]" accept="image/jpeg,image/png,image/webp" multiple data-market-images <?= $editMode ? '' : 'required' ?>>
+                <div class="market-upload-actions" aria-label="Pilih sumber foto produk">
+                    <label class="market-upload-zone is-camera" for="market-product-camera"><i class="fa fa-camera" aria-hidden="true"></i><strong>Foto langsung</strong><span>Buka kamera belakang perangkat</span></label>
+                    <label class="market-upload-zone is-gallery" for="market-product-images"><i class="fa fa-images" aria-hidden="true"></i><strong>Pilih dari galeri</strong><span>Bisa pilih beberapa foto</span></label>
+                </div>
+                <input class="market-file-input" type="file" id="market-product-camera" name="product_images[]" accept="image/jpeg,image/png,image/webp" capture="environment" data-market-images aria-describedby="market-product-images-help">
+                <input class="market-file-input" type="file" id="market-product-images" name="product_images[]" accept="image/jpeg,image/png,image/webp" multiple data-market-images aria-describedby="market-product-images-help">
+                <p class="market-upload-help" id="market-product-images-help">JPG, PNG, atau WEBP · maksimal 6 foto · 5 MB per foto</p>
                 <div class="market-image-preview" data-market-image-preview aria-live="polite">
                     <?php if ($editMode && !empty($product['images']) && is_array($product['images'])): ?>
                         <?php foreach ($product['images'] as $index => $image): ?><?php $previewUrl = $image['thumbnail_url'] ?? ($image['url'] ?? ''); ?><?php if ($previewUrl !== ''): ?><figure data-index="<?= (int) $index + 1 ?>"><img src="<?= e($previewUrl) ?>" alt="Foto produk <?= (int) $index + 1 ?>" loading="lazy"></figure><?php endif; ?><?php endforeach; ?>
