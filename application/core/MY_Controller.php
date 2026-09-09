@@ -114,7 +114,7 @@ class MY_Controller extends CI_Controller
      * traversal path, ukuran, dan MIME aktual. Browser tidak pernah menerima
      * lokasi fisik berkas.
      */
-    protected function stream_private_file($path, $originalName = '', $disposition = 'attachment', $expectedSha256 = '')
+    protected function stream_private_file($path, $originalName = '', $disposition = 'attachment', $expectedSha256 = '', $cacheSeconds = 0, $cacheToken = '')
     {
         $configured = trim((string) getenv('PRIVATE_STORAGE_PATH'));
         if (ENVIRONMENT === 'production' && $configured === '') {
@@ -160,15 +160,26 @@ class MY_Controller extends CI_Controller
         $name = $this->private_file_name($originalName, $extensions[$mime], $real);
         $disposition = in_array($disposition, array('inline', 'attachment'), TRUE)
             ? $disposition : 'attachment';
-        $this->output
-            ->set_status_header(200)
-            ->set_content_type($mime)
+        $cacheSeconds = max(0, (int) $cacheSeconds);
+        if ($cacheSeconds > 0) {
+            $etag = '"' . hash('sha256', ($cacheToken !== '' ? (string) $cacheToken : $body) . '|' . (string) $size) . '"';
+            $lastModified = @filemtime($real);
+            $lastModifiedHeader = $lastModified ? gmdate('D, d M Y H:i:s', (int) $lastModified) . ' GMT' : '';
+            $this->output->set_header('Cache-Control: public, max-age=' . $cacheSeconds . ', immutable')
+                ->set_header('Pragma: public')->set_header('ETag: ' . $etag);
+            if ($lastModifiedHeader !== '') $this->output->set_header('Last-Modified: ' . $lastModifiedHeader);
+            if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim((string) $_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+                $this->output->set_status_header(304)->set_header('Content-Length: 0')->set_output('');
+                return TRUE;
+            }
+            $this->output->set_header('Expires: ' . gmdate('D, d M Y H:i:s', time() + $cacheSeconds) . ' GMT');
+        } else {
+            $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private')->set_header('Pragma: no-cache');
+        }
+        $this->output->set_status_header(200)->set_content_type($mime)
             ->set_header('Content-Disposition: ' . $disposition . '; filename="' . $name . '"')
             ->set_header('Content-Length: ' . (int) $size)
-            ->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private')
-            ->set_header('Pragma: no-cache')
-            ->set_header('X-Content-Type-Options: nosniff')
-            ->set_output($body);
+            ->set_header('X-Content-Type-Options: nosniff')->set_output($body);
         return TRUE;
     }
 

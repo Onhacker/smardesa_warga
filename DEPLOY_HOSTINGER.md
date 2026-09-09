@@ -166,6 +166,23 @@ DB_NAME=smartdesa_warga
 
 Set permission `.env` menjadi `600`. Pastikan folder `PRIVATE_STORAGE_PATH` writable oleh PHP. Folder `application/sessions` juga harus writable.
 
+### Optimasi gambar Pasar Digital
+
+Upload foto produk diproses di server sebelum disimpan: sisi terpanjang dibatasi 1.600 px,
+file utama ditulis ulang sebagai WebP kualitas 84, thumbnail kartu dibuat sebagai WebP 640 px
+kualitas 82, dan metadata EXIF tidak ikut terbawa. Gambar lama tetap dapat ditampilkan; thumbnail
+WebP-nya dibuat otomatis saat pertama kali diminta. Endpoint gambar mengirim URL berversi dan
+service worker menyimpan respons gambar publik pada Cache Storage.
+
+Pastikan PHP production memiliki GD dengan dukungan WebP sebelum membuka menu tambah produk:
+
+```bash
+php -r 'var_export(array("gd" => extension_loaded("gd"), "webp" => function_exists("imagewebp"), "jpeg" => function_exists("imagecreatefromjpeg"), "png" => function_exists("imagecreatefrompng"))); echo PHP_EOL;'
+```
+
+Hasil `gd` dan `webp` harus `true`. Fitur ini tidak memerlukan migrasi database tambahan karena
+thumbnail disimpan sebagai berkas saudara (`nama-thumb.webp`) di folder private yang sama.
+
 ## 6. Hubungkan instalasi desa secara otomatis
 
 Seed dan migrasi wilayah sudah memuat seluruh 332 kampung/kelurahan Kabupaten Jayawijaya.

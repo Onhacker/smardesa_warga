@@ -237,7 +237,8 @@ class Marketplace_model extends CI_Model
     /**
      * Create or update a product. Uploaded images use input name
      * `product_images[]`; the model accepts JPG, PNG, and WEBP (max 5 MB each,
-     * maximum six images). The returned `paths` are for cleanup by callers.
+     * maximum six images), then stores a metadata-free WebP (max 1600 px) and
+     * a 640 px card thumbnail. The returned `paths` are for cleanup by callers.
      */
     public function save_product(array $user, array $data, array $files = array())
     {
@@ -347,7 +348,7 @@ class Marketplace_model extends CI_Model
                 if ((string) ($row['id'] ?? '') !== $id || (string) ($row['village_id'] ?? '') !== $villageId) continue;
                 $found = TRUE;
                 $allowed = $staffDelete || (int) ($row['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0);
-                foreach (($row['images'] ?? array()) as $image) if (!empty($image['storage_path'])) $paths[] = $image['storage_path'];
+                foreach (($row['images'] ?? array()) as $image) $paths = array_merge($paths, $this->image_paths($image));
                 break;
             }
             if (!$found || !$allowed) return FALSE;
@@ -364,8 +365,8 @@ class Marketplace_model extends CI_Model
         $product = $this->db->select('id,seller_user_id')->where(array('id' => $id, 'village_id' => $villageId))
             ->limit(1)->get('marketplace_products')->row_array();
         if (!$product || (!$staffDelete && (int) $product['seller_user_id'] !== (int) ($user['id'] ?? 0))) return FALSE;
-        $images = $this->db->select('storage_path')->where('product_id', $id)->get('marketplace_product_images')->result_array();
-        $paths = array(); foreach ($images as $image) if (!empty($image['storage_path'])) $paths[] = $image['storage_path'];
+        $images = $this->db->select('stored_name,storage_path')->where('product_id', $id)->get('marketplace_product_images')->result_array();
+        $paths = array(); foreach ($images as $image) $paths = array_merge($paths, $this->image_paths($image));
         if (!$this->db->trans_begin()) return FALSE;
         $ok = $this->db->where('product_id', $id)->delete('marketplace_product_images');
         if ($ok && $this->db->table_exists('marketplace_product_reviews')) {
@@ -391,18 +392,77 @@ class Marketplace_model extends CI_Model
                 $visible = (string) ($product['status'] ?? '') === 'published'
                     || ($this->can_manage($user) && (int) ($product['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0));
                 if (!$visible) continue;
-                foreach (($product['images'] ?? array()) as $image) if ((int) ($image['id'] ?? 0) === $imageId) return $image;
+                foreach (($product['images'] ?? array()) as $image) {
+                    if ((int) ($image['id'] ?? 0) !== $imageId) continue;
+                    // Demo records do not have a joined product row like the
+                    // database query below, so carry visibility metadata into
+                    // the image endpoint before it decides cacheability.
+                    $image['status'] = (string) ($product['status'] ?? 'published');
+                    $image['seller_user_id'] = (int) ($product['seller_user_id'] ?? 0);
+                    $image['village_id'] = (string) ($product['village_id'] ?? '');
+                    $image['product_updated_at'] = (string) ($product['updated_at'] ?? '');
+                    return $image;
+                }
             }
             return NULL;
         }
         if (!$this->ready()) return NULL;
-        $this->db->select('i.*,p.village_id,p.status,p.seller_user_id')->from('marketplace_product_images i')->join('marketplace_products p', 'p.id=i.product_id')
+        $this->db->select('i.*,p.village_id,p.status,p.seller_user_id,p.updated_at AS product_updated_at')->from('marketplace_product_images i')->join('marketplace_products p', 'p.id=i.product_id')
             ->where('i.id', $imageId);
         if (!$publicAll) $this->db->where('p.village_id', $this->user_village($user));
         $row = $this->db->limit(1)->get()->row_array();
         if (!$row) return NULL;
         if ((string) $row['status'] !== 'published' && (!$this->can_manage($user) || (int) $row['seller_user_id'] !== (int) $user['id'])) return NULL;
         return $row;
+    }
+
+    /** Resolve the full-size or thumbnail path without exposing storage paths. */
+    public function image_variant_path(array $image, $variant = 'full')
+    {
+        $path = trim((string) ($image['storage_path'] ?? ''));
+        if ($path === '') return '';
+        if ($variant !== 'thumb') return $path;
+        $storedThumb = trim((string) ($image['thumbnail_path'] ?? ''));
+        if ($storedThumb !== '') return $storedThumb;
+        $directory = dirname($path);
+        $basename = pathinfo($path, PATHINFO_FILENAME);
+        return $directory . DIRECTORY_SEPARATOR . $basename . '-thumb.webp';
+    }
+
+    /** Create a missing thumbnail for legacy uploads on first use. */
+    public function ensure_thumbnail(array $image)
+    {
+        $thumbnail = $this->image_variant_path($image, 'thumb');
+        if ($thumbnail !== '' && is_file($thumbnail) && (int) @filesize($thumbnail) > 0) return $thumbnail;
+        $source = $this->image_variant_path($image, 'full');
+        if ($source === '' || !is_file($source) || !function_exists('imagewebp')) return '';
+        $root = $this->private_storage_path(); $sourceReal = realpath($source);
+        $targetDirectory = $thumbnail !== '' ? realpath(dirname($thumbnail)) : FALSE;
+        if ($root === NULL || $sourceReal === FALSE || $targetDirectory === FALSE || is_link($thumbnail)) return '';
+        $rootPrefix = rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if (strpos($sourceReal, $rootPrefix) !== 0 || strpos(rtrim($targetDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR, $rootPrefix) !== 0) return '';
+        $thumbnail = rtrim($targetDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . basename($thumbnail);
+        $mime = strtolower(trim((string) ($image['mime_type'] ?? '')));
+        if ($mime === '' && function_exists('finfo_open')) {
+            $finfo = @finfo_open(FILEINFO_MIME_TYPE); $mime = $finfo ? strtolower(trim((string) @finfo_file($finfo, $source))) : '';
+            if ($finfo) finfo_close($finfo);
+        }
+        if (!in_array($mime, array('image/jpeg', 'image/png', 'image/webp'), TRUE)) return '';
+        $created = $this->create_thumbnail_file($source, $mime, $thumbnail);
+        if ($created) @chmod($thumbnail, 0640);
+        return $created ? $thumbnail : '';
+    }
+
+    /** Stable cache token changes when the source image/version changes. */
+    public function image_cache_token(array $image)
+    {
+        // Include publication state so a draft/archived product never reuses
+        // the public URL version that may already exist in Cache Storage.
+        $parts = array((string) ($image['id'] ?? ''), (string) ($image['stored_name'] ?? ''), (string) ($image['file_size'] ?? ''),
+            (string) ($image['status'] ?? ($image['product_status'] ?? 'published')), (string) ($image['product_updated_at'] ?? ''));
+        $source = $this->image_variant_path($image, 'full');
+        if ($source !== '' && is_file($source)) $parts[] = (string) @filesize($source) . ':' . (string) @filemtime($source);
+        return substr(hash('sha256', implode('|', $parts)), 0, 20);
     }
 
     private function apply_product_visibility(array $user, $canManage)
@@ -439,7 +499,14 @@ class Marketplace_model extends CI_Model
         $product['price_label'] = 'Rp ' . number_format($product['price_value'], 0, ',', '.');
         $product['images'] = isset($product['images']) && is_array($product['images']) ? array_values($product['images']) : array();
         foreach ($product['images'] as &$image) {
-            if (isset($image['id'])) $image['url'] = site_url('pasar/gambar/' . rawurlencode((string) $image['id']));
+            if (isset($image['id'])) {
+                if (!isset($image['status'])) $image['status'] = (string) ($product['status'] ?? 'published');
+                if (!isset($image['product_updated_at'])) $image['product_updated_at'] = (string) ($product['updated_at'] ?? '');
+                $base = site_url('pasar/gambar/' . rawurlencode((string) $image['id']));
+                $version = $this->image_cache_token($image);
+                $image['url'] = $base . '?v=' . rawurlencode($version);
+                $image['thumbnail_url'] = $base . '?variant=thumb&v=' . rawurlencode($version);
+            }
         }
         unset($image);
         $phone = (string) ($product['store_whatsapp'] ?? ($product['store_phone'] ?? ''));
@@ -621,21 +688,146 @@ class Marketplace_model extends CI_Model
         foreach ($names as $index => $name) if ((int) ($errors[$index] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) $entries[] = array('name' => (string) $name, 'type' => (string) ($types[$index] ?? ''), 'tmp_name' => (string) ($tmp[$index] ?? ''), 'error' => (int) ($errors[$index] ?? UPLOAD_ERR_NO_FILE), 'size' => (int) ($sizes[$index] ?? 0));
         if ($existingCount + count($entries) > 6) return array('files' => array(), 'paths' => array(), 'error' => 'Maksimal enam gambar dapat digunakan untuk satu produk.');
         if (!$entries) return array('files' => array(), 'paths' => array(), 'error' => NULL);
+        if (!function_exists('imagewebp') || !function_exists('imagecreatetruecolor')) return array('files' => array(), 'paths' => array(), 'error' => 'Server belum mendukung optimasi gambar WebP. Aktifkan ekstensi GD dengan dukungan WebP terlebih dahulu.');
         $root = $this->private_storage_path(); if ($root === NULL) return array('files' => array(), 'paths' => array(), 'error' => 'Penyimpanan gambar belum siap.');
         $dir = $root . DIRECTORY_SEPARATOR . 'marketplace' . DIRECTORY_SEPARATOR . date('Y') . DIRECTORY_SEPARATOR . date('m');
         if (!is_dir($dir) && !@mkdir($dir, 0750, TRUE) && !is_dir($dir)) return array('files' => array(), 'paths' => array(), 'error' => 'Folder gambar belum dapat dibuat.');
         $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : NULL;
         if (!$finfo) return array('files' => array(), 'paths' => array(), 'error' => 'Pemeriksaan gambar belum tersedia pada server.');
-        $allowed = array('image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'); $out = array(); $paths = array();
-        foreach ($entries as $entry) {
-            if ($entry['error'] !== UPLOAD_ERR_OK || $entry['size'] < 1 || $entry['size'] > 5 * 1024 * 1024 || !is_uploaded_file($entry['tmp_name'])) { finfo_close($finfo); $this->cleanup_paths($paths); return array('files' => array(), 'paths' => array(), 'error' => 'Setiap gambar harus berformat JPG, PNG, atau WEBP dan maksimal 5 MB.'); }
-            $mime = strtolower(trim((string) finfo_file($finfo, $entry['tmp_name']))); if (!isset($allowed[$mime])) { finfo_close($finfo); $this->cleanup_paths($paths); return array('files' => array(), 'paths' => array(), 'error' => 'Format gambar hanya boleh JPG, PNG, atau WEBP.'); }
-            $name = $productId . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime]; $destination = $dir . DIRECTORY_SEPARATOR . $name;
-            if (!move_uploaded_file($entry['tmp_name'], $destination)) { finfo_close($finfo); $this->cleanup_paths($paths); return array('files' => array(), 'paths' => array(), 'error' => 'Gambar belum dapat disimpan.'); }
-            @chmod($destination, 0640); $paths[] = $destination;
-            $out[] = array('id' => function_exists('random_int') ? random_int(100000000, 999999999) : mt_rand(100000000, 999999999), 'original_name' => substr($entry['name'], 0, 180), 'stored_name' => $name, 'storage_path' => $destination, 'mime_type' => $mime, 'file_size' => $entry['size']);
+        $allowed = array('image/jpeg' => TRUE, 'image/png' => TRUE, 'image/webp' => TRUE); $out = array(); $paths = array();
+        try {
+            foreach ($entries as $entry) {
+                if ($entry['error'] !== UPLOAD_ERR_OK || $entry['size'] < 1 || $entry['size'] > 5 * 1024 * 1024 || !is_uploaded_file($entry['tmp_name'])) throw new RuntimeException('Setiap gambar harus berformat JPG, PNG, atau WEBP dan maksimal 5 MB.');
+                $mime = strtolower(trim((string) finfo_file($finfo, $entry['tmp_name'])));
+                if (!isset($allowed[$mime])) throw new RuntimeException('Format gambar hanya boleh JPG, PNG, atau WEBP.');
+                $dimensions = @getimagesize($entry['tmp_name']);
+                if (!is_array($dimensions) || (int) ($dimensions[0] ?? 0) < 1 || (int) ($dimensions[1] ?? 0) < 1
+                    || (int) $dimensions[0] > 20000 || (int) $dimensions[1] > 20000
+                    || ((int) $dimensions[0] * (int) $dimensions[1]) > 24000000) throw new RuntimeException('Dimensi gambar terlalu besar untuk diproses.');
+                $base = $productId . '-' . bin2hex(random_bytes(8));
+                $name = $base . '.webp'; $thumbName = $base . '-thumb.webp';
+                $destination = $dir . DIRECTORY_SEPARATOR . $name; $thumbDestination = $dir . DIRECTORY_SEPARATOR . $thumbName;
+                $optimized = $this->optimize_image_file($entry['tmp_name'], $mime, $destination, $thumbDestination);
+                if (!is_array($optimized)) throw new RuntimeException('Gambar belum dapat dioptimasi. Gunakan JPG, PNG, atau WEBP yang valid.');
+                @chmod($destination, 0640); @chmod($thumbDestination, 0640); $paths[] = $destination; $paths[] = $thumbDestination;
+                $out[] = array('id' => function_exists('random_int') ? random_int(100000000, 999999999) : mt_rand(100000000, 999999999),
+                    'original_name' => substr($entry['name'], 0, 180), 'stored_name' => $name, 'storage_path' => $destination,
+                    'thumbnail_name' => $thumbName, 'thumbnail_path' => $thumbDestination, 'mime_type' => 'image/webp',
+                    'file_size' => (int) @filesize($destination), 'thumbnail_file_size' => (int) @filesize($thumbDestination),
+                    'width' => (int) $optimized['width'], 'height' => (int) $optimized['height']);
+            }
+        } catch (Throwable $exception) {
+            finfo_close($finfo); $this->cleanup_paths($paths);
+            $message = $exception instanceof RuntimeException
+                ? $exception->getMessage() : 'Gambar belum dapat dioptimasi. Coba lagi dengan foto lain.';
+            return array('files' => array(), 'paths' => array(), 'error' => $message);
         }
         finfo_close($finfo); return array('files' => $out, 'paths' => $paths, 'error' => NULL);
+    }
+
+    /** Re-encode an uploaded image as metadata-free WebP and create its card thumbnail. */
+    private function optimize_image_file($source, $mime, $destination, $thumbDestination)
+    {
+        $loaders = array('image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp');
+        if (!isset($loaders[$mime]) || !function_exists($loaders[$mime])) return NULL;
+        $image = @call_user_func($loaders[$mime], $source);
+        if (!$image) return NULL;
+        $main = NULL; $thumb = NULL;
+        try {
+            if (function_exists('imagepalettetotruecolor')) @imagepalettetotruecolor($image);
+            if ($mime === 'image/jpeg') {
+                $oriented = $this->apply_jpeg_orientation($image, $source);
+                if (!$oriented) return NULL;
+                if ($oriented !== $image) @imagedestroy($image);
+                $image = $oriented;
+            }
+            $main = $this->resize_image_canvas($image, 1600);
+            $thumb = $this->resize_image_canvas($image, 640);
+            if (!$this->write_webp_atomic($main, $destination, 84) || !$this->write_webp_atomic($thumb, $thumbDestination, 82)) {
+                @unlink($destination); @unlink($thumbDestination); return NULL;
+            }
+            return array('width' => (int) @imagesx($main), 'height' => (int) @imagesy($main));
+        } finally {
+            if (is_object($main) || is_resource($main)) @imagedestroy($main);
+            if (is_object($thumb) || is_resource($thumb)) @imagedestroy($thumb);
+            if (is_object($image) || is_resource($image)) @imagedestroy($image);
+        }
+    }
+
+    private function apply_jpeg_orientation($image, $source)
+    {
+        $orientation = 1;
+        if (function_exists('exif_read_data')) {
+            $exif = @exif_read_data($source);
+            $orientation = (int) ($exif['Orientation'] ?? 1);
+        }
+        switch ($orientation) {
+            case 2: @imageflip($image, IMG_FLIP_HORIZONTAL); break;
+            case 3: $image = @imagerotate($image, 180, 0); break;
+            case 4: @imageflip($image, IMG_FLIP_VERTICAL); break;
+            case 5: @imageflip($image, IMG_FLIP_HORIZONTAL); $image = @imagerotate($image, -90, 0); break;
+            case 6: $image = @imagerotate($image, -90, 0); break;
+            case 7: @imageflip($image, IMG_FLIP_HORIZONTAL); $image = @imagerotate($image, 90, 0); break;
+            case 8: $image = @imagerotate($image, 90, 0); break;
+        }
+        return $image ?: NULL;
+    }
+
+    private function resize_image_canvas($image, $maxDimension)
+    {
+        $width = max(1, (int) @imagesx($image)); $height = max(1, (int) @imagesy($image));
+        $scale = min(1, (float) $maxDimension / max($width, $height));
+        $newWidth = max(1, (int) round($width * $scale)); $newHeight = max(1, (int) round($height * $scale));
+        $canvas = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($canvas, FALSE); imagesavealpha($canvas, TRUE);
+        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        imagefilledrectangle($canvas, 0, 0, $newWidth, $newHeight, $transparent);
+        imagecopyresampled($canvas, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagealphablending($canvas, TRUE); imagesavealpha($canvas, TRUE);
+        return $canvas;
+    }
+
+    private function write_webp_atomic($image, $destination, $quality)
+    {
+        $temporary = $destination . '.tmp-' . bin2hex(random_bytes(6));
+        if (!@imagewebp($image, $temporary, (int) $quality) || !is_file($temporary) || (int) @filesize($temporary) < 1) { @unlink($temporary); return FALSE; }
+        @chmod($temporary, 0640);
+        if (!@rename($temporary, $destination)) { @unlink($temporary); return FALSE; }
+        return TRUE;
+    }
+
+    private function create_thumbnail_file($source, $mime, $destination)
+    {
+        $loaders = array('image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp');
+        if (!isset($loaders[$mime]) || !function_exists($loaders[$mime])) return FALSE;
+        $image = @call_user_func($loaders[$mime], $source); if (!$image) return FALSE;
+        $thumb = NULL;
+        try {
+            if (function_exists('imagepalettetotruecolor')) @imagepalettetotruecolor($image);
+            if ($mime === 'image/jpeg') {
+                $oriented = $this->apply_jpeg_orientation($image, $source);
+                if (!$oriented) return FALSE;
+                if ($oriented !== $image) @imagedestroy($image);
+                $image = $oriented;
+            }
+            if (!$image) return FALSE;
+            $thumb = $this->resize_image_canvas($image, 640);
+            return $this->write_webp_atomic($thumb, $destination, 82);
+        } finally {
+            if (is_object($thumb) || is_resource($thumb)) @imagedestroy($thumb);
+            if (is_object($image) || is_resource($image)) @imagedestroy($image);
+        }
+    }
+
+    private function image_paths(array $image)
+    {
+        $paths = array();
+        $full = trim((string) ($image['storage_path'] ?? ''));
+        if ($full !== '') $paths[] = $full;
+        $thumb = trim((string) ($image['thumbnail_path'] ?? ''));
+        if ($thumb === '' && $full !== '') $thumb = $this->image_variant_path($image, 'thumb');
+        if ($thumb !== '' && !in_array($thumb, $paths, TRUE)) $paths[] = $thumb;
+        return $paths;
     }
 
     private function private_storage_path()

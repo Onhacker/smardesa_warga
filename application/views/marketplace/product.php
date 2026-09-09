@@ -18,12 +18,14 @@ $imageUrl = static function ($image) use ($marketUrl) {
 $fallbackImage = base_url('assets/images/market-product-placeholder.svg');
 $cover = $product['cover_url'] ?? ($product['image_url'] ?? ($product['cover_image'] ?? ($product['image'] ?? '')));
 if ($cover !== '') array_unshift($images, $cover);
-$uniqueImages = array();
+$galleryImages = array();
 foreach ($images as $image) {
     $url = $imageUrl($image);
-    if ($url !== '' && !in_array($url, $uniqueImages, true)) $uniqueImages[] = $url;
+    $thumb = is_array($image) ? $imageUrl($image['thumbnail_url'] ?? $url, $url) : $url;
+    if ($url !== '' && !isset($galleryImages[$url])) $galleryImages[$url] = array('full' => $url, 'thumb' => $thumb !== '' ? $thumb : $url);
 }
-if (!$uniqueImages) $uniqueImages[] = $fallbackImage;
+if (!$galleryImages) $galleryImages[$fallbackImage] = array('full' => $fallbackImage, 'thumb' => $fallbackImage);
+$galleryImages = array_values($galleryImages);
 $price = is_numeric($product['price'] ?? null) ? (float) $product['price'] : 0;
 $priceLabel = 'Rp ' . number_format($price, 0, ',', '.');
 $category = trim((string) ($product['category_name'] ?? ($product['category'] ?? ($product['category_label'] ?? 'Produk warga'))));
@@ -56,9 +58,9 @@ $productId = (string) ($product['id'] ?? '');
 
 <div class="marketplace-page marketplace-product-page">
     <section class="market-product-gallery" data-market-gallery aria-label="Foto <?= e($product['name'] ?? 'produk') ?>">
-        <figure class="market-product-hero-image"><img src="<?= e($uniqueImages[0]) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" data-market-gallery-main></figure>
-        <?php if (count($uniqueImages) > 1): ?><div class="market-product-thumbs" role="list" aria-label="Galeri produk">
-            <?php foreach ($uniqueImages as $index => $image): ?><button type="button" class="market-product-thumb <?= $index === 0 ? 'is-active' : '' ?>" data-market-gallery-thumb data-image="<?= e($image) ?>" aria-label="Lihat foto <?= $index + 1 ?>"><img src="<?= e($image) ?>" alt="" loading="lazy"></button><?php endforeach; ?>
+        <figure class="market-product-hero-image"><img src="<?= e($galleryImages[0]['full']) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" data-market-gallery-main></figure>
+        <?php if (count($galleryImages) > 1): ?><div class="market-product-thumbs" role="list" aria-label="Galeri produk">
+            <?php foreach ($galleryImages as $index => $image): ?><button type="button" class="market-product-thumb <?= $index === 0 ? 'is-active' : '' ?>" data-market-gallery-thumb data-image="<?= e($image['full']) ?>" aria-label="Lihat foto <?= $index + 1 ?>"><img src="<?= e($image['thumb']) ?>" alt="" loading="lazy"></button><?php endforeach; ?>
         </div><?php endif; ?>
     </section>
 

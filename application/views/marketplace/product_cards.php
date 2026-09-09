@@ -15,7 +15,7 @@ $productImage = static function (array $item) use ($marketUrl) {
     $candidate = $item['cover_url'] ?? ($item['image_url'] ?? ($item['cover_image'] ?? ($item['image'] ?? '')));
     if ($candidate === '' && !empty($item['images']) && is_array($item['images'])) {
         $first = reset($item['images']);
-        $candidate = is_array($first) ? ($first['url'] ?? ($first['image_url'] ?? ($first['path'] ?? ''))) : $first;
+        $candidate = is_array($first) ? ($first['thumbnail_url'] ?? ($first['url'] ?? ($first['image_url'] ?? ($first['path'] ?? '')))) : $first;
     }
     return $marketUrl($candidate, base_url('assets/images/market-product-placeholder.svg'));
 };

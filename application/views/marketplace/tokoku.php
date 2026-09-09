@@ -11,7 +11,7 @@ $marketUrl = static function ($value) {
 $imageFor = static function (array $product) use ($marketUrl) {
     $images = isset($product['images']) && is_array($product['images']) ? $product['images'] : array();
     $first = $images ? reset($images) : '';
-    return $marketUrl(is_array($first) ? ($first['url'] ?? '') : $first);
+    return $marketUrl(is_array($first) ? ($first['thumbnail_url'] ?? ($first['url'] ?? '')) : $first);
 };
 ?>
 <div class="marketplace-page marketplace-tokoku-page">

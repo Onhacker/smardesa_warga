@@ -40,7 +40,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                 <input class="market-file-input" type="file" id="market-product-images" name="product_images[]" accept="image/jpeg,image/png,image/webp" multiple data-market-images <?= $editMode ? '' : 'required' ?>>
                 <div class="market-image-preview" data-market-image-preview aria-live="polite">
                     <?php if ($editMode && !empty($product['images']) && is_array($product['images'])): ?>
-                        <?php foreach ($product['images'] as $index => $image): ?><?php if (!empty($image['url'])): ?><figure data-index="<?= (int) $index + 1 ?>"><img src="<?= e($image['url']) ?>" alt="Foto produk <?= (int) $index + 1 ?>" loading="lazy"></figure><?php endif; ?><?php endforeach; ?>
+                        <?php foreach ($product['images'] as $index => $image): ?><?php $previewUrl = $image['thumbnail_url'] ?? ($image['url'] ?? ''); ?><?php if ($previewUrl !== ''): ?><figure data-index="<?= (int) $index + 1 ?>"><img src="<?= e($previewUrl) ?>" alt="Foto produk <?= (int) $index + 1 ?>" loading="lazy"></figure><?php endif; ?><?php endforeach; ?>
                     <?php else: ?><span>Belum ada foto dipilih.</span><?php endif; ?>
                 </div>
                 <?php if ($error('images')): ?><small class="market-form-error market-form-error-block"><?= e($error('images')) ?></small><?php endif; ?>

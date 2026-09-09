@@ -1,7 +1,10 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-notification-meta-deeplink-83';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-market-image-cache-84';
+// Product images are versioned by the server (`?v=<token>`), so they can live
+// in a separate cache across static-shell releases without serving stale data.
+const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const offlineUrl = new URL('offline.html', scopeUrl).href;
@@ -41,6 +44,19 @@ function isStaticAsset(request, url) {
   return /\.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname);
 }
 
+function isMarketplaceImage(request, url) {
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return false;
+  var route = appPath + 'pasar/gambar/';
+  if (!url.pathname.startsWith(route) || !/^\d+$/.test(url.pathname.slice(route.length))) return false;
+  if (!/^[a-f0-9]{20}$/i.test(url.searchParams.get('v') || '')) return false;
+  if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
+  return true;
+}
+
+function marketplaceImageFamily(url) {
+  return url.pathname + '::' + (url.searchParams.get('variant') === 'thumb' ? 'thumb' : 'full');
+}
+
 self.addEventListener('install', function (event) {
   event.waitUntil(caches.open(SDW_CACHE).then(function (cache) { return cache.addAll(precache); }).then(function () { return self.skipWaiting(); }));
 });
@@ -58,6 +74,33 @@ self.addEventListener('fetch', function (event) {
   if (url.origin !== self.location.origin) return;
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request).catch(function () { return caches.match(offlineUrl).then(function (response) { return response || Response.error(); }); }));
+    return;
+  }
+  if (isMarketplaceImage(request, url)) {
+    event.respondWith(caches.open(SDW_IMAGE_CACHE).then(function (cache) {
+      return cache.match(request).then(function (cached) {
+        if (cached) return cached;
+        return fetch(request).then(function (response) {
+          // Draft/private images deliberately remain network-only. Published
+          // image responses carry an explicit public cache header from PHP.
+          var cacheControl = response.headers.get('Cache-Control') || '';
+          if (response.ok && response.type === 'basic' && /\bpublic\b/i.test(cacheControl) && !/\bno-store\b/i.test(cacheControl)) {
+            return cache.put(request, response.clone()).then(function () {
+              // Keep one version per image/variant so repeated product edits
+              // do not leave unbounded old entries in Cache Storage.
+              var family = marketplaceImageFamily(url);
+              return cache.keys().then(function (keys) {
+                return Promise.all(keys.filter(function (key) {
+                  var keyUrl = new URL(key.url);
+                  return key.url !== request.url && marketplaceImageFamily(keyUrl) === family;
+                }).map(function (key) { return cache.delete(key); }));
+              });
+            }).catch(function () {}).then(function () { return response; });
+          }
+          return response;
+        });
+      });
+    }));
     return;
   }
   if (!isStaticAsset(request, url)) return;

@@ -28,12 +28,17 @@ Untuk membuat ulang konfigurasi demo, salin `.env.local.example` menjadi `.env`.
 - Isi `APP_KEY` acak minimal 32 karakter.
 - Isi kredensial database khusus aplikasi warga.
 - Isi `PRIVATE_STORAGE_PATH` dengan folder absolut di luar `public_html`.
+- Pastikan ekstensi GD PHP memiliki dukungan WebP (`imagewebp`) untuk optimasi foto produk.
 - Arahkan `APP_URL` ke `https://warga-smartdesa.mediaverse.co.id/`.
 - Arahkan `WARGA_CENTRAL_API_URL` ke `https://api-warga-smartdesa.mediaverse.co.id/v1/`.
 - Gunakan document root dan `.env` terpisah untuk domain PWA dan domain API.
 
 PWA menggunakan database pusat untuk halaman warga dan menyimpan berkas pada `PRIVATE_STORAGE_PATH` di luar `public_html`. API menggunakan database yang sama dengan user database yang dibatasi sesuai kebutuhan.
 - Jangan memakai database atau API key milik `smartdesa.mediaverse.co.id`.
+
+Foto produk baru otomatis diubah menjadi WebP tanpa metadata EXIF (maksimal 1.600 px),
+disertai thumbnail 640 px untuk kartu produk. URL gambar memakai token versi dan gambar publik
+dicache oleh service worker; gambar lama dibuatkan thumbnail saat pertama kali dipakai.
 
 Panduan pemasangan dua subdomain tersedia pada [DEPLOY_HOSTINGER.md](DEPLOY_HOSTINGER.md).
 

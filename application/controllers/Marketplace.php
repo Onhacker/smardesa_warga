@@ -254,7 +254,21 @@ class Marketplace extends Public_Controller
     {
         $viewer = is_array($this->currentUser) ? $this->currentUser : array();
         $image = $this->marketplace->image_for_user($id, $viewer, TRUE);
-        if (!$image || empty($image['storage_path']) || !$this->stream_private_file($image['storage_path'], $image['original_name'] ?? '', 'inline')) show_404();
+        if (!$image || empty($image['storage_path'])) show_404();
+        $variant = strtolower(trim((string) $this->input->get('variant', TRUE)));
+        $path = $this->marketplace->image_variant_path($image, $variant === 'thumb' ? 'thumb' : 'full');
+        $thumbnailReady = FALSE;
+        if ($variant === 'thumb') {
+            $thumbnail = $this->marketplace->ensure_thumbnail($image);
+            if ($thumbnail !== '') { $path = $thumbnail; $thumbnailReady = TRUE; }
+            if ($path === '' || !is_file($path)) $path = $this->marketplace->image_variant_path($image, 'full');
+        }
+        $isPublic = (string) ($image['status'] ?? 'published') === 'published';
+        // Do not cache a full-image fallback under a thumbnail URL. Once GD
+        // is available, the same versioned URL can then receive the real thumb.
+        $cacheSeconds = $isPublic && ($variant !== 'thumb' || $thumbnailReady) ? 31536000 : 0;
+        $cacheToken = $this->marketplace->image_cache_token($image);
+        if ($path === '' || !$this->stream_private_file($path, $image['original_name'] ?? '', 'inline', '', $cacheSeconds, $cacheToken)) show_404();
     }
 
     /**
