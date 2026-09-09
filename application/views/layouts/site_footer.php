@@ -23,6 +23,18 @@ if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
 if ($footerInstitution === '') $footerInstitution = 'Desa';
 $footerBrand = trim('Smart ' . $footerInstitution . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
 
+$footerShareUrl = trim((string) ($shareUrl ?? base_url()));
+if (!filter_var($footerShareUrl, FILTER_VALIDATE_URL)) $footerShareUrl = base_url();
+$footerShareTitle = trim((string) ($shareTitle ?? ''));
+// Keep the message shown in WhatsApp aligned with the identity rendered in
+// this footer (which already contains the authenticated tenant when present).
+if ($footerBrand !== '') $footerShareTitle = $footerBrand . ' — Layanan Digital Warga';
+if ($footerShareTitle === '') $footerShareTitle = $footerBrand;
+$footerShareDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.'));
+$footerShareMessage = $footerShareTitle . "\n" . $footerShareDescription . "\n\n" . $footerShareUrl;
+$footerWhatsappShare = 'https://wa.me/?text=' . rawurlencode($footerShareMessage);
+$footerFacebookShare = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($footerShareUrl);
+
 $footerAddress = trim((string) ($footerContact['address'] ?? ''));
 
 $footerHttpUrl = static function ($value) {
@@ -78,6 +90,17 @@ foreach (array(
                 <a class="warga-site-footer-action is-top back-to-top" href="#page" aria-label="Kembali ke atas"><i class="fa fa-arrow-up" aria-hidden="true"></i></a>
             </div>
         <?php endif; ?>
+
+        <section class="warga-site-footer-share" aria-labelledby="warga-footer-share-title">
+            <div class="warga-site-footer-share-copy">
+                <strong id="warga-footer-share-title">Bagikan aplikasi</strong>
+                <span>Ajak warga lain menggunakan layanan digital ini.</span>
+            </div>
+            <div class="warga-site-footer-share-actions">
+                <a class="warga-site-footer-share-button is-whatsapp" href="<?= e($footerWhatsappShare) ?>" target="_blank" rel="noopener noreferrer" aria-label="Bagikan SmartDesa Warga ke WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i><span class="color-white">WhatsApp</span></a>
+                <a class="warga-site-footer-share-button is-facebook" href="<?= e($footerFacebookShare) ?>" target="_blank" rel="noopener noreferrer" aria-label="Bagikan SmartDesa Warga ke Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i><span class="color-white">Facebook</span></a>
+            </div>
+        </section>
     </div>
     <div class="warga-site-footer-divider" aria-hidden="true"></div>
     <nav class="warga-site-footer-links" aria-label="Dokumen aplikasi">

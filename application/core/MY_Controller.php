@@ -61,6 +61,36 @@ class MY_Controller extends CI_Controller
         // buttons, while the page views remain responsible for their own data.
         $data['footerVillage'] = $contactVillage;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
+        $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+        $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
+        $shareInstitution = trim((string) ($contactVillage['institution'] ?? '')) ?: $publicInstitution;
+        $shareArea = trim((string) ($contactVillage['name'] ?? '')) ?: $publicArea;
+        if (preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', $shareArea, $sharePrefixMatch)) {
+            $shareAreaWithoutPrefix = trim((string) preg_replace('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', '', $shareArea, 1));
+            if ($shareInstitution === '' || (strtolower($shareInstitution) === 'desa' && strtolower($sharePrefixMatch[1]) !== 'desa')) {
+                $shareInstitution = function_exists('mb_convert_case')
+                    ? mb_convert_case($sharePrefixMatch[1], MB_CASE_TITLE, 'UTF-8')
+                    : ucfirst(strtolower($sharePrefixMatch[1]));
+            }
+            if ($shareAreaWithoutPrefix !== '') $shareArea = $shareAreaWithoutPrefix;
+        }
+        $publicBrand = trim('Smart ' . $shareInstitution . ($shareArea !== '' ? ' ' . $shareArea : ''));
+        // Share links intentionally point at the public landing page. Private
+        // account, notification, and letter URLs must never be exposed when a
+        // resident shares the application from the common footer.
+        $data['shareTitle'] = isset($data['shareTitle']) && trim((string) $data['shareTitle']) !== ''
+            ? trim((string) $data['shareTitle'])
+            : $publicBrand . ' — Layanan Digital Warga';
+        $data['shareDescription'] = isset($data['shareDescription']) && trim((string) $data['shareDescription']) !== ''
+            ? trim((string) $data['shareDescription'])
+            : 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.';
+        $data['shareUrl'] = isset($data['shareUrl']) && filter_var((string) $data['shareUrl'], FILTER_VALIDATE_URL)
+            ? (string) $data['shareUrl'] : base_url();
+        $data['shareImage'] = isset($data['shareImage']) && filter_var((string) $data['shareImage'], FILTER_VALIDATE_URL)
+            ? (string) $data['shareImage'] : base_url('assets/pwa/share-preview.png');
+        $data['shareImageAlt'] = isset($data['shareImageAlt']) ? (string) $data['shareImageAlt'] : $publicBrand . ', layanan digital warga';
+        $data['shareImageWidth'] = isset($data['shareImageWidth']) ? (int) $data['shareImageWidth'] : 1200;
+        $data['shareImageHeight'] = isset($data['shareImageHeight']) ? (int) $data['shareImageHeight'] : 630;
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);
         $data['canManageMarketplace'] = FALSE;
         if ($data['isAuthenticated']) {

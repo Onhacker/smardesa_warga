@@ -20,11 +20,21 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="SmartDesa Warga">
     <title><?= e($pageTitle) ?> | SmartDesa Warga</title>
+    <?php $this->load->view('layouts/social_meta', array(
+        'shareTitle' => $shareTitle,
+        'shareDescription' => $shareDescription,
+        'shareUrl' => $shareUrl,
+        'shareImage' => $shareImage,
+        'shareImageAlt' => $shareImageAlt,
+        'shareImageWidth' => $shareImageWidth,
+        'shareImageHeight' => $shareImageHeight
+    )); ?>
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/vendor/tabler-icons/tabler-warga.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/warga.min.css') ?>?v=113">
+    <link rel="stylesheet" type="text/css" href="<?= base_url('assets/css/footer-share.css') ?>?v=2">
     <link rel="stylesheet" href="<?= base_url('assets/css/community.min.css') ?>?v=25">
     <link rel="stylesheet" href="<?= base_url('assets/css/market.css') ?>?v=21">
     <style id="warga-letters-icon-override">
@@ -82,7 +92,13 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
             <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Perlu diperbaiki', 'flashMessage' => $flashError)); ?>
         <?php endif; ?>
         <?php $this->load->view($contentView); ?>
-        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
+        <?php $this->load->view('layouts/site_footer', array(
+            'footerVillage' => $footerVillage,
+            'currentUser' => $currentUser,
+            'shareTitle' => $shareTitle,
+            'shareDescription' => $shareDescription,
+            'shareUrl' => $shareUrl
+        )); ?>
     </main>
 
     <aside id="menu-main" class="menu menu-box-left rounded-0" data-menu-width="300">
@@ -91,7 +107,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <div class="menu-hider"></div>
     <?php $this->load->view('layouts/notification_onboarding'); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=84') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=86') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script>
 <script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script>

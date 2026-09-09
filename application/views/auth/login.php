@@ -12,10 +12,26 @@ $loginBrand = 'Smart ' . $loginInstitution;
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="<?= e($loginBrand) ?>">
     <title><?= e($pageTitle) ?></title>
+    <?php
+    $shareTitle = 'Smart ' . $loginInstitution . ' ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
+    $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.';
+    $shareUrl = base_url();
+    $shareImage = base_url('assets/pwa/share-preview.png');
+    $this->load->view('layouts/social_meta', array(
+        'shareTitle' => $shareTitle,
+        'shareDescription' => $shareDescription,
+        'shareUrl' => $shareUrl,
+        'shareImage' => $shareImage,
+        'shareImageAlt' => 'SmartDesa Warga, layanan digital warga',
+        'shareImageWidth' => 1200,
+        'shareImageHeight' => 630
+    ));
+    ?>
     <link rel="stylesheet" href="<?= base_url('assets/v22/styles/bootstrap.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
     <link rel="stylesheet" href="<?= base_url('assets/css/simp-v22.min.css') ?>?v=1">
     <link rel="stylesheet" href="<?= base_url('assets/css/warga.min.css') ?>?v=113">
+    <link rel="stylesheet" href="<?= base_url('assets/css/footer-share.css') ?>?v=2">
     <link rel="manifest" href="<?= base_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= base_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= base_url('assets/pwa/icon-180.png') ?>">
@@ -61,10 +77,10 @@ $loginBrand = 'Smart ' . $loginInstitution;
             </div>
         </section>
         <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install'); ?></div>
-        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser)); ?>
+        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=84') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(base_url('service-worker.js') . '?v=86') ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= base_url('assets/v22/scripts/bootstrap.min.js') ?>"></script><script src="<?= base_url('assets/v22/scripts/custom.min.js') ?>?v=3"></script><script src="<?= base_url('assets/js/warga.min.js') ?>?v=22"></script>
 </body>
 </html>
