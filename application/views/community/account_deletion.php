@@ -47,7 +47,7 @@ $deletionMailto = 'mailto:' . $supportEmail
 
         <section aria-labelledby="deletion-data-title">
             <h2 id="deletion-data-title">2. Data yang dihapus</h2>
-            <p>Setelah permintaan disetujui, data yang tidak wajib menjadi arsip akan dihapus atau dianonimkan. Data ini mencakup kredensial untuk masuk, profil dan kontak akun, sesi serta langganan notifikasi perangkat, dan konten Pasar Digital yang masih berada di bawah kendali akun.</p>
+            <p>Setelah permintaan disetujui, data yang tidak wajib menjadi arsip akan dihapus atau dianonimkan. Data ini mencakup kredensial untuk masuk, profil dan kontak akun, sesi serta langganan pemberitahuan perangkat, dan konten Pasar Digital yang masih berada di bawah kendali akun.</p>
         </section>
 
         <section aria-labelledby="retained-data-title">

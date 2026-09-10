@@ -83,7 +83,7 @@ class MY_Controller extends CI_Controller
             : $publicBrand . ' — Layanan Digital Warga';
         $data['shareDescription'] = isset($data['shareDescription']) && trim((string) $data['shareDescription']) !== ''
             ? trim((string) $data['shareDescription'])
-            : 'Akses layanan surat, pengumuman, pengaduan, notifikasi, dan Pasar Digital warga dalam satu aplikasi.';
+            : 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.';
         $data['shareUrl'] = isset($data['shareUrl']) && filter_var((string) $data['shareUrl'], FILTER_VALIDATE_URL)
             ? (string) $data['shareUrl'] : base_url();
         $data['shareImage'] = isset($data['shareImage']) && filter_var((string) $data['shareImage'], FILTER_VALIDATE_URL)

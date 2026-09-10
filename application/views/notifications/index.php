@@ -4,7 +4,7 @@
         <div class="community-v22-page-hero-icon"><i class="fa fa-bell" aria-hidden="true"></i></div>
         <div>
             <p class="community-v22-eyebrow">Pembaruan layanan</p>
-            <h1 id="notification-page-title">Notifikasi</h1>
+            <h1 id="notification-page-title">Pemberitahuan</h1>
             <p>Status terbaru permohonan Anda.</p>
         </div>
     </header>

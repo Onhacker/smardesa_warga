@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<section class="warga-notification-list" aria-label="Daftar notifikasi">
+<section class="warga-notification-list" aria-label="Daftar pemberitahuan">
     <?php if (!$notifications): ?>
-        <div class="warga-empty-state"><span><i class="fa fa-bell-slash" aria-hidden="true"></i></span><h3><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Notifikasi tidak ditemukan' : 'Belum ada notifikasi' ?></h3><p><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Coba nama surat atau tanggal lainnya.' : 'Pembaruan permohonan Anda akan tampil di sini.' ?></p></div>
+        <div class="warga-empty-state"><span><i class="fa fa-bell-slash" aria-hidden="true"></i></span><h3><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Pemberitahuan tidak ditemukan' : 'Belum ada pemberitahuan' ?></h3><p><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Coba nama surat atau tanggal lainnya.' : 'Pembaruan permohonan Anda akan tampil di sini.' ?></p></div>
     <?php endif; ?>
     <?php foreach ($notifications as $notification): ?>
         <?php $isUnread = empty($notification['read_at']); ?>

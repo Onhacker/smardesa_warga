@@ -18,11 +18,12 @@ class Dashboard extends Public_Controller
         if ($this->currentUser && warga_is_staff($this->currentUser)) redirect('petugas');
         $this->load->model('Community_model');
         $this->load->model('Marketplace_model', 'marketplace');
+        $this->load->model('Request_model');
         if ($this->currentUser) {
-            $this->load->model('Request_model');
             $summary = $this->Request_model->summary($this->currentUser['id']);
             $village = $this->Community_model->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
             $announcements = $this->Community_model->announcements($this->currentUser, 3);
+            $services = $this->Request_model->service_types($this->currentUser['village_id'] ?? '');
         } else {
             $summary = array('total' => 0, 'active' => 0, 'issued' => 0, 'revision' => 0);
             $village = array('name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya', 'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung', 'contact' => array());
@@ -30,6 +31,9 @@ class Dashboard extends Public_Controller
             // the other public services, but never receive a count or item
             // sourced from another village.
             $announcements = array();
+            // Guests may preview the public service catalogue. Protected
+            // actions still send them through the normal login flow.
+            $services = $this->Request_model->service_types('');
         }
         // Keep the dashboard preview lightweight while the public catalogue
         // remains available from the dedicated Pasar page.  The marketplace
@@ -37,6 +41,7 @@ class Dashboard extends Public_Controller
         $marketListing = $this->marketplace->latest_public_products(4);
         $this->render('community/home', array('pageTitle'=>'Beranda',
             'village'=>$village, 'summary'=>$summary, 'announcements'=>$announcements,
+            'services'=>array_slice(is_array($services) ? $services : array(), 0, 4),
             'marketplaceProducts'=>array_slice(isset($marketListing['items']) && is_array($marketListing['items']) ? $marketListing['items'] : array(), 0, 4),
             'marketplaceReady'=>!isset($marketListing['ready']) || (bool) $marketListing['ready']));
     }

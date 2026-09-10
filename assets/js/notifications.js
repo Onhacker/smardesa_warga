@@ -26,10 +26,10 @@
     if (permission === 'denied') {
       var standalone = isInstalledExperience();
       return standalone
-        ? 'Izin notifikasi belum tersinkron. Pastikan Info aplikasi > Notifikasi aktif, kembali ke aplikasi, lalu aktifkan sakelar. Jika masih gagal, buka ulang aplikasi.'
-        : 'Izin diblokir oleh browser. Buka Pengaturan situs > Notifikasi, pilih Izinkan, lalu coba lagi.';
+        ? 'Izin pemberitahuan belum tersinkron. Pastikan Info aplikasi > Pemberitahuan aktif, kembali ke aplikasi, lalu aktifkan sakelar. Jika masih gagal, buka ulang aplikasi.'
+        : 'Izin diblokir oleh browser. Buka Pengaturan situs > Pemberitahuan, pilih Izinkan, lalu coba lagi.';
     }
-    if (permission === 'default') return 'Klik sakelar untuk memberi izin notifikasi pada browser.';
+    if (permission === 'default') return 'Klik sakelar untuk memberi izin pemberitahuan pada browser.';
     return '';
   }
   function storageGet(key) {
@@ -71,7 +71,7 @@
         control.checked = subscribed;
         control.setAttribute('aria-checked', subscribed ? 'true' : 'false');
       } else {
-        control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Notifikasi' : 'Aktifkan Notifikasi');
+        control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Pemberitahuan' : 'Aktifkan Pemberitahuan');
       }
     });
   }
@@ -111,20 +111,20 @@
     try {
       if (!desired) {
         await disableSubscription();
-        updateButton(false); message('Notifikasi perangkat dinonaktifkan.');
+        updateButton(false); message('Pemberitahuan perangkat dinonaktifkan.');
         return;
       }
       var result = await enableSubscription();
       if (!result.active) {
         updateButton(previous);
-        message(permissionMessage(result.permission) || 'Izin notifikasi belum diberikan. Periksa pengaturan situs pada browser.');
+        message(permissionMessage(result.permission) || 'Izin pemberitahuan belum diberikan. Periksa pengaturan situs pada browser.');
         return;
       }
-      updateButton(true); message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
+      updateButton(true); message('Pemberitahuan perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
     } catch (error) {
       updateButton(previous);
       if (Notification.permission === 'denied') message(permissionMessage('denied'));
-      else message(error.message || 'Notifikasi belum dapat diaktifkan.');
+      else message(error.message || 'Pemberitahuan belum dapat diaktifkan.');
     } finally { setDisabled(false); }
   }
   var pushRefreshTimer = 0, pushRefreshing = false;
@@ -143,12 +143,12 @@
       if (active) {
         if (rebind && isAuthenticated) await post('notifikasi/push', {subscription:JSON.stringify(sub)});
       } else if (permission === 'granted') {
-        message('Izin notifikasi sudah diberikan. Aktifkan sakelar untuk menerima pembaruan.');
+        message('Izin pemberitahuan sudah diberikan. Aktifkan sakelar untuk menerima pembaruan.');
       } else {
         message(permissionMessage(permission));
       }
     } catch (_) {
-      message('Status notifikasi belum dapat diperiksa.');
+      message('Status pemberitahuan belum dapat diperiksa.');
     } finally { pushRefreshing = false; }
   }
   function schedulePushRefresh() {
@@ -157,8 +157,8 @@
     pushRefreshTimer = window.setTimeout(function () { refreshPushState(false); }, 120);
   }
   if (buttons.length) {
-    if (!supported) { updateButton(false); setDisabled(true); message('Notifikasi perangkat tidak didukung oleh browser ini.'); }
-    else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Notifikasi perangkat belum diaktifkan oleh pengelola server.'); }
+    if (!supported) { updateButton(false); setDisabled(true); message('Pemberitahuan perangkat tidak didukung oleh browser ini.'); }
+    else if (!config.vapidPublicKey) { updateButton(false); setDisabled(true); message('Pemberitahuan perangkat belum diaktifkan oleh pengelola server.'); }
     else {
       refreshPushState(true);
       checkboxes.forEach(function (control) {
@@ -198,12 +198,12 @@
     var label = onboarding.querySelector('[data-notification-onboarding-enable-label]');
     var later = onboarding.querySelector('[data-notification-onboarding-close].warga-notification-onboarding-later');
     if (messageNode) messageNode.textContent = blocked
-      ? 'Izin notifikasi saat ini diblokir. Aktifkan melalui Info aplikasi > Notifikasi agar pembaruan layanan dapat diterima.'
-      : 'Izinkan notifikasi agar Anda segera mengetahui status surat dan pembaruan layanan Anda.';
+      ? 'Izin pemberitahuan saat ini diblokir. Aktifkan melalui Info aplikasi > Pemberitahuan agar pembaruan layanan dapat diterima.'
+      : 'Izinkan pemberitahuan agar Anda segera mengetahui status surat dan pembaruan layanan Anda.';
     if (note) note.innerHTML = blocked
-      ? '<i class="fa fa-info-circle" aria-hidden="true"></i>Buka pengaturan aplikasi, pilih Notifikasi, lalu aktifkan Izinkan notifikasi.'
-      : '<i class="fa fa-shield-alt" aria-hidden="true"></i>Notifikasi hanya digunakan untuk pembaruan layanan akun Anda.';
-    if (label) label.textContent = blocked ? 'Mengerti' : 'Izinkan Notifikasi';
+      ? '<i class="fa fa-info-circle" aria-hidden="true"></i>Buka pengaturan aplikasi, pilih Pemberitahuan, lalu aktifkan Izinkan pemberitahuan.'
+      : '<i class="fa fa-shield-alt" aria-hidden="true"></i>Pemberitahuan hanya digunakan untuk pembaruan layanan akun Anda.';
+    if (label) label.textContent = blocked ? 'Mengerti' : 'Izinkan Pemberitahuan';
     if (later) later.hidden = blocked;
     if (enable) enable.setAttribute('data-notification-onboarding-blocked', blocked ? '1' : '0');
     onboarding.__previousFocus = document.activeElement;
@@ -238,18 +238,18 @@
         if (!result.active) {
           if (result.permission === 'denied') storageSet(onboardingKey, 'seen');
           var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
-          if (messageNode) messageNode.textContent = permissionMessage(result.permission) || 'Izin notifikasi belum diberikan. Anda dapat mengaktifkannya dari menu Akun.';
+          if (messageNode) messageNode.textContent = permissionMessage(result.permission) || 'Izin pemberitahuan belum diberikan. Anda dapat mengaktifkannya dari menu Akun.';
           if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
           return;
         }
         updateButton(true);
         storageSet(onboardingKey, 'seen');
         closeNotificationOnboarding(true);
-        message('Notifikasi perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
+        message('Pemberitahuan perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
       }).catch(function (error) {
         if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
         var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
-        if (messageNode) messageNode.textContent = error && error.message ? error.message : 'Notifikasi belum dapat diaktifkan. Periksa koneksi lalu coba lagi.';
+        if (messageNode) messageNode.textContent = error && error.message ? error.message : 'Pemberitahuan belum dapat diaktifkan. Periksa koneksi lalu coba lagi.';
       });
     });
     document.addEventListener('keydown', function (event) {

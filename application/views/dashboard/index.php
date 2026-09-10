@@ -10,7 +10,7 @@ $lettersPage = !empty($lettersPage);
 </section>
 <?php endif; ?>
 <nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
-    <a href="<?= site_url('notifikasi') ?>"><i class="fa fa-bell"></i> Notifikasi Surat <span data-notification-count></span></a>
+    <a href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt"></i> Permohonanku</a>
     <a href="<?= site_url('layanan') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
 </nav>
 <?php if (!$lettersPage): ?><section class="warga-home-head">
@@ -18,7 +18,7 @@ $lettersPage = !empty($lettersPage);
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
         <div><p class="color-white">Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span class="color-white"><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
     </div>
-    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka notifikasi"><i class="fa fa-bell"></i></a>
+    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka pemberitahuan"><i class="fa fa-bell"></i></a>
 </section><?php endif; ?>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">

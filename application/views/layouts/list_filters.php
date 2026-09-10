@@ -1,5 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<form method="get" action="<?= e($listUrl) ?>" class="warga-list-search" data-list-search aria-label="Pencarian <?= $listKind === 'notifications' ? 'notifikasi' : 'permohonan' ?>">
+<form method="get" action="<?= e($listUrl) ?>" class="warga-list-search" data-list-search aria-label="Pencarian <?= $listKind === 'notifications' ? 'pemberitahuan' : 'permohonan' ?>">
     <div class="warga-list-search-fields">
         <div class="warga-list-field">
             <label for="warga-list-name">Nama surat</label>

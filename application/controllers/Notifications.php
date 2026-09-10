@@ -17,7 +17,7 @@ class Notifications extends Public_Controller
         ));
         $notifications = $listing['items'];
         $data = array(
-            'pageTitle' => 'Notifikasi',
+            'pageTitle' => 'Pemberitahuan',
             'notifications' => $notifications,
             'listing' => $listing,
             'listUrl' => site_url('notifikasi'),

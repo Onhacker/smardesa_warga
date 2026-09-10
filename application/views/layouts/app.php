@@ -5,7 +5,7 @@ $backUrl = isset($backUrl) && trim((string) $backUrl) !== ''
     : site_url(!empty($staffMode) ? 'petugas' : 'permohonan');
 $notificationHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
 $notificationUrl = !empty($isAuthenticated) ? site_url('notifikasi') : site_url('login');
-$notificationLabel = !empty($isAuthenticated) ? 'Buka notifikasi' : 'Masuk untuk melihat notifikasi';
+$notificationLabel = !empty($isAuthenticated) ? 'Buka pemberitahuan' : 'Masuk untuk melihat pemberitahuan';
 $navSection = $this->uri->segment(1) ?: 'dashboard';
 ?>
 <!DOCTYPE HTML>

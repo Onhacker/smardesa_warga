@@ -74,13 +74,15 @@ $productId = (string) ($product['id'] ?? '');
             <div class="market-product-detail-meta">
                 <strong><?= e($priceLabel) ?></strong>
                 <?php if ($storeName !== '' || $villageName !== ''): ?><div class="market-product-seller-meta">
-                    <?php if ($storeName !== ''): ?><?php if ($storeUrl !== ''): ?><a class="market-product-seller-store" href="<?= e($storeUrl) ?>" aria-label="Lihat toko <?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong><i class="fa fa-chevron-right market-store-link-arrow" aria-hidden="true"></i></a><?php else: ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?><?php endif; ?>
+                    <?php if ($storeName !== ''): ?><span class="market-product-store-row">
+                        <?php if ($storeUrl !== ''): ?><a class="market-product-seller-store" href="<?= e($storeUrl) ?>" aria-label="Buka toko <?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></a><?php else: ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?>
+                        <?php if ($storeUrl !== ''): ?><a class="market-product-store-inline-link" href="<?= e($storeUrl) ?>">Lihat toko <i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
+                    </span><?php endif; ?>
                     <?php if ($villageName !== ''): ?><span class="market-product-seller-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></span><?php endif; ?>
                 </div><?php endif; ?>
             </div>
             <?php if (isset($product['stock'])): ?><span class="market-stock-pill <?= (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><i class="fa fa-box" aria-hidden="true"></i><?= (int) $product['stock'] < 1 ? 'Stok habis' : 'Stok tersedia' ?></span><?php endif; ?>
             <button type="button" class="market-contact-trigger" data-market-contact-open aria-haspopup="dialog" aria-controls="market-contact-dialog"><i class="fa fa-phone-alt color-white" aria-hidden="true"></i><span class="color-white">Hubungi</span><i class="fa fa-chevron-right color-white" aria-hidden="true"></i></button>
-            <?php if ($storeUrl !== ''): ?><a class="market-view-store-button" href="<?= e($storeUrl) ?>"><i class="fa fa-store-alt" aria-hidden="true"></i><span>Lihat toko</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
             <?php if (!$hasContact): ?><p class="market-contact-note"><i class="fa fa-info-circle" aria-hidden="true"></i>Nomor kontak penjual belum tersedia.</p><?php endif; ?>
         </div>
     </section>

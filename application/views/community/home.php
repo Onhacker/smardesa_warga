@@ -107,6 +107,36 @@ $pictureUrl = static function ($name) {
         <?php endif; ?>
     </section>
 
+    <?php $homeServices = isset($services) && is_array($services) ? array_slice($services, 0, 4) : array(); ?>
+    <section class="warga-service-card warga-dashboard-services community-v22-letter-preview" aria-labelledby="community-letter-preview-title">
+        <div class="content warga-section-head warga-service-heading-card">
+            <div>
+                <p class="font-600 color-highlight mb-n1">Pelayanan <?= e($institutionLower) ?></p>
+                <h2 id="community-letter-preview-title" class="font-22 mb-0">Ajukan Surat</h2>
+            </div>
+            <a href="<?= site_url($isAuthenticated ? 'layanan' : 'login') ?>" class="font-12 color-highlight font-600">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <?php if ($homeServices): ?>
+            <div class="warga-service-grid" aria-label="Empat jenis surat">
+                <?php foreach ($homeServices as $service): ?>
+                    <?php
+                    $homeServiceName = !empty($service['short_name']) ? $service['short_name'] : $service['name'];
+                    $homeServiceIcon = warga_service_icon($service);
+                    $homeServiceUrl = $isAuthenticated
+                        ? site_url('permohonan/baru?layanan=' . rawurlencode($service['slug']))
+                        : site_url('login');
+                    ?>
+                    <a href="<?= e($homeServiceUrl) ?>" class="warga-service-item" title="<?= e($service['name']) ?>">
+                        <span class="warga-service-icon <?= e($homeServiceIcon['class']) ?>"><i class="<?= e($homeServiceIcon['icon']) ?>" aria-hidden="true"></i></span>
+                        <strong><?= e($homeServiceName) ?></strong>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php else: ?>
+            <p class="warga-service-empty">Belum ada layanan surat yang tersedia.</p>
+        <?php endif; ?>
+    </section>
+
     <section class="community-v22-information" aria-labelledby="community-information-title">
         <header class="community-v22-section-head">
             <div>
@@ -117,12 +147,12 @@ $pictureUrl = static function ($name) {
 
         <div class="community-v22-feature-list">
             <a class="community-v22-feature" href="<?= site_url('notifikasi') ?>" data-dashboard-media-card>
-                <img src="<?= $pictureUrl('notifikasi-layanan') ?>" srcset="<?= $pictureUrl('notifikasi-layanan-256') ?> 256w, <?= $pictureUrl('notifikasi-layanan-384') ?> 384w, <?= $pictureUrl('notifikasi-layanan') ?> 600w" sizes="(max-width: 560px) 106px, 128px" alt="Ilustrasi notifikasi surat" loading="lazy" width="600" height="1067">
+                <img src="<?= $pictureUrl('notifikasi-layanan') ?>" srcset="<?= $pictureUrl('notifikasi-layanan-256') ?> 256w, <?= $pictureUrl('notifikasi-layanan-384') ?> 384w, <?= $pictureUrl('notifikasi-layanan') ?> 600w" sizes="(max-width: 560px) 106px, 128px" alt="Ilustrasi pemberitahuan layanan" loading="lazy" width="600" height="1067">
                 <span class="community-v22-feature-copy">
                     <small>Kabar layanan</small>
-                    <strong>Notifikasi Surat</strong>
-                    <span>Pantau perkembangan dan hasil permohonan surat Anda.</span>
-                    <b>Buka notifikasi <span data-notification-count></span> <i class="fa fa-arrow-right" aria-hidden="true"></i></b>
+                    <strong>Pemberitahuan</strong>
+                    <span>Pantau perkembangan layanan dan pengumuman terbaru.</span>
+                    <b>Buka pemberitahuan <span data-notification-count></span> <i class="fa fa-arrow-right" aria-hidden="true"></i></b>
                 </span>
             </a>
 

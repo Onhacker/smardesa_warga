@@ -140,13 +140,13 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
             <div class="warga-account-notification-row">
                 <span class="warga-setting-icon is-red"><i class="fa fa-bell" aria-hidden="true"></i></span>
                 <div class="warga-account-notification-copy">
-                    <strong>Notifikasi</strong>
+                    <strong>Pemberitahuan</strong>
                     <small>Aktifkan pemberitahuan status layanan; suara dan getar mengikuti pengaturan perangkat</small>
                     <span class="warga-account-notification-status" data-push-status role="status" aria-live="polite"></span>
-                    <a class="warga-account-notification-history" href="<?= site_url('notifikasi') ?>">Lihat riwayat notifikasi <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+                    <a class="warga-account-notification-history" href="<?= site_url('notifikasi') ?>">Lihat riwayat pemberitahuan <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                 </div>
                 <div class="custom-control small-switch ios-switch warga-account-notification-switch">
-                    <input data-push-toggle type="checkbox" class="ios-input" id="switch-push-notification" aria-label="Aktifkan notifikasi">
+                    <input data-push-toggle type="checkbox" class="ios-input" id="switch-push-notification" aria-label="Aktifkan pemberitahuan">
                     <label class="custom-control-label" for="switch-push-notification" aria-hidden="true"></label>
                 </div>
             </div>
@@ -171,7 +171,7 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
     <section class="card card-style warga-install-card"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
     <?php if ($staffMode): ?>
         <section class="warga-community">
-            <a href="<?= site_url('notifikasi') ?>">Notifikasi <span data-notification-count></span></a>
+            <a href="<?= site_url('notifikasi') ?>">Pemberitahuan <span data-notification-count></span></a>
         </section>
     <?php endif; ?>
 
