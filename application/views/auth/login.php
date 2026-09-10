@@ -43,7 +43,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
     <nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
         <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
-        <a class="circle-nav" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span></a>
+        <a class="circle-nav" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span><strong aria-hidden="true"><u></u></strong></a>
         <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
         <a class="active-nav" href="<?= site_url('login') ?>"><i class="fa fa-sign-in-alt"></i><span>Login</span></a>
     </nav>
