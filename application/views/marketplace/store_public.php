@@ -11,6 +11,11 @@ $address = trim((string) ($store['address'] ?? ''));
 $productCount = max(0, (int) ($listing['total'] ?? count($products)));
 $whatsappUrl = trim((string) ($store['whatsapp_url'] ?? ''));
 $phoneUrl = trim((string) ($store['phone_url'] ?? ''));
+$whatsappDigits = preg_replace('/[^0-9]/', '', (string) ($store['whatsapp'] ?? ''));
+if (strpos($whatsappDigits, '0') === 0) $whatsappDigits = '62' . substr($whatsappDigits, 1);
+$whatsappDigits = preg_match('/^[0-9]{8,15}$/D', $whatsappDigits) ? $whatsappDigits : '';
+$whatsappHref = $whatsappDigits !== '' ? 'https://wa.me/' . $whatsappDigits . '?text=' . rawurlencode('Halo, saya ingin menghubungi toko ' . $storeName . '.') : $whatsappUrl;
+$whatsappCallHref = $whatsappDigits !== '' ? 'whatsapp://call?phone=' . $whatsappDigits : '';
 ?>
 
 <div class="marketplace-page marketplace-store-public-page">
@@ -27,8 +32,7 @@ $phoneUrl = trim((string) ($store['phone_url'] ?? ''));
         <?php if ($address !== ''): ?><p class="market-store-public-address"><i class="fa fa-location-arrow" aria-hidden="true"></i><?= e($address) ?></p><?php endif; ?>
         <?php if ($whatsappUrl !== '' || $phoneUrl !== ''): ?>
             <div class="market-store-public-actions" aria-label="Kontak toko">
-                <?php if ($whatsappUrl !== ''): ?><a class="market-store-contact market-store-contact-whatsapp" href="<?= e($whatsappUrl) ?>" target="_blank" rel="noopener"><i class="fab fa-whatsapp" aria-hidden="true"></i><span>Chat WhatsApp</span></a><?php endif; ?>
-                <?php if ($phoneUrl !== ''): ?><a class="market-store-contact market-store-contact-phone" href="<?= e($phoneUrl) ?>"><i class="fa fa-phone" aria-hidden="true"></i><span>Telepon</span></a><?php endif; ?>
+                <button type="button" class="market-contact-trigger market-store-public-contact-trigger" data-market-contact-open aria-haspopup="dialog" aria-controls="market-contact-dialog"><i class="fa fa-phone-alt" aria-hidden="true"></i><span>Hubungi</span><i class="fa fa-chevron-right" aria-hidden="true"></i></button>
             </div>
         <?php endif; ?>
     </section>
@@ -55,3 +59,12 @@ $phoneUrl = trim((string) ($store['phone_url'] ?? ''));
         <?php endif; ?>
     </section>
 </div>
+<?php $this->load->view('marketplace/contact_modal', array(
+    'contactStoreName' => $storeName,
+    'contactVillageName' => $villageName,
+    'contactWhatsappHref' => $whatsappHref,
+    'contactWhatsappCallHref' => $whatsappCallHref,
+    'contactPhoneHref' => $phoneUrl,
+    'contactHeading' => 'Hubungi toko',
+    'contactDescription' => 'Pilih cara yang paling nyaman untuk menghubungi toko ini.'
+)); ?>

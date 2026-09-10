@@ -270,10 +270,12 @@ body.market-contact-open { overflow: hidden; }
 .market-store-public-address { position: relative; z-index: 1; display: flex; align-items: flex-start; gap: 7px; margin: 9px 0 0; color: rgba(255,255,255,.84) !important; font-size: 13px; line-height: 1.45; }
 .market-store-public-address i { flex: 0 0 auto; margin-top: 2px; color: inherit !important; }
 .market-store-public-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-.market-store-contact { display: inline-flex; align-items: center; gap: 7px; min-height: 39px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.3); border-radius: 10px; background: rgba(255,255,255,.14); color: #fff !important; font-size: 12px; font-weight: 800; line-height: 1.2; }
-.market-store-contact:hover, .market-store-contact:focus-visible { border-color: rgba(255,255,255,.7); background: rgba(255,255,255,.24); color: #fff !important; outline: 0; }
-.market-store-contact i { color: inherit !important; font-size: 15px; }
-.market-store-contact-whatsapp { background: rgba(20, 130, 73, .72); }
+.market-store-public-actions .market-store-public-contact-trigger { width: 100%; min-height: 45px; margin-top: 0; border: 1px solid rgba(255,255,255,.42); background: rgba(255,255,255,.16); box-shadow: 0 6px 15px rgba(11,48,90,.18); }
+.market-store-public-actions .market-store-public-contact-trigger:hover,
+.market-store-public-actions .market-store-public-contact-trigger:focus-visible { border-color: rgba(255,255,255,.78); background: rgba(255,255,255,.25); }
+.market-store-public-actions .market-store-public-contact-trigger > span { color: #fff !important; }
+.market-store-public-actions .market-store-public-contact-trigger > i { color: #fff !important; }
+.market-store-public-actions .market-store-public-contact-trigger > i:last-child { justify-self: end; }
 .market-store-public-products { margin: 0 15px 28px; }
 .market-store-public-products .market-section-heading { align-items: center; }
 .market-store-public-count { flex: 0 0 auto; padding: 7px 10px; border: 1px solid var(--market-line); border-radius: 10px; background: var(--market-surface); color: var(--market-muted); font-size: 12px; font-weight: 800; white-space: nowrap; }
