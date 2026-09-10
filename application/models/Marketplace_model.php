@@ -89,6 +89,51 @@ class Marketplace_model extends CI_Model
         return $row ? $this->decorate_store($row) : NULL;
     }
 
+    /**
+     * Resolve an active store for the public store page. Store identity is
+     * intentionally looked up by its opaque ID; no owner account details are
+     * exposed to visitors.
+     */
+    public function public_store($storeId)
+    {
+        $storeId = trim((string) $storeId);
+        if ($storeId === '') return NULL;
+
+        if (warga_demo_mode()) {
+            $state = $this->demo_state();
+            foreach ($state['stores'] as $stored) {
+                if (!is_array($stored) || (string) ($stored['id'] ?? '') !== $storeId || (int) ($stored['is_active'] ?? 1) !== 1) continue;
+                return $this->decorate_store($stored);
+            }
+            // Demo products carry enough public store data to make the public
+            // store route useful even before a seller has saved store settings.
+            foreach ($this->demo_products() as $product) {
+                if ((string) ($product['store_id'] ?? '') !== $storeId || (string) ($product['status'] ?? '') !== 'published') continue;
+                return $this->decorate_store(array(
+                    'id' => $storeId,
+                    'village_id' => (string) ($product['village_id'] ?? ''),
+                    'village_name' => (string) ($product['village_name'] ?? ''),
+                    'owner_user_id' => (int) ($product['seller_user_id'] ?? 0),
+                    'name' => (string) ($product['store_name'] ?? 'Toko warga'),
+                    'description' => (string) ($product['store_description'] ?? ''),
+                    'whatsapp' => (string) ($product['store_whatsapp'] ?? ''),
+                    'phone' => (string) ($product['store_phone'] ?? ''),
+                    'address' => (string) ($product['store_address'] ?? ''),
+                    'is_active' => 1
+                ));
+            }
+            return NULL;
+        }
+
+        if (!$this->ready()) return NULL;
+        $row = $this->db->select('s.*,v.name AS village_name')
+            ->from('marketplace_stores s')
+            ->join('village_tenants v', 'v.id=s.village_id', 'left')
+            ->where(array('s.id' => $storeId, 's.is_active' => 1))
+            ->limit(1)->get()->row_array();
+        return $row ? $this->decorate_store($row) : NULL;
+    }
+
     public function save_store(array $user, array $data)
     {
         if (!$this->can_manage($user)) return array('success' => FALSE, 'message' => 'Akses mengelola toko ditolak.');
@@ -150,13 +195,15 @@ class Marketplace_model extends CI_Model
         if (!in_array($sort, array('newest', 'price_low', 'price_high', 'name'), TRUE)) $sort = 'newest';
         $publicAll = !empty($filters['public_all']);
         $onlyOwn = !empty($filters['only_own']);
+        $storeId = trim((string) ($filters['store_id'] ?? ''));
         $skipTotal = !empty($filters['skip_total']);
         $villageId = $this->user_village($user);
         $canManage = $this->can_manage($user);
         if (warga_demo_mode()) {
-            $rows = array_values(array_filter($this->demo_products(), function ($row) use ($villageId, $q, $category, $canManage, $user, $publicAll, $onlyOwn) {
+            $rows = array_values(array_filter($this->demo_products(), function ($row) use ($villageId, $q, $category, $canManage, $user, $publicAll, $onlyOwn, $storeId) {
                 if (!$publicAll && (string) ($row['village_id'] ?? '') !== $villageId) return FALSE;
                 if ($onlyOwn && (int) ($row['seller_user_id'] ?? 0) !== (int) ($user['id'] ?? 0)) return FALSE;
+                if ($storeId !== '' && (string) ($row['store_id'] ?? '') !== $storeId) return FALSE;
                 $visible = (string) ($row['status'] ?? '') === 'published' || ($canManage && (int) ($row['seller_user_id'] ?? 0) === (int) ($user['id'] ?? 0));
                 if (!$onlyOwn && !$visible) return FALSE;
                 if ($category > 0 && (int) ($row['category_id'] ?? 0) !== $category) return FALSE;
@@ -188,6 +235,7 @@ class Marketplace_model extends CI_Model
             if (!$publicAll) $this->db->where('p.village_id', $villageId);
             if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
             else $this->apply_product_visibility($user, $canManage);
+            if ($storeId !== '') $this->db->where('p.store_id', $storeId);
             if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
             if ($category > 0) $this->db->where('p.category_id', $category);
             $total = (int) $this->db->count_all_results();
@@ -199,6 +247,7 @@ class Marketplace_model extends CI_Model
         if (!$publicAll) $this->db->where('p.village_id', $villageId);
         if ($onlyOwn) $this->db->where('p.seller_user_id', (int) ($user['id'] ?? 0));
         else $this->apply_product_visibility($user, $canManage);
+        if ($storeId !== '') $this->db->where('p.store_id', $storeId);
         if ($q !== '') $this->db->group_start()->like('p.name', $q)->or_like('p.description', $q)->or_like('c.name', $q)->group_end();
         if ($category > 0) $this->db->where('p.category_id', $category);
         if ($sort === 'price_low') $this->db->order_by('p.price', 'ASC');

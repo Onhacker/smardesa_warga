@@ -30,6 +30,8 @@ $price = is_numeric($product['price'] ?? null) ? (float) $product['price'] : 0;
 $priceLabel = 'Rp ' . number_format($price, 0, ',', '.');
 $category = trim((string) ($product['category_name'] ?? ($product['category'] ?? ($product['category_label'] ?? 'Produk warga'))));
 $storeName = trim((string) ($product['store_name'] ?? ($store['name'] ?? ($product['seller_name'] ?? 'Toko warga'))));
+$storeId = trim((string) ($product['store_id'] ?? ($store['id'] ?? '')));
+$storeUrl = $storeId !== '' ? site_url('pasar/toko/' . rawurlencode($storeId)) : '';
 $villageName = trim((string) ($product['village_name'] ?? ''));
 $description = trim((string) ($product['description'] ?? ($product['body'] ?? '')));
 $normalizeContactDigits = static function ($value) {
@@ -72,12 +74,13 @@ $productId = (string) ($product['id'] ?? '');
             <div class="market-product-detail-meta">
                 <strong><?= e($priceLabel) ?></strong>
                 <?php if ($storeName !== '' || $villageName !== ''): ?><div class="market-product-seller-meta">
-                    <?php if ($storeName !== ''): ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?>
+                    <?php if ($storeName !== ''): ?><?php if ($storeUrl !== ''): ?><a class="market-product-seller-store" href="<?= e($storeUrl) ?>" aria-label="Lihat toko <?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong><i class="fa fa-chevron-right market-store-link-arrow" aria-hidden="true"></i></a><?php else: ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?><?php endif; ?>
                     <?php if ($villageName !== ''): ?><span class="market-product-seller-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></span><?php endif; ?>
                 </div><?php endif; ?>
             </div>
             <?php if (isset($product['stock'])): ?><span class="market-stock-pill <?= (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><i class="fa fa-box" aria-hidden="true"></i><?= (int) $product['stock'] < 1 ? 'Stok habis' : 'Stok tersedia' ?></span><?php endif; ?>
             <button type="button" class="market-contact-trigger" data-market-contact-open aria-haspopup="dialog" aria-controls="market-contact-dialog"><i class="fa fa-phone-alt color-white" aria-hidden="true"></i><span class="color-white">Hubungi</span><i class="fa fa-chevron-right color-white" aria-hidden="true"></i></button>
+            <?php if ($storeUrl !== ''): ?><a class="market-view-store-button" href="<?= e($storeUrl) ?>"><i class="fa fa-store-alt" aria-hidden="true"></i><span>Lihat toko</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
             <?php if (!$hasContact): ?><p class="market-contact-note"><i class="fa fa-info-circle" aria-hidden="true"></i>Nomor kontak penjual belum tersedia.</p><?php endif; ?>
         </div>
     </section>
@@ -114,6 +117,7 @@ $productId = (string) ($product['id'] ?? '');
             <?php $storeDescription = trim((string) ($product['store_description'] ?? ($store['description'] ?? ''))); $storeAddress = trim((string) ($product['store_address'] ?? ($store['address'] ?? ''))); ?>
             <?php if ($storeDescription !== ''): ?><p><?= e($storeDescription) ?></p><?php endif; ?>
             <?php if ($storeAddress !== ''): ?><span class="market-store-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($storeAddress) ?></span><?php endif; ?>
+            <?php if ($storeUrl !== ''): ?><a class="market-view-store-button market-view-store-button-secondary" href="<?= e($storeUrl) ?>"><i class="fa fa-store" aria-hidden="true"></i><span>Lihat semua produk toko ini</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
         </div>
     </section>
 </div>

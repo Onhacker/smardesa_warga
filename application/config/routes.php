@@ -27,6 +27,7 @@ $route['pasar/tokoku'] = 'marketplace/tokoku';
 $route['tokoku'] = 'marketplace/tokoku';
 $route['pasar/toko'] = 'marketplace/store_settings';
 $route['pasar/toko/simpan'] = 'marketplace/store_settings';
+$route['pasar/toko/(:any)'] = 'marketplace/public_store/$1';
 $route['pasar/gambar/(:num)'] = 'marketplace/image/$1';
 $route['pasar/produk/(:any)/ubah'] = 'marketplace/edit/$1';
 $route['pasar/produk/(:any)/arsipkan'] = 'marketplace/archive/$1';

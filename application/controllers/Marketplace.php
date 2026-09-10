@@ -95,6 +95,33 @@ class Marketplace extends Public_Controller
     }
 
     /**
+     * Public storefront. Visitors may browse a seller's active identity and
+     * published products without signing in; unpublished products are never
+     * included in this view.
+     */
+    public function public_store($id)
+    {
+        $store = $this->marketplace->public_store($id);
+        if (!$store) show_404();
+
+        $storeId = (string) ($store['id'] ?? $id);
+        $listing = $this->marketplace->products(array(), array(
+            'public_all' => TRUE,
+            'store_id' => $storeId,
+            'sort' => 'newest',
+            'per_page' => 48
+        ));
+        $this->render('marketplace/store_public', array(
+            'pageTitle' => (string) ($store['name'] ?? 'Toko warga'),
+            'store' => $store,
+            'products' => $listing['items'],
+            'listing' => $listing,
+            'showBackButton' => TRUE,
+            'backUrl' => site_url('pasar')
+        ));
+    }
+
+    /**
      * Store a public product rating asynchronously. The catalogue and detail
      * pages remain readable without login; only submitting a review requires
      * an authenticated warga/staff account.
