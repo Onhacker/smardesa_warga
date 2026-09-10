@@ -95,6 +95,7 @@
       if (control.matches('input[type="checkbox"]')) {
         control.checked = subscribed;
         control.setAttribute('aria-checked', subscribed ? 'true' : 'false');
+        control.setAttribute('aria-label', subscribed ? 'Matikan pemberitahuan' : 'Nyalakan pemberitahuan');
       } else {
         control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Pemberitahuan' : 'Aktifkan Pemberitahuan');
       }
@@ -125,8 +126,17 @@
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
     if (sub) {
-      if (isAuthenticated) await post('notifikasi/push/hapus', {endpoint:sub.endpoint});
+      // Disable the browser subscription first so a temporary server/connection
+      // error cannot switch this device back on after the user's explicit tap.
+      var endpoint = sub.endpoint;
       await sub.unsubscribe();
+      if (await reg.pushManager.getSubscription()) {
+        throw new Error('Pemberitahuan belum dapat dinonaktifkan. Coba lagi.');
+      }
+      if (isAuthenticated) {
+        try { await post('notifikasi/push/hapus', {endpoint:endpoint}); }
+        catch (_) { return {active:false, cleanupPending:true}; }
+      }
     }
     return {active:false};
   }
@@ -135,8 +145,11 @@
     setDisabled(true);
     try {
       if (!desired) {
-        await disableSubscription();
-        updateButton(false); message('Pemberitahuan perangkat dinonaktifkan.');
+        var disabledResult = await disableSubscription();
+        updateButton(false);
+        message(disabledResult.cleanupPending
+          ? 'Pemberitahuan perangkat dinonaktifkan. Sinkronisasi server akan diperbarui saat Anda online.'
+          : 'Pemberitahuan perangkat dinonaktifkan.');
         return;
       }
       var result = await enableSubscription();

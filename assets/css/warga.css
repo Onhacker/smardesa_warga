@@ -1652,6 +1652,7 @@ body {
 }
 
 #menu-main .warga-menu-list > a,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row,
 #menu-main .warga-logout-form > button {
   position: relative;
   display: grid;
@@ -1671,6 +1672,7 @@ body {
 }
 
 #menu-main .warga-menu-list > a > span,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row > span:not(.warga-menu-toggle-control),
 #menu-main .warga-logout-form > button > span {
   float: none;
   min-width: 0;
@@ -1684,6 +1686,7 @@ body {
 }
 
 #menu-main .warga-menu-list > a > i:first-child,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row > i:first-child,
 #menu-main .warga-logout-form > button > i:first-child {
   display: grid;
   place-items: center;
@@ -1724,15 +1727,18 @@ body {
 }
 
 #menu-main .warga-menu-list > a:hover,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row:hover,
 #menu-main .warga-logout-form > button:hover {
   background: #f0f5f6;
 }
 
-#menu-main .warga-menu-list > a.warga-menu-toggle-row {
+#menu-main .warga-menu-list > .warga-menu-toggle-row {
   grid-template-columns: 38px minmax(0, 1fr) 58px;
+  cursor: pointer;
+  user-select: none;
 }
 
-#menu-main .warga-menu-list > a.warga-menu-toggle-row > .warga-menu-toggle-control,
+#menu-main .warga-menu-list > .warga-menu-toggle-row > .warga-menu-toggle-control,
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control {
   position: relative;
   top: auto;
@@ -1749,7 +1755,7 @@ body {
   justify-self: end;
 }
 
-#menu-main .warga-menu-list > a.warga-menu-toggle-row > .warga-menu-toggle-control > .custom-control-label,
+#menu-main .warga-menu-list > .warga-menu-toggle-row > .warga-menu-toggle-control > .custom-control-label,
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control > .custom-control-label {
   position: absolute;
   inset: 0;
@@ -1763,21 +1769,35 @@ body {
 
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::before,
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::after {
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   box-sizing: border-box;
   margin: 0 !important;
+  border-radius: 50px !important;
+  transition: all 250ms ease;
 }
 
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::before {
+  display: block !important;
   width: 58px !important;
   height: 32px !important;
+  background-color: #e8e9ea;
+  border: 1px solid rgba(152, 152, 152, .4);
 }
 
 #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::after {
+  z-index: 6;
   width: 30px !important;
   height: 30px !important;
+  background-color: #fff;
+  border: 1px solid rgba(152, 152, 152, .4);
+}
+
+.theme-dark #menu-main .warga-menu-list .ios-switch.warga-menu-toggle-control .custom-control-label::before {
+  background-color: #1b1d21;
+  border-color: rgba(255, 255, 255, .05);
 }
 
 #menu-main .warga-logout-form {
@@ -1832,7 +1852,8 @@ body {
   overflow-wrap: anywhere;
 }
 
-#menu-main :is(.warga-menu-close, .warga-menu-list > a, .warga-logout-form > button):focus-visible {
+#menu-main :is(.warga-menu-close, .warga-menu-list > a, .warga-menu-list > label.warga-menu-toggle-row, .warga-logout-form > button):focus-visible,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row:focus-within {
   outline: 2px solid var(--warga-teal) !important;
   outline-offset: -2px;
 }
@@ -6678,12 +6699,14 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
 
 /* AppKit-inspired menu palette: distinct colors, rounded tiles, and soft depth. */
 #menu-main .warga-menu-list > a,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row,
 #menu-main .warga-logout-form > button {
   grid-template-columns: 44px minmax(0, 1fr) auto;
   min-height: 64px;
 }
 
 #menu-main .warga-menu-list > a > i.warga-menu-icon:first-child,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row > i.warga-menu-icon:first-child,
 #menu-main .warga-logout-form > button > i.warga-menu-icon:first-child {
   --warga-menu-icon-start: #5b98e6;
   --warga-menu-icon-end: #3e79c7;
@@ -6700,6 +6723,7 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
 }
 
 #menu-main .warga-menu-list > a:hover > i.warga-menu-icon:first-child,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row:hover > i.warga-menu-icon:first-child,
 #menu-main .warga-logout-form > button:hover > i.warga-menu-icon:first-child {
   box-shadow: 0 10px 21px var(--warga-menu-icon-shadow) !important;
   transform: translateY(-1px);
@@ -6715,13 +6739,15 @@ body.theme-dark #page .warga-request-detail .warga-timeline-item p {
 #menu-main .warga-menu-icon.is-indigo { --warga-menu-icon-start: #7f94e4 !important; --warga-menu-icon-end: #596ec1 !important; --warga-menu-icon-shadow: rgba(89, 110, 193, .24) !important; }
 #menu-main .warga-menu-icon.is-dark { --warga-menu-icon-start: #65717e !important; --warga-menu-icon-end: #3d4752 !important; --warga-menu-icon-shadow: rgba(61, 71, 82, .24) !important; }
 
-#menu-main .warga-menu-list > a.is-navigating > span {
+#menu-main .warga-menu-list > a.is-navigating > span,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row.is-navigating > span:not(.warga-menu-toggle-control) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
 
-#menu-main .warga-menu-list > a.is-navigating > span::before {
+#menu-main .warga-menu-list > a.is-navigating > span::before,
+#menu-main .warga-menu-list > label.warga-menu-toggle-row.is-navigating > span:not(.warga-menu-toggle-control)::before {
   flex: 0 0 14px;
   width: 14px;
   height: 14px;
