@@ -4,14 +4,71 @@
   var body = document.body;
   var config = window.SDW || {};
 
+  function syncPageSkeletonBounds(skeleton) {
+    if (!skeleton) return;
+
+    var page = document.getElementById('page');
+    var pageTitle = page ? page.querySelector(':scope > .warga-page-title') : null;
+    var compactHeader = page ? page.querySelector(':scope > .header') : null;
+    var pageContent = page ? page.querySelector(':scope > .page-content') : null;
+    var footer = document.getElementById('footer-bar');
+    var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+    var top = 0;
+
+    if (compactHeader) {
+      var compactStyle = window.getComputedStyle(compactHeader);
+      var compactVisible = compactHeader.classList.contains('header-active') || parseFloat(compactStyle.opacity || '0') > 0.5;
+      if (compactVisible) top = compactHeader.getBoundingClientRect().bottom;
+    }
+
+    if (!top) {
+      if (pageContent) top = pageContent.getBoundingClientRect().top;
+      if (pageTitle) top = Math.max(top, pageTitle.getBoundingClientRect().bottom);
+    }
+
+    var bottom = 0;
+    if (footer && viewportHeight) {
+      var footerRect = footer.getBoundingClientRect();
+      if (footerRect.height > 0 && footerRect.top < viewportHeight) {
+        bottom = viewportHeight - footerRect.top;
+      }
+    }
+
+    skeleton.style.setProperty('--warga-page-skeleton-top', Math.max(0, Math.floor(top)) + 'px');
+    skeleton.style.setProperty('--warga-page-skeleton-bottom', Math.max(0, Math.ceil(bottom)) + 'px');
+  }
+
+  function syncVisiblePageSkeletonBounds() {
+    document.querySelectorAll('#preloader.warga-initial-skeleton, [data-warga-page-skeleton]').forEach(function (skeleton) {
+      if (skeleton.hidden || window.getComputedStyle(skeleton).display === 'none') return;
+      syncPageSkeletonBounds(skeleton);
+    });
+  }
+
+  var skeletonBoundsFrame = 0;
+  function schedulePageSkeletonBounds() {
+    if (skeletonBoundsFrame) return;
+    skeletonBoundsFrame = window.requestAnimationFrame(function () {
+      skeletonBoundsFrame = 0;
+      syncVisiblePageSkeletonBounds();
+    });
+  }
+
   // The authentication screens intentionally omit the large AppKit runtime.
   // Keep the initial skeleton lifecycle in the application bundle so those
   // routes still reveal their content at the same point as the full shell.
   var initialPreloader = document.getElementById('preloader');
   if (initialPreloader) {
+    syncPageSkeletonBounds(initialPreloader);
     window.setTimeout(function () {
       initialPreloader.classList.add('preloader-hide');
     }, 150);
+  }
+
+  window.addEventListener('resize', schedulePageSkeletonBounds, { passive: true });
+  window.addEventListener('orientationchange', schedulePageSkeletonBounds, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', schedulePageSkeletonBounds, { passive: true });
   }
 
   /*
@@ -164,6 +221,7 @@
   function showNavigationLoader(link) {
     body.classList.add('warga-is-navigating');
     var skeleton = pageSkeleton();
+    syncPageSkeletonBounds(skeleton);
     skeleton.hidden = false;
 
     if (link && link.closest && link.closest('#footer-bar')) {

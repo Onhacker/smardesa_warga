@@ -6822,7 +6822,10 @@ body.warga-is-navigating { overflow: hidden; cursor: progress; }
 .warga-page-skeleton {
   position: fixed;
   z-index: 96;
-  inset: calc(90px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
+  top: var(--warga-page-skeleton-top, calc(80px + env(safe-area-inset-top, 0px)));
+  right: 0;
+  bottom: var(--warga-page-skeleton-bottom, calc(64px + env(safe-area-inset-bottom, 0px)));
+  left: 0;
   overflow: hidden;
   background: var(--warga-page);
   pointer-events: auto;
@@ -6833,7 +6836,10 @@ body.warga-is-navigating { overflow: hidden; cursor: progress; }
 #preloader.warga-initial-skeleton {
   position: fixed;
   z-index: 96;
-  inset: calc(90px + env(safe-area-inset-top, 0px)) 0 calc(64px + env(safe-area-inset-bottom, 0px));
+  top: var(--warga-page-skeleton-top, calc(80px + env(safe-area-inset-top, 0px)));
+  right: 0;
+  bottom: var(--warga-page-skeleton-bottom, calc(64px + env(safe-area-inset-bottom, 0px)));
+  left: 0;
   display: block;
   overflow: hidden;
   padding-top: 0;
