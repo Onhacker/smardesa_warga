@@ -69,13 +69,13 @@ $productId = (string) ($product['id'] ?? '');
     <section class="card card-style market-product-info-card" aria-labelledby="market-product-title">
         <div class="content">
             <span class="market-product-category"><i class="fa fa-tag" aria-hidden="true"></i><?= e($category) ?></span>
-            <h1 id="market-product-title"><?= e($product['name'] ?? 'Produk warga') ?></h1>
+            <h1 id="market-product-title" title="<?= e($product['name'] ?? 'Produk warga') ?>"><?= e($product['name'] ?? 'Produk warga') ?></h1>
             <p class="market-product-detail-description"><?= e($description !== '' ? $description : 'Produk pilihan warga dari ' . ($institutionLower ?? 'kampung') . '.') ?></p>
             <div class="market-product-detail-meta">
                 <strong><?= e($priceLabel) ?></strong>
                 <?php if ($storeName !== '' || $villageName !== ''): ?><div class="market-product-seller-meta">
                     <?php if ($storeName !== ''): ?><span class="market-product-store-row">
-                        <?php if ($storeUrl !== ''): ?><a class="market-product-seller-store" href="<?= e($storeUrl) ?>" aria-label="Buka toko <?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></a><?php else: ?><span class="market-product-seller-store"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?>
+                        <?php if ($storeUrl !== ''): ?><a class="market-product-seller-store" href="<?= e($storeUrl) ?>" aria-label="Buka toko <?= e($storeName) ?>" title="<?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></a><?php else: ?><span class="market-product-seller-store" title="<?= e($storeName) ?>"><i class="fa fa-store" aria-hidden="true"></i><strong><?= e($storeName) ?></strong></span><?php endif; ?>
                         <?php if ($storeUrl !== ''): ?><a class="market-product-store-inline-link" href="<?= e($storeUrl) ?>">Lihat toko <i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
                     </span><?php endif; ?>
                     <?php if ($villageName !== ''): ?><span class="market-product-seller-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></span><?php endif; ?>

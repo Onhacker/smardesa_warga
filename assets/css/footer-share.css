@@ -1,9 +1,6 @@
 .warga-site-footer-action.is-share {
-  width: 40px;
-  height: 40px;
   padding: 0;
   border: 0;
-  border-radius: 12px;
   background: #7865d7;
   color: #fff !important;
   font: inherit;
@@ -266,7 +263,7 @@ body.theme-dark .warga-footer-modal-icon.is-ios { background: #303a45; color: #f
 }
 
 @media (max-width: 460px) {
-  .warga-site-footer-action.is-share { width: 36px; height: 36px; border-radius: 11px; font-size: 14px; }
+  .warga-site-footer-action.is-share { font-size: 14px; }
   .warga-footer-install { margin-top: 20px; padding-top: 18px; }
   .warga-footer-install-actions { gap: 8px; }
   .warga-footer-install-actions a,

@@ -749,9 +749,13 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   box-shadow: none !important;
 }
 #page > .header.header-auto-show .header-title {
+  display: block;
+  overflow: hidden;
   color: #000 !important;
   font-size: 14px;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 #page > .header.header-auto-show .header-icon {
   color: #1f1f1f !important;
@@ -2687,8 +2691,14 @@ html {
 .warga-site-footer-action {
   display: inline-grid;
   place-items: center;
+  flex: 0 0 48px;
   width: 48px;
   height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   border-radius: 14px;
   color: #fff !important;
   font-size: 19px;
@@ -2711,11 +2721,6 @@ html {
 .warga-site-footer-action.is-youtube { background: #e34b4b; }
 .warga-site-footer-action.is-whatsapp { background: #22b875; }
 .warga-site-footer-action.is-top { background: var(--warga-teal-dark); }
-.warga-site-footer-action.back-to-top {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-}
 .warga-site-footer-action.is-top > i { font-size: 12px; }
 
 html { scroll-behavior: smooth; }
@@ -2853,9 +2858,16 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
   .warga-site-footer-main { padding: 24px 16px 20px; }
   .warga-site-footer h2 { font-size: 24px; }
   .warga-site-footer-address { font-size: 14px; }
-  .warga-site-footer-action { width: 44px; height: 44px; border-radius: 13px; font-size: 17px; }
+  .warga-site-footer-action {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 13px;
+    font-size: 17px;
+  }
   .warga-site-footer h2 + .warga-site-footer-actions { margin-top: 14px; }
-  .warga-site-footer-action.back-to-top { width: 36px; height: 36px; border-radius: 11px; }
   .warga-site-footer-links a { min-height: 58px; padding-right: 6px; padding-left: 6px; font-size: 12px; }
   .warga-legal-page { margin-right: 14px; margin-left: 14px; }
   .warga-legal-hero { align-items: flex-start; padding: 19px 16px; }
@@ -2884,6 +2896,13 @@ body.theme-dark .warga-site-footer-links a:focus-visible { background: #1b304c; 
   font-weight: 700 !important;
   line-height: 1.2;
   overflow-wrap: anywhere;
+}
+
+#page .warga-page-title.has-back h1 {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 #page .warga-page-title .page-title-icon {
@@ -3205,7 +3224,7 @@ body.theme-dark #page .community-item p { color: #bdc9d0; }
 }
 
 #page .community-v22-market-grid .market-product-card .market-product-name {
-  min-height: 2.45em;
+  min-height: 0;
   font-size: 17px;
   line-height: 1.22;
 }

@@ -42,9 +42,9 @@ $productId = static function (array $item) {
                 <span class="market-rating-stars" data-market-rating-stars aria-hidden="true"><?php for ($star = 1; $star <= 5; $star++): ?><i class="fa fa-star <?= $star <= $ratingRounded ? 'is-filled' : 'is-empty' ?>" aria-hidden="true"></i><?php endfor; ?></span>
                 <small class="market-product-rating-count" data-market-rating-count><?= $ratingCount ? e(number_format($ratingAverage, 1, ',', '.') . ' (' . $ratingCount . ')') : 'Beri rating' ?></small>
             </span>
-            <strong class="market-product-name"><?= e($product['name'] ?? 'Produk warga') ?></strong>
-            <small class="market-product-store"><i class="fa fa-store" aria-hidden="true"></i><?= e($storeName !== '' ? $storeName : 'Toko warga') ?></small>
-            <?php if ($villageName !== ''): ?><small class="market-product-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($villageName) ?></small><?php endif; ?>
+            <strong class="market-product-name" title="<?= e($product['name'] ?? 'Produk warga') ?>"><?= e($product['name'] ?? 'Produk warga') ?></strong>
+            <small class="market-product-store" title="<?= e($storeName !== '' ? $storeName : 'Toko warga') ?>"><i class="fa fa-store" aria-hidden="true"></i><span><?= e($storeName !== '' ? $storeName : 'Toko warga') ?></span></small>
+            <?php if ($villageName !== ''): ?><small class="market-product-village" title="<?= e($villageName) ?>"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($villageName) ?></span></small><?php endif; ?>
             <b class="market-product-price"><?= e($productPrice($product['price'] ?? 0)) ?></b>
             <?php if (!empty($product['stock']) || isset($product['stock'])): ?><small class="market-product-stock <?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'is-empty' : '' ?>"><?= isset($product['stock']) && (int) $product['stock'] < 1 ? 'Stok habis' : 'Tersedia' ?></small><?php endif; ?>
         </span>
