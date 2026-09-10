@@ -1733,7 +1733,7 @@ body {
 }
 
 #menu-main .warga-menu-list > .warga-menu-toggle-row {
-  grid-template-columns: 38px minmax(0, 1fr) 58px;
+  grid-template-columns: 44px minmax(0, 1fr) 58px;
   cursor: pointer;
   user-select: none;
 }
