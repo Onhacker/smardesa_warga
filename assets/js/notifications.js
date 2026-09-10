@@ -9,6 +9,7 @@
   var buttons = Array.prototype.slice.call(document.querySelectorAll('[data-push-toggle]'));
   var checkboxes = buttons.filter(function (control) { return control.matches('input[type="checkbox"]'); });
   var statuses = Array.prototype.slice.call(document.querySelectorAll('[data-push-status]'));
+  var enablePrompts = Array.prototype.slice.call(document.querySelectorAll('[data-push-enable-prompt]'));
   var onboarding = document.querySelector('[data-notification-onboarding]');
   var subscribed = false;
   var onboardingKey = 'sdw-notification-onboarding-v1';
@@ -73,6 +74,10 @@
       } else {
         control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Pemberitahuan' : 'Aktifkan Pemberitahuan');
       }
+    });
+    enablePrompts.forEach(function (prompt) {
+      prompt.hidden = subscribed;
+      prompt.setAttribute('aria-hidden', subscribed ? 'true' : 'false');
     });
   }
   function setDisabled(disabled) { buttons.forEach(function (control) { control.disabled = !!disabled; }); }

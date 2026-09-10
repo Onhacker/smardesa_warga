@@ -482,6 +482,93 @@ body.theme-dark #page .community-v22-empty-icon { background: #254c4a; color: #a
 body.theme-dark #page .community-v22-empty-icon.is-complaint { background: #263f62; color: #b8d2f6 !important; }
 body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !important; }
 
+/* Reveal this activation card only after the push runtime confirms that the
+ * current device does not yet have an active subscription. */
+#page .warga-notification-enable-card {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border: 1px solid #bfd3ea;
+  border-radius: 18px;
+  background: #edf5ff;
+  box-shadow: 0 7px 20px rgba(35, 95, 164, .08);
+}
+#page .warga-notification-enable-card[hidden] { display: none !important; }
+#page .warga-notification-enable-icon {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 15px;
+  background: #2d6bb2;
+  color: #fff !important;
+  font-size: 20px;
+}
+#page .warga-notification-enable-icon > i { color: #fff !important; }
+#page .warga-notification-enable-copy { min-width: 0; }
+#page .warga-notification-enable-copy h2 {
+  margin: 0;
+  color: var(--warga-ink) !important;
+  font-size: 17px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+#page .warga-notification-enable-copy p {
+  margin: 3px 0 0;
+  color: var(--warga-muted) !important;
+  font-size: 13px;
+  line-height: 1.45;
+}
+#page .warga-notification-enable-copy [data-push-status] {
+  display: block;
+  margin-top: 4px;
+  color: #235fa4 !important;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+#page .warga-notification-enable-copy [data-push-status]:empty { display: none; }
+#page .warga-notification-enable-switch {
+  position: relative;
+  display: block;
+  width: 58px;
+  height: 32px;
+  margin: 0 !important;
+  padding: 0 !important;
+  justify-self: end;
+  transform: scale(.8);
+  transform-origin: right center;
+}
+#page .warga-notification-enable-switch .custom-control-label {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 58px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+#page .warga-notification-enable-switch .custom-control-label::before,
+#page .warga-notification-enable-switch .custom-control-label::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  margin: 0 !important;
+}
+#page .warga-notification-enable-switch .custom-control-label::before { width: 58px !important; height: 32px !important; }
+#page .warga-notification-enable-switch .custom-control-label::after { width: 30px !important; height: 30px !important; }
+#page .warga-notification-enable-switch .ios-input:disabled + .custom-control-label { cursor: not-allowed; opacity: .55; }
+body.theme-dark #page .warga-notification-enable-card { border-color: #35577f; background: #172f51; }
+body.theme-dark #page .warga-notification-enable-copy h2 { color: #f1f5f7 !important; }
+body.theme-dark #page .warga-notification-enable-copy p { color: #b7c5d2 !important; }
+body.theme-dark #page .warga-notification-enable-copy [data-push-status] { color: #b8d5f4 !important; }
+
 @media (min-width: 680px) {
   #page .community-v22-slide { flex-basis: min(43vw, 430px); }
   #page .community-v22-feature-list { grid-template-columns: repeat(2, minmax(0,1fr)); }
@@ -489,6 +576,16 @@ body.theme-dark #page .community-v22-empty-copy > span { color: #aebbc4 !importa
 
 @media (max-width: 480px) {
   #page .community-v22-home { padding-right: 12px; padding-left: 12px; }
+  #page .warga-notification-enable-card {
+    grid-template-columns: 46px minmax(0, 1fr) 52px;
+    gap: 11px;
+    padding: 14px 12px;
+    border-radius: 16px;
+  }
+  #page .warga-notification-enable-icon { width: 46px; height: 46px; border-radius: 13px; font-size: 18px; }
+  #page .warga-notification-enable-copy h2 { font-size: 15px; }
+  #page .warga-notification-enable-copy p { font-size: 12px; }
+  #page .warga-notification-enable-switch { transform: scale(.74); }
   #page .community-v22-hero { padding: 18px; border-radius: 21px; }
   #page .community-v22-hero-main { grid-template-columns: 64px minmax(0,1fr); gap: 11px; }
   #page .community-v22-hero-logo { width: 64px; height: 64px; border-radius: 18px; }
