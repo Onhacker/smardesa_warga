@@ -48,7 +48,7 @@
             <div class="warga-letter-modal-status" data-warga-letter-status role="status">Memuat surat...</div>
             <div class="warga-letter-modal-scroll" data-warga-letter-viewport>
                 <div class="warga-letter-modal-canvas" data-warga-letter-canvas hidden>
-                    <iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="" hidden></iframe>
+                    <iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="allow-same-origin" hidden></iframe>
                 </div>
             </div>
             <div class="warga-letter-modal-gesture-layer" data-warga-letter-gesture-layer hidden aria-label="Cubit untuk memperbesar surat"></div>

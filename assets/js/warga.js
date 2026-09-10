@@ -680,6 +680,7 @@
     var pageWasInert = false;
     var baseWidth = 794;
     var baseHeight = 1123;
+    var contentHeight = baseHeight;
     var minScale = 0.25;
     var maxScale = 3;
     var fitScale = 1;
@@ -687,6 +688,8 @@
     var pointers = {};
     var panStart = null;
     var pinchStart = null;
+    var frameRequestNumber = 0;
+    var frameResizeObserver = null;
 
     function clampScale(value) {
       return Math.max(minScale, Math.min(maxScale, Number(value) || 1));
@@ -710,11 +713,11 @@
       var contentX = focusX === null ? null : (viewport.scrollLeft - oldLeft + focusX) / previousScale;
       var contentY = focusY === null ? null : (viewport.scrollTop - oldTop + focusY) / previousScale;
       var width = baseWidth * nextScale;
-      var height = baseHeight * nextScale;
+      var height = contentHeight * nextScale;
       canvas.style.width = width + 'px';
       canvas.style.height = height + 'px';
       frame.style.width = baseWidth + 'px';
-      frame.style.height = baseHeight + 'px';
+      frame.style.height = contentHeight + 'px';
       frame.style.transform = 'scale(' + nextScale + ')';
       currentScale = nextScale;
       updateZoomLabel();
@@ -722,6 +725,63 @@
         viewport.scrollLeft = Math.max(0, canvas.offsetLeft + contentX * nextScale - focusX);
         viewport.scrollTop = Math.max(0, canvas.offsetTop + contentY * nextScale - focusY);
       }
+    }
+
+    function stopFrameObserver() {
+      if (frameResizeObserver) frameResizeObserver.disconnect();
+      frameResizeObserver = null;
+    }
+
+    function measureFrameHeight() {
+      try {
+        var documentNode = frame.contentDocument;
+        if (!documentNode) return baseHeight;
+        var root = documentNode.documentElement;
+        var body = documentNode.body;
+        var page = documentNode.querySelector('.page');
+        var pageBottom = page ? Math.ceil(page.getBoundingClientRect().bottom) : 0;
+        return Math.max(
+          baseHeight,
+          root ? root.scrollHeight : 0,
+          root ? root.offsetHeight : 0,
+          body ? body.scrollHeight : 0,
+          body ? body.offsetHeight : 0,
+          pageBottom
+        );
+      } catch (ignore) {
+        return baseHeight;
+      }
+    }
+
+    function syncFrameHeight(requestNumber) {
+      if (requestNumber !== sequence || requestNumber !== frameRequestNumber || modal.hidden) return;
+      var measured = Math.ceil(measureFrameHeight());
+      if (!Number.isFinite(measured) || measured < baseHeight || Math.abs(measured - contentHeight) < 2) return;
+      contentHeight = measured;
+      setCanvasScale(currentScale);
+    }
+
+    function observeFrameHeight(requestNumber) {
+      stopFrameObserver();
+      syncFrameHeight(requestNumber);
+      window.requestAnimationFrame(function () { syncFrameHeight(requestNumber); });
+      window.setTimeout(function () { syncFrameHeight(requestNumber); }, 120);
+
+      try {
+        var documentNode = frame.contentDocument;
+        if (!documentNode) return;
+        Array.prototype.forEach.call(documentNode.images || [], function (image) {
+          if (!image.complete) {
+            image.addEventListener('load', function () { syncFrameHeight(requestNumber); }, { once: true });
+            image.addEventListener('error', function () { syncFrameHeight(requestNumber); }, { once: true });
+          }
+        });
+        if (window.ResizeObserver) {
+          frameResizeObserver = new ResizeObserver(function () { syncFrameHeight(requestNumber); });
+          if (documentNode.documentElement) frameResizeObserver.observe(documentNode.documentElement);
+          if (documentNode.body) frameResizeObserver.observe(documentNode.body);
+        }
+      } catch (ignore) {}
     }
 
     function calculateFitScale() {
@@ -821,6 +881,9 @@
       sequence++;
       if (controller) controller.abort();
       controller = null;
+      frameRequestNumber = 0;
+      stopFrameObserver();
+      contentHeight = baseHeight;
       modal.hidden = true;
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('warga-letter-modal-open');
@@ -852,6 +915,9 @@
       panStart = null;
       pinchStart = null;
       currentScale = 1;
+      contentHeight = baseHeight;
+      frameRequestNumber = 0;
+      stopFrameObserver();
       modal.hidden = false;
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('warga-letter-modal-open');
@@ -859,6 +925,8 @@
       modal.querySelector('.warga-letter-icon-button').focus();
       frame.hidden = true;
       frame.srcdoc = '';
+      frame.style.width = baseWidth + 'px';
+      frame.style.height = baseHeight + 'px';
       if (canvas) canvas.hidden = true;
       if (gestureLayer) gestureLayer.hidden = true;
       if (zoomControls) zoomControls.hidden = true;
@@ -879,6 +947,7 @@
         if (requestNumber !== sequence || modal.hidden) return;
         if (!html || html.length > 8 * 1024 * 1024) throw new Error('Ukuran surat tidak dapat ditampilkan.');
         currentHtml = html;
+        frameRequestNumber = requestNumber;
         frame.srcdoc = html;
         frame.hidden = false;
         if (canvas) canvas.hidden = false;
@@ -897,6 +966,10 @@
         status.textContent = error.message || 'Surat belum dapat dimuat. Coba lagi.';
       });
     }
+
+    frame.addEventListener('load', function () {
+      if (frameRequestNumber > 0) observeFrameHeight(frameRequestNumber);
+    });
 
     document.addEventListener('click', function (event) {
       var button = event.target.closest('[data-warga-letter-open], [data-warga-letter-close], [data-warga-letter-download], [data-warga-letter-zoom-in], [data-warga-letter-zoom-out], [data-warga-letter-zoom-reset]');

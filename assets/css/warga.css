@@ -5575,8 +5575,8 @@ body.theme-dark #page .page-content .warga-detail-head > .warga-detail-icon[clas
 .warga-letter-icon-button:hover, .warga-letter-icon-button:focus-visible { border-color: #235fa4; background: #ecfdf5; color: #235fa4; }
 .warga-letter-modal-frame-wrap { position: relative; flex: 1; min-height: 0; overflow: hidden; background: #e5e7eb; }
 .warga-letter-modal-scroll { position: absolute; inset: 0; box-sizing: border-box; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 14px; }
-.warga-letter-modal-canvas { position: relative; flex: 0 0 auto; width: 794px; height: 1123px; margin: 0 auto; background: #fff; box-shadow: 0 2px 12px rgba(15,23,42,.14); }
-.warga-letter-modal-frame { position: absolute; top: 0; left: 0; display: block; width: 794px; height: 1123px; min-width: 0; min-height: 0; border: 0; background: #fff; transform-origin: top left; pointer-events: none; }
+.warga-letter-modal-canvas { position: relative; flex: 0 0 auto; width: 794px; min-height: 1123px; margin: 0 auto; overflow: visible; background: #fff; box-shadow: 0 2px 12px rgba(15,23,42,.14); }
+.warga-letter-modal-frame { position: absolute; top: 0; left: 0; display: block; width: 794px; min-width: 0; min-height: 1123px; border: 0; background: #fff; transform-origin: top left; pointer-events: none; }
 .warga-letter-modal-gesture-layer { position: absolute; inset: 0; z-index: 3; touch-action: none; cursor: grab; }
 .warga-letter-modal-gesture-layer:active { cursor: grabbing; }
 .warga-letter-modal-zoom { position: absolute; top: 12px; right: 12px; z-index: 4; display: inline-flex; align-items: center; gap: 2px; min-height: 38px; padding: 3px; border: 1px solid rgba(148,163,184,.72); border-radius: 999px; background: rgba(255,255,255,.94); box-shadow: 0 5px 18px rgba(15,23,42,.16); }
