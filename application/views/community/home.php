@@ -78,35 +78,6 @@ $pictureUrl = static function ($name) {
         </nav>
     </section>
 
-    <?php
-    $marketplaceProducts = isset($marketplaceProducts) && is_array($marketplaceProducts) ? array_slice($marketplaceProducts, 0, 4) : array();
-    $marketplaceReady = !isset($marketplaceReady) || (bool) $marketplaceReady;
-    ?>
-    <section class="marketplace-page community-v22-market-preview" aria-labelledby="community-market-preview-title">
-        <header class="community-v22-section-head">
-            <div>
-                <p class="community-v22-eyebrow">Pasar digital</p>
-                <h2 id="community-market-preview-title">Produk terbaru</h2>
-            </div>
-            <a href="<?= site_url('pasar') ?>">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
-        </header>
-
-        <?php if ($marketplaceProducts): ?>
-            <div class="market-product-grid community-v22-market-grid" data-dashboard-market-preview>
-                <?php $this->load->view('marketplace/product_cards', array('products' => $marketplaceProducts, 'eagerFirst' => TRUE)); ?>
-            </div>
-            <?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>
-        <?php else: ?>
-            <div class="community-v22-market-empty" role="status">
-                <span class="community-v22-market-empty-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
-                <span>
-                    <strong><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar digital sedang disiapkan' ?></strong>
-                    <small><?= $marketplaceReady ? 'Produk warga akan tampil di sini.' : 'Silakan lihat kembali beberapa saat lagi.' ?></small>
-                </span>
-            </div>
-        <?php endif; ?>
-    </section>
-
     <?php $homeServices = isset($services) && is_array($services) ? array_slice($services, 0, 4) : array(); ?>
     <section class="warga-service-card warga-dashboard-services community-v22-letter-preview" aria-labelledby="community-letter-preview-title">
         <div class="content warga-section-head warga-service-heading-card">
@@ -114,7 +85,7 @@ $pictureUrl = static function ($name) {
                 <p class="font-600 color-highlight mb-n1">Pelayanan <?= e($institutionLower) ?></p>
                 <h2 id="community-letter-preview-title" class="font-22 mb-0">Ajukan Surat</h2>
             </div>
-            <a href="<?= site_url($isAuthenticated ? 'layanan' : 'login') ?>" class="font-12 color-highlight font-600">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            <a href="<?= site_url($isAuthenticated ? 'layanan' : 'login') ?>" class="community-v22-section-action font-12 color-highlight font-600">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
         </div>
         <?php if ($homeServices): ?>
             <div class="warga-service-grid" aria-label="Empat jenis surat">
@@ -134,6 +105,35 @@ $pictureUrl = static function ($name) {
             </div>
         <?php else: ?>
             <p class="warga-service-empty">Belum ada layanan surat yang tersedia.</p>
+        <?php endif; ?>
+    </section>
+
+    <?php
+    $marketplaceProducts = isset($marketplaceProducts) && is_array($marketplaceProducts) ? array_slice($marketplaceProducts, 0, 4) : array();
+    $marketplaceReady = !isset($marketplaceReady) || (bool) $marketplaceReady;
+    ?>
+    <section class="marketplace-page community-v22-market-preview" aria-labelledby="community-market-preview-title">
+        <header class="community-v22-section-head">
+            <div>
+                <p class="community-v22-eyebrow">Pasar digital</p>
+                <h2 id="community-market-preview-title">Produk terbaru</h2>
+            </div>
+            <a href="<?= site_url('pasar') ?>" class="community-v22-section-action">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </header>
+
+        <?php if ($marketplaceProducts): ?>
+            <div class="market-product-grid community-v22-market-grid" data-dashboard-market-preview>
+                <?php $this->load->view('marketplace/product_cards', array('products' => $marketplaceProducts, 'eagerFirst' => TRUE)); ?>
+            </div>
+            <?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>
+        <?php else: ?>
+            <div class="community-v22-market-empty" role="status">
+                <span class="community-v22-market-empty-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
+                <span>
+                    <strong><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar digital sedang disiapkan' ?></strong>
+                    <small><?= $marketplaceReady ? 'Produk warga akan tampil di sini.' : 'Silakan lihat kembali beberapa saat lagi.' ?></small>
+                </span>
+            </div>
         <?php endif; ?>
     </section>
 
