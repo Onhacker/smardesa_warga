@@ -85,10 +85,11 @@
     }
   }
 
-  function skeletonMarkup() {
+  function skeletonMarkup(marker) {
     var html = '';
-    for (var index = 0; index < 4; index += 1) {
-      html += '<div class="market-product-skeleton" aria-hidden="true">' +
+    var markerAttribute = marker ? ' data-market-skeleton="' + marker + '"' : '';
+    for (var index = 0; index < 8; index += 1) {
+      html += '<div class="market-product-skeleton"' + markerAttribute + ' aria-hidden="true">' +
         '<div class="market-product-skeleton-media"></div>' +
         '<div class="market-product-skeleton-copy">' +
         '<div class="market-product-skeleton-line"></div>' +
@@ -207,7 +208,11 @@
       var sequence = state.sequence;
       state.controller = typeof window.AbortController === 'function' ? new AbortController() : null;
       setLoading(true);
-      if (!append) list.innerHTML = skeletonMarkup();
+      if (!append) {
+        list.innerHTML = skeletonMarkup('initial');
+      } else {
+        list.insertAdjacentHTML('beforeend', skeletonMarkup('append'));
+      }
 
       var params = new URLSearchParams();
       params.set('page', String(page));
@@ -227,6 +232,7 @@
         if (!data || data.success !== true) throw new Error('Respons katalog tidak valid.');
         var itemsHtml = typeof data.items_html === 'string' ? data.items_html.trim() : '';
         if (append) {
+          list.querySelectorAll('[data-market-skeleton="append"]').forEach(function (item) { item.remove(); });
           if (itemsHtml) list.insertAdjacentHTML('beforeend', itemsHtml);
         } else {
           list.innerHTML = itemsHtml || (typeof data.empty_html === 'string' ? data.empty_html : '');
@@ -244,6 +250,7 @@
         if (updateHistory) syncUrl();
       }).catch(function (error) {
         if (sequence !== state.sequence || (error && error.name === 'AbortError')) return;
+        if (append) list.querySelectorAll('[data-market-skeleton="append"]').forEach(function (item) { item.remove(); });
         if (!append) {
           list.innerHTML = '<div class="market-empty-state"><span class="market-empty-icon"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span><h3>Produk belum dapat dimuat</h3><p>Periksa koneksi Anda lalu coba lagi.</p><button type="button" class="market-filter-submit" data-market-retry><i class="fa fa-refresh color-white" aria-hidden="true"></i><span class="color-white">Coba lagi</span></button></div>';
           var retry = list.querySelector('[data-market-retry]');
@@ -359,6 +366,12 @@
     syncPagination();
     updateCount(parseInt((count && count.textContent) || '0', 10));
     if (sentinel) setHidden(sentinel, !state.hasMore);
+    // Match /ausi/produk: page 1 is also fetched asynchronously so the
+    // initial document contains only the lightweight shell and skeletons.
+    if (root.getAttribute('data-market-initial-load') === '1') {
+      root.removeAttribute('data-market-initial-load');
+      requestCatalog(state.page, false, false);
+    }
   }
 
   function bindContactModal() {

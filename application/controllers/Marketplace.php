@@ -23,10 +23,25 @@ class Marketplace extends Public_Controller
             'page' => $this->input->get('page', TRUE),
             'per_page' => 12
         );
-        // Katalog selalu memakai visibilitas publik. Produk draf milik penjual
-        // tetap dikelola dari Tokoku dan tidak bercampur dengan katalog umum.
+        // Katalog publik dimuat AJAX-first seperti /ausi/produk: halaman HTML
+        // hanya menyiapkan kerangka, lalu request pertama (maks. 12 item)
+        // dilakukan oleh market.js. Ini mengurangi HTML awal dan mencegah
+        // browser membangun seluruh katalog sebelum pengguna scroll.
+        $requestedPage = max(1, (int) ($filters['page'] ?? 1));
+        $listing = array(
+            'items' => array(),
+            'total' => 0,
+            'page' => $requestedPage,
+            'pages' => 1,
+            'per_page' => 12,
+            'filters' => array(
+                'q' => trim((string) ($filters['q'] ?? '')),
+                'category_id' => max(0, (int) ($filters['category_id'] ?? 0)),
+                'sort' => trim((string) ($filters['sort'] ?? 'newest')) ?: 'newest'
+            ),
+            'ready' => $this->marketplace->is_ready()
+        );
         $viewer = array();
-        $listing = $this->marketplace->products($viewer, array_merge($filters, array('public_all' => TRUE)));
         $this->render('marketplace/index', array(
             'pageTitle' => 'Pasar Digital',
             'products' => $listing['items'],

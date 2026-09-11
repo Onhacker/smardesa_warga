@@ -32,13 +32,14 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
      data-market-page="<?= $listingPage ?>"
      data-market-pages="<?= $listingPages ?>"
      data-market-per-page="<?= $listingPerPage ?>"
+     data-market-initial-load="1"
      data-market-ready="<?= $marketplaceReady ? '1' : '0' ?>">
     <section class="market-hero" aria-labelledby="market-title">
         <div class="market-hero-copy">
             <p class="market-eyebrow color-white">KABUPATEN <?= e($activeRegencyUpper) ?></p>
             <h1 id="market-title">Pasar Digital</h1>
             <span class="color-white">Temukan produk warga dan dukung usaha lokal.</span>
-            <small class="market-hero-count" data-market-count><?= $listingTotal ?> produk</small>
+            <small class="market-hero-count" data-market-count><?= $listingTotal ? $listingTotal . ' produk' : 'Memuat produk…' ?></small>
         </div>
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>
     </section>
@@ -97,6 +98,17 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
         <div class="market-product-grid" data-market-product-list aria-live="polite">
             <?php if ($products): ?>
                 <?php $this->load->view('marketplace/product_cards', array('products' => $products, 'eagerFirst' => TRUE)); ?>
+            <?php elseif ($marketplaceReady): ?>
+                <?php for ($skeletonIndex = 0; $skeletonIndex < 8; $skeletonIndex++): ?>
+                    <div class="market-product-skeleton" aria-hidden="true">
+                        <div class="market-product-skeleton-media"></div>
+                        <div class="market-product-skeleton-copy">
+                            <div class="market-product-skeleton-line"></div>
+                            <div class="market-product-skeleton-line short"></div>
+                            <div class="market-product-skeleton-line short"></div>
+                        </div>
+                    </div>
+                <?php endfor; ?>
             <?php else: ?>
                 <?php $this->load->view('marketplace/empty_state', array('marketplaceReady' => $marketplaceReady, 'canManage' => $canManage)); ?>
             <?php endif; ?>
