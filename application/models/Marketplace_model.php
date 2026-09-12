@@ -356,6 +356,8 @@ class Marketplace_model extends CI_Model
         if (!in_array($status, array('draft', 'published', 'archived'), TRUE)) $status = 'published';
         if ($name === '' || mb_strlen($name, 'UTF-8') > 180) return array('success' => FALSE, 'message' => 'Nama produk wajib diisi (maksimal 180 karakter).');
         if ($description !== '' && mb_strlen($description, 'UTF-8') > 5000) return array('success' => FALSE, 'message' => 'Deskripsi produk maksimal 5.000 karakter.');
+        $prohibitedReason = $this->prohibited_product_reason($name . ' ' . $description);
+        if ($prohibitedReason !== '') return array('success' => FALSE, 'message' => 'Produk tidak dapat diterbitkan karena terindikasi ' . $prohibitedReason . '. Lihat Syarat & Ketentuan Pasar Digital.');
         if ($categoryId < 1 || !$this->category($categoryId)) return array('success' => FALSE, 'message' => 'Pilih kategori produk yang tersedia.');
         if ($price === FALSE) return array('success' => FALSE, 'message' => 'Harga produk harus berupa angka nol atau lebih.');
         if ($stock !== NULL && ($stock < 0 || $stock > 4294967295)) return array('success' => FALSE, 'message' => 'Stok produk belum valid.');
@@ -954,6 +956,25 @@ class Marketplace_model extends CI_Model
 
     private function cleanup_paths(array $paths) { foreach ($paths as $path) if (is_string($path) && is_file($path)) @unlink($path); }
 
+    /**
+     * Block obvious regulated or dangerous listings before they reach the
+     * public catalogue. This complements (and does not replace) moderation of
+     * images and less explicit wording by the marketplace administrator.
+     */
+    private function prohibited_product_reason($text)
+    {
+        $text = trim((string) $text);
+        if ($text === '') return '';
+        $rules = array(
+            'produk tembakau atau nikotin' => '/\b(?:rokok|cerutu|tembakau|nikotin|nicotine|vape|vaping|vapor|rokok\s+elektronik|e[\s-]?cigarette|liquid\s+vape|nicotine\s+pouch)\b/iu',
+            'minuman beralkohol' => '/\b(?:minuman\s+keras|miras|beralkohol|alkohol|bir|beer|wine|vodka|wiski|whisky|rum|tequila)\b/iu',
+            'narkotika atau zat terlarang' => '/\b(?:narkoba|narkotika|psikotropika|ganja|marijuana|mariyuana|kanabis|cannabis|thc|cbd|sabu(?:-sabu)?|kokain|cocaine|heroin|ekstasi|ecstasy|methamphetamine)\b/iu',
+            'senjata, amunisi, atau bahan peledak' => '/\b(?:senjata\s+api|pistol(?!\s+lem)|revolver|senapan|amunisi|peluru|bahan\s+peledak|granat|bom)\b/iu'
+        );
+        foreach ($rules as $reason => $pattern) if (preg_match($pattern, $text)) return $reason;
+        return '';
+    }
+
     private function cleanup_product_paths(array $paths, $productId)
     {
         $root = $this->private_storage_path();
@@ -972,7 +993,22 @@ class Marketplace_model extends CI_Model
 
     private function demo_categories()
     {
-        return array(array('id' => 1, 'slug' => 'makanan-minuman', 'name' => 'Makanan & Minuman', 'sort_order' => 10), array('id' => 2, 'slug' => 'hasil-tani', 'name' => 'Hasil Tani', 'sort_order' => 20), array('id' => 3, 'slug' => 'kerajinan', 'name' => 'Kerajinan', 'sort_order' => 30), array('id' => 4, 'slug' => 'jasa', 'name' => 'Jasa', 'sort_order' => 40), array('id' => 5, 'slug' => 'lainnya', 'name' => 'Lainnya', 'sort_order' => 90));
+        return array(
+            array('id' => 1, 'slug' => 'makanan-minuman', 'name' => 'Makanan & Minuman', 'sort_order' => 10),
+            array('id' => 2, 'slug' => 'hasil-tani', 'name' => 'Hasil Tani', 'sort_order' => 20),
+            array('id' => 6, 'slug' => 'peternakan-perikanan', 'name' => 'Peternakan & Perikanan', 'sort_order' => 25),
+            array('id' => 3, 'slug' => 'kerajinan', 'name' => 'Kerajinan', 'sort_order' => 30),
+            array('id' => 7, 'slug' => 'pakaian-aksesori', 'name' => 'Pakaian & Aksesori', 'sort_order' => 35),
+            array('id' => 4, 'slug' => 'jasa', 'name' => 'Jasa', 'sort_order' => 40),
+            array('id' => 8, 'slug' => 'kebutuhan-rumah-tangga', 'name' => 'Kebutuhan Rumah Tangga', 'sort_order' => 45),
+            array('id' => 9, 'slug' => 'elektronik-aksesori', 'name' => 'Elektronik & Aksesori', 'sort_order' => 50),
+            array('id' => 10, 'slug' => 'peralatan-bahan-bangunan', 'name' => 'Peralatan & Bahan Bangunan', 'sort_order' => 55),
+            array('id' => 11, 'slug' => 'pendidikan-buku', 'name' => 'Pendidikan & Buku', 'sort_order' => 60),
+            array('id' => 12, 'slug' => 'tanaman-bibit', 'name' => 'Tanaman & Bibit', 'sort_order' => 65),
+            array('id' => 13, 'slug' => 'otomotif-suku-cadang', 'name' => 'Otomotif & Suku Cadang', 'sort_order' => 70),
+            array('id' => 14, 'slug' => 'perawatan-pribadi', 'name' => 'Perawatan Pribadi', 'sort_order' => 75),
+            array('id' => 5, 'slug' => 'lainnya', 'name' => 'Lainnya', 'sort_order' => 90)
+        );
     }
 
     private function demo_state()

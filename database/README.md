@@ -35,6 +35,8 @@ Jalankan `migrations/018_global_nik_uniqueness.sql` setelah data ganda lama dise
 
 Untuk dashboard monitoring pada server SmartDesa pusat, jalankan `migrations/019_monitoring_auth.sql`. Migrasi ini menambahkan pencegah replay untuk permintaan server-ke-server. Kredensial monitoring diisi hanya pada `.env` API dan pengaturan API SmartDesa pusat; jangan masukkan ke PWA atau installer desa. Dashboard hanya menerima metrik agregat per kampung, bukan NIK, No. KK, password, isi permohonan, atau dokumen.
 
+Jalankan `migrations/020_announcement_attachments.sql` untuk mengaktifkan lampiran gambar atau PDF pada pengumuman kampung. Setelah itu, jalankan `migrations/021_marketplace_categories.sql` pada database yang sudah memakai Pasar Digital untuk menambahkan kategori produk terbaru. Kedua migrasi idempoten dan aman dijalankan ulang.
+
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

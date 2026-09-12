@@ -514,6 +514,45 @@ body.market-review-open { overflow: hidden; }
 .marketplace-form-page .market-image-preview > span { font-size: 12px; }
 .marketplace-form-page .market-form-actions .btn { min-height: 48px; font-size: 14px; }
 
+/* Store contacts are frequently checked while typing on a phone. Keep their
+ * value text comfortably legible and above iOS' auto-zoom threshold. */
+.marketplace-store-page #market-store-name,
+.marketplace-store-page #market-store-whatsapp,
+.marketplace-store-page #market-store-phone {
+  min-height: 54px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+.marketplace-store-page #market-store-whatsapp,
+.marketplace-store-page #market-store-phone { font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+
+.market-product-consent {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: start;
+  gap: 11px;
+  margin: 18px 0 4px;
+  padding: 13px 14px;
+  border: 1px solid #b9cde4;
+  border-radius: 13px;
+  background: #eef5fd;
+  color: var(--market-ink);
+  cursor: pointer;
+}
+.market-product-consent input {
+  width: 20px;
+  height: 20px;
+  margin: 1px 0 0;
+  -webkit-appearance: checkbox !important;
+  -moz-appearance: checkbox !important;
+  appearance: auto !important;
+  accent-color: var(--market-blue);
+  cursor: pointer;
+}
+.market-product-consent > span { min-width: 0; font-size: 13px; font-weight: 650; line-height: 1.5; }
+.market-product-consent a { color: var(--market-blue-dark); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+.market-product-consent:focus-within { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
+
 body.theme-dark .market-tokoku-status.status-published { background: #214c35; color: #a5e0b8; }
 body.theme-dark .market-tokoku-status.status-draft { background: #55451f; color: #f3d58b; }
 body.theme-dark .market-tokoku-status.status-archived { background: #33404d; color: #b9c5d0; }
@@ -529,6 +568,8 @@ body.theme-dark .market-upload-zone { border-color: #4b77a7; background: #1c3552
 body.theme-dark .market-upload-actions .market-upload-zone.is-camera { background: #203f61; }
 body.theme-dark .market-form-alert { border-color: #704047; background: #46282d; color: #f4a1aa; }
 body.theme-dark .market-form-cancel { background: #22303b; }
+body.theme-dark .market-product-consent { border-color: #456b94; background: #203b59; color: #e6f2ff; }
+body.theme-dark .market-product-consent a { color: #a9cff8; }
 body.theme-dark .market-search-trigger { background: #213c5a; color: #9fc5f3; }
 body.theme-dark .market-search-trigger:hover, body.theme-dark .market-search-trigger:focus-visible { background: #294c70; }
 body.theme-dark .market-search-dialog { background: var(--market-surface); color: var(--market-ink); }

@@ -50,6 +50,12 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                     <?php else: ?><span>Belum ada foto dipilih.</span><?php endif; ?>
                 </div>
                 <?php if ($error('images')): ?><small class="market-form-error market-form-error-block"><?= e($error('images')) ?></small><?php endif; ?>
+                <?php if (!$editMode): ?>
+                    <label class="market-product-consent" for="market-product-terms">
+                        <input type="checkbox" id="market-product-terms" name="market_terms_accepted" value="1" required aria-required="true">
+                        <span>Saya memastikan produk ini legal dan tidak termasuk barang terlarang, termasuk rokok/produk nikotin, minuman beralkohol, narkotika, atau senjata. Saya menyetujui <a href="<?= site_url('syarat-ketentuan#pasar-digital') ?>" target="_blank" rel="noopener">Syarat &amp; Ketentuan Pasar Digital</a>.</span>
+                    </label>
+                <?php endif; ?>
                 <div class="market-form-actions"><a href="<?= site_url('pasar/tokoku') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-cloud-upload-alt color-white" aria-hidden="true"></i><span class="color-white"><?= $editMode ? 'Simpan perubahan' : 'Terbitkan produk' ?></span></button></div>
             </form>
         </div>

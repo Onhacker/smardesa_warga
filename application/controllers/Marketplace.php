@@ -208,17 +208,29 @@ class Marketplace extends Public_Controller
         $this->require_authentication();
         $this->require_post();
         $this->require_manager();
+        $productId = trim((string) $this->input->post('product_id', TRUE));
         $this->form_validation->set_rules('name', 'Nama produk', 'trim|required|max_length[180]');
         $this->form_validation->set_rules('category_id', 'Kategori', 'trim|required|integer');
         $this->form_validation->set_rules('price', 'Harga', 'trim|required|max_length[30]');
         $this->form_validation->set_rules('description', 'Deskripsi', 'trim|max_length[5000]');
         $this->form_validation->set_rules('stock', 'Stok', 'trim|integer');
+        if ($productId === '') {
+            $this->form_validation->set_rules(
+                'market_terms_accepted',
+                'Persetujuan Syarat & Ketentuan Pasar Digital',
+                'required|in_list[1]',
+                array(
+                    'required' => 'Centang persetujuan Syarat & Ketentuan Pasar Digital sebelum menerbitkan produk.',
+                    'in_list' => 'Persetujuan Syarat & Ketentuan Pasar Digital belum valid.'
+                )
+            );
+        }
         if (!$this->form_validation->run()) {
             $this->session->set_flashdata('error', trim(strip_tags(validation_errors())) ?: 'Form produk belum lengkap.');
-            redirect($this->input->post('product_id', TRUE) ? 'pasar/produk/' . rawurlencode((string) $this->input->post('product_id', TRUE)) . '/ubah' : 'pasar/buat');
+            redirect($productId !== '' ? 'pasar/produk/' . rawurlencode($productId) . '/ubah' : 'pasar/buat');
         }
         $data = array(
-            'id' => $this->input->post('product_id', TRUE),
+            'id' => $productId,
             'category_id' => $this->input->post('category_id', TRUE),
             'name' => $this->input->post('name', TRUE),
             'description' => $this->input->post('description', TRUE),

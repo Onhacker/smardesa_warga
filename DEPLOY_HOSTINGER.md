@@ -97,7 +97,7 @@ smartdesa-warga/database/seed.sql
 
 Jika database sudah pernah dibuat, impor berkas pada `database/migrations` sesuai urutan dan
 catat migration yang sudah pernah dijalankan. Jangan mengimpor ulang migration lama yang tidak
-idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `020_*.sql` dan
+idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `021_*.sql` dan
 menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
@@ -106,9 +106,10 @@ Pasar Digital untuk toko, produk, kategori, dan gambar privat. Untuk rilis ini, 
 `016_marketplace.sql` wajib dijalankan lebih dahulu, lalu `017_marketplace_reviews.sql` untuk
 rating/ulasan. `018_global_nik_uniqueness.sql` dan `019_monitoring_auth.sql` dijalankan sesuai
 kebutuhan instalasi setelah migration pendahulunya selesai. `020_announcement_attachments.sql`
-wajib dijalankan untuk fitur lampiran pengumuman.
+wajib dijalankan untuk fitur lampiran pengumuman. `021_marketplace_categories.sql` menambahkan
+kategori Pasar Digital terbaru pada instalasi yang sudah menjalankan migration marketplace.
 
-Contoh menjalankan dua migration Pasar Digital dari root repository (password dimasukkan pada
+Contoh menjalankan migration Pasar Digital dari root repository (password dimasukkan pada
 prompt `mysql`, tidak ditulis di terminal history):
 
 ```bash
@@ -126,6 +127,8 @@ mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" 
 # Lampiran pengumuman (wajib untuk fitur upload dan modal lampiran)
 mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
   < "$REPO/database/migrations/020_announcement_attachments.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/021_marketplace_categories.sql"
 ```
 
 Kode aplikasi tidak lagi menjalankan `CREATE TABLE`, `ALTER TABLE`, atau pemeriksaan metadata

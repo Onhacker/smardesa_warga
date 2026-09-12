@@ -10,7 +10,7 @@
     </header>
 
     <div class="warga-legal-card">
-        <p class="warga-legal-updated">Berlaku mulai: <?= e(tanggal_id('2026-09-05')) ?></p>
+        <p class="warga-legal-updated">Diperbarui: <?= e(tanggal_id('2026-09-13')) ?></p>
         <p>Dengan membuat akun atau menggunakan SI DAPULIK, Anda menyetujui ketentuan berikut. Jika tidak setuju, jangan gunakan fitur pengajuan atau unggah berkas pada aplikasi.</p>
 
         <section>
@@ -34,16 +34,29 @@
             <h2>4. Pengaduan dan informasi</h2>
             <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Pengumuman, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah <?= e($institutionLower) ?>.</p>
         </section>
+        <section id="pasar-digital">
+            <h2>5. Pasar Digital dan produk terlarang</h2>
+            <p>Penjual bertanggung jawab memastikan informasi, harga, foto, kepemilikan, keamanan, dan legalitas setiap produk atau jasa yang ditawarkan. Dilarang menerbitkan, mempromosikan, atau mengarahkan pengguna untuk membeli:</p>
+            <ul>
+                <li>rokok, cerutu, tembakau, vape, rokok elektronik, cairan vape, kantong nikotin, atau produk lain yang mengandung maupun mempromosikan nikotin;</li>
+                <li>minuman beralkohol karena Pasar Digital ini tidak menyediakan verifikasi usia;</li>
+                <li>ganja, produk THC/CBD, narkotika, psikotropika, obat terlarang, obat keras atau obat resep yang dijual tanpa kewenangan dan izin yang sah;</li>
+                <li>senjata api, amunisi, bahan peledak, serta barang yang dibuat atau dipasarkan untuk melukai orang;</li>
+                <li>barang curian, palsu, melanggar hak kekayaan intelektual, pornografi, layanan seksual, satwa dilindungi, atau barang lain yang dilarang oleh hukum; dan</li>
+                <li>makanan, kosmetik, atau barang konsumsi yang kedaluwarsa, berbahaya, tidak layak, atau wajib berizin tetapi belum memiliki izin yang diperlukan.</li>
+            </ul>
+            <p>SI DAPULIK berhak menolak atau menghapus produk, membatasi akun penjual, serta meneruskan laporan kepada pihak berwenang jika ditemukan pelanggaran. Persetujuan pada formulir produk merupakan pernyataan penjual bahwa produk memenuhi ketentuan ini.</p>
+        </section>
         <section>
-            <h2>5. Ketersediaan layanan</h2>
+            <h2>6. Ketersediaan layanan</h2>
             <p>Kami berupaya menjaga aplikasi tetap tersedia, tetapi layanan dapat dihentikan sementara untuk pemeliharaan, gangguan jaringan, atau keadaan di luar kendali. Simpan salinan informasi penting dan gunakan kanal kantor jika permohonan mendesak.</p>
         </section>
         <section>
-            <h2>6. Perubahan ketentuan</h2>
+            <h2>7. Perubahan ketentuan</h2>
             <p>Fitur dan ketentuan dapat diperbarui untuk menyesuaikan kebutuhan layanan atau aturan yang berlaku. Perubahan penting akan ditampilkan di aplikasi. Penggunaan setelah perubahan berarti Anda menerima versi terbaru.</p>
         </section>
         <section>
-            <h2>7. Hubungi kami</h2>
+            <h2>8. Hubungi kami</h2>
             <p>Untuk pertanyaan, koreksi data, atau kendala layanan, kirim email ke <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>. Permintaan penghapusan akun dijelaskan pada halaman <a href="<?= site_url('permintaan-hapus-akun') ?>">Permintaan Penghapusan Akun</a>.</p>
         </section>
     </div>

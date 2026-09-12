@@ -2875,7 +2875,7 @@ body #page .page-content .warga-legal-page .warga-legal-hero > div:last-child > 
 .warga-legal-card > p:first-child { margin-top: 0; }
 .warga-legal-updated { color: var(--warga-muted); font-size: 12px; font-weight: 700; }
 .warga-legal-card > p { color: var(--warga-muted); font-size: 15px; line-height: 1.65; }
-.warga-legal-card section { margin-top: 22px; }
+.warga-legal-card section { margin-top: 22px; scroll-margin-top: calc(96px + env(safe-area-inset-top, 0px)); }
 .warga-legal-card h2 { margin: 0 0 7px; color: var(--warga-ink); font-size: 18px; line-height: 1.35; }
 .warga-legal-card section p,
 .warga-legal-card li { color: var(--warga-muted); font-size: 14px; line-height: 1.65; }
