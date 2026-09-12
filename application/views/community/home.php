@@ -19,7 +19,7 @@ $pictureUrl = static function ($name) {
         <div class="community-v22-hero-main">
             <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SI DAPULIK">
             <div class="community-v22-hero-copy">
-                <p class="community-v22-eyebrow">SI DAPULIK <?= e($heroRegency) ?></p>
+                <p class="community-v22-eyebrow community-v22-brandline">SI DAPULIK <?= e($heroRegency) ?></p>
                 <p class="community-v22-hero-tagline"><?= e($heroTagline) ?></p>
                 <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>
                 <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($heroLocation) ?></p>
