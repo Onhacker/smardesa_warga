@@ -22,7 +22,7 @@
             <p data-announcement-attachment-error hidden>Lampiran belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.</p>
         </div>
         <div class="community-v22-attachment-actions">
-            <a class="community-button" data-announcement-attachment-download href="#" download><i class="fa fa-download" aria-hidden="true"></i><span>Unduh</span></a>
+            <a class="community-button color-white" data-announcement-attachment-download href="#" download><i class="fa fa-download" aria-hidden="true"></i><span>Unduh</span></a>
             <button type="button" class="community-button is-secondary" data-announcement-attachment-close>Tutup</button>
         </div>
     </section>
