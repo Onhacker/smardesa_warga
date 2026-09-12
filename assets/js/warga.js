@@ -271,7 +271,7 @@
     if (event.defaultPrevented || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     var target = event.target;
     if (!target || typeof target.closest !== 'function') return;
-    if (target.closest('[data-toggle-theme], [data-menu], [data-market-review-open], [data-market-page-link], [data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]')) return;
+    if (target.closest('[data-toggle-theme], [data-menu], [data-notification-center-trigger], [data-market-review-open], [data-market-page-link], [data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]')) return;
     var link = target.closest('a[href]');
     if (!link || link.hasAttribute('download') || (link.target && link.target !== '_self')) return;
     var href = (link.getAttribute('href') || '').trim();
