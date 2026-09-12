@@ -57,7 +57,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         <?php endif; ?>
         <a href="<?= site_url(warga_home_route($currentUser)) ?>" class="header-title"><?= e($pageTitle) ?></a>
         <?php if ($showBackButton): ?><a href="#" data-menu="menu-main" class="header-icon header-icon-4" aria-label="Buka menu"><i class="fas fa-bars"></i></a><?php endif; ?>
-        <a href="<?= $notificationUrl ?>" class="header-icon <?= $notificationHeaderClass ?> warga-header-notification" aria-label="<?= e($notificationLabel) ?>"<?= !empty($isAuthenticated) ? ' data-notification-center-trigger aria-haspopup="dialog" aria-controls="warga-notification-center"' : '' ?>><i class="fas fa-inbox" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a>
+        <a href="<?= $notificationUrl ?>" class="header-icon <?= $notificationHeaderClass ?> warga-header-notification" aria-label="<?= e($notificationLabel) ?>"<?= !empty($isAuthenticated) ? ' data-notification-center-trigger aria-haspopup="dialog" aria-controls="warga-notification-center"' : '' ?>><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a>
     </header>
 
     <?php $footerIsAuthenticated = !empty($isAuthenticated) && is_array($currentUser); ?>
@@ -76,7 +76,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
             <a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme warga-page-title-menu" aria-label="Buka menu"><i class="fa fa-bars"></i></a>
         <?php endif; ?>
         <h1><?= e($pageTitle) ?></h1>
-        <a href="<?= $notificationUrl ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-header-notification" aria-label="<?= e($notificationLabel) ?>"<?= !empty($isAuthenticated) ? ' data-notification-center-trigger aria-haspopup="dialog" aria-controls="warga-notification-center"' : '' ?>><i class="fa fa-inbox" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a>
+        <a href="<?= $notificationUrl ?>" class="page-title-icon shadow-xl bg-theme color-theme warga-header-notification" aria-label="<?= e($notificationLabel) ?>"<?= !empty($isAuthenticated) ? ' data-notification-center-trigger aria-haspopup="dialog" aria-controls="warga-notification-center"' : '' ?>><i class="fa fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a>
         <?php if ($showBackButton): ?><a href="#" data-menu="menu-main" class="page-title-icon shadow-xl bg-theme color-theme" aria-label="Buka menu"><i class="fa fa-bars"></i></a><?php endif; ?>
     </section>
     <div class="page-title-clear" aria-hidden="true"></div>

@@ -45,6 +45,8 @@ class MY_Controller extends CI_Controller
         } else {
             $contactVillage = array(
                 'name' => trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya',
+                'district_name' => trim((string) (getenv('PUBLIC_DISTRICT_NAME') ?: '')),
+                'regency_name' => trim((string) (getenv('PUBLIC_REGENCY_NAME') ?: (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya'))),
                 'institution' => $this->institution_label(),
                 'contact' => array()
             );

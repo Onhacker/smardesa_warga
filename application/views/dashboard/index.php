@@ -18,7 +18,7 @@ $lettersPage = !empty($lettersPage);
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
         <div><p class="color-white">Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span class="color-white"><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
     </div>
-    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka pemberitahuan"><i class="fa fa-inbox"></i></a>
+    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka pemberitahuan"><i class="fa fa-bell"></i></a>
 </section><?php endif; ?>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">

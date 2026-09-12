@@ -17,14 +17,12 @@ $menuRegency = trim((string) ($menuIsAuthenticated
     : ($menuFooterVillage['regency_name'] ?? '')));
 if ($menuRegency === '') $menuRegency = trim((string) (getenv('PUBLIC_REGENCY_NAME') ?: ''));
 if ($menuRegency === '') $menuRegency = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
-$menuTagline = 'Sistem Informasi Digitalisasi Administrasi, Pelayanan Umum, dan Layanan Informasi Kampung';
 ?>
 <div class="warga-menu-head">
     <div class="warga-menu-brand-row">
         <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo SI DAPULIK" width="56" height="56">
         <div class="warga-menu-brand-copy">
             <h2>SI DAPULIK</h2>
-            <p class="warga-menu-tagline"><?= e($menuTagline) ?></p>
             <div class="warga-menu-location" aria-label="Wilayah layanan">
                 <strong><?= e($menuArea) ?></strong>
                 <?php if ($menuDistrict !== '' || $menuRegency !== ''): ?><span><?= $menuDistrict !== '' ? e($menuDistrict) : '' ?><?= $menuDistrict !== '' && $menuRegency !== '' ? ' · ' : '' ?><?= $menuRegency !== '' ? e($menuRegency) : '' ?></span><?php endif; ?>

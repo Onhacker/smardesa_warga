@@ -26,7 +26,13 @@ class Dashboard extends Public_Controller
             $services = $this->Request_model->service_types($this->currentUser['village_id'] ?? '');
         } else {
             $summary = array('total' => 0, 'active' => 0, 'issued' => 0, 'revision' => 0);
-            $village = array('name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya', 'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung', 'contact' => array());
+            $village = array(
+                'name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya',
+                'district_name' => getenv('PUBLIC_DISTRICT_NAME') ?: '',
+                'regency_name' => getenv('PUBLIC_REGENCY_NAME') ?: (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya'),
+                'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung',
+                'contact' => array()
+            );
             // Announcement content is tenant-private. Guests may still use
             // the other public services, but never receive a count or item
             // sourced from another village.

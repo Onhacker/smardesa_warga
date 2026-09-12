@@ -71,7 +71,7 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 #page .community-v22-home .community-v22-hero {
   display: block;
   margin: 0 0 22px;
-  padding: 24px;
+  padding: 18px 20px;
   border: 0;
   border-radius: 26px;
   background: linear-gradient(135deg, #1d4f8a 0%, #235fa4 60%, #4a89dc 100%);
@@ -81,16 +81,16 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
 
 #page .community-v22-hero-main {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-columns: 68px minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
+  gap: 13px;
 }
 
 #page .community-v22-hero-logo {
-  width: 84px;
-  height: 84px;
-  padding: 5px;
-  border-radius: 24px;
+  width: 68px;
+  height: 68px;
+  padding: 4px;
+  border-radius: 20px;
   background: #fff;
   object-fit: contain;
   box-shadow: 0 8px 18px rgba(0, 0, 0, .12);
@@ -106,18 +106,28 @@ body.theme-dark #page .community-compose input,body.theme-dark #page .community-
   line-height: 1.3;
   text-transform: uppercase;
 }
+#page .community-v22-hero-tagline {
+  max-width: 60ch;
+  margin: 0 0 6px;
+  color: #e1ecfb;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+#page .community-v22-hero .community-v22-hero-tagline { color: #e1ecfb !important; }
 #page .community-v22-hero h1 {
   margin: 0;
   color: #fff;
-  font-size: clamp(25px, 4vw, 38px);
+  font-size: clamp(22px, 3.4vw, 32px);
   font-weight: 800;
   line-height: 1.12;
 }
 #page .community-v22-hero .community-v22-eyebrow { color: #bdd4f1 !important; }
 #page .community-v22-location {
-  margin: 9px 0 0;
+  margin: 6px 0 0;
   color: #e1ecfb;
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.4;
 }
 #page .community-v22-hero .community-v22-location { color: #e1ecfb !important; }
@@ -586,11 +596,12 @@ body.theme-dark #page .warga-notification-enable-copy [data-push-status] { color
   #page .warga-notification-enable-copy h2 { font-size: 15px; }
   #page .warga-notification-enable-copy p { font-size: 12px; }
   #page .warga-notification-enable-switch { transform: scale(.74); }
-  #page .community-v22-hero { padding: 18px; border-radius: 21px; }
-  #page .community-v22-hero-main { grid-template-columns: 64px minmax(0,1fr); gap: 11px; }
-  #page .community-v22-hero-logo { width: 64px; height: 64px; border-radius: 18px; }
-  #page .community-v22-hero h1 { font-size: 23px; }
-  #page .community-v22-location { font-size: 13px; }
+  #page .community-v22-hero { padding: 14px 15px; border-radius: 21px; }
+  #page .community-v22-hero-main { grid-template-columns: 56px minmax(0,1fr); gap: 10px; }
+  #page .community-v22-hero-logo { width: 56px; height: 56px; border-radius: 16px; }
+  #page .community-v22-hero h1 { font-size: 21px; }
+  #page .community-v22-hero-tagline { margin-bottom: 5px; font-size: 10.5px; line-height: 1.3; }
+  #page .community-v22-location { margin-top: 5px; font-size: 12px; }
   #page .community-v22-hero-action { width: 42px; height: 42px; border-radius: 13px; }
   #page .community-v22-stats dd { font-size: 24px; }
   #page .community-v22-stats dt { font-size: 10px; }
@@ -621,6 +632,7 @@ body.theme-dark #page .warga-notification-enable-copy [data-push-status] { color
    These selectors intentionally carry the theme/page scope so the image-card
    copy keeps the contrast of the original v22 cards. */
 body.theme-light #page .community-v22-home .community-v22-hero .community-v22-eyebrow { color: #bdd4f1 !important; }
+body.theme-light #page .community-v22-home .community-v22-hero .community-v22-hero-tagline { color: #e1ecfb !important; }
 body.theme-light #page .community-v22-home .community-v22-hero .community-v22-location { color: #e1ecfb !important; }
 body.theme-light #page .community-v22-home .community-v22-hero-action,
 body.theme-light #page .community-v22-home .community-v22-hero-action i { color: #fff !important; }

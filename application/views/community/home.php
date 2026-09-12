@@ -2,8 +2,14 @@
 <?php
 $isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
 $publicArea = trim((string) ($village['name'] ?? (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
-$heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'SI DAPULIK ' . $publicArea;
+$heroRegency = trim((string) ($isAuthenticated
+    ? ($currentUser['regency_name'] ?? '')
+    : ($village['regency_name'] ?? '')));
+if ($heroRegency === '') $heroRegency = trim((string) (getenv('PUBLIC_REGENCY_NAME') ?: ''));
+if ($heroRegency === '') $heroRegency = $publicArea !== '' ? $publicArea : 'Jayawijaya';
+$heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Layanan warga';
 $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
+$heroTagline = 'Sistem Informasi Digitalisasi Administrasi, Pelayanan Umum, dan Layanan Informasi Kampung';
 $pictureUrl = static function ($name) {
     return warga_asset_url('assets/v22/images/pictures/' . trim((string) $name) . '.webp');
 };
@@ -13,7 +19,8 @@ $pictureUrl = static function ($name) {
         <div class="community-v22-hero-main">
             <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SI DAPULIK">
             <div class="community-v22-hero-copy">
-                <p class="community-v22-eyebrow">Layanan digital warga</p>
+                <p class="community-v22-eyebrow">SI DAPULIK <?= e($heroRegency) ?></p>
+                <p class="community-v22-hero-tagline"><?= e($heroTagline) ?></p>
                 <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>
                 <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($heroLocation) ?></p>
             </div>
