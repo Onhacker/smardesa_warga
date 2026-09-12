@@ -6,16 +6,32 @@ class Petugas extends Staff_Controller
     public function index()
     {
         $this->load->model('Request_model');
-        $status = trim((string) $this->input->get('status', TRUE));
-        $validStatuses = array('submitted', 'verified', 'approved', 'revision', 'rejected', 'issued');
-        if ($status !== '' && !in_array($status, $validStatuses, TRUE)) $status = '';
-        $this->render('staff/index', array(
-            'pageTitle' => 'Layanan ' . $this->institution_label(),
-            'staffMode' => TRUE,
-            'requests' => $this->Request_model->for_staff($this->currentUser, $status ?: NULL),
-            'summary' => $this->Request_model->staff_summary($this->currentUser),
-            'selectedStatus' => $status
+        $listing = $this->Request_model->paginated_for_staff($this->currentUser, array(
+            'status' => $this->input->get('status', TRUE),
+            'page' => $this->input->get('page', TRUE)
         ));
+        $institutionLabel = $this->institution_label();
+        $data = array(
+            'pageTitle' => 'Layanan ' . $institutionLabel,
+            'institutionUpper' => function_exists('mb_strtoupper') ? mb_strtoupper($institutionLabel, 'UTF-8') : strtoupper($institutionLabel),
+            'staffMode' => TRUE,
+            'requests' => $listing['items'],
+            'listing' => $listing,
+            'listUrl' => site_url('petugas'),
+            'summary' => $this->Request_model->staff_summary($this->currentUser),
+            'selectedStatus' => $listing['filters']['status']
+        );
+        $this->output->set_header('Cache-Control: no-store, private');
+        if ($this->input->is_ajax_request()) {
+            return $this->json(array(
+                'html' => $this->load->view('staff/results', $data, TRUE),
+                'page' => $listing['page'],
+                'pages' => $listing['pages'],
+                'total' => $listing['total'],
+                'filters' => $listing['filters']
+            ));
+        }
+        $this->render('staff/index', $data);
     }
 
     public function show($id)

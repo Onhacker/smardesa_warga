@@ -15,30 +15,17 @@
     <a href="<?= site_url('petugas?status=issued') ?>" class="<?= $selectedStatus === 'issued' ? 'is-active' : '' ?>"><strong><?= number_format($summary['issued']) ?></strong><span>Terbit</span></a>
 </section>
 
-<section class="content warga-section-head mt-3">
-    <div>
-        <p class="font-600 color-highlight mb-n1">ANTREAN <?= e($institutionUpper) ?></p>
-        <h2 class="font-22 mb-0"><?= $selectedStatus !== '' ? e(warga_status_text($selectedStatus)) : 'Semua Permohonan' ?></h2>
+<div class="warga-paged-list warga-staff-paged-list" data-paged-list>
+    <p class="warga-list-feedback" data-list-feedback role="status" aria-live="polite" aria-atomic="true"></p>
+    <div class="warga-list-error" data-list-error role="alert" hidden>
+        <span data-list-error-message></span>
+        <button type="button" data-list-retry>Coba lagi</button>
+        <a href="<?= site_url('login') ?>" data-list-login hidden>Masuk kembali</a>
     </div>
-    <span class="warga-result-count"><?= number_format(count($requests)) ?> data</span>
-</section>
-
-<section class="warga-staff-list">
-    <?php if (!$requests): ?>
-        <div class="warga-empty-state"><span><i class="fa fa-check-circle"></i></span><h3>Antrean ini sudah kosong</h3><p class="mb-0">Permohonan baru akan muncul otomatis.</p></div>
-    <?php endif; ?>
-    <?php foreach ($requests as $request): ?>
-        <a href="<?= site_url('petugas/permohonan/' . rawurlencode($request['id'])) ?>" class="warga-staff-request">
-            <span class="warga-request-icon"><i class="fa <?= e($request['service_icon']) ?>"></i></span>
-            <span class="warga-staff-request-copy">
-                <strong><?= e($request['citizen_name']) ?></strong>
-                <b><?= e($request['service_name']) ?></b>
-                <small><?= e($request['request_code']) ?> · <?= e(tanggal_id($request['submitted_at'], TRUE)) ?></small>
-            </span>
-            <span class="warga-request-status"><?= warga_status_label($request['status']) ?><i class="fa fa-chevron-right"></i></span>
-        </a>
-    <?php endforeach; ?>
-</section>
+    <div data-list-results id="warga-staff-list-results" aria-busy="false">
+        <?php $this->load->view('staff/results'); ?>
+    </div>
+</div>
 
 <section class="warga-home-notice">
     <i class="fa fa-shield-alt"></i>

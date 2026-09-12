@@ -581,21 +581,27 @@
     var sequence = 0;
     var lastAttempt = null;
 
+    if (!results || !feedback || !errorBox || !errorMessage || !retry || !login) return;
+
     function searchUrl(status) {
-      var url = new URL(form.action, window.location.href);
-      new FormData(form).forEach(function (value, key) {
-        if (String(value).trim()) url.searchParams.set(key, String(value).trim());
-      });
+      var url = new URL(form ? form.action : window.location.href, window.location.href);
+      if (form) {
+        new FormData(form).forEach(function (value, key) {
+          if (String(value).trim()) url.searchParams.set(key, String(value).trim());
+        });
+      }
       if (status) url.searchParams.set('status', status);
       url.searchParams.set('page', '1');
       return url;
     }
 
     function syncFilters(url) {
-      ['q', 'date', 'status'].forEach(function (name) {
-        var field = form.elements.namedItem(name);
-        if (field) field.value = url.searchParams.get(name) || (name === 'status' ? 'all' : '');
-      });
+      if (form) {
+        ['q', 'date', 'status'].forEach(function (name) {
+          var field = form.elements.namedItem(name);
+          if (field) field.value = url.searchParams.get(name) || (name === 'status' ? 'all' : '');
+        });
+      }
       var status = url.searchParams.get('status') || 'all';
       filterLinks.forEach(function (link) {
         var value = link.getAttribute('data-list-filter');
@@ -640,7 +646,7 @@
         // The same escaped, authenticated partial renders initial and AJAX results.
         results.innerHTML = data.html;
         url.searchParams.set('page', String(data.page));
-        if (data.filters) {
+        if (data.filters && form) {
           ['q', 'date', 'status'].forEach(function (name) {
             if (!form.elements.namedItem(name)) return;
             if (data.filters[name]) url.searchParams.set(name, data.filters[name]);
@@ -672,10 +678,12 @@
       });
     }
 
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-      loadPage(searchUrl(), false);
-    });
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        loadPage(searchUrl(), false);
+      });
+    }
     listing.addEventListener('click', function (event) {
       var control = event.target.closest('[data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]');
       if (!control || !listing.contains(control) || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;

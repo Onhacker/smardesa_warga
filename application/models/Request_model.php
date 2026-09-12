@@ -299,6 +299,22 @@ class Request_model extends CI_Model
         else $this->db->where('sr.id', '');
     }
 
+    private function apply_staff_base_query(array $user, $status = NULL)
+    {
+        $this->db->from('service_requests sr')
+            ->join('village_tenants v', 'v.id=sr.village_id');
+        $this->apply_staff_scope($user);
+        if ($status !== NULL && $status !== '') $this->db->where('sr.status', $status);
+    }
+
+    private function apply_staff_list_query(array $user, $status = NULL)
+    {
+        $this->apply_staff_base_query($user, $status);
+        $this->db->join('service_types st', 'st.id=sr.service_type_id')
+            ->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE)
+            ->join('users u', 'u.id=sr.citizen_user_id');
+    }
+
     private function demo_staff_request_rows()
     {
         $rows = $this->demo_requests();
@@ -650,31 +666,95 @@ class Request_model extends CI_Model
         }
         if (!warga_database_available()) return array();
         $this->ensure_catalog_schema();
+        $this->apply_staff_list_query($user, $status);
         $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name', FALSE);
-        $this->db->from('service_requests sr');
-        $this->db->join('service_types st', 'st.id=sr.service_type_id');
-        $this->db->join('village_service_catalog vc', 'vc.id=sr.catalog_service_id AND vc.village_id=sr.village_id', 'left', FALSE);
-        $this->db->join('users u', 'u.id=sr.citizen_user_id');
-        $this->db->join('village_tenants v', 'v.id=sr.village_id');
-        $this->apply_staff_scope($user);
-        if ($status !== NULL && $status !== '') $this->db->where('sr.status', $status);
-        $rows = $this->db->order_by('sr.submitted_at', 'DESC')->get()->result_array();
+        $rows = $this->db->order_by('sr.submitted_at', 'DESC')->order_by('sr.id', 'DESC')->get()->result_array();
         foreach ($rows as &$row) $row = $this->normalize_row($row);
         unset($row);
         return $rows;
     }
 
+    public function paginated_for_staff(array $user, array $filters = array())
+    {
+        $validStatuses = array('submitted', 'verified', 'approved', 'revision', 'rejected', 'issued');
+        $status = isset($filters['status']) && is_scalar($filters['status']) ? trim((string) $filters['status']) : '';
+        if (!in_array($status, $validStatuses, TRUE)) $status = '';
+        $requestedPage = isset($filters['page']) && is_scalar($filters['page']) ? (string) $filters['page'] : '1';
+        $requestedPage = ctype_digit($requestedPage) ? max(1, (int) $requestedPage) : 1;
+        $perPage = 10;
+        $total = 0;
+        $rows = array();
+
+        if (warga_demo_mode()) {
+            $rows = $this->demo_staff_request_rows();
+            if ($status !== '') {
+                $rows = array_values(array_filter($rows, function ($row) use ($status) {
+                    return isset($row['status']) && $row['status'] === $status;
+                }));
+            }
+            usort($rows, function ($left, $right) {
+                $dateOrder = strcmp((string) ($right['submitted_at'] ?? ''), (string) ($left['submitted_at'] ?? ''));
+                return $dateOrder !== 0 ? $dateOrder : strcmp((string) ($right['id'] ?? ''), (string) ($left['id'] ?? ''));
+            });
+            $total = count($rows);
+        } elseif (warga_database_available()) {
+            $this->ensure_catalog_schema();
+            $this->apply_staff_base_query($user, $status ?: NULL);
+            $total = (int) $this->db->count_all_results();
+        }
+
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($requestedPage, $pages);
+        $offset = ($page - 1) * $perPage;
+        if (warga_demo_mode()) {
+            $rows = array_slice($rows, $offset, $perPage);
+        } elseif ($total > 0) {
+            $this->apply_staff_list_query($user, $status ?: NULL);
+            $rows = $this->db->select('sr.*, COALESCE(vc.service_key, st.slug) AS service_slug, COALESCE(vc.name, st.name) AS service_name, COALESCE(vc.icon, st.icon) AS service_icon, vc.form_schema_json AS catalog_form_schema_json, vc.template_key AS catalog_template_key, u.name AS citizen_name, u.phone AS citizen_phone, u.email AS citizen_email, v.name AS village_name, v.regency_code, v.regency_name', FALSE)
+                ->order_by('sr.submitted_at', 'DESC')->order_by('sr.id', 'DESC')
+                ->limit($perPage, $offset)->get()->result_array();
+            foreach ($rows as &$row) $row = $this->normalize_row($row);
+            unset($row);
+        }
+
+        return array(
+            'items' => $rows,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => $perPage,
+            'from' => $total > 0 ? $offset + 1 : 0,
+            'to' => min($offset + count($rows), $total),
+            'filters' => array('status' => $status)
+        );
+    }
+
     public function staff_summary(array $user)
     {
-        $rows = $this->for_staff($user);
-        $summary = array('total' => count($rows), 'verification' => 0, 'approval' => 0, 'issued' => 0, 'revision' => 0, 'rejected' => 0);
-        foreach ($rows as $row) {
-            if ($row['status'] === 'submitted') $summary['verification']++;
-            if ($row['status'] === 'verified') $summary['approval']++;
-            if ($row['status'] === 'issued') $summary['issued']++;
-            if ($row['status'] === 'revision') $summary['revision']++;
-            if ($row['status'] === 'rejected') $summary['rejected']++;
+        $summary = array('total' => 0, 'verification' => 0, 'approval' => 0, 'issued' => 0, 'revision' => 0, 'rejected' => 0);
+        if (warga_demo_mode()) {
+            $rows = $this->demo_staff_request_rows();
+            $summary['total'] = count($rows);
+            foreach ($rows as $row) {
+                if ($row['status'] === 'submitted') $summary['verification']++;
+                if ($row['status'] === 'verified') $summary['approval']++;
+                if ($row['status'] === 'issued') $summary['issued']++;
+                if ($row['status'] === 'revision') $summary['revision']++;
+                if ($row['status'] === 'rejected') $summary['rejected']++;
+            }
+            return $summary;
         }
+        if (!warga_database_available()) return $summary;
+        $this->ensure_catalog_schema();
+        $this->apply_staff_base_query($user);
+        $row = $this->db->select("COUNT(*) AS total,
+                SUM(CASE WHEN sr.status = 'submitted' THEN 1 ELSE 0 END) AS verification,
+                SUM(CASE WHEN sr.status = 'verified' THEN 1 ELSE 0 END) AS approval,
+                SUM(CASE WHEN sr.status = 'issued' THEN 1 ELSE 0 END) AS issued,
+                SUM(CASE WHEN sr.status = 'revision' THEN 1 ELSE 0 END) AS revision,
+                SUM(CASE WHEN sr.status = 'rejected' THEN 1 ELSE 0 END) AS rejected", FALSE)
+            ->limit(1)->get()->row_array();
+        foreach ($summary as $key => $value) $summary[$key] = (int) ($row[$key] ?? 0);
         return $summary;
     }
 

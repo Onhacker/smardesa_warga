@@ -6912,6 +6912,48 @@ body.theme-dark .warga-media-loading::before {
 @keyframes warga-loader-spin { to { transform: rotate(360deg); } }
 @keyframes warga-skeleton-shimmer { to { background-position-x: -220%; } }
 
+/* Staff queues carry dense operational data, so keep every line readable
+ * while allowing the status to move below the copy on narrow phones. */
+#page .warga-staff-list .warga-staff-request {
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 14px;
+  min-height: 96px;
+  padding: 17px;
+}
+
+#page .warga-staff-list .warga-request-icon {
+  width: 52px;
+  height: 52px;
+  font-size: 20px;
+}
+
+#page .warga-staff-list .warga-staff-request-copy strong {
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+#page .warga-staff-list .warga-staff-request-copy b {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+#page .warga-staff-list .warga-staff-request-copy small {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+#page .warga-staff-list .warga-status-badge {
+  padding: 7px 9px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+#page .warga-staff-list .warga-request-status > i { font-size: 12px; }
+#page .warga-staff-summary span { font-size: 12px; }
+#page .warga-staff-paged-list .warga-result-count { font-size: 12px; }
+
 @media (max-width: 480px) {
   .warga-page-skeleton-inner { padding: 16px 12px 24px; }
   .warga-page-skeleton-hero { height: 126px; margin-bottom: 18px; border-radius: 20px !important; }
@@ -6920,6 +6962,31 @@ body.theme-dark .warga-media-loading::before {
   .warga-page-skeleton-grid > i { height: 82px; }
   .warga-page-skeleton-row { grid-template-columns: 54px minmax(0, 1fr); min-height: 78px; padding: 11px; }
   .warga-page-skeleton-row > i { width: 54px; height: 54px; }
+
+  #page .warga-staff-list .warga-staff-request {
+    grid-template-columns: 48px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 9px;
+    min-height: 0;
+    padding: 15px;
+  }
+
+  #page .warga-staff-list .warga-request-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+
+  #page .warga-staff-list .warga-staff-request-copy strong { font-size: 16px; }
+  #page .warga-staff-list .warga-staff-request-copy b { font-size: 14px; }
+  #page .warga-staff-list .warga-staff-request-copy small { font-size: 12px; }
+  #page .warga-staff-list .warga-request-status {
+    grid-column: 2;
+    justify-content: space-between;
+  }
+
+  #page .warga-staff-list .warga-status-badge { font-size: 11px; }
+  #page .warga-staff-summary span { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
