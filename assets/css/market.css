@@ -50,6 +50,41 @@
 .market-hero-icon, .market-hero-icon i { position: relative; z-index: 1; color: #fff !important; }
 .market-hero-icon { display: grid; flex: 0 0 56px; width: 56px; height: 56px; place-items: center; border: 1px solid rgba(255,255,255,.42); border-radius: 17px; background: rgba(255,255,255,.15); font-size: 23px; }
 .market-hero-compact { min-height: 125px; }
+
+/* The catalogue hero carries three short lines plus the product count. Keep
+ * that introductory card compact without changing the taller form/store
+ * heroes used elsewhere in the marketplace. The copy is allowed to grow
+ * naturally when a narrow viewport wraps a long regional name or tagline. */
+.marketplace-listing-page > .market-hero {
+  min-height: 0;
+  padding: 17px 19px;
+  gap: 12px;
+}
+.marketplace-listing-page > .market-hero .market-eyebrow {
+  font-size: 11px;
+  line-height: 1.2;
+}
+.marketplace-listing-page > .market-hero .market-hero-copy h1 {
+  margin: 1px 0 3px;
+  font-size: 27px;
+  line-height: 1.08;
+}
+.marketplace-listing-page > .market-hero .market-hero-copy > span {
+  font-size: 14px;
+  line-height: 1.3;
+}
+.marketplace-listing-page > .market-hero .market-hero-copy .market-hero-count {
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.marketplace-listing-page > .market-hero .market-hero-icon {
+  flex-basis: 50px;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  font-size: 21px;
+}
 .market-quick-actions { display: flex; gap: 10px; margin: 0 15px 18px; }
 .market-action { display: inline-flex; flex: 1 1 0; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 10px 13px; border: 1px solid var(--market-line); border-radius: 12px; background: var(--market-surface); color: var(--market-blue-dark); font-size: 14px; font-weight: 700; box-shadow: 0 3px 11px rgba(31,62,96,.06); }
 .market-action i { font-size: 14px; }
