@@ -3559,8 +3559,22 @@ body.theme-dark .warga-notification-search-trigger,
 body.theme-dark .warga-notification-active-filter { background: #1b3858; color: #b8d5f4 !important; }
 
 @media (max-width: 480px) {
-  .warga-notification-center { place-items: end center; padding: 0; }
-  .warga-notification-center-dialog { width: 100%; max-height: min(86vh, 740px); margin: 0; border-width: 1px 0 0; border-radius: 23px 23px 0 0; }
+  /* On phones the unread centre opens as a top sheet so it stays close to
+   * the bell that launched it. Safe-area padding keeps the panel below the
+   * Android/iOS status area, while the result list remains independently
+   * scrollable when there are many notifications. */
+  .warga-notification-center {
+    place-items: start center;
+    padding: max(10px, env(safe-area-inset-top, 0px)) 10px max(10px, env(safe-area-inset-bottom, 0px));
+  }
+  .warga-notification-center-dialog {
+    width: 100%;
+    max-height: min(86vh, 740px);
+    max-height: min(86dvh, 740px);
+    margin: 0;
+    border-width: 1px;
+    border-radius: 18px;
+  }
   .warga-notification-center-head { grid-template-columns: 44px minmax(0, 1fr) 34px; gap: 10px; padding: 14px 13px; }
   .warga-notification-center-head-icon { width: 44px; height: 44px; border-radius: 13px; font-size: 17px; }
   .warga-notification-center-head h2 { font-size: 19px; }
