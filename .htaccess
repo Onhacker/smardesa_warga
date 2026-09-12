@@ -3,6 +3,7 @@ DirectoryIndex index.php
 
 <IfModule mod_mime.c>
     AddType application/manifest+json .webmanifest
+    AddType text/javascript .mjs
     AddType font/woff2 .woff2
     AddType font/woff .woff
 </IfModule>
@@ -13,7 +14,7 @@ DirectoryIndex index.php
     # warga_asset_url() appends a per-file version. Mark only those requests
     # immutable; legacy/unversioned files keep the host's shorter default TTL.
     RewriteCond %{QUERY_STRING} (^|&)v=[^&]+ [NC]
-    RewriteRule \.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$ - [E=SDW_VERSIONED_ASSET:1]
+    RewriteRule \.(?:css|m?js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$ - [E=SDW_VERSIONED_ASSET:1]
 
     # Framework, schema, runtime secrets, and generated files are never
     # public resources. Keep these rules before the front-controller fallback.
@@ -35,7 +36,7 @@ DirectoryIndex index.php
 
     # Versioned static URLs may be retained for a year without risking stale
     # CSS, JavaScript, fonts, or images after a deployment.
-    <FilesMatch "\.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$">
+    <FilesMatch "\.(?:css|m?js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$">
         Header always set Cache-Control "public, max-age=31536000, immutable" env=SDW_VERSIONED_ASSET
     </FilesMatch>
     <FilesMatch "\.webmanifest$">

@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-12-performance-94';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-12-announcement-pdf-95';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
@@ -21,7 +21,7 @@ const precache = [
 function isStaticAsset(request, url) {
   if (request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(assetPath)) return false;
   if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
-  return /\.(?:css|js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname);
+  return /\.(?:css|m?js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname);
 }
 
 function isMarketplaceImage(request, url) {

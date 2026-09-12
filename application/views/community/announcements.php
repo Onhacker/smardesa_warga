@@ -49,7 +49,7 @@ $announcementAttachment = static function (array $item) {
     <?php if ($canManage && $ready): ?>
     <details class="community-compose community-v22-compose">
         <summary><i class="fa fa-plus" aria-hidden="true"></i><span>Buat Pengumuman</span><i class="fa fa-chevron-down" aria-hidden="true"></i></summary>
-        <form method="post" action="<?= site_url('pengumuman/terbitkan') ?>" enctype="multipart/form-data">
+        <form method="post" action="<?= site_url('pengumuman/terbitkan') ?>" enctype="multipart/form-data" data-disable-submit>
             <?= csrf_field() ?>
             <label for="announcement-title">Judul</label>
             <input id="announcement-title" name="title" maxlength="180" required>
@@ -59,7 +59,7 @@ $announcementAttachment = static function (array $item) {
             <input type="hidden" name="MAX_FILE_SIZE" value="8388608">
             <input id="announcement-attachment" name="announcement_attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" aria-describedby="announcement-attachment-help">
             <small id="announcement-attachment-help" class="community-v22-file-help">Satu file PDF atau gambar, maksimal 8 MB.</small>
-            <button class="community-button" type="submit" data-disable-submit><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Terbitkan</span></button>
+            <button class="community-button community-v22-publish-button color-white" type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i><span>Terbitkan</span></button>
         </form>
     </details>
     <?php endif; ?>
@@ -102,18 +102,4 @@ $announcementAttachment = static function (array $item) {
     </section>
 </div>
 
-<div class="community-v22-attachment-modal" data-announcement-attachment-modal hidden aria-hidden="true">
-    <button type="button" class="community-v22-attachment-backdrop" data-announcement-attachment-close aria-label="Tutup lampiran"></button>
-    <section class="community-v22-attachment-dialog" role="dialog" aria-modal="true" aria-labelledby="community-v22-attachment-title">
-        <header class="community-v22-attachment-dialog-head">
-            <div><span class="community-v22-eyebrow">Lampiran pengumuman</span><h2 id="community-v22-attachment-title" data-announcement-attachment-title>Lampiran</h2></div>
-            <button type="button" class="community-v22-attachment-close" data-announcement-attachment-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
-        </header>
-        <div class="community-v22-attachment-viewer" data-announcement-attachment-viewer>
-            <img data-announcement-attachment-image alt="" hidden>
-            <iframe data-announcement-attachment-frame title="Pratinjau lampiran pengumuman" hidden loading="lazy"></iframe>
-            <p data-announcement-attachment-error hidden>Lampiran belum dapat ditampilkan. Gunakan tombol buka untuk melihatnya.</p>
-        </div>
-        <div class="community-v22-attachment-actions"><a class="community-button" data-announcement-attachment-download href="#" target="_blank" rel="noopener noreferrer"><i class="fa fa-download" aria-hidden="true"></i><span>Unduh lampiran</span></a><button type="button" class="community-button is-secondary" data-announcement-attachment-close>Tutup</button></div>
-    </section>
-</div>
+<?php $this->load->view('community/announcement_attachment_modal'); ?>

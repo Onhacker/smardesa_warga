@@ -715,6 +715,17 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
 #page .community-v22-compose > form { border-top: 1px solid var(--warga-line); }
 #page .community-v22-compose label { margin-top: 15px; }
 #page .community-v22-compose .community-button { margin-top: 17px; }
+#page .community-v22-compose .community-v22-publish-button,
+#page .community-v22-compose .community-v22-publish-button:hover,
+#page .community-v22-compose .community-v22-publish-button:focus,
+#page .community-v22-compose .community-v22-publish-button > i,
+#page .community-v22-compose .community-v22-publish-button > span {
+  color: #fff !important;
+}
+#page .community-v22-compose .community-v22-publish-button:disabled {
+  cursor: wait;
+  opacity: .82;
+}
 #page .community-v22-compose input[type="file"] { min-height: 54px; padding: 7px; cursor: pointer; }
 #page .community-v22-compose input[type="file"]::file-selector-button {
   min-height: 38px;
@@ -814,20 +825,20 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   flex-direction: column;
   align-items: stretch;
   justify-content: stretch;
-  border: 1px solid #b6cce4;
+  border: 1px solid #f0aaa5;
   border-radius: 17px;
   background: #fff;
-  color: #1d4f8a !important;
+  color: #172431 !important;
   font-variant-numeric: tabular-nums;
   text-align: center;
-  box-shadow: 0 8px 18px rgba(35, 95, 164, .15);
+  box-shadow: 0 8px 18px rgba(192, 45, 38, .16);
 }
 #page .community-v22-announcement-date-tile b {
   display: grid;
   min-height: 45px;
   flex: 1 1 auto;
   place-items: center;
-  color: #1d4f8a !important;
+  color: #172431 !important;
   font-size: 27px;
   font-weight: 900;
   line-height: 1;
@@ -836,7 +847,7 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
   display: grid;
   min-height: 23px;
   place-items: center;
-  background: linear-gradient(135deg, #235fa4, #4787d2);
+  background: linear-gradient(135deg, #ff453a, #d92d27);
   color: #fff !important;
   font-size: 10px;
   font-weight: 900;
@@ -976,7 +987,7 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
 #page .community-v22-announcement-detail .community-v22-detail-hero * {
   color: #fff !important;
 }
-#page .community-v22-announcement-detail .community-v22-detail-hero .community-v22-announcement-date-tile b { color: #1d4f8a !important; }
+#page .community-v22-announcement-detail .community-v22-detail-hero .community-v22-announcement-date-tile b { color: #172431 !important; }
 #page .community-v22-announcement-detail .community-v22-detail-hero .community-v22-announcement-date-tile small { color: #fff !important; }
 #page .community-v22-announcement-detail .community-v22-detail-hero {
   display: grid;
@@ -1087,12 +1098,59 @@ body.community-v22-attachment-open { overflow: hidden; }
   background: #e9f0f6;
 }
 .community-v22-attachment-viewer > img { display: block; max-width: 100%; max-height: min(66vh, 680px); margin: auto; object-fit: contain; }
-.community-v22-attachment-viewer > iframe { display: block; width: 100%; min-height: min(64vh, 650px); border: 0; background: #fff; }
 .community-v22-attachment-viewer > [hidden] { display: none !important; }
 .community-v22-attachment-viewer > p { max-width: 420px; margin: 30px; color: #526b83; font-size: 14px; line-height: 1.55; text-align: center; }
+.community-v22-pdf-preview {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: min(58vh, 560px);
+  padding: 14px;
+  align-self: stretch;
+}
+.community-v22-pdf-status {
+  display: flex;
+  min-height: 130px;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  color: #526b83;
+  font-size: 14px;
+  font-weight: 750;
+  text-align: center;
+}
+.community-v22-pdf-status[hidden] { display: none !important; }
+.community-v22-pdf-status .fa-spinner,
+.community-v22-attachment-actions .is-loading .fa-spinner { animation: community-submit-spin .72s linear infinite !important; }
+.community-v22-pdf-pages { display: grid; width: 100%; gap: 14px; }
+.community-v22-pdf-page {
+  position: relative;
+  display: grid;
+  box-sizing: border-box;
+  width: min(100%, 780px);
+  min-height: 180px;
+  margin: 0 auto;
+  overflow: hidden;
+  place-items: center;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(16, 34, 52, .16);
+}
+.community-v22-pdf-page.is-pending::after {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #d7e3ef;
+  border-top-color: #235fa4;
+  border-radius: 50%;
+  content: '';
+  animation: community-submit-spin .72s linear infinite;
+}
+.community-v22-pdf-page > canvas { display: block; max-width: 100%; height: auto; }
+.community-v22-pdf-page-error { margin: 18px; color: #7c3040; font-size: 13px; line-height: 1.5; text-align: center; }
 .community-v22-attachment-actions { display: grid; padding: 13px 16px; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid #dce6ef; background: #fff; }
 .community-v22-attachment-actions .community-button { width: 100%; min-height: 45px; margin: 0; border-radius: 12px; text-decoration: none; }
 .community-v22-attachment-actions .community-button.is-secondary { border: 0; }
+.community-v22-attachment-actions .community-button.is-loading { cursor: wait; opacity: .82; pointer-events: none; }
 
 body.theme-dark #page .community-v22-page-hero,
 body.theme-dark #page .community-v22-detail-hero { color: #fff; }
@@ -1138,6 +1196,7 @@ body.theme-dark .community-v22-attachment-dialog-head .community-v22-eyebrow { c
 body.theme-dark .community-v22-attachment-close { background: #30404c; color: #f1f5f7; }
 body.theme-dark .community-v22-attachment-viewer { background: #111a20; }
 body.theme-dark .community-v22-attachment-viewer > p { color: #bdc9d1; }
+body.theme-dark .community-v22-pdf-status { color: #bdc9d1; }
 
 /* Bootstrap/simp-v22 includes a broad light-theme rule for plain paragraphs.
    Keep the colored hero copy white with an equally explicit theme scope. */
@@ -1223,7 +1282,7 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   .community-v22-attachment-modal { padding-right: 10px; padding-left: 10px; }
   .community-v22-attachment-dialog { max-height: calc(100vh - 20px); max-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); border-radius: 18px; }
   .community-v22-attachment-viewer { min-height: 54vh; }
-  .community-v22-attachment-viewer > iframe { min-height: 58vh; }
+  .community-v22-pdf-preview { min-height: 54vh; padding: 10px; }
   .community-v22-attachment-actions { padding: 10px; }
 }
 

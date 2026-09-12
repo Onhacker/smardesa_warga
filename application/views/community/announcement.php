@@ -44,18 +44,4 @@ $attachmentIsImage = strpos($attachmentMime, 'image/') === 0;
     </div>
 </article>
 
-<div class="community-v22-attachment-modal" data-announcement-attachment-modal hidden aria-hidden="true">
-    <button type="button" class="community-v22-attachment-backdrop" data-announcement-attachment-close aria-label="Tutup lampiran"></button>
-    <section class="community-v22-attachment-dialog" role="dialog" aria-modal="true" aria-labelledby="community-v22-attachment-title">
-        <header class="community-v22-attachment-dialog-head">
-            <div><span class="community-v22-eyebrow">Lampiran pengumuman</span><h2 id="community-v22-attachment-title" data-announcement-attachment-title>Lampiran</h2></div>
-            <button type="button" class="community-v22-attachment-close" data-announcement-attachment-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
-        </header>
-        <div class="community-v22-attachment-viewer" data-announcement-attachment-viewer>
-            <img data-announcement-attachment-image alt="" hidden>
-            <iframe data-announcement-attachment-frame title="Pratinjau lampiran pengumuman" hidden loading="lazy"></iframe>
-            <p data-announcement-attachment-error hidden>Lampiran belum dapat ditampilkan. Gunakan tombol buka untuk melihatnya.</p>
-        </div>
-        <div class="community-v22-attachment-actions"><a class="community-button" data-announcement-attachment-download href="#" target="_blank" rel="noopener noreferrer"><i class="fa fa-download" aria-hidden="true"></i><span>Unduh lampiran</span></a><button type="button" class="community-button is-secondary" data-announcement-attachment-close>Tutup</button></div>
-    </section>
-</div>
+<?php $this->load->view('community/announcement_attachment_modal'); ?>

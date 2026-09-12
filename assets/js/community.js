@@ -490,30 +490,202 @@
     // it on compact Android screens and installed PWA/TWA windows.
     if (modal.parentNode !== document.body) document.body.appendChild(modal);
     var title = modal.querySelector('[data-announcement-attachment-title]');
+    var viewer = modal.querySelector('[data-announcement-attachment-viewer]');
     var image = modal.querySelector('[data-announcement-attachment-image]');
-    var frame = modal.querySelector('[data-announcement-attachment-frame]');
+    var pdfPreview = modal.querySelector('[data-announcement-attachment-pdf]');
+    var pdfStatus = modal.querySelector('[data-announcement-attachment-pdf-status]');
+    var pdfPages = modal.querySelector('[data-announcement-attachment-pdf-pages]');
     var error = modal.querySelector('[data-announcement-attachment-error]');
     var download = modal.querySelector('[data-announcement-attachment-download]');
     var previousFocus = null;
+    var previewVersion = 0;
+    var previewController = null;
+    var pdfLibraryPromise = null;
+    var pdfLoadingTask = null;
+    var pdfDocument = null;
+    var pdfObserver = null;
 
     function focusableItems() {
       return Array.prototype.slice.call(modal.querySelectorAll('a[href],button:not([disabled])')).filter(function (item) {
         return !item.hidden && item.getAttribute('aria-hidden') !== 'true';
       });
     }
-    function showError() {
-      if (image) { image.hidden = true; image.removeAttribute('src'); }
-      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
-      if (error) error.hidden = false;
+
+    function resetPdf() {
+      if (pdfObserver) pdfObserver.disconnect();
+      pdfObserver = null;
+      if (pdfLoadingTask && typeof pdfLoadingTask.destroy === 'function') {
+        try {
+          var destroying = pdfLoadingTask.destroy();
+          if (destroying && typeof destroying.catch === 'function') destroying.catch(function () {});
+        } catch (_) {}
+      } else if (pdfDocument && typeof pdfDocument.destroy === 'function') {
+        try {
+          var closing = pdfDocument.destroy();
+          if (closing && typeof closing.catch === 'function') closing.catch(function () {});
+        } catch (_) {}
+      }
+      pdfLoadingTask = null;
+      pdfDocument = null;
+      if (pdfPages) pdfPages.textContent = '';
+      if (pdfStatus) {
+        pdfStatus.hidden = false;
+        var statusText = pdfStatus.querySelector('span');
+        if (statusText) statusText.textContent = 'Menyiapkan PDF…';
+      }
+      if (pdfPreview) pdfPreview.hidden = true;
     }
+
+    function resetPreview() {
+      previewVersion += 1;
+      if (previewController) previewController.abort();
+      previewController = null;
+      if (image) { image.hidden = true; image.removeAttribute('src'); image.removeAttribute('data-preview-token'); }
+      resetPdf();
+      if (error) error.hidden = true;
+      return previewVersion;
+    }
+
+    function showError(message, token) {
+      if (typeof token === 'number' && token !== previewVersion) return;
+      if (image) { image.hidden = true; image.removeAttribute('data-preview-token'); image.removeAttribute('src'); }
+      if (pdfPreview) pdfPreview.hidden = true;
+      if (error) {
+        if (message) error.textContent = message;
+        error.hidden = false;
+      }
+    }
+
+    function loadPdfLibrary() {
+      if (pdfLibraryPromise) return pdfLibraryPromise;
+      var moduleUrl = modal.getAttribute('data-pdfjs-url') || '';
+      var workerUrl = modal.getAttribute('data-pdfjs-worker-url') || '';
+      if (!moduleUrl || !workerUrl) return Promise.reject(new Error('Renderer PDF belum tersedia.'));
+      pdfLibraryPromise = import(moduleUrl).then(function (pdfjs) {
+        if (!pdfjs || typeof pdfjs.getDocument !== 'function') throw new Error('Renderer PDF tidak valid.');
+        pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
+        return pdfjs;
+      }).catch(function (reason) {
+        pdfLibraryPromise = null;
+        throw reason;
+      });
+      return pdfLibraryPromise;
+    }
+
+    function renderPdfPage(shell, pageNumber, documentHandle, token) {
+      if (!shell || shell.getAttribute('data-render-state') !== 'pending' || token !== previewVersion) return;
+      shell.setAttribute('data-render-state', 'loading');
+      documentHandle.getPage(pageNumber).then(function (page) {
+        if (token !== previewVersion) return;
+        var baseViewport = page.getViewport({scale: 1});
+        var availableWidth = Math.max(220, Math.min(780, (pdfPages ? pdfPages.clientWidth : 0) || (viewer ? viewer.clientWidth - 28 : 720)));
+        var cssScale = availableWidth / Math.max(1, baseViewport.width);
+        var pixelRatio = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        var viewport = page.getViewport({scale: cssScale * pixelRatio});
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d', {alpha: false});
+        if (!context) throw new Error('Canvas PDF tidak tersedia.');
+        canvas.width = Math.max(1, Math.floor(viewport.width));
+        canvas.height = Math.max(1, Math.floor(viewport.height));
+        canvas.style.width = Math.max(1, Math.floor(viewport.width / pixelRatio)) + 'px';
+        canvas.style.height = Math.max(1, Math.floor(viewport.height / pixelRatio)) + 'px';
+        shell.style.aspectRatio = baseViewport.width + ' / ' + baseViewport.height;
+        return page.render({canvasContext: context, viewport: viewport, intent: 'display'}).promise.then(function () {
+          if (token !== previewVersion) return;
+          shell.textContent = '';
+          shell.classList.remove('is-pending');
+          shell.setAttribute('data-render-state', 'ready');
+          shell.appendChild(canvas);
+          if (typeof page.cleanup === 'function') page.cleanup();
+        });
+      }).catch(function () {
+        if (token !== previewVersion) return;
+        shell.textContent = '';
+        shell.classList.remove('is-pending');
+        shell.setAttribute('data-render-state', 'error');
+        var message = document.createElement('p');
+        message.className = 'community-v22-pdf-page-error';
+        message.textContent = 'Halaman ' + pageNumber + ' belum dapat ditampilkan.';
+        shell.appendChild(message);
+      });
+    }
+
+    function preparePdfPages(documentHandle, token) {
+      if (!pdfPages || token !== previewVersion) return;
+      pdfPages.textContent = '';
+      var shells = [];
+      for (var pageNumber = 1; pageNumber <= documentHandle.numPages; pageNumber += 1) {
+        var shell = document.createElement('section');
+        shell.className = 'community-v22-pdf-page is-pending';
+        shell.setAttribute('data-render-state', 'pending');
+        shell.setAttribute('data-page-number', String(pageNumber));
+        shell.setAttribute('aria-label', 'Halaman ' + pageNumber + ' dari ' + documentHandle.numPages);
+        shell.style.aspectRatio = '1 / 1.4142';
+        pdfPages.appendChild(shell);
+        shells.push(shell);
+      }
+      if (pdfStatus) pdfStatus.hidden = true;
+
+      if ('IntersectionObserver' in window && viewer) {
+        pdfObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            pdfObserver.unobserve(entry.target);
+            renderPdfPage(entry.target, parseInt(entry.target.getAttribute('data-page-number'), 10), documentHandle, token);
+          });
+        }, {root: viewer, rootMargin: '500px 0px'});
+        shells.forEach(function (item) { pdfObserver.observe(item); });
+      } else {
+        shells.forEach(function (item, index) { renderPdfPage(item, index + 1, documentHandle, token); });
+      }
+      if (shells[0]) renderPdfPage(shells[0], 1, documentHandle, token);
+    }
+
+    function renderPdf(url, token) {
+      if (!pdfPreview || !pdfPages) {
+        showError('PDF belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.', token);
+        return;
+      }
+      pdfPreview.hidden = false;
+      if (pdfStatus) pdfStatus.hidden = false;
+      previewController = window.AbortController ? new AbortController() : null;
+      var fetchOptions = {credentials: 'same-origin', cache: 'no-store', headers: {'Accept': 'application/pdf'}};
+      if (previewController) fetchOptions.signal = previewController.signal;
+
+      Promise.all([loadPdfLibrary(), fetch(url, fetchOptions)]).then(function (values) {
+        var pdfjs = values[0];
+        var response = values[1];
+        if (token !== previewVersion) return null;
+        if (response.redirected || !response.ok || (response.headers.get('Content-Type') || '').toLowerCase().indexOf('application/pdf') === -1) {
+          throw new Error('Berkas PDF tidak dapat dimuat.');
+        }
+        return response.arrayBuffer().then(function (buffer) { return {pdfjs: pdfjs, buffer: buffer}; });
+      }).then(function (payload) {
+        if (!payload || token !== previewVersion) return null;
+        pdfLoadingTask = payload.pdfjs.getDocument({
+          data: new Uint8Array(payload.buffer),
+          isEvalSupported: false,
+          useSystemFonts: true,
+          useWasm: false,
+          useWorkerFetch: false
+        });
+        return pdfLoadingTask.promise;
+      }).then(function (documentHandle) {
+        if (!documentHandle || token !== previewVersion) return;
+        pdfDocument = documentHandle;
+        preparePdfPages(documentHandle, token);
+      }).catch(function (reason) {
+        if (reason && reason.name === 'AbortError') return;
+        showError('PDF belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.', token);
+      });
+    }
+
     function close() {
       if (modal.hidden) return;
       modal.hidden = true;
       modal.setAttribute('aria-hidden', 'true');
       document.body.classList.remove('community-v22-attachment-open');
-      if (image) { image.hidden = true; image.removeAttribute('src'); }
-      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
-      if (error) error.hidden = true;
+      resetPreview();
       var focus = previousFocus;
       previousFocus = null;
       if (focus && typeof focus.focus === 'function') focus.focus();
@@ -524,31 +696,59 @@
       previousFocus = document.activeElement;
       var name = trigger.getAttribute('data-attachment-name') || 'Lampiran pengumuman';
       var mime = (trigger.getAttribute('data-attachment-mime') || '').toLowerCase();
+      var token = resetPreview();
       if (title) title.textContent = name;
       if (error) error.hidden = true;
-      if (image) { image.hidden = true; image.removeAttribute('src'); image.alt = name; }
-      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
       if (download) {
         download.href = url + (url.indexOf('?') === -1 ? '?' : '&') + 'download=1';
+        download.download = name.replace(/[\\/\u0000-\u001f\u007f]+/g, '_') || 'lampiran';
+        download.setAttribute('data-download-name', download.download);
         download.setAttribute('aria-label', 'Unduh ' + name);
-      }
-      if (mime.indexOf('image/') === 0 && image) {
-        image.hidden = false;
-        image.src = url;
-      } else if (mime === 'application/pdf' && frame) {
-        frame.hidden = false;
-        frame.src = url;
-      } else {
-        showError();
       }
       modal.hidden = false;
       modal.setAttribute('aria-hidden', 'false');
       document.body.classList.add('community-v22-attachment-open');
+      if (mime.indexOf('image/') === 0 && image) {
+        image.alt = name;
+        image.setAttribute('data-preview-token', String(token));
+        image.hidden = false;
+        image.src = url;
+      } else if (mime === 'application/pdf') {
+        window.requestAnimationFrame(function () { renderPdf(url, token); });
+      } else {
+        showError('Jenis lampiran ini belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.', token);
+      }
       var closeButton = modal.querySelector('.community-v22-attachment-close');
       if (closeButton) window.setTimeout(function () { closeButton.focus(); }, 20);
     }
 
-    if (image) image.addEventListener('error', showError);
+    if (image) image.addEventListener('error', function () {
+      var imageToken = parseInt(image.getAttribute('data-preview-token'), 10);
+      if (!isNaN(imageToken)) showError('Gambar belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.', imageToken);
+    });
+    if (download) download.addEventListener('click', function (event) {
+      if (download.getAttribute('aria-busy') === 'true') {
+        event.preventDefault();
+        return;
+      }
+      var icon = download.querySelector('i');
+      var label = download.querySelector('span');
+      download.setAttribute('aria-busy', 'true');
+      download.setAttribute('aria-disabled', 'true');
+      download.classList.add('is-loading');
+      if (icon) icon.className = 'fa fa-spinner fa-spin';
+      if (label) label.textContent = 'Mengunduh…';
+      // Keep the browser's native, same-origin download navigation. It retains
+      // the user's click gesture in installed Android PWAs, whereas a delayed
+      // Blob click can be blocked after an asynchronous fetch completes.
+      window.setTimeout(function () {
+        download.removeAttribute('aria-busy');
+        download.removeAttribute('aria-disabled');
+        download.classList.remove('is-loading');
+        if (icon) icon.className = 'fa fa-download';
+        if (label) label.textContent = 'Unduh';
+      }, 2500);
+    });
     modal.querySelectorAll('[data-announcement-attachment-close]').forEach(function (button) {
       button.addEventListener('click', function (event) { event.preventDefault(); close(); });
     });
