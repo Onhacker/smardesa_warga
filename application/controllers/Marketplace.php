@@ -98,11 +98,23 @@ class Marketplace extends Public_Controller
         $viewer = is_array($this->currentUser) ? $this->currentUser : array();
         $product = $this->marketplace->product($id, $viewer, TRUE);
         if (!$product) show_404();
-        $related = $this->marketplace->products($viewer, array('category_id' => $product['category_id'], 'per_page' => 4, 'public_all' => TRUE, 'skip_total' => TRUE));
+        // Fetch one extra row because the current product is removed before
+        // rendering. This still keeps the detail request light while allowing
+        // the related rail to show up to four other products. If a legacy row
+        // has no category, leave the rail empty instead of mixing categories.
+        $categoryId = (int) ($product['category_id'] ?? 0);
+        $related = $categoryId > 0
+            ? $this->marketplace->products($viewer, array('category_id' => $categoryId, 'per_page' => 5, 'public_all' => TRUE, 'skip_total' => TRUE))
+            : array('items' => array());
+        $relatedItems = isset($related['items']) && is_array($related['items']) ? $related['items'] : array();
+        $relatedItems = array_values(array_filter($relatedItems, function ($item) use ($product) {
+            return is_array($item) && (string) ($item['id'] ?? '') !== (string) ($product['id'] ?? '');
+        }));
+        $relatedItems = array_slice($relatedItems, 0, 4);
         $this->render('marketplace/product', array(
             'pageTitle' => (string) $product['name'],
             'product' => $product,
-            'related' => array_values(array_filter($related['items'], function ($item) use ($product) { return (string) $item['id'] !== (string) $product['id']; })),
+            'related' => $relatedItems,
             'canManage' => $this->currentUser ? $this->marketplace->can_manage($this->currentUser) : FALSE,
             'showBackButton' => TRUE,
             'backUrl' => site_url('pasar')

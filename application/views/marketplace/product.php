@@ -56,6 +56,7 @@ $ratingCount = max(0, (int) ($product['rating_count'] ?? 0));
 $ratingRounded = $ratingCount > 0 ? (int) round($ratingAverage) : 0;
 $reviews = isset($product['reviews']) && is_array($product['reviews']) ? $product['reviews'] : array();
 $productId = (string) ($product['id'] ?? '');
+$relatedProducts = isset($related) && is_array($related) ? array_slice(array_values($related), 0, 4) : array();
 ?>
 
 <div class="marketplace-page marketplace-product-page">
@@ -69,7 +70,7 @@ $productId = (string) ($product['id'] ?? '');
     <section class="card card-style market-product-info-card" aria-labelledby="market-product-title">
         <div class="content">
             <span class="market-product-category"><i class="fa fa-tag" aria-hidden="true"></i><?= e($category) ?></span>
-            <h1 id="market-product-title" title="<?= e($product['name'] ?? 'Produk warga') ?>"><?= e($product['name'] ?? 'Produk warga') ?></h1>
+            <h1 id="market-product-title" class="market-product-detail-title" title="<?= e($product['name'] ?? 'Produk warga') ?>"><?= e($product['name'] ?? 'Produk warga') ?></h1>
             <p class="market-product-detail-description"><?= e($description !== '' ? $description : 'Produk pilihan warga dari ' . ($institutionLower ?? 'kampung') . '.') ?></p>
             <div class="market-product-detail-meta">
                 <strong><?= e($priceLabel) ?></strong>
@@ -111,6 +112,23 @@ $productId = (string) ($product['id'] ?? '');
             </div>
         </div>
     </section>
+
+    <?php if ($relatedProducts): ?>
+        <section class="market-related-products" aria-labelledby="market-related-products-title">
+            <div class="market-section-heading market-related-heading">
+                <div>
+                    <p class="market-eyebrow market-eyebrow-blue">PRODUK LAINNYA</p>
+                    <h2 id="market-related-products-title">Produk terkait</h2>
+                </div>
+                <span class="market-related-hint">Geser untuk melihat</span>
+            </div>
+            <div class="market-related-slider" role="region" tabindex="0" aria-label="Produk terkait, geser horizontal untuk melihat lebih banyak">
+                <div class="market-related-track">
+                    <?php $this->load->view('marketplace/product_cards', array('products' => $relatedProducts, 'eagerFirst' => FALSE)); ?>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
 
 </div>
 <?php $this->load->view('marketplace/contact_modal', array(
