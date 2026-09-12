@@ -9,18 +9,41 @@ $listingFilters = isset($listing['filters']) && is_array($listing['filters']) ? 
 $search = trim((string) ($listingFilters['q'] ?? ''));
 $selectedCategory = (string) ($listingFilters['category_id'] ?? '');
 $selectedSort = (string) ($listingFilters['sort'] ?? 'newest');
-$selectedCategoryName = 'Semua produk';
-foreach ($categories as $categoryOption) {
-    if ((string) ($categoryOption['id'] ?? '') === $selectedCategory) {
-        $selectedCategoryName = trim((string) ($categoryOption['name'] ?? ($categoryOption['label'] ?? 'Semua produk')));
+$categoryName = function ($category) {
+    return trim((string) ($category['name'] ?? ($category['label'] ?? '')));
+};
+$categorySlug = function ($category) {
+    return trim((string) ($category['slug'] ?? ''));
+};
+// Keep the most useful categories visible beside the search field. The
+// remaining active categories are available from the lazy "Lihat semua"
+// dialog, so the first paint stays compact even when an administrator adds
+// many categories later.
+$quickCategories = array();
+$quickSlugs = array('makanan-minuman', 'hasil-tani', 'kerajinan', 'jasa', 'lainnya');
+$usedCategoryIds = array();
+foreach ($quickSlugs as $preferredSlug) {
+    foreach ($categories as $categoryOption) {
+        $categoryId = (string) ($categoryOption['id'] ?? '');
+        if ($categoryId === '' || isset($usedCategoryIds[$categoryId]) || $categorySlug($categoryOption) !== $preferredSlug) continue;
+        $quickCategories[] = $categoryOption;
+        $usedCategoryIds[$categoryId] = TRUE;
         break;
     }
+}
+foreach ($categories as $categoryOption) {
+    if (count($quickCategories) >= 5) break;
+    $categoryId = (string) ($categoryOption['id'] ?? '');
+    if ($categoryId === '' || isset($usedCategoryIds[$categoryId])) continue;
+    $quickCategories[] = $categoryOption;
+    $usedCategoryIds[$categoryId] = TRUE;
 }
 $listingPages = max(1, (int) ($listing['pages'] ?? 1));
 $listingPage = max(1, (int) ($listing['page'] ?? 1));
 $listingTotal = max(0, (int) ($listing['total'] ?? count($products)));
 $listingPerPage = max(1, (int) ($listing['per_page'] ?? 12));
 $ajaxEndpoint = site_url('pasar/data');
+$categoryEndpoint = site_url('pasar/kategori');
 $activeRegency = trim((string) ($currentUser['regency_name'] ?? ($footerVillage['regency_name'] ?? '')));
 if ($activeRegency === '') $activeRegency = trim((string) (getenv('PUBLIC_REGENCY_NAME') ?: (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
 $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRegency, 'UTF-8') : strtoupper($activeRegency);
@@ -32,6 +55,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
      data-market-page="<?= $listingPage ?>"
      data-market-pages="<?= $listingPages ?>"
      data-market-per-page="<?= $listingPerPage ?>"
+     data-market-category-endpoint="<?= e($categoryEndpoint) ?>"
      data-market-initial-load="1"
      data-market-ready="<?= $marketplaceReady ? '1' : '0' ?>">
     <section class="market-hero" aria-labelledby="market-title">
@@ -79,20 +103,77 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
         </section>
     </div>
 
+    <!-- The complete category list is fetched only when a visitor asks for it.
+         The initial catalogue therefore renders just the five quick choices. -->
+    <div class="market-category-modal" id="market-category-modal" data-market-category-modal hidden aria-hidden="true">
+        <button type="button" class="market-category-backdrop" data-market-category-close aria-label="Tutup daftar kategori"></button>
+        <section class="market-category-dialog" role="dialog" aria-modal="true" aria-labelledby="market-category-title" aria-describedby="market-category-description">
+            <header class="market-category-dialog-head">
+                <div>
+                    <p class="market-eyebrow market-eyebrow-blue">KATEGORI PRODUK</p>
+                    <h2 id="market-category-title">Pilih kategori</h2>
+                    <small id="market-category-description">Temukan produk sesuai kebutuhan Anda.</small>
+                </div>
+                <button type="button" class="market-category-close" data-market-category-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+            </header>
+            <div class="market-category-dialog-scroll">
+                <div class="market-category-loading" data-market-category-loading role="status" aria-live="polite" hidden>
+                    <span class="market-category-spinner" aria-hidden="true"></span>
+                    <span>Memuat kategori…</span>
+                </div>
+                <div class="market-category-error" data-market-category-error role="alert" hidden>
+                    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                    <span data-market-category-error-message>Kategori belum dapat dimuat.</span>
+                    <button type="button" data-market-category-retry>Coba lagi</button>
+                </div>
+                <div class="market-all-category-list" data-market-category-list role="list" aria-label="Semua kategori" hidden></div>
+            </div>
+        </section>
+    </div>
+
     <div class="market-filter-status" data-market-filter-status<?= $search === '' ? ' hidden' : '' ?>>
         <span><i class="fa fa-search" aria-hidden="true"></i> Hasil untuk “<strong data-market-query-label><?= e($search) ?></strong>”</span>
         <button type="button" data-market-query-clear>Hapus</button>
     </div>
 
-    <section class="market-products" aria-labelledby="market-products-title">
-        <div class="market-section-heading market-products-heading">
-            <div><h2 id="market-products-title" data-market-products-title><?= e($selectedCategoryName) ?></h2></div>
-            <div class="market-products-heading-actions">
-                <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
-                <button type="button" class="market-search-trigger" data-market-search-open aria-label="Cari, filter, dan urutkan produk" aria-haspopup="dialog" aria-controls="market-search-modal">
-                    <i class="fa fa-search" aria-hidden="true"></i>
+    <section class="market-products" aria-label="Katalog produk Pasar Dapulik">
+        <form class="market-inline-search" data-market-inline-search-form role="search" action="<?= e(site_url('pasar')) ?>" method="get">
+            <label class="market-inline-search-field" for="market-inline-search-input">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <span class="sr-only">Cari produk</span>
+                <input type="search" id="market-inline-search-input" name="q" value="<?= e($search) ?>" placeholder="Cari produk…" autocomplete="off" data-market-query-field>
+            </label>
+            <button type="button" class="market-search-trigger market-inline-filter" data-market-search-open aria-label="Buka filter produk" aria-haspopup="dialog" aria-controls="market-search-modal">
+                <i class="fa fa-filter" aria-hidden="true"></i>
+            </button>
+        </form>
+
+        <div class="market-category-shortcuts" data-market-category-shortcuts role="list" aria-label="Kategori pilihan">
+            <?php foreach ($quickCategories as $quickCategory): ?>
+                <?php
+                $quickId = (string) ($quickCategory['id'] ?? '');
+                $quickSlug = $categorySlug($quickCategory);
+                $quickLabel = $categoryName($quickCategory);
+                $quickIcon = 'fa-tags';
+                if ($quickSlug === 'makanan-minuman') $quickIcon = 'fa-utensils';
+                elseif ($quickSlug === 'hasil-tani') $quickIcon = 'fa-leaf';
+                elseif ($quickSlug === 'peternakan-perikanan') $quickIcon = 'fa-paw';
+                elseif ($quickSlug === 'kerajinan') $quickIcon = 'fa-palette';
+                elseif ($quickSlug === 'jasa') $quickIcon = 'fa-wrench';
+                ?>
+                <button type="button" class="market-category-chip" data-market-category-quick data-market-category-id="<?= e($quickId) ?>" data-market-category-slug="<?= e($quickSlug) ?>" aria-pressed="<?= $selectedCategory === $quickId ? 'true' : 'false' ?>">
+                    <span class="market-category-chip-icon" aria-hidden="true"><i class="fa <?= e($quickIcon) ?>"></i></span>
+                    <span class="market-category-chip-label"><?= e($quickLabel !== '' ? $quickLabel : 'Kategori') ?></span>
                 </button>
-            </div>
+            <?php endforeach; ?>
+            <button type="button" class="market-category-chip market-category-chip-all" data-market-all-categories-open aria-haspopup="dialog" aria-controls="market-category-modal">
+                <span class="market-category-chip-icon" aria-hidden="true"><i class="fa fa-th-large"></i></span>
+                <span class="market-category-chip-label">Lihat semua</span>
+            </button>
+        </div>
+
+        <div class="market-results-summary" data-market-result-summary>
+            <span class="market-result-note" data-market-result-note><?= $listingTotal ? 'Temukan yang Anda butuhkan' : 'Katalog sedang diperbarui' ?></span>
         </div>
 
         <div class="market-product-grid" data-market-product-list aria-live="polite">

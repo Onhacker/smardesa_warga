@@ -93,6 +93,30 @@ class Marketplace extends Public_Controller
         ));
     }
 
+    /**
+     * Return the active marketplace categories without loading any products.
+     * The Pasar page calls this endpoint only when the visitor opens the
+     * "Lihat semua" dialog, keeping the initial document and first paint small.
+     */
+    public function categories_ajax()
+    {
+        $categories = $this->marketplace->categories(array());
+        $items = array();
+        foreach (is_array($categories) ? $categories : array() as $category) {
+            if (!is_array($category)) continue;
+            $id = (int) ($category['id'] ?? 0);
+            $name = trim((string) ($category['name'] ?? ($category['label'] ?? '')));
+            if ($id < 1 || $name === '') continue;
+            $items[] = array(
+                'id' => $id,
+                'slug' => trim((string) ($category['slug'] ?? '')),
+                'name' => $name,
+                'sort_order' => (int) ($category['sort_order'] ?? 0)
+            );
+        }
+        return $this->json(array('success' => TRUE, 'categories' => $items));
+    }
+
     public function show($id)
     {
         $viewer = is_array($this->currentUser) ? $this->currentUser : array();

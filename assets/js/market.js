@@ -115,6 +115,7 @@
     var categorySelect = root.querySelector('#market-category');
     var sortSelect = root.querySelector('#market-sort');
     var queryField = root.querySelector('[data-market-query-field]');
+    var inlineSearchForm = root.querySelector('[data-market-inline-search-form]');
     var status = root.querySelector('[data-market-filter-status]');
     var queryLabel = root.querySelector('[data-market-query-label]');
     var productsTitle = root.querySelector('[data-market-products-title]');
@@ -123,6 +124,16 @@
     var searchForm = root.querySelector('[data-market-search-form]');
     var modalCategory = root.querySelector('[data-market-modal-category]');
     var modalSort = root.querySelector('[data-market-modal-sort]');
+    var categoryEndpoint = root.getAttribute('data-market-category-endpoint') || '';
+    var categoryModal = root.querySelector('[data-market-category-modal]');
+    var categoryList = root.querySelector('[data-market-category-list]');
+    var categoryLoading = root.querySelector('[data-market-category-loading]');
+    var categoryError = root.querySelector('[data-market-category-error]');
+    var categoryErrorMessage = root.querySelector('[data-market-category-error-message]');
+    var categoryRetry = root.querySelector('[data-market-category-retry]');
+    var categoryRequest = null;
+    var categoryLoaded = false;
+    var categoryLastFocus = null;
     var lastFocus = null;
     if (!list || !endpoint) return;
 
@@ -141,6 +152,145 @@
     };
     state.hasMore = state.page < state.pages;
     root.classList.add('is-ajax');
+
+    function categoryIconClass(slug) {
+      var key = String(slug || '').toLowerCase();
+      if (key === 'makanan-minuman') return 'fa-utensils';
+      if (key === 'hasil-tani' || key === 'tanaman-bibit') return 'fa-leaf';
+      if (key === 'kerajinan' || key === 'pakaian-aksesori') return 'fa-palette';
+      if (key === 'jasa') return 'fa-wrench';
+      if (key === 'peternakan-perikanan') return 'fa-paw';
+      if (key === 'elektronik-aksesori') return 'fa-mobile-alt';
+      if (key === 'pendidikan-buku') return 'fa-book';
+      if (key === 'peralatan-bahan-bangunan') return 'fa-hammer';
+      if (key === 'otomotif-suku-cadang') return 'fa-car';
+      if (key === 'perawatan-pribadi') return 'fa-heart';
+      return 'fa-tags';
+    }
+
+    function syncQuickCategories() {
+      root.querySelectorAll('[data-market-category-quick]').forEach(function (button) {
+        var active = String(button.getAttribute('data-market-category-id') || '') === String(state.category || '');
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      if (categoryList) categoryList.querySelectorAll('[data-market-category-option]').forEach(function (button) {
+        button.setAttribute('aria-pressed', String(button.getAttribute('data-market-category-id') || '') === String(state.category || '') ? 'true' : 'false');
+      });
+    }
+
+    function setCategoryModalLoading(active) {
+      if (categoryLoading) categoryLoading.hidden = !active;
+      if (categoryList && active) categoryList.hidden = true;
+      if (categoryError && active) categoryError.hidden = true;
+      if (categoryModal) categoryModal.setAttribute('aria-busy', active ? 'true' : 'false');
+    }
+
+    function renderAllCategories(categories) {
+      if (!categoryList) return;
+      categoryList.innerHTML = '';
+      if (!Array.isArray(categories) || !categories.length) {
+        throw new Error('Belum ada kategori yang tersedia.');
+      }
+      categories.forEach(function (category) {
+        if (!category || category.id === undefined || category.id === null) return;
+        var id = String(category.id);
+        var slug = String(category.slug || '');
+        var name = String(category.name || category.label || 'Kategori').trim();
+        if (!name) name = 'Kategori';
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'market-all-category-item';
+        item.setAttribute('data-market-category-option', '');
+        item.setAttribute('data-market-category-id', id);
+        item.setAttribute('data-market-category-slug', slug);
+        item.setAttribute('aria-pressed', String(state.category || '') === id ? 'true' : 'false');
+
+        var icon = document.createElement('span');
+        icon.className = 'market-all-category-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        var iconElement = document.createElement('i');
+        iconElement.className = 'fa ' + categoryIconClass(slug);
+        icon.appendChild(iconElement);
+
+        var label = document.createElement('span');
+        label.className = 'market-all-category-label';
+        label.textContent = name;
+        item.appendChild(icon);
+        item.appendChild(label);
+        categoryList.appendChild(item);
+      });
+      if (!categoryList.children.length) throw new Error('Belum ada kategori yang tersedia.');
+      categoryList.hidden = false;
+      if (categoryError) categoryError.hidden = true;
+      if (categoryLoading) categoryLoading.hidden = true;
+      if (categoryModal) categoryModal.setAttribute('aria-busy', 'false');
+    }
+
+    function loadAllCategories() {
+      if (categoryLoaded) return Promise.resolve();
+      if (categoryRequest) return categoryRequest;
+      if (!categoryEndpoint || typeof window.fetch !== 'function') {
+        if (categoryError) categoryError.hidden = false;
+        if (categoryErrorMessage) categoryErrorMessage.textContent = 'Kategori belum dapat dimuat.';
+        return Promise.resolve();
+      }
+      setCategoryModalLoading(true);
+      categoryRequest = window.fetch(categoryEndpoint, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+      }).then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      }).then(function (data) {
+        if (!data || data.success !== true || !Array.isArray(data.categories)) {
+          throw new Error('Respons kategori tidak valid.');
+        }
+        renderAllCategories(data.categories);
+        categoryLoaded = true;
+      }).catch(function (error) {
+        if (categoryLoading) categoryLoading.hidden = true;
+        if (categoryList) categoryList.hidden = true;
+        if (categoryError) categoryError.hidden = false;
+        if (categoryErrorMessage) categoryErrorMessage.textContent = error && error.message && error.message.indexOf('HTTP') === 0
+          ? 'Kategori belum dapat dimuat. Periksa koneksi lalu coba lagi.'
+          : (error && error.message ? error.message : 'Kategori belum dapat dimuat.');
+      }).then(function () {
+        categoryRequest = null;
+      });
+      return categoryRequest;
+    }
+
+    function openCategories(trigger) {
+      if (!categoryModal) return;
+      categoryLastFocus = trigger || document.activeElement;
+      categoryModal.hidden = false;
+      categoryModal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('market-category-open');
+      loadAllCategories();
+      var closeButton = categoryModal.querySelector('[data-market-category-close]');
+      if (closeButton) window.setTimeout(function () { closeButton.focus(); }, 20);
+    }
+
+    function closeCategories() {
+      if (!categoryModal || categoryModal.hidden) return;
+      categoryModal.hidden = true;
+      categoryModal.setAttribute('aria-hidden', 'true');
+      categoryModal.removeAttribute('aria-busy');
+      document.body.classList.remove('market-category-open');
+      if (categoryLastFocus && typeof categoryLastFocus.focus === 'function') categoryLastFocus.focus();
+      categoryLastFocus = null;
+    }
+
+    function chooseCategory(id) {
+      state.category = String(id || '');
+      if (categorySelect) categorySelect.value = state.category;
+      syncStatus();
+      syncCategoryTitle();
+      syncQuickCategories();
+      requestCatalog(1, false, true);
+    }
 
     function updateCount(total) {
       if (count) count.textContent = String(Math.max(0, parseInt(total, 10) || 0)) + ' produk';
@@ -162,7 +312,7 @@
 
     function syncCategoryTitle() {
       if (!productsTitle) return;
-      var title = 'Semua produk';
+      var title = '';
       if (categorySelect && categorySelect.value) {
         var option = categorySelect.options[categorySelect.selectedIndex];
         if (option && option.textContent.trim()) title = option.textContent.trim();
@@ -283,12 +433,39 @@
 
     root.querySelectorAll('[data-market-search-open]').forEach(function (button) { button.addEventListener('click', openSearch); });
     root.querySelectorAll('[data-market-search-close]').forEach(function (button) { button.addEventListener('click', closeSearch); });
+    root.querySelectorAll('[data-market-all-categories-open]').forEach(function (button) {
+      button.addEventListener('click', function () { openCategories(button); });
+    });
+    root.querySelectorAll('[data-market-category-quick]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var id = String(button.getAttribute('data-market-category-id') || '');
+        if (id && id === String(state.category || '')) id = '';
+        chooseCategory(id);
+      });
+    });
+    if (categoryModal) {
+      categoryModal.querySelectorAll('[data-market-category-close]').forEach(function (button) {
+        button.addEventListener('click', closeCategories);
+      });
+      categoryModal.addEventListener('click', function (event) {
+        var option = event.target.closest ? event.target.closest('[data-market-category-option]') : null;
+        if (!option || !categoryModal.contains(option)) return;
+        event.preventDefault();
+        chooseCategory(option.getAttribute('data-market-category-id') || '');
+        closeCategories();
+      });
+    }
+    if (categoryRetry) categoryRetry.addEventListener('click', function () {
+      categoryLoaded = false;
+      loadAllCategories();
+    });
     root.querySelectorAll('[data-market-auto-filter]').forEach(function (select) {
       select.addEventListener('change', function () {
         state.category = categorySelect ? categorySelect.value : '';
         state.sort = sortSelect ? sortSelect.value : 'newest';
         syncStatus();
         syncCategoryTitle();
+        syncQuickCategories();
         requestCatalog(1, false, true);
       });
     });
@@ -301,6 +478,7 @@
         if (sortSelect) sortSelect.value = 'newest';
         syncStatus();
         syncCategoryTitle();
+        syncQuickCategories();
         closeSearch();
         requestCatalog(1, false, true);
       });
@@ -314,6 +492,7 @@
         if (sortSelect) sortSelect.value = 'newest';
         syncStatus();
         syncCategoryTitle();
+        syncQuickCategories();
         closeSearch();
         requestCatalog(1, false, true);
       });
@@ -325,6 +504,27 @@
       closeSearch();
       requestCatalog(1, false, true);
     });
+    if (inlineSearchForm) inlineSearchForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      state.query = queryField ? queryField.value.trim() : '';
+      syncStatus();
+      requestCatalog(1, false, true);
+    });
+    if (queryField) {
+      var liveInlineSearch = debounce(function () {
+        state.query = queryField.value.trim();
+        syncStatus();
+        requestCatalog(1, false, true);
+      }, 350);
+      queryField.addEventListener('input', liveInlineSearch);
+      queryField.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        state.query = queryField.value.trim();
+        syncStatus();
+        requestCatalog(1, false, true);
+      });
+    }
     if (searchInput) {
       var liveSearch = debounce(function () {
         state.query = searchInput.value.trim();
@@ -335,6 +535,24 @@
     }
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && modal && !modal.hidden) closeSearch();
+      if (event.key === 'Escape' && categoryModal && !categoryModal.hidden) {
+        event.preventDefault();
+        closeCategories();
+        return;
+      }
+      if (event.key !== 'Tab' || !categoryModal || categoryModal.hidden) return;
+      var categoryFocusables = Array.prototype.slice.call(categoryModal.querySelectorAll('button:not(.market-category-backdrop):not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'))
+        .filter(function (item) { return !item.hidden && item.offsetParent !== null; });
+      if (!categoryFocusables.length) return;
+      var categoryFirst = categoryFocusables[0];
+      var categoryLast = categoryFocusables[categoryFocusables.length - 1];
+      if (event.shiftKey && document.activeElement === categoryFirst) {
+        event.preventDefault();
+        categoryLast.focus();
+      } else if (!event.shiftKey && document.activeElement === categoryLast) {
+        event.preventDefault();
+        categoryFirst.focus();
+      }
     });
     if (pagination) pagination.querySelectorAll('[data-market-page-link]').forEach(function (link) {
       link.addEventListener('click', function (event) {
@@ -363,6 +581,7 @@
     }
     syncStatus();
     syncCategoryTitle();
+    syncQuickCategories();
     syncPagination();
     updateCount(parseInt((count && count.textContent) || '0', 10));
     if (sentinel) setHidden(sentinel, !state.hasMore);

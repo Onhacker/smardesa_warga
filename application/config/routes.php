@@ -22,6 +22,7 @@ $route['kontak'] = 'community/contact';
 $route['pasar'] = 'marketplace/index';
 $route['pasar-digital'] = 'marketplace/index';
 $route['pasar/data'] = 'marketplace/list_ajax';
+$route['pasar/kategori'] = 'marketplace/categories_ajax';
 $route['pasar/buat'] = 'marketplace/create';
 $route['pasar/simpan'] = 'marketplace/store';
 $route['pasar/tokoku'] = 'marketplace/tokoku';
