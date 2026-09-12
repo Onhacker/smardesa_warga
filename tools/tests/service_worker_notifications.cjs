@@ -169,7 +169,7 @@ async function test(label, callback) {
 
     assert.equal(instance.calls.shown.length, 1);
     assert.equal(instance.calls.shown[0].options.icon, 'https://warga.example/assets/pwa/icon-192.png');
-    assert.equal(instance.calls.shown[0].options.badge, 'https://warga.example/assets/pwa/notification-badge.png');
+    assert.equal(instance.calls.shown[0].options.badge, 'https://warga.example/assets/pwa/notification-badge.png?v=20260913');
     assert.equal(
       instance.calls.shown[0].options.data.url,
       'https://warga.example/notifikasi/buka/66666666-6666-4666-8666-666666666666'

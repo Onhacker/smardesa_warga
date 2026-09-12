@@ -15,7 +15,7 @@ const notificationFallbackUrl = new URL('notifikasi', scopeUrl);
 const precache = [
   'offline.html',
   'assets/pwa/icon-192.png',
-  'assets/pwa/notification-badge.png'
+  'assets/pwa/notification-badge.png?v=20260913'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {
@@ -183,7 +183,7 @@ self.addEventListener('push', function (event) {
     icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
     // Android renders `badge` as a monochrome alpha mask. Never use the
     // opaque, full-colour launcher icon here or it becomes a solid circle.
-    badge: new URL('assets/pwa/notification-badge.png',scopeUrl).href,
+    badge: new URL('assets/pwa/notification-badge.png?v=20260913',scopeUrl).href,
     tag: data.tag || 'sdw-notification', renotify: true, silent: false,
     vibrate: [200,100,200],
     navigate: url.href,
