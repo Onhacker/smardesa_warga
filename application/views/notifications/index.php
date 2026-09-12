@@ -24,7 +24,9 @@
 
     <div class="warga-paged-list warga-notification-paged-list" data-paged-list>
         <div class="warga-notification-toolbar">
-            <form class="warga-notification-actions" method="post" action="<?= site_url('notifikasi/baca') ?>"><?= csrf_field() ?><button class="community-button is-secondary"><i class="fa fa-check-double" aria-hidden="true"></i><span>Tandai semua dibaca</span></button></form>
+            <form class="warga-notification-actions" method="post" action="<?= site_url('notifikasi/baca') ?>" data-notification-mark-all data-confirm="Semua pemberitahuan yang belum dibaca akan ditandai sebagai sudah dibaca. Lanjutkan?" data-confirm-title="Tandai semua dibaca?" data-confirm-button="Ya" data-confirm-tone="info">
+                <?= csrf_field() ?><button type="submit" class="community-button is-secondary"><i class="fa fa-check-double" aria-hidden="true"></i><span>Tandai semua dibaca</span></button><span class="visually-hidden" data-notification-mark-all-status role="status" aria-live="polite" aria-atomic="true"></span>
+            </form>
             <button type="button" class="warga-notification-search-trigger" data-notification-search-open aria-label="Cari dan filter pemberitahuan" aria-haspopup="dialog" aria-controls="warga-notification-search-modal"><i class="fa fa-search" aria-hidden="true"></i></button>
         </div>
 

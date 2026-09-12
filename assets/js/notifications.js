@@ -284,6 +284,62 @@
       element.setAttribute('aria-hidden', unread > 0 ? 'false' : 'true');
     });
   }
+
+  function markVisibleNotificationsRead() {
+    document.querySelectorAll('[data-notification-open].is-unread').forEach(function (link) {
+      link.classList.remove('is-unread');
+      link.classList.add('is-read');
+      var state = link.querySelector('.warga-notification-state');
+      if (state) {
+        state.textContent = 'Sudah dibaca';
+        state.classList.remove('is-danger');
+        state.classList.add('is-success');
+      }
+      var label = link.getAttribute('aria-label');
+      if (label) link.setAttribute('aria-label', label.replace(/^Belum dibaca:\s*/i, 'Sudah dibaca: '));
+    });
+  }
+
+  function initMarkAllRead() {
+    var forms = Array.prototype.slice.call(document.querySelectorAll('[data-notification-mark-all]'));
+    if (!forms.length || !window.fetch || !isAuthenticated) return;
+    forms.forEach(function (form) {
+      var button = form.querySelector('button[type="submit"]');
+      if (!button) return;
+      var icon = button.querySelector('i');
+      var label = button.querySelector('span:not([data-notification-mark-all-status])');
+      var status = form.querySelector('[data-notification-mark-all-status]');
+      var busy = false;
+      var defaultLabel = label ? label.textContent : 'Tandai semua dibaca';
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (busy) return;
+        busy = true;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        button.setAttribute('aria-disabled', 'true');
+        if (icon) icon.className = 'fa fa-spinner fa-spin';
+        if (label) label.textContent = 'Memproses…';
+        if (status) status.textContent = '';
+
+        post('notifikasi/baca', {}).then(function (data) {
+          setUnreadCount(data && data.unread);
+          markVisibleNotificationsRead();
+          if (status) status.textContent = (data && data.message) || 'Semua pemberitahuan sudah dibaca.';
+        }).catch(function (error) {
+          if (status) status.textContent = error.message || 'Pemberitahuan belum dapat diperbarui.';
+        }).finally(function () {
+          busy = false;
+          button.disabled = false;
+          button.removeAttribute('aria-busy');
+          button.removeAttribute('aria-disabled');
+          if (icon) icon.className = 'fa fa-check-double';
+          if (label) label.textContent = defaultLabel;
+        });
+      });
+    });
+  }
   var pending=false, stopped=!isAuthenticated, timer;
   async function poll() {
     if (pending || stopped || document.hidden || !navigator.onLine) return;
@@ -303,6 +359,8 @@
     window.addEventListener('online',schedule);
     schedule();
   }
+
+  initMarkAllRead();
 
   // Per-item read state is persisted by /notifikasi/buka/{id}. Update the
   // visible count immediately while navigation follows that server endpoint.

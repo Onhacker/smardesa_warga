@@ -82,10 +82,28 @@ class Notifications extends Public_Controller
 
     public function read()
     {
-        $this->require_authentication();
-        $this->require_post();
+        // The notification page uses an AJAX mutation so the current list,
+        // badge, and read-state labels can be updated in place. Keep the
+        // regular POST fallback for clients that do not run JavaScript.
+        $isAjax = $this->input->is_ajax_request()
+            || stripos((string) $this->input->get_request_header('Accept'), 'application/json') !== FALSE;
+        if ($isAjax) {
+            if (!$this->require_json_authentication()) return;
+            $this->require_post();
+        } else {
+            $this->require_authentication();
+            $this->require_post();
+        }
         $this->load->model('Notification_model');
         $this->Notification_model->read($this->currentUser['id']);
+        if ($isAjax) {
+            $this->output->set_header('Cache-Control: no-store, private');
+            return $this->json(array(
+                'success' => TRUE,
+                'unread' => $this->Notification_model->unread($this->currentUser['id']),
+                'message' => 'Semua pemberitahuan sudah ditandai sebagai sudah dibaca.'
+            ));
+        }
         redirect('notifikasi');
     }
 
