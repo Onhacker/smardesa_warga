@@ -1414,3 +1414,71 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   #page .community-v22-notification-page .community-v22-page-hero-icon { flex-basis: 42px; width: 42px; height: 42px; }
   #page .community-v22-notification-page .community-v22-page-hero h1 { font-size: 21px; }
 }
+
+/* Announcement page hero: keep the heading to two concise lines. The page
+ * title is followed by a short subtitle; the village scope remains visible
+ * on each announcement card below. */
+#page .community-v22-announcement-page .community-v22-announcement-page-hero {
+  min-height: 104px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+#page .community-v22-announcement-page .community-v22-announcement-page-hero-icon {
+  flex-basis: 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 21px;
+}
+#page .community-v22-announcement-page .community-v22-announcement-page-hero h1 {
+  margin: 0 0 3px;
+  font-size: clamp(24px, 4.6vw, 32px);
+  line-height: 1.05;
+}
+#page .community-v22-announcement-page .community-v22-announcement-page-hero p.community-v22-hero-subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.25;
+  opacity: .84;
+}
+#page .community-v22-announcement-page .community-v22-announcement-card-copy > strong {
+  font-size: clamp(20px, 3.5vw, 25px);
+  line-height: 1.16;
+}
+
+@media (max-width: 480px) {
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero {
+    min-height: 92px;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+  }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero-icon {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    font-size: 19px;
+  }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero h1 { font-size: 23px; }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero p.community-v22-hero-subtitle { font-size: 12px; }
+  #page .community-v22-announcement-page .community-v22-announcement-card-copy > strong { font-size: 20px; }
+}
+
+@media (max-width: 360px) {
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero {
+    min-height: 84px;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    font-size: 17px;
+  }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero h1 { font-size: 21px; }
+  #page .community-v22-announcement-page .community-v22-announcement-page-hero p.community-v22-hero-subtitle { font-size: 11px; }
+  #page .community-v22-announcement-page .community-v22-announcement-card-copy > strong { font-size: 19px; }
+}

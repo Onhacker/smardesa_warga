@@ -37,12 +37,11 @@ $announcementAttachment = static function (array $item) {
 };
 ?>
 <div class="warga-community community-v22-page community-v22-announcement-page">
-    <header class="community-heading community-v22-page-hero" aria-labelledby="announcement-page-title">
+    <header class="community-heading community-v22-page-hero community-v22-announcement-page-hero" aria-labelledby="announcement-page-title">
         <div class="community-v22-page-hero-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>
         <div>
-            <p class="community-v22-eyebrow">Pengumuman <?= e($announcementScope) ?></p>
             <h1 id="announcement-page-title">Pengumuman</h1>
-            <p><?= e($announcementAreaName) ?> <span aria-hidden="true">·</span> Informasi terbaru untuk warga</p>
+            <p class="community-v22-hero-subtitle">Informasi Terbaru</p>
         </div>
     </header>
 
