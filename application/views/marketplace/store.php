@@ -9,7 +9,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
 
 <div class="marketplace-page marketplace-form-page marketplace-store-page">
     <section class="market-hero market-hero-compact" aria-labelledby="market-store-form-title">
-        <div class="market-hero-copy"><p class="market-eyebrow color-white">PASAR DIGITAL</p><h1 id="market-store-form-title">Identitas Toko</h1><span class="color-white">Tampilkan informasi usaha agar warga mudah menghubungi Anda.</span></div>
+        <div class="market-hero-copy"><p class="market-eyebrow color-white">PASAR DAPULIK</p><h1 id="market-store-form-title">Identitas Toko</h1><span class="color-white">Tampilkan informasi usaha agar warga mudah menghubungi Anda.</span></div>
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store-alt color-white"></i></span>
     </section>
 

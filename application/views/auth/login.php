@@ -14,7 +14,7 @@ $loginBrand = 'SI DAPULIK';
     <title><?= e($pageTitle) ?></title>
     <?php
     $shareTitle = 'SI DAPULIK ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
-    $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.';
+    $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
     $shareUrl = base_url();
     $shareImage = warga_asset_url('assets/pwa/share-preview.png');
     $this->load->view('layouts/social_meta', array(

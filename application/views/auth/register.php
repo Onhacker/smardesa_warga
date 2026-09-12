@@ -16,7 +16,7 @@ $registrationErrorHtml = !empty($error)
 $registerInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
 $registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
 $registerShareTitle = 'SI DAPULIK ' . $registerArea . ' — Layanan Digital Warga';
-$registerShareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.';
+$registerShareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
 $registerShareUrl = base_url();
 $registerShareImage = warga_asset_url('assets/pwa/share-preview.png');
 $registerFooterVillage = array('name' => $registerArea, 'institution' => $registerInstitution, 'contact' => array());

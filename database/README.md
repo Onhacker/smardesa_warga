@@ -25,17 +25,17 @@ Jalankan `migrations/010_sync_aggregate_keys.sql` untuk memperpanjang kunci kata
 
 Jalankan `migrations/012_citizen_identity_details.sql` untuk menambahkan kolom terenkripsi NIK dan No. KK pada profil warga. Kolom ini hanya dibaca pada halaman akun milik warga yang sedang masuk; direktori penduduk dan riwayat sinkronisasi tetap hanya menyimpan HMAC.
 
-Setelah seluruh migrasi sebelumnya selesai (termasuk `migrations/015_sync_integrity.sql`), jalankan `migrations/016_marketplace.sql` untuk mengaktifkan Pasar Digital: kategori, identitas toko per pengguna, produk, dan metadata gambar privat. Gambar produk disimpan pada `PRIVATE_STORAGE_PATH`, bukan di dalam `public_html`.
+Setelah seluruh migrasi sebelumnya selesai (termasuk `migrations/015_sync_integrity.sql`), jalankan `migrations/016_marketplace.sql` untuk mengaktifkan Pasar Dapulik: kategori, identitas toko per pengguna, produk, dan metadata gambar privat. Gambar produk disimpan pada `PRIVATE_STORAGE_PATH`, bukan di dalam `public_html`.
 
 Jalankan `migrations/017_marketplace_reviews.sql` setelahnya untuk tabel ulasan, rating, dan
-indeks agregat Pasar Digital. Migration ini wajib dipasang bersama `016_marketplace.sql` sebelum
+indeks agregat Pasar Dapulik. Migration ini wajib dipasang bersama `016_marketplace.sql` sebelum
 fitur rating atau halaman produk dibuka di produksi.
 
 Jalankan `migrations/018_global_nik_uniqueness.sql` setelah data ganda lama diselesaikan. Migrasi ini menambahkan indeks unik global pada direktori penduduk dan profil akun; satu NIK tidak dapat terdaftar pada dua kampung atau dua akun. Migrasi sengaja gagal bila database masih berisi hash NIK ganda, sehingga tidak ada data yang dihapus otomatis.
 
 Untuk dashboard monitoring pada server SmartDesa pusat, jalankan `migrations/019_monitoring_auth.sql`. Migrasi ini menambahkan pencegah replay untuk permintaan server-ke-server. Kredensial monitoring diisi hanya pada `.env` API dan pengaturan API SmartDesa pusat; jangan masukkan ke PWA atau installer desa. Dashboard hanya menerima metrik agregat per kampung, bukan NIK, No. KK, password, isi permohonan, atau dokumen.
 
-Jalankan `migrations/020_announcement_attachments.sql` untuk mengaktifkan lampiran gambar atau PDF pada pengumuman kampung. Setelah itu, jalankan `migrations/021_marketplace_categories.sql` pada database yang sudah memakai Pasar Digital untuk menambahkan kategori produk terbaru. Kedua migrasi idempoten dan aman dijalankan ulang.
+Jalankan `migrations/020_announcement_attachments.sql` untuk mengaktifkan lampiran gambar atau PDF pada pengumuman kampung. Setelah itu, jalankan `migrations/021_marketplace_categories.sql` pada database yang sudah memakai Pasar Dapulik untuk menambahkan kategori produk terbaru. Kedua migrasi idempoten dan aman dijalankan ulang.
 
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 

@@ -1,4 +1,4 @@
--- Pasar Digital. Produk dimiliki oleh kampung/desa asalnya, tetapi produk
+-- Pasar Dapulik. Produk dimiliki oleh kampung/desa asalnya, tetapi produk
 -- berstatus published dapat ditemukan warga dari seluruh wilayah.
 -- Jalankan setelah schema.sql pada database PWA warga.
 -- Migrasi ini aman dijalankan ulang.

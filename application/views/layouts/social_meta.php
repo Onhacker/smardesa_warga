@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $socialTitle = trim((string) ($shareTitle ?? 'SI DAPULIK — Layanan Digital Warga'));
-$socialDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.'));
+$socialDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.'));
 $socialUrl = trim((string) ($shareUrl ?? base_url()));
 $socialImage = trim((string) ($shareImage ?? warga_asset_url('assets/pwa/share-preview.png')));
 $socialImageAlt = trim((string) ($shareImageAlt ?? 'SI DAPULIK, layanan digital warga'));

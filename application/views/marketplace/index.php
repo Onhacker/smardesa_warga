@@ -37,8 +37,8 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
     <section class="market-hero" aria-labelledby="market-title">
         <div class="market-hero-copy">
             <p class="market-eyebrow color-white">KABUPATEN <?= e($activeRegencyUpper) ?></p>
-            <h1 id="market-title">Pasar Digital</h1>
-            <span class="color-white">Temukan produk warga dan dukung usaha lokal.</span>
+            <h1 id="market-title">Pasar Dapulik</h1>
+            <span class="color-white">Temukan produk dan dukung usaha lokal.</span>
             <small class="market-hero-count" data-market-count><?= $listingTotal ? $listingTotal . ' produk' : 'Memuat produk…' ?></small>
         </div>
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-store color-white"></i></span>

@@ -30,7 +30,7 @@ $footerShareTitle = trim((string) ($shareTitle ?? ''));
 // this footer (which already contains the authenticated tenant when present).
 if ($footerBrand !== '') $footerShareTitle = $footerBrand . ' — Layanan Digital Warga';
 if ($footerShareTitle === '') $footerShareTitle = $footerBrand;
-$footerShareDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.'));
+$footerShareDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.'));
 $footerShareMessage = $footerShareTitle . "\n" . $footerShareDescription . "\n\n" . $footerShareUrl;
 $footerWhatsappShare = 'https://wa.me/?text=' . rawurlencode($footerShareMessage);
 $footerFacebookShare = 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode($footerShareUrl);

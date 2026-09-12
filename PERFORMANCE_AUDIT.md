@@ -27,7 +27,7 @@ bergantung pada Brotli/gzip dan cache Hostinger.
 - DDL dan `SHOW INDEX`/`field_exists()` yang sebelumnya berjalan pada request dihapus. Schema
   wajib disiapkan melalui migration sebelum deployment.
 - Ringkasan dashboard memakai satu aggregate SQL, bukan memuat seluruh riwayat permohonan.
-- Query preview Pasar Digital dibatasi empat produk, melewati `COUNT(*)`, dan memakai cache file
+- Query preview Pasar Dapulik dibatasi empat produk, melewati `COUNT(*)`, dan memakai cache file
   45 detik yang diinvalidasi ketika toko/produk/ulasan berubah.
 - Query produk terkait juga melewati total count. Pemeriksaan kesiapan tabel dimemoisasi selama
   satu request.
@@ -50,6 +50,6 @@ bergantung pada Brotli/gzip dan cache Hostinger.
 2. Uji login warga, sekdes, dan kades pada lebar 360, 390, 768, dan 1440 px; pastikan footer,
    menu, tema, slider, dan tidak ada overflow horizontal.
 3. Pastikan migration `016_marketplace.sql` lalu `017_marketplace_reviews.sql` selesai di
-   database produksi sebelum membuka Pasar Digital.
+   database produksi sebelum membuka Pasar Dapulik.
 4. Setelah rsync, cek `service-worker.js`, `assetlinks.json`, URL penghapusan akun, dan header
    cache aset berversi. Tutup tab PWA sekali agar worker baru mengambil alih.

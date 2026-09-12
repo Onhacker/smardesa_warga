@@ -1,4 +1,4 @@
--- Rating dan komentar produk Pasar Digital.
+-- Rating dan komentar produk Pasar Dapulik.
 -- Jalankan setelah migrations/016_marketplace.sql.
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;

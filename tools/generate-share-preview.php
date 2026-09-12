@@ -66,7 +66,7 @@ imagettftext($canvas, 48, 0, 531, 290, $white, $bold, 'untuk Warga');
 imagettftext($canvas, 21, 0, 535, 344, $white, $regular, 'Mudah diakses, aman, dan selalu terhubung.');
 
 $roundedRect($canvas, 531, 389, 1113, 449, 18, imagecolorallocatealpha($canvas, 255, 255, 255, 10));
-imagettftext($canvas, 17, 0, 558, 427, $navy, $bold, 'SURAT  •  PENGADUAN  •  PASAR DIGITAL');
+imagettftext($canvas, 17, 0, 558, 427, $navy, $bold, 'SURAT  •  PENGADUAN  •  PASAR DAPULIK');
 imagettftext($canvas, 16, 0, 535, 505, $sky, $regular, 'warga-smartdesa.mediaverse.co.id');
 
 imagesavealpha($canvas, TRUE);

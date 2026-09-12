@@ -52,7 +52,7 @@ if ($menuRegency === '') $menuRegency = trim((string) (getenv('PUBLIC_AREA_NAME'
 <div class="list-group list-custom-small list-menu warga-menu-list">
     <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn warga-menu-icon is-purple"></i><span>Pengumuman</span><i class="fa fa-angle-right"></i></a>
     <a href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments warga-menu-icon is-amber"></i><span>Pengaduan</span><i class="fa fa-angle-right"></i></a>
-    <a class="<?= nav_is('marketplace') ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store warga-menu-icon is-green"></i><span>Pasar Digital</span><i class="fa fa-angle-right"></i></a>
+    <a class="<?= nav_is('marketplace') ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store warga-menu-icon is-green"></i><span>Pasar Dapulik</span><i class="fa fa-angle-right"></i></a>
     <?php if ($menuIsAuthenticated && $menuCanManageMarketplace): ?><a href="<?= site_url('pasar/tokoku') ?>"><i class="fa fa-store-alt warga-menu-icon is-blue"></i><span>Tokoku</span><i class="fa fa-angle-right"></i></a><?php endif; ?>
     <a href="<?= site_url('kontak') ?>"><i class="fa fa-address-book warga-menu-icon is-teal"></i><span>Kontak <?= e($institutionLabel) ?></span><i class="fa fa-angle-right"></i></a>
     <?php if ($staffMode): ?><a href="<?= site_url('notifikasi') ?>"><i class="fa fa-inbox warga-menu-icon is-red"></i><span>Pemberitahuan</span><i class="fa fa-angle-right"></i></a><?php endif; ?>

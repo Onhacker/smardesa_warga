@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Data access for Pasar Digital.
+ * Data access for Pasar Dapulik.
  *
  * Product management remains scoped to the seller's village, while published
  * products and their contact details form a public, cross-village catalogue.
@@ -166,7 +166,7 @@ class Marketplace_model extends CI_Model
             $this->invalidate_public_preview_cache();
             return array('success' => TRUE, 'id' => $values['id'], 'store' => $this->decorate_store($state['stores'][(string) $userId]));
         }
-        if (!$this->ready()) return array('success' => FALSE, 'message' => 'Fitur Pasar Digital belum diaktifkan pada database. Jalankan migrasi marketplace terlebih dahulu.');
+        if (!$this->ready()) return array('success' => FALSE, 'message' => 'Fitur Pasar Dapulik belum diaktifkan pada database. Jalankan migrasi marketplace terlebih dahulu.');
         $existing = $this->db->where(array('village_id' => $villageId, 'owner_user_id' => $userId))->limit(1)->get('marketplace_stores')->row_array();
         if ($existing) {
             $ok = $this->db->where('id', $existing['id'])->update('marketplace_stores', $values);
@@ -357,7 +357,7 @@ class Marketplace_model extends CI_Model
         if ($name === '' || mb_strlen($name, 'UTF-8') > 180) return array('success' => FALSE, 'message' => 'Nama produk wajib diisi (maksimal 180 karakter).');
         if ($description !== '' && mb_strlen($description, 'UTF-8') > 5000) return array('success' => FALSE, 'message' => 'Deskripsi produk maksimal 5.000 karakter.');
         $prohibitedReason = $this->prohibited_product_reason($name . ' ' . $description);
-        if ($prohibitedReason !== '') return array('success' => FALSE, 'message' => 'Produk tidak dapat diterbitkan karena terindikasi ' . $prohibitedReason . '. Lihat Syarat & Ketentuan Pasar Digital.');
+        if ($prohibitedReason !== '') return array('success' => FALSE, 'message' => 'Produk tidak dapat diterbitkan karena terindikasi ' . $prohibitedReason . '. Lihat Syarat & Ketentuan Pasar Dapulik.');
         if ($categoryId < 1 || !$this->category($categoryId)) return array('success' => FALSE, 'message' => 'Pilih kategori produk yang tersedia.');
         if ($price === FALSE) return array('success' => FALSE, 'message' => 'Harga produk harus berupa angka nol atau lebih.');
         if ($stock !== NULL && ($stock < 0 || $stock > 4294967295)) return array('success' => FALSE, 'message' => 'Stok produk belum valid.');
@@ -707,7 +707,7 @@ class Marketplace_model extends CI_Model
             $this->invalidate_public_preview_cache();
             return array('success' => TRUE, 'review' => $review, 'summary' => $this->review_summary($productId));
         }
-        if (!$this->reviews_ready()) return array('success' => FALSE, 'message' => 'Fitur rating belum diaktifkan pada database. Jalankan migrasi ulasan Pasar Digital terlebih dahulu.');
+        if (!$this->reviews_ready()) return array('success' => FALSE, 'message' => 'Fitur rating belum diaktifkan pada database. Jalankan migrasi ulasan Pasar Dapulik terlebih dahulu.');
         $existing = $this->db->where(array('product_id' => $productId, 'user_id' => $userId))->limit(1)->get('marketplace_product_reviews')->row_array();
         $values = array('reviewer_name' => $reviewer, 'rating' => $rating, 'comment' => $comment, 'status' => 'published', 'updated_at' => $now);
         if ($existing) {

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-labelledby="title desc">
-  <title id="title">Produk Pasar Digital</title>
+  <title id="title">Produk Pasar Dapulik</title>
   <desc id="desc">Ilustrasi tas belanja berwarna biru</desc>
   <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eaf3ff"/><stop offset="1" stop-color="#c7def8"/></linearGradient><linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#2d6bb2"/><stop offset="1" stop-color="#1f4f8d"/></linearGradient></defs>
   <rect width="600" height="600" rx="72" fill="url(#bg)"/>

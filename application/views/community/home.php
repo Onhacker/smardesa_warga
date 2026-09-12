@@ -41,13 +41,13 @@ $pictureUrl = static function ($name) {
             <div class="splide__track">
                 <div class="splide__list">
             <a class="community-v22-slide splide__slide is-marketplace" href="<?= site_url('pasar') ?>" data-dashboard-media-card>
-                <img src="<?= $pictureUrl('pasar-layanan') ?>" srcset="<?= $pictureUrl('pasar-layanan-480') ?> 480w, <?= $pictureUrl('pasar-layanan-768') ?> 768w, <?= $pictureUrl('pasar-layanan') ?> 1200w" sizes="(max-width: 560px) 86vw, (max-width: 900px) 58vw, 720px" alt="Ilustrasi Pasar Digital <?= e($institutionLabel) ?>" loading="eager" fetchpriority="high" decoding="async" width="1200" height="676">
+                <img src="<?= $pictureUrl('pasar-layanan') ?>" srcset="<?= $pictureUrl('pasar-layanan-480') ?> 480w, <?= $pictureUrl('pasar-layanan-768') ?> 768w, <?= $pictureUrl('pasar-layanan') ?> 1200w" sizes="(max-width: 560px) 86vw, (max-width: 900px) 58vw, 720px" alt="Ilustrasi Pasar Dapulik <?= e($institutionLabel) ?>" loading="eager" fetchpriority="high" decoding="async" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-store" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
                     <small>Ekonomi <?= e($institutionLower) ?></small>
-                    <strong>Pasar Digital <?= e($institutionLabel) ?></strong>
-                    <span>Temukan produk warga <?= e($institutionLower) ?></span>
+                    <strong>Pasar Dapulik <?= e($institutionLabel) ?></strong>
+                    <span>Temukan produk <?= e($institutionLower) ?></span>
                 </span>
             </a>
             <a class="community-v22-slide splide__slide is-letter" href="<?= site_url('surat') ?>" data-dashboard-media-card>
@@ -122,7 +122,7 @@ $pictureUrl = static function ($name) {
     <section class="marketplace-page community-v22-market-preview" aria-labelledby="community-market-preview-title">
         <header class="community-v22-section-head">
             <div>
-                <p class="community-v22-eyebrow">Pasar digital</p>
+                <p class="community-v22-eyebrow">Pasar Dapulik</p>
                 <h2 id="community-market-preview-title">Produk terbaru</h2>
             </div>
             <a href="<?= site_url('pasar') ?>" class="community-v22-section-action">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
@@ -137,8 +137,8 @@ $pictureUrl = static function ($name) {
             <div class="community-v22-market-empty" role="status">
                 <span class="community-v22-market-empty-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
                 <span>
-                    <strong><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar digital sedang disiapkan' ?></strong>
-                    <small><?= $marketplaceReady ? 'Produk warga akan tampil di sini.' : 'Silakan lihat kembali beberapa saat lagi.' ?></small>
+                    <strong><?= $marketplaceReady ? 'Belum ada produk' : 'Pasar Dapulik sedang disiapkan' ?></strong>
+                    <small><?= $marketplaceReady ? 'Produk akan tampil di sini.' : 'Silakan lihat kembali beberapa saat lagi.' ?></small>
                 </span>
             </div>
         <?php endif; ?>
@@ -195,9 +195,9 @@ $pictureUrl = static function ($name) {
         <a class="community-v22-quick-card is-marketplace" href="<?= site_url('pasar') ?>">
             <span class="community-v22-quick-card-head">
                 <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-store"></i></span>
-                <strong>Pasar Digital</strong>
+                <strong>Pasar Dapulik</strong>
             </span>
-            <span class="community-v22-quick-card-copy">Temukan dan jual produk warga <?= e($institutionLower) ?>.</span>
+            <span class="community-v22-quick-card-copy">Temukan dan jual produk <?= e($institutionLower) ?>.</span>
         </a>
     </section>
 </div>

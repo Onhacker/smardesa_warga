@@ -112,16 +112,6 @@ $productId = (string) ($product['id'] ?? '');
         </div>
     </section>
 
-    <section class="card card-style market-store-card" aria-labelledby="market-store-title">
-        <div class="content">
-            <p class="market-eyebrow market-eyebrow-blue">TOKO WARGA</p>
-            <h2 id="market-store-title"><?= e($storeName) ?></h2>
-            <?php $storeDescription = trim((string) ($product['store_description'] ?? ($store['description'] ?? ''))); $storeAddress = trim((string) ($product['store_address'] ?? ($store['address'] ?? ''))); ?>
-            <?php if ($storeDescription !== ''): ?><p><?= e($storeDescription) ?></p><?php endif; ?>
-            <?php if ($storeAddress !== ''): ?><span class="market-store-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($storeAddress) ?></span><?php endif; ?>
-            <?php if ($storeUrl !== ''): ?><a class="market-view-store-button market-view-store-button-secondary" href="<?= e($storeUrl) ?>"><i class="fa fa-store" aria-hidden="true"></i><span>Lihat semua produk toko ini</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a><?php endif; ?>
-        </div>
-    </section>
 </div>
 <?php $this->load->view('marketplace/contact_modal', array(
     'contactStoreName' => $storeName,

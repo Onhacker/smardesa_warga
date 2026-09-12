@@ -102,14 +102,14 @@ menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
 penyimpanan terenkripsi NIK dan No. KK untuk ditampilkan kepada pemilik akun, serta tabel
-Pasar Digital untuk toko, produk, kategori, dan gambar privat. Untuk rilis ini, migration
+Pasar Dapulik untuk toko, produk, kategori, dan gambar privat. Untuk rilis ini, migration
 `016_marketplace.sql` wajib dijalankan lebih dahulu, lalu `017_marketplace_reviews.sql` untuk
 rating/ulasan. `018_global_nik_uniqueness.sql` dan `019_monitoring_auth.sql` dijalankan sesuai
 kebutuhan instalasi setelah migration pendahulunya selesai. `020_announcement_attachments.sql`
 wajib dijalankan untuk fitur lampiran pengumuman. `021_marketplace_categories.sql` menambahkan
-kategori Pasar Digital terbaru pada instalasi yang sudah menjalankan migration marketplace.
+kategori Pasar Dapulik terbaru pada instalasi yang sudah menjalankan migration marketplace.
 
-Contoh menjalankan migration Pasar Digital dari root repository (password dimasukkan pada
+Contoh menjalankan migration Pasar Dapulik dari root repository (password dimasukkan pada
 prompt `mysql`, tidak ditulis di terminal history):
 
 ```bash
@@ -200,7 +200,7 @@ DB_NAME=smartdesa_warga
 
 Set permission `.env` menjadi `600`. Pastikan folder `PRIVATE_STORAGE_PATH` writable oleh PHP. Folder `application/sessions` juga harus writable.
 
-### Optimasi gambar Pasar Digital
+### Optimasi gambar Pasar Dapulik
 
 Upload foto produk diproses di server sebelum disimpan: sisi terpanjang dibatasi 1.600 px,
 file utama ditulis ulang sebagai WebP kualitas 84, thumbnail kartu dibuat sebagai WebP 640 px
@@ -250,7 +250,7 @@ Tool provisioning dan kode sekali pakai hanya dipakai sebagai pemulihan instalas
 - Nilai `PRIVATE_STORAGE_PATH` API dan PWA sama persis dan writable oleh kedua aplikasi.
 - Database API dan PWA terhubung, tetapi user database tetap terpisah bila memungkinkan.
 - Migration prasyarat `001` sampai `015` sudah selesai; `016` dan `017` sudah dijalankan untuk
-  Pasar Digital; `018` dan `019` selesai bila fitur terkait diaktifkan.
+  Pasar Dapulik; `018` dan `019` selesai bila fitur terkait diaktifkan.
 - Akun demo tidak digunakan di produksi.
 - Backup database dan folder privat dibuat sebelum onboarding desa pertama.
 

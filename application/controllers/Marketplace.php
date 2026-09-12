@@ -2,7 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Pasar Digital warga. Katalog terbit bersifat publik lintas kampung;
+ * Pasar Dapulik. Katalog terbit bersifat publik lintas kampung;
  * operasi pengelolaan tetap dibatasi pada sesi dan kepemilikan penjual.
  */
 class Marketplace extends Public_Controller
@@ -43,7 +43,7 @@ class Marketplace extends Public_Controller
         );
         $viewer = array();
         $this->render('marketplace/index', array(
-            'pageTitle' => 'Pasar Digital',
+            'pageTitle' => 'Pasar Dapulik',
             'products' => $listing['items'],
             'listing' => $listing,
             'categories' => $this->marketplace->categories($viewer),
@@ -217,11 +217,11 @@ class Marketplace extends Public_Controller
         if ($productId === '') {
             $this->form_validation->set_rules(
                 'market_terms_accepted',
-                'Persetujuan Syarat & Ketentuan Pasar Digital',
+                'Persetujuan Syarat & Ketentuan Pasar Dapulik',
                 'required|in_list[1]',
                 array(
-                    'required' => 'Centang persetujuan Syarat & Ketentuan Pasar Digital sebelum menerbitkan produk.',
-                    'in_list' => 'Persetujuan Syarat & Ketentuan Pasar Digital belum valid.'
+                    'required' => 'Centang persetujuan Syarat & Ketentuan Pasar Dapulik sebelum menerbitkan produk.',
+                    'in_list' => 'Persetujuan Syarat & Ketentuan Pasar Dapulik belum valid.'
                 )
             );
         }
@@ -348,6 +348,6 @@ class Marketplace extends Public_Controller
 
     private function require_manager()
     {
-        if (!$this->currentUser || !$this->marketplace->can_manage($this->currentUser)) show_error('Akses mengelola Pasar Digital ditolak.', 403);
+        if (!$this->currentUser || !$this->marketplace->can_manage($this->currentUser)) show_error('Akses mengelola Pasar Dapulik ditolak.', 403);
     }
 }

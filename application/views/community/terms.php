@@ -35,11 +35,11 @@
             <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Pengumuman, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah <?= e($institutionLower) ?>.</p>
         </section>
         <section id="pasar-digital">
-            <h2>5. Pasar Digital dan produk terlarang</h2>
+            <h2>5. Pasar Dapulik dan produk terlarang</h2>
             <p>Penjual bertanggung jawab memastikan informasi, harga, foto, kepemilikan, keamanan, dan legalitas setiap produk atau jasa yang ditawarkan. Dilarang menerbitkan, mempromosikan, atau mengarahkan pengguna untuk membeli:</p>
             <ul>
                 <li>rokok, cerutu, tembakau, vape, rokok elektronik, cairan vape, kantong nikotin, atau produk lain yang mengandung maupun mempromosikan nikotin;</li>
-                <li>minuman beralkohol karena Pasar Digital ini tidak menyediakan verifikasi usia;</li>
+                <li>minuman beralkohol karena Pasar Dapulik ini tidak menyediakan verifikasi usia;</li>
                 <li>ganja, produk THC/CBD, narkotika, psikotropika, obat terlarang, obat keras atau obat resep yang dijual tanpa kewenangan dan izin yang sah;</li>
                 <li>senjata api, amunisi, bahan peledak, serta barang yang dibuat atau dipasarkan untuk melukai orang;</li>
                 <li>barang curian, palsu, melanggar hak kekayaan intelektual, pornografi, layanan seksual, satwa dilindungi, atau barang lain yang dilarang oleh hukum; dan</li>

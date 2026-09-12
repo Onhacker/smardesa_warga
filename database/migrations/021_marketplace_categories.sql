@@ -1,4 +1,4 @@
--- Perluasan kategori Pasar Digital untuk instalasi yang sudah menjalankan
+-- Perluasan kategori Pasar Dapulik untuk instalasi yang sudah menjalankan
 -- 016_marketplace.sql. Aman dijalankan ulang.
 SET NAMES utf8mb4;
 

@@ -19,7 +19,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
 
 <div class="marketplace-page marketplace-form-page">
     <section class="market-hero market-hero-compact" aria-labelledby="market-create-title">
-        <div class="market-hero-copy"><p class="market-eyebrow color-white">PASAR DIGITAL</p><h1 id="market-create-title">Jual Produk</h1><span class="color-white">Bagikan produk unggulan Anda kepada warga.</span></div>
+        <div class="market-hero-copy"><p class="market-eyebrow color-white">PASAR DAPULIK</p><h1 id="market-create-title">Jual Produk</h1><span class="color-white">Bagikan produk unggulan Anda kepada warga.</span></div>
         <span class="market-hero-icon color-white" aria-hidden="true"><i class="fa fa-camera color-white"></i></span>
     </section>
 
@@ -53,7 +53,7 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                 <?php if (!$editMode): ?>
                     <label class="market-product-consent" for="market-product-terms">
                         <input type="checkbox" id="market-product-terms" name="market_terms_accepted" value="1" required aria-required="true">
-                        <span>Saya memastikan produk ini legal dan tidak termasuk barang terlarang, termasuk rokok/produk nikotin, minuman beralkohol, narkotika, atau senjata. Saya menyetujui <a href="<?= site_url('syarat-ketentuan#pasar-digital') ?>" target="_blank" rel="noopener">Syarat &amp; Ketentuan Pasar Digital</a>.</span>
+                        <span>Saya memastikan produk ini legal dan tidak termasuk barang terlarang, termasuk rokok/produk nikotin, minuman beralkohol, narkotika, atau senjata. Saya menyetujui <a href="<?= site_url('syarat-ketentuan#pasar-digital') ?>" target="_blank" rel="noopener">Syarat &amp; Ketentuan Pasar Dapulik</a>.</span>
                     </label>
                 <?php endif; ?>
                 <div class="market-form-actions"><a href="<?= site_url('pasar/tokoku') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-cloud-upload-alt color-white" aria-hidden="true"></i><span class="color-white"><?= $editMode ? 'Simpan perubahan' : 'Terbitkan produk' ?></span></button></div>
