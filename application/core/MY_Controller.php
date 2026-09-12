@@ -60,7 +60,7 @@ class MY_Controller extends CI_Controller
         // components.  The footer uses this data for the identity and contact
         // buttons, while the page views remain responsible for their own data.
         $data['footerVillage'] = $contactVillage;
-        $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SmartDesa Warga';
+        $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SI DAPULIK';
         $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
         $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         $shareInstitution = trim((string) ($contactVillage['institution'] ?? '')) ?: $publicInstitution;
@@ -74,7 +74,7 @@ class MY_Controller extends CI_Controller
             }
             if ($shareAreaWithoutPrefix !== '') $shareArea = $shareAreaWithoutPrefix;
         }
-        $publicBrand = trim('Smart ' . $shareInstitution . ($shareArea !== '' ? ' ' . $shareArea : ''));
+        $publicBrand = trim('SI DAPULIK' . ($shareArea !== '' ? ' ' . $shareArea : ''));
         // Share links intentionally point at the public landing page. Private
         // account, notification, and letter URLs must never be exposed when a
         // resident shares the application from the common footer.

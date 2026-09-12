@@ -54,7 +54,7 @@ class Push_worker extends CI_Controller
                     // push.  The service worker resolves this route against its own
                     // registered scope before opening it.
                     $openPath = 'notifikasi/buka/' . rawurlencode((string)$row['notification_id']);
-                    $payload=json_encode(array('title'=>'SmartDesa Warga','body'=>'Ada pembaruan layanan untuk Anda.',
+                    $payload=json_encode(array('title'=>'SI DAPULIK','body'=>'Ada pembaruan layanan untuk Anda.',
                         'tag'=>'sdw-'.$row['notification_id'],'url'=>$openPath,
                         'notificationId'=>(string)$row['notification_id']), JSON_UNESCAPED_SLASHES);
                     if (!is_string($payload)) throw new RuntimeException('Payload push tidak valid.');

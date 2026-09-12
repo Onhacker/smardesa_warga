@@ -3,7 +3,7 @@
     <button type="button" class="warga-notification-center-backdrop" data-notification-center-close aria-label="Tutup pemberitahuan"></button>
     <section class="warga-notification-center-dialog" role="dialog" aria-modal="true" aria-labelledby="warga-notification-center-title" aria-describedby="warga-notification-center-description">
         <header class="warga-notification-center-head">
-            <span class="warga-notification-center-head-icon" aria-hidden="true"><i class="fa fa-bell"></i></span>
+            <span class="warga-notification-center-head-icon" aria-hidden="true"><i class="fa fa-inbox"></i></span>
             <div>
                 <p>PEMBERITAHUAN BARU</p>
                 <h2 id="warga-notification-center-title">Belum dibaca</h2>

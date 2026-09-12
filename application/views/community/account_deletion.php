@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $deletionInstitution = trim((string) ($village['institution'] ?? ($institutionLabel ?? 'Kampung')));
 if ($deletionInstitution === '') $deletionInstitution = 'Kampung';
-$deletionAppName = 'Smart ' . $deletionInstitution;
+$deletionAppName = 'SI DAPULIK';
 $deletionArea = trim((string) ($village['name'] ?? ''));
 $deletionSubject = 'Permintaan penghapusan akun ' . $deletionAppName;
 $deletionBody = "Saya meminta penghapusan akun dan data terkait pada aplikasi {$deletionAppName}.\n\n"

@@ -1257,12 +1257,12 @@
       }
       deferredInstall.prompt();
       deferredInstall.userChoice.then(function (choice) {
-        if (choice.outcome === 'accepted') updateInstallStatus('SmartDesa Warga sudah terpasang.', true);
+        if (choice.outcome === 'accepted') updateInstallStatus('SI DAPULIK sudah terpasang.', true);
         deferredInstall = null;
       });
     });
   });
-  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) updateInstallStatus('SmartDesa Warga sudah terpasang.', true);
+  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) updateInstallStatus('SI DAPULIK sudah terpasang.', true);
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
     window.addEventListener('load', function () {

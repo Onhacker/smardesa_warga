@@ -15,7 +15,7 @@ $registrationErrorHtml = !empty($error)
     : $registrationValidationErrors;
 $registerInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
 $registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
-$registerShareTitle = 'Smart ' . $registerInstitution . ' ' . $registerArea . ' — Layanan Digital Warga';
+$registerShareTitle = 'SI DAPULIK ' . $registerArea . ' — Layanan Digital Warga';
 $registerShareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.';
 $registerShareUrl = base_url();
 $registerShareImage = warga_asset_url('assets/pwa/share-preview.png');
@@ -31,7 +31,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         'shareDescription' => $registerShareDescription,
         'shareUrl' => $registerShareUrl,
         'shareImage' => $registerShareImage,
-        'shareImageAlt' => 'SmartDesa Warga, layanan digital warga',
+        'shareImageAlt' => 'SI DAPULIK, layanan digital warga',
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     )); ?>
@@ -39,7 +39,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
-<header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
+<header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-inbox" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
 <main class="page-content header-clear-medium warga-auth-page">
     <section class="warga-auth-brand compact"><img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">

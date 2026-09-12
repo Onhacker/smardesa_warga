@@ -5,13 +5,13 @@
         <div>
             <p class="warga-legal-kicker">Dokumen layanan</p>
             <h1>Syarat &amp; Ketentuan</h1>
-            <p>Aturan penggunaan Smart Kampung untuk layanan administrasi warga.</p>
+            <p>Aturan penggunaan SI DAPULIK untuk layanan administrasi warga.</p>
         </div>
     </header>
 
     <div class="warga-legal-card">
         <p class="warga-legal-updated">Berlaku mulai: <?= e(tanggal_id('2026-09-05')) ?></p>
-        <p>Dengan membuat akun atau menggunakan Smart Kampung, Anda menyetujui ketentuan berikut. Jika tidak setuju, jangan gunakan fitur pengajuan atau unggah berkas pada aplikasi.</p>
+        <p>Dengan membuat akun atau menggunakan SI DAPULIK, Anda menyetujui ketentuan berikut. Jika tidak setuju, jangan gunakan fitur pengajuan atau unggah berkas pada aplikasi.</p>
 
         <section>
             <h2>1. Akun warga</h2>

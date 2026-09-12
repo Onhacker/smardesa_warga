@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $loginInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Kampung')));
 if ($loginInstitution === '') $loginInstitution = 'Kampung';
-$loginBrand = 'Smart ' . $loginInstitution;
+$loginBrand = 'SI DAPULIK';
 ?>
 <!DOCTYPE HTML>
 <html lang="id">
@@ -13,7 +13,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
     <meta name="apple-mobile-web-app-title" content="<?= e($loginBrand) ?>">
     <title><?= e($pageTitle) ?></title>
     <?php
-    $shareTitle = 'Smart ' . $loginInstitution . ' ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
+    $shareTitle = 'SI DAPULIK ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
     $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.';
     $shareUrl = base_url();
     $shareImage = warga_asset_url('assets/pwa/share-preview.png');
@@ -22,7 +22,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
         'shareDescription' => $shareDescription,
         'shareUrl' => $shareUrl,
         'shareImage' => $shareImage,
-        'shareImageAlt' => 'SmartDesa Warga, layanan digital warga',
+        'shareImageAlt' => 'SI DAPULIK, layanan digital warga',
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     ));
@@ -39,7 +39,7 @@ $loginBrand = 'Smart ' . $loginInstitution;
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?>
 <div id="page">
-    <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title"><?= e($loginBrand) ?></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
+    <header class="header header-fixed header-logo-center"><a href="<?= site_url('login') ?>" class="header-title"><?= e($loginBrand) ?></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-inbox" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
     <nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
         <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>

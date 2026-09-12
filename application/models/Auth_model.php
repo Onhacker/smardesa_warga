@@ -520,7 +520,7 @@ class Auth_model extends CI_Model
         }
         $code = isset($decoded['error']) ? (string) $decoded['error'] : '';
         if ($code === 'resident_directory_unavailable' || $code === 'service_unavailable') {
-            return array('success' => FALSE, 'message' => 'Data penduduk wilayah belum tersinkron ke layanan warga. Silakan coba lagi setelah SmartDesa terhubung ke internet.');
+            return array('success' => FALSE, 'message' => 'Data penduduk wilayah belum tersinkron ke layanan warga. Silakan coba lagi setelah SI DAPULIK terhubung ke internet.');
         }
         if ($code === 'rate_limited') return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan. Silakan tunggu beberapa menit lalu coba lagi.');
         return array('success' => FALSE, 'message' => 'NIK, No. KK, atau Nama Lengkap tidak sesuai dengan data penduduk wilayah yang dipilih.');

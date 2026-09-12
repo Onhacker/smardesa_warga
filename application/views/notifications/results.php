@@ -7,7 +7,7 @@
 <?php endif; ?>
 <section class="warga-notification-list" aria-label="Daftar pemberitahuan">
     <?php if (!$notifications): ?>
-        <div class="warga-empty-state"><span><i class="fa fa-bell-slash" aria-hidden="true"></i></span><h3><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Pemberitahuan tidak ditemukan' : 'Belum ada pemberitahuan' ?></h3><p><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Coba judul, isi, atau tanggal lainnya.' : 'Pemberitahuan baru akan tampil di sini.' ?></p></div>
+        <div class="warga-empty-state"><span><i class="fa fa-inbox" aria-hidden="true"></i></span><h3><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Pemberitahuan tidak ditemukan' : 'Belum ada pemberitahuan' ?></h3><p><?= $listing['filters']['q'] !== '' || $listing['filters']['date'] !== '' ? 'Coba judul, isi, atau tanggal lainnya.' : 'Pemberitahuan baru akan tampil di sini.' ?></p></div>
     <?php endif; ?>
     <?php foreach ($notifications as $notification): ?>
         <?php $isUnread = empty($notification['read_at']); ?>

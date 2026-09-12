@@ -11,7 +11,7 @@
 
     <div class="warga-legal-card">
         <p class="warga-legal-updated">Terakhir diperbarui: <?= e(tanggal_id('2026-09-05')) ?></p>
-        <p>Smart Kampung membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan <?= e($institutionLower) ?>.</p>
+        <p>SI DAPULIK membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan <?= e($institutionLower) ?>.</p>
 
         <section>
             <h2>1. Data yang kami gunakan</h2>

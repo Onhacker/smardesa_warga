@@ -18,7 +18,7 @@ $lettersPage = !empty($lettersPage);
         <span class="warga-avatar"><?= e(warga_initials($currentUser['name'])) ?></span>
         <div><p class="color-white">Selamat datang</p><h1><?= e($currentUser['name']) ?></h1><span class="color-white"><i class="fa fa-map-marker-alt"></i> <?= e($currentUser['village_name']) ?></span></div>
     </div>
-    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka pemberitahuan"><i class="fa fa-bell"></i></a>
+    <a href="<?= site_url('notifikasi') ?>" class="warga-head-action" aria-label="Buka pemberitahuan"><i class="fa fa-inbox"></i></a>
 </section><?php endif; ?>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">
@@ -90,5 +90,5 @@ $lettersPage = !empty($lettersPage);
 <?php endif; ?>
 
 <section class="warga-home-notice">
-    <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi <?= e($institutionLabel) ?></strong><p>Status permohonan diperbarui otomatis saat perangkat SmartDesa <?= e($institutionLower) ?> terhubung.</p></div>
+    <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi <?= e($institutionLabel) ?></strong><p>Status permohonan diperbarui otomatis saat perangkat SI DAPULIK <?= e($institutionLower) ?> terhubung.</p></div>
 </section>

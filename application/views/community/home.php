@@ -2,7 +2,7 @@
 <?php
 $isAuthenticated = !empty($isAuthenticated) && is_array($currentUser);
 $publicArea = trim((string) ($village['name'] ?? (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')));
-$heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Smart ' . (string) ($institutionLabel ?? 'Kampung') . ' ' . $publicArea;
+$heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'SI DAPULIK ' . $publicArea;
 $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
 $pictureUrl = static function ($name) {
     return warga_asset_url('assets/v22/images/pictures/' . trim((string) $name) . '.webp');
@@ -11,7 +11,7 @@ $pictureUrl = static function ($name) {
 <div class="warga-community community-v22-home" data-dashboard-home>
     <section class="community-home community-v22-hero" aria-labelledby="community-welcome-title">
         <div class="community-v22-hero-main">
-            <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SmartDesa Warga">
+            <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SI DAPULIK">
             <div class="community-v22-hero-copy">
                 <p class="community-v22-eyebrow">Layanan digital warga</p>
                 <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>

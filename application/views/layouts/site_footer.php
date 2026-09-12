@@ -21,7 +21,7 @@ if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
     $footerVillageName = $nameWithoutPrefix !== '' ? $nameWithoutPrefix : $footerVillageName;
 }
 if ($footerInstitution === '') $footerInstitution = 'Desa';
-$footerBrand = trim('Smart ' . $footerInstitution . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
+$footerBrand = trim('SI DAPULIK' . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
 
 $footerShareUrl = trim((string) ($shareUrl ?? base_url()));
 if (!filter_var($footerShareUrl, FILTER_VALIDATE_URL)) $footerShareUrl = base_url();
@@ -93,8 +93,8 @@ foreach (array(
                 <span>Unduh untuk Android atau tambahkan ke Layar Utama iPhone.</span>
             </div>
             <div class="warga-footer-install-actions">
-                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SmartDesa Warga di Google Play"><img src="<?= warga_asset_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
-                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SmartDesa Warga di iOS"><img src="<?= warga_asset_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
+                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SI DAPULIK di Google Play"><img src="<?= warga_asset_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
+                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SI DAPULIK di iOS"><img src="<?= warga_asset_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
             </div>
         </section>
     </div>

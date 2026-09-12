@@ -60,7 +60,7 @@ imagedestroy($icon);
 $white = imagecolorallocate($canvas, 255, 255, 255);
 $sky = imagecolorallocate($canvas, 158, 218, 255);
 $navy = imagecolorallocate($canvas, 20, 68, 128);
-imagettftext($canvas, 22, 0, 535, 154, $sky, $bold, 'SMARTDESA WARGA');
+imagettftext($canvas, 22, 0, 535, 154, $sky, $bold, 'SI DAPULIK');
 imagettftext($canvas, 48, 0, 531, 230, $white, $bold, 'Layanan Digital');
 imagettftext($canvas, 48, 0, 531, 290, $white, $bold, 'untuk Warga');
 imagettftext($canvas, 21, 0, 535, 344, $white, $regular, 'Mudah diakses, aman, dan selalu terhubung.');

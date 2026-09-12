@@ -308,7 +308,7 @@ if (!function_exists('warga_notification_icon')) {
             || !empty($notification['request_id']) || strpos($title, 'surat') !== FALSE || strpos($title, 'permohonan') !== FALSE) {
             return array('type' => 'letter', 'icon' => 'fa fa-envelope', 'class' => 'is-letter', 'label' => 'Surat');
         }
-        return array('type' => 'general', 'icon' => 'fa fa-bell', 'class' => 'is-general', 'label' => 'Pemberitahuan');
+        return array('type' => 'general', 'icon' => 'fa fa-inbox', 'class' => 'is-general', 'label' => 'Pemberitahuan');
     }
 }
 

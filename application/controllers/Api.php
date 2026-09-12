@@ -15,6 +15,6 @@ class Api extends Public_Controller
             $this->output->set_status_header(204)->set_header('Access-Control-Allow-Methods: GET, POST, OPTIONS')->set_header('Access-Control-Allow-Headers: Content-Type, X-Requested-With, X-CSRF-TOKEN');
             return;
         }
-        $this->output->set_content_type('application/json', 'utf-8')->set_output(json_encode(array('success' => TRUE, 'service' => 'SmartDesa Warga API', 'status' => 'ready', 'time' => date('c')), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $this->output->set_content_type('application/json', 'utf-8')->set_output(json_encode(array('success' => TRUE, 'service' => 'SI DAPULIK API', 'status' => 'ready', 'time' => date('c')), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }

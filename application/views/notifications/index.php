@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <div class="warga-community community-v22-page community-v22-notification-page">
     <header class="community-heading community-v22-page-hero" aria-labelledby="notification-page-title">
-        <div class="community-v22-page-hero-icon"><i class="fa fa-bell" aria-hidden="true"></i></div>
+        <div class="community-v22-page-hero-icon"><i class="fa fa-inbox" aria-hidden="true"></i></div>
         <div>
             <p class="community-v22-eyebrow">Pembaruan layanan</p>
             <h1 id="notification-page-title">Pemberitahuan</h1>
@@ -10,7 +10,7 @@
     </header>
 
     <section class="warga-notification-enable-card" data-push-enable-prompt hidden aria-labelledby="notification-enable-title">
-        <span class="warga-notification-enable-icon" aria-hidden="true"><i class="fa fa-bell"></i></span>
+        <span class="warga-notification-enable-icon" aria-hidden="true"><i class="fa fa-inbox"></i></span>
         <div class="warga-notification-enable-copy">
             <h2 id="notification-enable-title">Nyalakan pemberitahuan</h2>
             <p>Terima pembaruan layanan langsung di perangkat Anda.</p>

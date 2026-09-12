@@ -97,7 +97,7 @@
         control.setAttribute('aria-checked', subscribed ? 'true' : 'false');
         control.setAttribute('aria-label', subscribed ? 'Matikan pemberitahuan' : 'Nyalakan pemberitahuan');
       } else {
-        control.innerHTML = '<i class="fa fa-bell"></i> ' + (subscribed ? 'Nonaktifkan Pemberitahuan' : 'Aktifkan Pemberitahuan');
+        control.innerHTML = '<i class="fa fa-inbox"></i> ' + (subscribed ? 'Nonaktifkan Pemberitahuan' : 'Aktifkan Pemberitahuan');
       }
     });
   }
@@ -277,7 +277,7 @@
           if (result.permission === 'denied') storageSet(onboardingKey, 'seen');
           var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
           if (messageNode) messageNode.textContent = permissionMessage(result.permission) || 'Izin pemberitahuan belum diberikan. Anda dapat mengaktifkannya dari menu Akun.';
-          if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
+          if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-inbox'; if (label) label.textContent = 'Coba Lagi'; }
           return;
         }
         updateButton(true);
@@ -285,7 +285,7 @@
         closeNotificationOnboarding(true);
         message('Pemberitahuan perangkat aktif. Suara dan getar mengikuti pengaturan perangkat.');
       }).catch(function (error) {
-        if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-bell'; if (label) label.textContent = 'Coba Lagi'; }
+        if (enable) { enable.disabled = false; if (icon) icon.className = 'fa fa-inbox'; if (label) label.textContent = 'Coba Lagi'; }
         var messageNode = onboarding.querySelector('[data-notification-onboarding-message]');
         if (messageNode) messageNode.textContent = error && error.message ? error.message : 'Pemberitahuan belum dapat diaktifkan. Periksa koneksi lalu coba lagi.';
       });

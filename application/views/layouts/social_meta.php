@@ -1,15 +1,15 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-$socialTitle = trim((string) ($shareTitle ?? 'SmartDesa Warga — Layanan Digital Warga'));
+$socialTitle = trim((string) ($shareTitle ?? 'SI DAPULIK — Layanan Digital Warga'));
 $socialDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Digital warga dalam satu aplikasi.'));
 $socialUrl = trim((string) ($shareUrl ?? base_url()));
 $socialImage = trim((string) ($shareImage ?? warga_asset_url('assets/pwa/share-preview.png')));
-$socialImageAlt = trim((string) ($shareImageAlt ?? 'SmartDesa Warga, layanan digital warga'));
+$socialImageAlt = trim((string) ($shareImageAlt ?? 'SI DAPULIK, layanan digital warga'));
 $socialImageWidth = max(1, (int) ($shareImageWidth ?? 1200));
 $socialImageHeight = max(1, (int) ($shareImageHeight ?? 630));
 $socialSiteName = 'Kabupaten Jayawijaya';
 
-if ($socialTitle === '') $socialTitle = 'SmartDesa Warga — Layanan Digital Warga';
+if ($socialTitle === '') $socialTitle = 'SI DAPULIK — Layanan Digital Warga';
 if ($socialDescription === '') $socialDescription = 'Akses layanan warga dalam satu aplikasi.';
 if (!filter_var($socialUrl, FILTER_VALIDATE_URL)) $socialUrl = base_url();
 if (!filter_var($socialImage, FILTER_VALIDATE_URL)) $socialImage = warga_asset_url('assets/pwa/share-preview.png');
@@ -20,7 +20,7 @@ $socialStructuredData = array(
     '@id' => $socialWebsiteUrl . '#website',
     'url' => $socialWebsiteUrl,
     'name' => $socialSiteName,
-    'alternateName' => 'SmartDesa Warga',
+    'alternateName' => 'SI DAPULIK',
     'description' => $socialDescription,
     'inLanguage' => 'id-ID'
 );
