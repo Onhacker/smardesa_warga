@@ -9,6 +9,8 @@
     <div class="warga-notification-center-list" aria-label="Pemberitahuan belum dibaca">
         <?php foreach ($notifications as $notification): ?>
             <?php $notificationIcon = warga_notification_icon($notification); ?>
+            <?php $notificationTitle = warga_notification_display_text($notification['title']); ?>
+            <?php $notificationMessage = warga_notification_display_text(warga_replace_institution($notification['message'], $institutionLabel)); ?>
             <a href="<?= site_url('notifikasi/buka/'.rawurlencode((string) $notification['id'])) ?>"
                class="warga-notification-center-item is-unread"
                data-notification-open
@@ -16,8 +18,8 @@
                 <span class="warga-notification-type-icon <?= e($notificationIcon['class']) ?>" aria-hidden="true"><i class="<?= e($notificationIcon['icon']) ?>"></i></span>
                 <span class="warga-notification-center-copy">
                     <small><?= e($notificationIcon['label']) ?></small>
-                    <strong><?= e($notification['title']) ?></strong>
-                    <p><?= e(warga_replace_institution($notification['message'], $institutionLabel)) ?></p>
+                    <strong><?= e($notificationTitle) ?></strong>
+                    <p><?= e($notificationMessage) ?></p>
                     <time datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-clock" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time>
                 </span>
                 <i class="fa fa-chevron-right" aria-hidden="true"></i>

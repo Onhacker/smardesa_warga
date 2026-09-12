@@ -22,6 +22,10 @@ if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
 }
 if ($footerInstitution === '') $footerInstitution = 'Desa';
 $footerBrand = trim('SI DAPULIK' . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
+$footerBrand = function_exists('mb_strtoupper')
+    ? mb_strtoupper($footerBrand, 'UTF-8')
+    : strtoupper($footerBrand);
+$footerTagline = 'Sistem Informasi Digitalisasi Administrasi, Pelayanan Umum, dan Layanan Informasi Kampung';
 
 $footerShareUrl = trim((string) ($shareUrl ?? base_url()));
 if (!filter_var($footerShareUrl, FILTER_VALIDATE_URL)) $footerShareUrl = base_url();
@@ -52,10 +56,9 @@ $footerPhoneHref = preg_match('/^\+?[0-9 ()-]{8,25}$/D', $footerPhone)
 $footerEmail = trim((string) ($footerContact['email'] ?? ''));
 $footerEmailHref = filter_var($footerEmail, FILTER_VALIDATE_EMAIL) ? 'mailto:' . $footerEmail : '';
 $footerWebsite = $footerHttpUrl($footerContact['website'] ?? '');
+$footerHasContact = $footerPhoneHref !== '' || $footerEmailHref !== '';
 
 $footerActions = array();
-if ($footerPhoneHref !== '') $footerActions[] = array('href' => $footerPhoneHref, 'icon' => 'fa fa-phone', 'class' => 'is-phone', 'label' => 'Telepon kantor');
-if ($footerEmailHref !== '') $footerActions[] = array('href' => $footerEmailHref, 'icon' => 'fa fa-envelope', 'class' => 'is-email', 'label' => 'Kirim email');
 if ($footerWebsite !== '') $footerActions[] = array('href' => $footerWebsite, 'icon' => 'fa fa-globe', 'class' => 'is-website', 'label' => 'Buka situs kantor', 'external' => true);
 foreach (array(
     array('key' => 'facebook', 'icon' => 'fab fa-facebook-f', 'class' => 'is-facebook', 'label' => 'Facebook'),
@@ -75,11 +78,18 @@ foreach (array(
     <div class="warga-site-footer-main">
         <p class="warga-site-footer-kicker">Layanan digital warga</p>
         <h2><?= e($footerBrand) ?></h2>
+        <p class="warga-site-footer-tagline"><?= e($footerTagline) ?></p>
         <?php if ($footerAddress !== ''): ?>
             <p class="warga-site-footer-address"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><span><?= e($footerAddress) ?></span></p>
         <?php endif; ?>
 
-        <div class="warga-site-footer-actions" aria-label="<?= $footerActions ? 'Kontak dan navigasi ' . e($footerBrand) : 'Navigasi halaman' ?>">
+        <div class="warga-site-footer-actions" aria-label="<?= $footerHasContact || $footerActions ? 'Kontak dan navigasi ' . e($footerBrand) : 'Navigasi halaman' ?>">
+            <?php if ($footerPhoneHref !== ''): ?>
+                <button type="button" class="warga-site-footer-action is-phone" data-footer-contact-open aria-controls="warga-footer-contact-dialog" aria-haspopup="dialog" aria-label="Lihat nomor telepon"><i class="fa fa-phone" aria-hidden="true"></i></button>
+            <?php endif; ?>
+            <?php if ($footerEmailHref !== ''): ?>
+                <button type="button" class="warga-site-footer-action is-email" data-footer-contact-open aria-controls="warga-footer-contact-dialog" aria-haspopup="dialog" aria-label="Lihat alamat email"><i class="fa fa-envelope" aria-hidden="true"></i></button>
+            <?php endif; ?>
             <?php foreach ($footerActions as $action): ?>
                 <a class="warga-site-footer-action <?= e($action['class']) ?>" href="<?= e($action['href']) ?>" aria-label="<?= e($action['label']) ?>"<?= !empty($action['external']) ? ' target="_blank" rel="noopener noreferrer"' : '' ?>><i class="<?= e($action['icon']) ?>" aria-hidden="true"></i></a>
             <?php endforeach; ?>
@@ -104,6 +114,34 @@ foreach (array(
         <a href="<?= site_url('syarat-ketentuan') ?>">Syarat &amp; Ketentuan</a>
     </nav>
 </footer>
+
+<?php if ($footerHasContact): ?>
+<div class="warga-footer-modal" id="warga-footer-contact-dialog" data-footer-modal hidden aria-hidden="true">
+    <button type="button" class="warga-footer-modal-backdrop" data-footer-modal-close tabindex="-1" aria-label="Tutup informasi kontak"></button>
+    <section class="warga-footer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="warga-footer-contact-heading" aria-describedby="warga-footer-contact-description">
+        <button type="button" class="warga-footer-modal-close" data-footer-modal-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+        <span class="warga-footer-modal-icon is-contact" aria-hidden="true"><i class="fa fa-address-book"></i></span>
+        <h2 id="warga-footer-contact-heading">Kontak <?= e($footerBrand) ?></h2>
+        <p id="warga-footer-contact-description">Nomor telepon dan email ditampilkan lebih dahulu. Ketuk kontak yang ingin digunakan.</p>
+        <div class="warga-footer-contact-list">
+            <?php if ($footerPhoneHref !== ''): ?>
+                <a class="warga-footer-contact-item is-phone" href="<?= e($footerPhoneHref) ?>">
+                    <span class="warga-footer-contact-item-icon" aria-hidden="true"><i class="fa fa-phone"></i></span>
+                    <span class="warga-footer-contact-item-copy"><small>Nomor telepon</small><strong><?= e($footerPhone) ?></strong></span>
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                </a>
+            <?php endif; ?>
+            <?php if ($footerEmailHref !== ''): ?>
+                <a class="warga-footer-contact-item is-email" href="<?= e($footerEmailHref) ?>">
+                    <span class="warga-footer-contact-item-icon" aria-hidden="true"><i class="fa fa-envelope"></i></span>
+                    <span class="warga-footer-contact-item-copy"><small>Alamat email</small><strong><?= e($footerEmail) ?></strong></span>
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                </a>
+            <?php endif; ?>
+        </div>
+    </section>
+</div>
+<?php endif; ?>
 
 <div class="warga-footer-modal" id="warga-footer-share-dialog" data-footer-modal hidden aria-hidden="true">
     <button type="button" class="warga-footer-modal-backdrop" data-footer-modal-close tabindex="-1" aria-label="Tutup pilihan berbagi"></button>

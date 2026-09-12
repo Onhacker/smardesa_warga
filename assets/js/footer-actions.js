@@ -59,6 +59,13 @@
   }
 
   document.addEventListener('click', function (event) {
+    var contactButton = event.target.closest('[data-footer-contact-open]');
+    if (contactButton) {
+      event.preventDefault();
+      openModal(document.getElementById(contactButton.getAttribute('aria-controls')), contactButton);
+      return;
+    }
+
     var shareButton = event.target.closest('[data-footer-share-open]');
     if (shareButton) {
       event.preventDefault();

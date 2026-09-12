@@ -12,9 +12,11 @@
     <?php foreach ($notifications as $notification): ?>
         <?php $isUnread = empty($notification['read_at']); ?>
         <?php $notificationIcon = warga_notification_icon($notification); ?>
-        <a href="<?= site_url('notifikasi/buka/'.rawurlencode((string) $notification['id'])) ?>" class="warga-notification-item <?= $isUnread ? 'is-unread' : 'is-read' ?>" data-notification-open data-notification-id="<?= e($notification['id']) ?>" aria-label="<?= e(($isUnread ? 'Belum dibaca: ' : 'Sudah dibaca: ').$notification['title']) ?>">
+        <?php $notificationTitle = warga_notification_display_text($notification['title']); ?>
+        <?php $notificationMessage = warga_notification_display_text(warga_replace_institution($notification['message'], $institutionLabel)); ?>
+        <a href="<?= site_url('notifikasi/buka/'.rawurlencode((string) $notification['id'])) ?>" class="warga-notification-item <?= $isUnread ? 'is-unread' : 'is-read' ?>" data-notification-open data-notification-id="<?= e($notification['id']) ?>" aria-label="<?= e(($isUnread ? 'Belum dibaca: ' : 'Sudah dibaca: ').$notificationTitle) ?>">
             <span class="warga-notification-icon warga-notification-type-icon <?= e($notificationIcon['class']) ?>" title="<?= e($notificationIcon['label']) ?>"><i class="<?= e($notificationIcon['icon']) ?>" aria-hidden="true"></i></span>
-            <span class="warga-notification-copy"><strong><?= e($notification['title']) ?></strong><p><?= e(warga_replace_institution($notification['message'], $institutionLabel)) ?></p><span class="warga-notification-meta"><span class="warga-notification-state <?= $isUnread ? 'is-danger' : 'is-success' ?>"><?= $isUnread ? 'Belum dibaca' : 'Sudah dibaca' ?></span><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span></span>
+            <span class="warga-notification-copy"><strong><?= e($notificationTitle) ?></strong><p><?= e($notificationMessage) ?></p><span class="warga-notification-meta"><span class="warga-notification-state <?= $isUnread ? 'is-danger' : 'is-success' ?>"><?= $isUnread ? 'Belum dibaca' : 'Sudah dibaca' ?></span><time class="warga-notification-date" datetime="<?= e(str_replace(' ', 'T', $notification['occurred_at'])) ?>"><i class="far fa-calendar-alt" aria-hidden="true"></i><?= e(tanggal_id($notification['occurred_at'], TRUE)) ?></time></span></span>
             <i class="fa fa-chevron-right" aria-hidden="true"></i>
         </a>
     <?php endforeach; ?>

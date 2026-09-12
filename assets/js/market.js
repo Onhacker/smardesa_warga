@@ -663,6 +663,131 @@
     });
   }
 
+  function bindTermsModal() {
+    var modal = document.querySelector('[data-market-terms-modal]');
+    var triggers = Array.prototype.slice.call(document.querySelectorAll('[data-market-terms-open]'));
+    if (!modal || !triggers.length || modal.getAttribute('data-market-terms-bound') === '1' || typeof window.fetch !== 'function') return;
+    modal.setAttribute('data-market-terms-bound', '1');
+    if (modal.parentNode !== document.body) document.body.appendChild(modal);
+
+    var loading = modal.querySelector('[data-market-terms-loading]');
+    var content = modal.querySelector('[data-market-terms-content]');
+    var errorBox = modal.querySelector('[data-market-terms-error]');
+    var retry = modal.querySelector('[data-market-terms-retry]');
+    var lastFocus = null;
+    var sourceUrl = '';
+    var loaded = false;
+    var request = null;
+
+    function focusableItems() {
+      return Array.prototype.slice.call(modal.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+        .filter(function (item) { return !item.hidden && item.getAttribute('aria-hidden') !== 'true'; });
+    }
+
+    function setLoadingState() {
+      if (loading) loading.hidden = false;
+      if (content) content.hidden = true;
+      if (errorBox) errorBox.hidden = true;
+    }
+
+    function loadTerms() {
+      if (loaded || request || !sourceUrl) return request;
+      setLoadingState();
+      var pageUrl = sourceUrl;
+      var targetId = 'pasar-digital';
+      try {
+        var parsedUrl = new URL(sourceUrl, window.location.href);
+        pageUrl = parsedUrl.href.split('#')[0];
+        if (parsedUrl.hash) targetId = decodeURIComponent(parsedUrl.hash.slice(1));
+      } catch (_) {
+        pageUrl = sourceUrl.split('#')[0];
+      }
+
+      request = window.fetch(pageUrl, {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }
+      }).then(function (response) {
+        if (!response.ok) throw new Error('Syarat dan ketentuan belum dapat dimuat.');
+        return response.text();
+      }).then(function (html) {
+        var parsed = new DOMParser().parseFromString(html, 'text/html');
+        var section = parsed.getElementById(targetId) || parsed.getElementById('pasar-digital');
+        if (!section || !content) throw new Error('Bagian ketentuan Pasar Dapulik tidak ditemukan.');
+        var copy = section.cloneNode(true);
+        var repeatedHeading = copy.querySelector('h2');
+        if (repeatedHeading) repeatedHeading.remove();
+        content.innerHTML = copy.innerHTML;
+        loaded = true;
+        if (loading) loading.hidden = true;
+        content.hidden = false;
+      }).catch(function (error) {
+        if (loading) loading.hidden = true;
+        if (content) content.hidden = true;
+        if (errorBox) {
+          var message = errorBox.querySelector('p');
+          if (message) message.textContent = error && error.message ? error.message : 'Syarat dan ketentuan belum dapat dimuat.';
+          errorBox.hidden = false;
+        }
+      }).then(function () {
+        request = null;
+      });
+      return request;
+    }
+
+    function open(trigger) {
+      lastFocus = trigger || document.activeElement;
+      sourceUrl = trigger.getAttribute('data-market-terms-url') || trigger.href || sourceUrl;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('market-terms-open');
+      var scroll = modal.querySelector('.market-terms-dialog-scroll');
+      if (scroll) scroll.scrollTop = 0;
+      loadTerms();
+      var closeButton = modal.querySelector('.market-terms-close');
+      if (closeButton) window.setTimeout(function () { closeButton.focus(); }, 20);
+    }
+
+    function close() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('market-terms-open');
+      if (lastFocus && typeof lastFocus.focus === 'function') lastFocus.focus();
+      lastFocus = null;
+    }
+
+    triggers.forEach(function (trigger) {
+      trigger.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        open(trigger);
+      });
+    });
+    modal.querySelectorAll('[data-market-terms-close]').forEach(function (button) { button.addEventListener('click', close); });
+    if (retry) retry.addEventListener('click', function () { loadTerms(); });
+    document.addEventListener('keydown', function (event) {
+      if (modal.hidden) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+
   function bind() {
     document.querySelectorAll('[data-market-price]').forEach(bindPriceInput);
     document.querySelectorAll('[data-market-product-form]').forEach(function (form) {
@@ -714,6 +839,7 @@
     bindMediaSkeletons(document);
     bindContactModal();
     bindReviewModals();
+    bindTermsModal();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);

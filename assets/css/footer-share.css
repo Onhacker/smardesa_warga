@@ -8,6 +8,31 @@
   cursor: pointer;
 }
 
+.warga-site-footer-tagline {
+  max-width: 580px;
+  margin: 8px auto 0;
+  color: var(--warga-muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.warga-site-footer-tagline + .warga-site-footer-address {
+  margin-top: 12px;
+}
+
+.warga-site-footer-tagline + .warga-site-footer-actions {
+  margin-top: 18px;
+}
+
+.warga-site-footer-action[data-footer-contact-open] {
+  border: 0;
+  color: #fff !important;
+  font: inherit;
+  font-size: 19px;
+  cursor: pointer;
+}
+
 .warga-footer-install {
   max-width: 520px;
   margin: 22px auto 0;
@@ -152,6 +177,11 @@
   color: #293544;
 }
 
+.warga-footer-modal-icon.is-contact {
+  background: #e5f1fd;
+  color: #2d6bb2;
+}
+
 .warga-footer-modal-panel h2 {
   margin: 0;
   color: var(--warga-ink);
@@ -201,6 +231,76 @@ body #page .page-content .warga-footer-modal .warga-site-footer-share-button spa
 .warga-site-footer-share-button i { font-size: 19px; }
 .warga-site-footer-share-button.is-whatsapp { background: #1fae62; }
 .warga-site-footer-share-button.is-facebook { background: #3867ad; }
+
+.warga-footer-contact-list {
+  display: grid;
+  gap: 10px;
+  text-align: left;
+}
+
+.warga-footer-contact-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 12px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 66px;
+  padding: 10px 12px;
+  border: 1px solid var(--warga-line);
+  border-radius: 15px;
+  background: var(--warga-page);
+  color: var(--warga-ink) !important;
+  transition: border-color 160ms ease, transform 160ms ease;
+}
+
+.warga-footer-contact-item:hover,
+.warga-footer-contact-item:focus-visible {
+  border-color: #7aa7d9;
+  color: var(--warga-ink) !important;
+  transform: translateY(-1px);
+}
+
+.warga-footer-contact-item-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 13px;
+  color: #fff;
+  font-size: 16px;
+}
+
+.warga-footer-contact-item.is-phone .warga-footer-contact-item-icon { background: #20ae62; }
+.warga-footer-contact-item.is-email .warga-footer-contact-item-icon { background: #3e82d8; }
+
+.warga-footer-contact-item-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.warga-footer-contact-item-copy small {
+  color: var(--warga-muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.warga-footer-contact-item-copy strong {
+  min-width: 0;
+  color: var(--warga-ink);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.warga-footer-contact-item > .fa-chevron-right {
+  color: var(--warga-muted);
+  font-size: 11px;
+}
 
 .warga-footer-install-steps {
   display: grid;
@@ -257,6 +357,7 @@ body.warga-dialog-open { overflow: hidden; }
 body.theme-dark .warga-footer-install { border-top-color: var(--warga-line); }
 body.theme-dark .warga-footer-modal-icon.is-share { background: #322a57; color: #c9beff; }
 body.theme-dark .warga-footer-modal-icon.is-ios { background: #303a45; color: #f0f4f8; }
+body.theme-dark .warga-footer-modal-icon.is-contact { background: #203b59; color: #a9cff8; }
 
 @media (display-mode: standalone) {
   .warga-footer-install { display: none !important; }
@@ -271,6 +372,10 @@ body.theme-dark .warga-footer-modal-icon.is-ios { background: #303a45; color: #f
   .warga-footer-modal { padding: 12px; }
   .warga-footer-modal-panel { padding: 24px 16px 18px; border-radius: 22px; }
   .warga-footer-modal-panel h2 { font-size: 20px; }
+  .warga-site-footer-tagline { font-size: 12px; }
+  .warga-footer-contact-item { grid-template-columns: 42px minmax(0, 1fr) 10px; gap: 10px; padding: 9px 10px; }
+  .warga-footer-contact-item-icon { width: 42px; height: 42px; }
+  .warga-footer-contact-item-copy strong { font-size: 14px; }
 }
 
 @media (max-width: 340px) {

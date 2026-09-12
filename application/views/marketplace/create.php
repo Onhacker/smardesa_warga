@@ -15,6 +15,7 @@ $values = array_merge(array(
 $errors = isset($fieldErrors) && is_array($fieldErrors) ? $fieldErrors : array();
 $value = static function ($key, $fallback = '') use ($values) { return isset($values[$key]) ? (string) $values[$key] : (string) $fallback; };
 $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (string) $errors[$key] : ''; };
+$marketTermsUrl = site_url('syarat-ketentuan#pasar-digital');
 ?>
 
 <div class="marketplace-page marketplace-form-page">
@@ -51,13 +52,33 @@ $error = static function ($key) use ($errors) { return isset($errors[$key]) ? (s
                 </div>
                 <?php if ($error('images')): ?><small class="market-form-error market-form-error-block"><?= e($error('images')) ?></small><?php endif; ?>
                 <?php if (!$editMode): ?>
-                    <label class="market-product-consent" for="market-product-terms">
+                    <div class="market-product-consent">
                         <input type="checkbox" id="market-product-terms" name="market_terms_accepted" value="1" required aria-required="true">
-                        <span>Saya memastikan produk ini legal dan tidak termasuk barang terlarang, termasuk rokok/produk nikotin, minuman beralkohol, narkotika, atau senjata. Saya menyetujui <a href="<?= site_url('syarat-ketentuan#pasar-digital') ?>" target="_blank" rel="noopener">Syarat &amp; Ketentuan Pasar Dapulik</a>.</span>
-                    </label>
+                        <span><label for="market-product-terms">Saya memastikan produk ini legal dan tidak termasuk barang terlarang, termasuk rokok/produk nikotin, minuman beralkohol, narkotika, atau senjata. Saya menyetujui</label> <a href="<?= e($marketTermsUrl) ?>" data-market-terms-open data-market-terms-url="<?= e($marketTermsUrl) ?>" aria-controls="market-terms-dialog" aria-haspopup="dialog">Syarat &amp; Ketentuan Pasar Dapulik</a>.</span>
+                    </div>
                 <?php endif; ?>
                 <div class="market-form-actions"><a href="<?= site_url('pasar/tokoku') ?>" class="btn btn-s market-form-cancel">Batal</a><button type="submit" class="btn btn-s market-form-submit"><i class="fa fa-cloud-upload-alt color-white" aria-hidden="true"></i><span class="color-white"><?= $editMode ? 'Simpan perubahan' : 'Terbitkan produk' ?></span></button></div>
             </form>
         </div>
     </section>
+
+    <?php if (!$editMode): ?>
+    <div class="market-terms-modal" id="market-terms-dialog" data-market-terms-modal hidden aria-hidden="true">
+        <button type="button" class="market-terms-backdrop" data-market-terms-close tabindex="-1" aria-label="Tutup syarat dan ketentuan"></button>
+        <section class="market-terms-dialog" role="dialog" aria-modal="true" aria-labelledby="market-terms-title" aria-describedby="market-terms-description">
+            <header class="market-terms-dialog-head">
+                <span class="market-terms-dialog-icon" aria-hidden="true"><i class="fa fa-file-contract"></i></span>
+                <div><p>PASAR DAPULIK</p><h2 id="market-terms-title">Syarat &amp; Ketentuan</h2></div>
+                <button type="button" class="market-terms-close" data-market-terms-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+            </header>
+            <p class="market-terms-dialog-description" id="market-terms-description">Ketentuan penjualan dan daftar produk yang dilarang.</p>
+            <div class="market-terms-dialog-scroll">
+                <div class="market-terms-loading" data-market-terms-loading role="status" aria-live="polite"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i><span>Memuat syarat dan ketentuan…</span></div>
+                <div class="market-terms-content" data-market-terms-content hidden></div>
+                <div class="market-terms-error" data-market-terms-error role="alert" hidden><i class="fa fa-exclamation-circle" aria-hidden="true"></i><p>Syarat dan ketentuan belum dapat dimuat.</p><button type="button" data-market-terms-retry>Coba lagi</button></div>
+            </div>
+            <footer class="market-terms-dialog-footer"><button type="button" data-market-terms-close>Mengerti</button></footer>
+        </section>
+    </div>
+    <?php endif; ?>
 </div>

@@ -64,6 +64,26 @@ if (!function_exists('warga_replace_institution')) {
     }
 }
 
+if (!function_exists('warga_notification_display_text')) {
+    /**
+     * Localise legacy notification copy at render time without changing the
+     * stored notification or any workflow status identifiers.
+     */
+    function warga_notification_display_text($text)
+    {
+        $localized = preg_replace(
+            array(
+                '/\bSmart\s*Desa\s+lokal\b/iu',
+                '/\bverified\b/iu',
+                '/\bapproved\b/iu'
+            ),
+            array('SI DAPULIK', 'diverifikasi', 'disetujui'),
+            (string) $text
+        );
+        return $localized !== NULL ? $localized : (string) $text;
+    }
+}
+
 function warga_complaint_status($status)
 {
     $labels = array('submitted'=>'Dikirim','received'=>'Diterima','processing'=>'Ditindaklanjuti','resolved'=>'Selesai','rejected'=>'Ditolak');
