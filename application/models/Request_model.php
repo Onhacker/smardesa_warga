@@ -547,7 +547,8 @@ class Request_model extends CI_Model
                 }
                 if ($filters['date'] !== '' && substr((string) ($row[$dateField] ?? ''), 0, 10) !== $filters['date']) return FALSE;
                 if ($filters['status'] === 'issued' && $row['status'] !== 'issued') return FALSE;
-                if ($filters['status'] === 'active' && !in_array($row['status'], array('submitted', 'verified', 'approved', 'syncing', 'revision'), TRUE)) return FALSE;
+                if ($filters['status'] === 'active' && !in_array($row['status'], array('submitted', 'verified', 'approved', 'syncing'), TRUE)) return FALSE;
+                if ($filters['status'] === 'revision' && $row['status'] !== 'revision') return FALSE;
                 return TRUE;
             }));
             usort($rows, function ($left, $right) use ($dateField) {
@@ -597,7 +598,7 @@ class Request_model extends CI_Model
             $date = '';
         }
         $status = isset($filters['status']) && is_scalar($filters['status']) ? (string) $filters['status'] : 'all';
-        if (!in_array($status, array('all', 'active', 'issued'), TRUE)) $status = 'all';
+        if (!in_array($status, array('all', 'active', 'issued', 'revision'), TRUE)) $status = 'all';
         $page = isset($filters['page']) && is_scalar($filters['page']) ? (string) $filters['page'] : '1';
         $page = ctype_digit($page) ? max(1, (int) $page) : 1;
         return array('q' => $query, 'date' => $date, 'status' => $status, 'page' => $page);
@@ -616,7 +617,8 @@ class Request_model extends CI_Model
                 ->where('sr.' . $dateField . ' <=', $filters['date'] . ' 23:59:59');
         }
         if ($filters['status'] === 'issued') $this->db->where('sr.status', 'issued');
-        if ($filters['status'] === 'active') $this->db->where_in('sr.status', array('submitted', 'verified', 'approved', 'syncing', 'revision'));
+        if ($filters['status'] === 'active') $this->db->where_in('sr.status', array('submitted', 'verified', 'approved', 'syncing'));
+        if ($filters['status'] === 'revision') $this->db->where('sr.status', 'revision');
     }
 
     public function summary($userId)

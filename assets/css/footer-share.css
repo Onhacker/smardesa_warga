@@ -387,3 +387,16 @@ body.theme-dark .warga-footer-modal-icon.is-contact { background: #203b59; color
 @media (prefers-reduced-motion: reduce) {
   .warga-site-footer-action { transition: none; }
 }
+
+/* Footer actions sit on saturated brand-colour backgrounds.  Keep every
+ * glyph/label white even when the global theme or button defaults are loaded
+ * after the footer stylesheet. */
+body .warga-site-footer .warga-site-footer-action,
+body .warga-site-footer .warga-site-footer-action i,
+body .warga-site-footer .warga-site-footer-action span,
+body .warga-footer-modal .warga-site-footer-share-button,
+body .warga-footer-modal .warga-site-footer-share-button i,
+body .warga-footer-modal .warga-site-footer-share-button span,
+body .warga-footer-modal .warga-footer-modal-done {
+  color: #fff !important;
+}

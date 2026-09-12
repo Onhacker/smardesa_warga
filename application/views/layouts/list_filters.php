@@ -18,7 +18,7 @@
     <?php if ($listKind === 'requests'): ?>
         <input type="hidden" name="status" value="<?= e($listing['filters']['status']) ?>">
         <nav class="warga-list-status" aria-label="Filter status permohonan">
-            <?php foreach (array('all' => 'Semua', 'active' => 'Diproses', 'issued' => 'Selesai') as $value => $label): ?>
+            <?php foreach (array('all' => 'Semua', 'active' => 'Diproses', 'issued' => 'Selesai', 'revision' => 'Perbaikan') as $value => $label): ?>
                 <?php $filterQuery = $listing['filters']; $filterQuery['status'] = $value; ?>
                 <a href="<?= e($listUrl . '?' . http_build_query($filterQuery)) ?>" data-list-filter="<?= e($value) ?>" class="<?= $listing['filters']['status'] === $value ? 'active' : '' ?>" <?= $listing['filters']['status'] === $value ? 'aria-current="true"' : '' ?>><?= e($label) ?></a>
             <?php endforeach; ?>

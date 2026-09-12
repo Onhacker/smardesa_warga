@@ -5,13 +5,16 @@ $lettersPage = !empty($lettersPage);
 ?>
 <?php if ($lettersPage): ?>
 <section class="warga-home-head warga-letters-head" aria-labelledby="warga-letters-title">
-    <div class="warga-letters-copy"><p>PELAYANAN PERMOHONAN SURAT</p><h1 id="warga-letters-title">Surat menyurat</h1><span>Ajukan dan pantau surat administrasi Anda.</span></div>
     <span class="warga-intro-icon" aria-hidden="true"><i class="fa fa-envelope"></i></span>
+    <div class="warga-letters-copy">
+        <h1 id="warga-letters-title">Surat Menyurat</h1>
+        <p class="warga-letters-subtitle">Pelayanan Permohonan Surat</p>
+    </div>
 </section>
 <?php endif; ?>
 <nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
-    <a href="<?= site_url('permohonan') ?>"><i class="fa fa-file-alt"></i> Permohonanku</a>
-    <a href="<?= site_url('layanan') ?>"><i class="fa fa-plus"></i> Ajukan Surat</a>
+    <a class="is-history" href="<?= site_url('permohonan') ?>"><i class="fa fa-history" aria-hidden="true"></i> Riwayat</a>
+    <a class="is-create" href="<?= site_url('layanan') ?>"><i class="fa fa-plus" aria-hidden="true"></i> Ajukan Surat</a>
 </nav>
 <?php if (!$lettersPage): ?><section class="warga-home-head">
     <div class="warga-home-identity">
@@ -22,22 +25,22 @@ $lettersPage = !empty($lettersPage);
 </section><?php endif; ?>
 
 <section class="warga-summary-band" aria-label="Ringkasan permohonan">
-    <div class="warga-summary-card is-total">
+    <a href="<?= site_url('permohonan') ?>" class="warga-summary-card is-total" aria-label="Lihat semua <?= (int) $summary['total'] ?> permohonan">
         <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-file-alt"></i></span>
         <strong><?= number_format($summary['total']) ?></strong><span class="warga-summary-label">Total</span>
-    </div>
-    <div class="warga-summary-card is-active">
+    </a>
+    <a href="<?= e(site_url('permohonan') . '?status=active') ?>" class="warga-summary-card is-active" aria-label="Lihat <?= (int) $summary['active'] ?> permohonan yang diproses">
         <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-clock"></i></span>
         <strong><?= number_format($summary['active']) ?></strong><span class="warga-summary-label">Diproses</span>
-    </div>
-    <div class="warga-summary-card is-issued">
+    </a>
+    <a href="<?= e(site_url('permohonan') . '?status=issued') ?>" class="warga-summary-card is-issued" aria-label="Lihat <?= (int) $summary['issued'] ?> permohonan yang selesai">
         <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-check-circle"></i></span>
         <strong><?= number_format($summary['issued']) ?></strong><span class="warga-summary-label">Selesai</span>
-    </div>
-    <div class="warga-summary-card is-revision">
+    </a>
+    <a href="<?= e(site_url('permohonan') . '?status=revision') ?>" class="warga-summary-card is-revision" aria-label="Lihat <?= (int) $summary['revision'] ?> permohonan yang perlu diperbaiki">
         <span class="warga-summary-icon" aria-hidden="true"><i class="fa fa-wrench"></i></span>
         <strong><?= number_format($summary['revision']) ?></strong><span class="warga-summary-label">Perbaikan</span>
-    </div>
+    </a>
 </section>
 
 <section class="warga-service-card warga-dashboard-services" aria-labelledby="warga-service-title">
@@ -88,7 +91,3 @@ $lettersPage = !empty($lettersPage);
     <div><strong>Akun belum terverifikasi</strong><p>Akun lama ini belum cocok dengan Data Penduduk <?= e($institutionLower) ?>. Hubungi operator <?= e($institutionLower) ?> agar data penduduk disinkronkan, lalu daftarkan akun warga menggunakan NIK, No. KK, dan nama yang sesuai.</p></div>
 </section>
 <?php endif; ?>
-
-<section class="warga-home-notice">
-    <i class="fa fa-sync-alt"></i><div><strong>Sinkronisasi <?= e($institutionLabel) ?></strong><p>Status permohonan diperbarui otomatis saat perangkat SI DAPULIK <?= e($institutionLower) ?> terhubung.</p></div>
-</section>

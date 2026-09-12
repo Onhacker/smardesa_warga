@@ -2580,6 +2580,118 @@ body #page .page-content .warga-action-buttons .btn i {
   }
 }
 
+/* Surat dashboard refinements: the four counters are real links so residents
+ * can jump straight to the matching history filter.  Keep the anchor cards
+ * visually identical to the original cards while tightening their height. */
+#page .page-content .warga-summary-band > a.warga-summary-card {
+  --warga-summary-accent: var(--warga-teal-dark);
+  --warga-summary-tint: #e8f0fb;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 104px;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px 10px;
+  border: 1px solid var(--warga-line) !important;
+  border-radius: 14px;
+  background: var(--warga-surface);
+  box-shadow: var(--warga-shadow-soft);
+  color: var(--warga-ink);
+  overflow: hidden;
+  text-align: center;
+  text-decoration: none;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+#page .page-content .warga-summary-band > a.warga-summary-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: var(--warga-summary-accent);
+  content: '';
+}
+#page .page-content .warga-summary-band > a.warga-summary-card > .warga-summary-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--warga-summary-tint);
+  color: var(--warga-summary-accent) !important;
+  font-size: 14px;
+  line-height: 1;
+}
+#page .page-content .warga-summary-band > a.warga-summary-card > strong {
+  margin-top: 9px;
+  color: var(--warga-summary-accent) !important;
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+#page .page-content .warga-summary-band > a.warga-summary-card > .warga-summary-label {
+  margin-top: 6px;
+  color: var(--warga-muted) !important;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.2;
+  text-align: center;
+}
+#page .page-content .warga-summary-band > a.warga-summary-card.is-active { --warga-summary-accent: var(--warga-blue); --warga-summary-tint: #e7eef9; }
+#page .page-content .warga-summary-band > a.warga-summary-card.is-issued { --warga-summary-accent: var(--warga-green); --warga-summary-tint: #e7f3e8; }
+#page .page-content .warga-summary-band > a.warga-summary-card.is-revision { --warga-summary-accent: var(--warga-orange); --warga-summary-tint: #f9ece2; }
+#page .page-content .warga-summary-band > a.warga-summary-card:hover,
+#page .page-content .warga-summary-band > a.warga-summary-card:focus-visible {
+  border-color: var(--warga-summary-accent) !important;
+  box-shadow: 0 10px 22px rgba(31, 45, 56, .12);
+  color: var(--warga-ink);
+  outline: none;
+  transform: translateY(-2px);
+}
+.theme-dark #page .page-content .warga-summary-band > a.warga-summary-card {
+  border-color: var(--warga-line) !important;
+  background: var(--warga-surface);
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .2);
+}
+.theme-dark #page .page-content .warga-summary-band > a.warga-summary-card.is-total,
+.theme-dark #page .page-content .warga-summary-band > a.warga-summary-card.is-active { --warga-summary-tint: rgba(35, 95, 164, .24); }
+.theme-dark #page .page-content .warga-summary-band > a.warga-summary-card.is-issued { --warga-summary-tint: rgba(45, 120, 59, .24); }
+.theme-dark #page .page-content .warga-summary-band > a.warga-summary-card.is-revision { --warga-summary-tint: rgba(168, 84, 32, .24); }
+
+/* Give both Surat actions a clear, consistent button treatment. */
+#page .page-content .warga-letter-shortcuts > a.is-history,
+#page .page-content .warga-letter-shortcuts > a.is-create {
+  min-height: 50px;
+  padding: 14px 14px;
+  border-color: transparent;
+  background: var(--warga-blue);
+  color: #fff !important;
+  font-weight: 750;
+}
+#page .page-content .warga-letter-shortcuts > a.is-history > i,
+#page .page-content .warga-letter-shortcuts > a.is-create > i { color: #fff !important; }
+#page .page-content .warga-letter-shortcuts > a.is-history:hover,
+#page .page-content .warga-letter-shortcuts > a.is-create:hover,
+#page .page-content .warga-letter-shortcuts > a.is-history:focus-visible,
+#page .page-content .warga-letter-shortcuts > a.is-create:focus-visible {
+  color: #fff !important;
+  filter: brightness(1.05);
+}
+
+@media (max-width: 460px) {
+  #page .page-content .warga-summary-band > a.warga-summary-card {
+    min-height: 92px;
+    padding: 10px 5px 8px;
+    border-radius: 11px;
+  }
+  #page .page-content .warga-summary-band > a.warga-summary-card > .warga-summary-icon { width: 30px; height: 30px; font-size: 13px; }
+  #page .page-content .warga-summary-band > a.warga-summary-card > strong { margin-top: 8px; font-size: 23px; }
+  #page .page-content .warga-summary-band > a.warga-summary-card > .warga-summary-label { margin-top: 5px; font-size: 9px; }
+}
+
 /* Match the fixed footer geometry from the supplied AppKit v22 template. Keep
  * the SmartDesa labels/icons and equal-width navigation columns, but do not
  * add a second rounded/white layer above the original footer surface. */
@@ -7652,4 +7764,41 @@ body #page .page-content .warga-notification-type-icon.is-complaint i { color: #
   .warga-notification-center-copy strong { font-size: 15px; }
   .warga-notification-center-copy p { font-size: 12.5px; }
   .warga-notification-center-copy time { font-size: 11px; }
+}
+
+/* Final Surat hero override: the compact two-line variant replaces the old
+ * three-line copy without changing the shared announcement geometry. */
+#page .page-content .warga-letters-head {
+  justify-content: flex-start;
+  min-height: 104px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+}
+#page .page-content .warga-letters-head .warga-letters-copy h1 {
+  margin: 0 0 3px;
+  font-size: clamp(24px, 4.6vw, 32px);
+  line-height: 1.05;
+}
+#page .page-content .warga-letters-head .warga-letters-copy { flex: 1 1 auto; min-width: 0; }
+#page .page-content .warga-letters-head .warga-letters-subtitle {
+  margin: 0 !important;
+  color: #eff5fd !important;
+  font-size: 14px;
+  line-height: 1.25;
+  text-transform: none;
+}
+@media (max-width: 480px) {
+  #page .page-content .warga-letters-head {
+    min-height: 92px;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+  }
+  #page .page-content .warga-letters-head .warga-letters-copy h1 { font-size: 23px; }
+  #page .page-content .warga-letters-head .warga-letters-subtitle { font-size: 12px; }
+}
+@media (max-width: 360px) {
+  #page .page-content .warga-letters-head { min-height: 84px; gap: 10px; padding: 12px 14px; }
+  #page .page-content .warga-letters-head .warga-letters-copy h1 { font-size: 21px; }
+  #page .page-content .warga-letters-head .warga-letters-subtitle { font-size: 11px; }
 }
