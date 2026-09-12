@@ -11,6 +11,7 @@ $route['dashboard'] = 'dashboard/index';
 $route['surat'] = 'dashboard/letters';
 $route['pengumuman'] = 'community/announcements';
 $route['pengumuman/terbitkan'] = 'community/publish';
+$route['pengumuman/(:any)/lampiran'] = 'community/attachment/$1';
 $route['pengumuman/(:any)/hapus'] = 'community/delete/$1';
 $route['pengumuman/(:any)'] = 'community/announcement/$1';
 $route['pengaduan'] = 'community/complaints';

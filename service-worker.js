@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-09-performance-93';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-12-performance-94';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
@@ -9,6 +9,7 @@ const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const assetPath = new URL('assets/', scopeUrl).pathname;
 const marketplaceImagePath = new URL('pasar/gambar/', scopeUrl).pathname;
+const privateAnnouncementPath = new URL('pengumuman/', scopeUrl).pathname;
 const offlineUrl = new URL('offline.html', scopeUrl).href;
 const notificationFallbackUrl = new URL('notifikasi', scopeUrl);
 const precache = [
@@ -29,6 +30,14 @@ function isMarketplaceImage(request, url) {
   if (!/^[a-f0-9]{20}$/i.test(url.searchParams.get('v') || '')) return false;
   if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
   return true;
+}
+
+// Announcement attachments are authenticated, tenant-scoped files. Never
+// put them into a Cache Storage bucket, even when the browser requests an
+// image/PDF with a mode that could otherwise look cacheable.
+function isPrivateAnnouncementAttachment(request, url) {
+  if (request.method !== 'GET' || url.origin !== self.location.origin) return false;
+  return url.pathname.startsWith(privateAnnouncementPath) && /\/lampiran$/i.test(url.pathname);
 }
 
 function marketplaceImageFamily(url) {
@@ -115,6 +124,10 @@ self.addEventListener('fetch', function (event) {
   if (request.method !== 'GET') return;
   var url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (isPrivateAnnouncementAttachment(request, url)) {
+    event.respondWith(fetch(request));
+    return;
+  }
   if (request.mode === 'navigate') {
     event.respondWith(Promise.resolve(event.preloadResponse).then(function (preloaded) {
       return preloaded || fetch(request);

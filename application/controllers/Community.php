@@ -52,8 +52,34 @@ class Community extends Public_Controller
         $this->form_validation->set_rules('title', 'Judul', 'trim|required|max_length[180]');
         $this->form_validation->set_rules('body', 'Isi pengumuman', 'trim|required|min_length[10]|max_length[10000]');
         if (!$this->form_validation->run()) $this->redirect_with('pengumuman', 'error', trim(strip_tags(validation_errors())));
-        $id = $this->community->publish($this->currentUser, trim((string)$this->input->post('title')), trim((string)$this->input->post('body')));
-        $this->redirect_with($id ? 'pengumuman/'.$id : 'pengumuman', $id ? 'success' : 'error', $id ? 'Pengumuman diterbitkan.' : 'Pengumuman belum dapat disimpan.');
+        $upload = isset($_FILES['announcement_attachment']) && is_array($_FILES['announcement_attachment'])
+            ? $_FILES['announcement_attachment'] : NULL;
+        $id = $this->community->publish(
+            $this->currentUser,
+            trim((string)$this->input->post('title')),
+            trim((string)$this->input->post('body')),
+            $upload
+        );
+        $message = $id ? 'Pengumuman diterbitkan.' : ($this->community->last_error() ?: 'Pengumuman belum dapat disimpan.');
+        $this->redirect_with($id ? 'pengumuman/'.$id : 'pengumuman', $id ? 'success' : 'error', $message);
+    }
+
+    public function attachment($id)
+    {
+        $this->require_authentication();
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        // Resolve the announcement first so the same tenant and publication
+        // rules used by the detail page also protect the private file.
+        if (!$this->community->announcement($id, $this->currentUser)) show_404();
+        $attachment = $this->community->announcement_attachment($id, $this->currentUser);
+        if (!$attachment || empty($attachment['storage_path'])) show_404();
+        $disposition = (string) $this->input->get('download', TRUE) === '1' ? 'attachment' : 'inline';
+        if (!$this->stream_private_file(
+            $attachment['storage_path'],
+            $attachment['original_name'] ?? 'lampiran',
+            $disposition,
+            $attachment['sha256'] ?? ''
+        )) show_404();
     }
 
     public function delete($id)

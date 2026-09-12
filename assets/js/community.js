@@ -482,6 +482,95 @@
 
   document.querySelectorAll('[data-complaint-form], [data-complaint-reply-form]').forEach(bindComplaintForm);
 
+  function initAnnouncementAttachmentModal() {
+    var modal = document.querySelector('[data-announcement-attachment-modal]');
+    if (!modal || modal.getAttribute('data-announcement-attachment-bound') === '1') return;
+    modal.setAttribute('data-announcement-attachment-bound', '1');
+    // Moving the fixed dialog outside #page avoids AppKit transforms clipping
+    // it on compact Android screens and installed PWA/TWA windows.
+    if (modal.parentNode !== document.body) document.body.appendChild(modal);
+    var title = modal.querySelector('[data-announcement-attachment-title]');
+    var image = modal.querySelector('[data-announcement-attachment-image]');
+    var frame = modal.querySelector('[data-announcement-attachment-frame]');
+    var error = modal.querySelector('[data-announcement-attachment-error]');
+    var download = modal.querySelector('[data-announcement-attachment-download]');
+    var previousFocus = null;
+
+    function focusableItems() {
+      return Array.prototype.slice.call(modal.querySelectorAll('a[href],button:not([disabled])')).filter(function (item) {
+        return !item.hidden && item.getAttribute('aria-hidden') !== 'true';
+      });
+    }
+    function showError() {
+      if (image) { image.hidden = true; image.removeAttribute('src'); }
+      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
+      if (error) error.hidden = false;
+    }
+    function close() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('community-v22-attachment-open');
+      if (image) { image.hidden = true; image.removeAttribute('src'); }
+      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
+      if (error) error.hidden = true;
+      var focus = previousFocus;
+      previousFocus = null;
+      if (focus && typeof focus.focus === 'function') focus.focus();
+    }
+    function open(trigger) {
+      var url = trigger.getAttribute('data-attachment-url') || '';
+      if (!url) return;
+      previousFocus = document.activeElement;
+      var name = trigger.getAttribute('data-attachment-name') || 'Lampiran pengumuman';
+      var mime = (trigger.getAttribute('data-attachment-mime') || '').toLowerCase();
+      if (title) title.textContent = name;
+      if (error) error.hidden = true;
+      if (image) { image.hidden = true; image.removeAttribute('src'); image.alt = name; }
+      if (frame) { frame.hidden = true; frame.setAttribute('src', 'about:blank'); }
+      if (download) {
+        download.href = url + (url.indexOf('?') === -1 ? '?' : '&') + 'download=1';
+        download.setAttribute('aria-label', 'Unduh ' + name);
+      }
+      if (mime.indexOf('image/') === 0 && image) {
+        image.hidden = false;
+        image.src = url;
+      } else if (mime === 'application/pdf' && frame) {
+        frame.hidden = false;
+        frame.src = url;
+      } else {
+        showError();
+      }
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('community-v22-attachment-open');
+      var closeButton = modal.querySelector('.community-v22-attachment-close');
+      if (closeButton) window.setTimeout(function () { closeButton.focus(); }, 20);
+    }
+
+    if (image) image.addEventListener('error', showError);
+    modal.querySelectorAll('[data-announcement-attachment-close]').forEach(function (button) {
+      button.addEventListener('click', function (event) { event.preventDefault(); close(); });
+    });
+    document.addEventListener('click', function (event) {
+      var trigger = event.target && event.target.closest ? event.target.closest('[data-announcement-attachment-open]') : null;
+      if (!trigger) return;
+      event.preventDefault();
+      open(trigger);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (modal.hidden) return;
+      if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+      if (event.key !== 'Tab') return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+  }
+  initAnnouncementAttachmentModal();
+
   // AppKit v22's double-slider advances every four seconds.  Keep the
   // community slider equally useful when its lightweight scroll-snap markup
   // is used (Splide-marked sliders are initialized by custom.min.js instead).

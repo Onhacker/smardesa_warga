@@ -324,6 +324,16 @@ CREATE TABLE IF NOT EXISTS warga_announcements (
  FOREIGN KEY (village_id) REFERENCES village_tenants(id),
  FOREIGN KEY (author_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS warga_announcement_attachments (
+ id CHAR(36) NOT NULL PRIMARY KEY, announcement_id CHAR(36) NOT NULL, village_id CHAR(36) NOT NULL,
+ original_name VARCHAR(180) NOT NULL, stored_name VARCHAR(255) NOT NULL, storage_path VARCHAR(1024) NOT NULL,
+ mime_type VARCHAR(100) NOT NULL, file_size BIGINT UNSIGNED NOT NULL, sha256 CHAR(64) NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ UNIQUE KEY uniq_announcement_attachment (announcement_id),
+ KEY idx_announcement_attachment_village (announcement_id, village_id),
+ FOREIGN KEY (announcement_id) REFERENCES warga_announcements(id) ON DELETE CASCADE,
+ FOREIGN KEY (village_id) REFERENCES village_tenants(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 CREATE TABLE IF NOT EXISTS warga_complaints (
  id CHAR(36) PRIMARY KEY, village_id CHAR(36) NOT NULL, citizen_user_id BIGINT UNSIGNED NOT NULL,
  title VARCHAR(180) NOT NULL, body TEXT NOT NULL, location VARCHAR(255) NULL,
