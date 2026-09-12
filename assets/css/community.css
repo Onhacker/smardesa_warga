@@ -1102,6 +1102,39 @@ body.community-v22-attachment-open { overflow: hidden; }
   place-items: center;
   background: #e9f0f6;
 }
+.community-v22-attachment-image-loader {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  min-width: 150px;
+  min-height: 92px;
+  box-sizing: border-box;
+  padding: 16px 18px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid rgba(35, 95, 164, .18);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .9);
+  color: #235fa4;
+  font-size: 13px;
+  font-weight: 750;
+  box-shadow: 0 8px 22px rgba(16, 42, 67, .12);
+}
+.community-v22-attachment-image-loader[hidden] { display: none !important; }
+.community-v22-attachment-image-spinner {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 3px solid #d7e3ef;
+  border-top-color: #235fa4;
+  border-radius: 50%;
+  font-size: 0;
+  animation: community-submit-spin .72s linear infinite;
+}
+.community-v22-attachment-image-spinner .fa-spinner { display: none; }
 .community-v22-attachment-viewer > img { display: block; max-width: 100%; max-height: min(66vh, 680px); margin: auto; object-fit: contain; }
 .community-v22-attachment-viewer > [hidden] { display: none !important; }
 .community-v22-attachment-viewer > p { max-width: 420px; margin: 30px; color: #526b83; font-size: 14px; line-height: 1.55; text-align: center; }
@@ -1224,6 +1257,8 @@ body.theme-dark .community-v22-attachment-dialog-head h2 { color: #f1f5f7; }
 body.theme-dark .community-v22-attachment-dialog-head .community-v22-eyebrow { color: #9fc5ef !important; }
 body.theme-dark .community-v22-attachment-close { background: #30404c; color: #f1f5f7; }
 body.theme-dark .community-v22-attachment-viewer { background: #111a20; }
+body.theme-dark .community-v22-attachment-image-loader { border-color: #3c5770; background: rgba(32, 42, 48, .94); color: #b5d3f3; }
+body.theme-dark .community-v22-attachment-image-spinner { border-color: #405a70; border-top-color: #9fc5ef; }
 body.theme-dark .community-v22-attachment-viewer > p { color: #bdc9d1; }
 body.theme-dark .community-v22-pdf-status { color: #bdc9d1; }
 

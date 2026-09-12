@@ -7515,3 +7515,76 @@ body #page .page-content .warga-notification-type-icon.is-complaint i { color: #
   #menu-main .warga-menu-location span { font-size: 8px; }
   #menu-main .warga-menu-close { width: 34px; height: 34px; }
 }
+
+/* Keep the notification actions compact and anchored to opposite sides of
+ * the page toolbar.  The earlier flex rule made the read-all form consume
+ * the entire row, leaving the search control visually detached on phones. */
+#page .community-v22-notification-page .warga-notification-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+#page .community-v22-notification-page .warga-notification-actions {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: calc(100% - 54px);
+  min-width: 0;
+  margin: 0;
+}
+#page .community-v22-notification-page .warga-notification-actions .community-button {
+  display: inline-flex;
+  width: auto;
+  max-width: 100%;
+  min-height: 44px;
+  margin: 0;
+  justify-content: flex-start;
+  padding: 9px 13px;
+  overflow: hidden;
+  font-size: clamp(12px, 1.6vw, 14px);
+  line-height: 1.3;
+  white-space: nowrap;
+}
+#page .community-v22-notification-page .warga-notification-actions .community-button > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#page .community-v22-notification-page .warga-notification-search-trigger {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  align-self: center;
+  font-size: 16px;
+}
+
+/* The unread notification dialog is used for quick triage, so its title,
+ * message, and timestamp should remain comfortably readable at a glance. */
+.warga-notification-center-copy small { font-size: 10px; }
+.warga-notification-center-copy strong {
+  font-size: clamp(15px, 3.5vw, 17px);
+  line-height: 1.3;
+}
+.warga-notification-center-copy p {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  font-size: clamp(12.5px, 3.2vw, 14px);
+  line-height: 1.45;
+}
+.warga-notification-center-copy time {
+  font-size: clamp(11px, 2.8vw, 12px);
+  line-height: 1.35;
+}
+
+@media (max-width: 380px) {
+  #page .community-v22-notification-page .warga-notification-actions .community-button {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+  .warga-notification-center-copy strong { font-size: 15px; }
+  .warga-notification-center-copy p { font-size: 12.5px; }
+  .warga-notification-center-copy time { font-size: 11px; }
+}

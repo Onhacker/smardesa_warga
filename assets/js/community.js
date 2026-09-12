@@ -491,6 +491,7 @@
     if (modal.parentNode !== document.body) document.body.appendChild(modal);
     var title = modal.querySelector('[data-announcement-attachment-title]');
     var viewer = modal.querySelector('[data-announcement-attachment-viewer]');
+    var imageLoader = modal.querySelector('[data-announcement-attachment-image-loader]');
     var image = modal.querySelector('[data-announcement-attachment-image]');
     var pdfPreview = modal.querySelector('[data-announcement-attachment-pdf]');
     var pdfStatus = modal.querySelector('[data-announcement-attachment-pdf-status]');
@@ -557,6 +558,7 @@
       attachmentBlob = null;
       attachmentBlobPromise = null;
       if (image) { image.hidden = true; image.removeAttribute('src'); image.removeAttribute('data-preview-token'); }
+      if (imageLoader) imageLoader.hidden = true;
       resetPdf();
       if (error) error.hidden = true;
       return previewVersion;
@@ -565,6 +567,7 @@
     function showError(message, token) {
       if (typeof token === 'number' && token !== previewVersion) return;
       if (image) { image.hidden = true; image.removeAttribute('data-preview-token'); image.removeAttribute('src'); }
+      if (imageLoader) imageLoader.hidden = true;
       if (pdfPreview) pdfPreview.hidden = true;
       if (error) {
         if (message) error.textContent = message;
@@ -781,8 +784,16 @@
       if (mime.indexOf('image/') === 0 && image) {
         image.alt = name;
         image.setAttribute('data-preview-token', String(token));
-        image.hidden = false;
+        // Keep the image hidden until the browser has decoded it, so the
+        // modal never shows a blank/partially painted frame while a large
+        // attachment is loading (including slow mobile connections).
+        image.hidden = true;
+        if (imageLoader) imageLoader.hidden = false;
         image.src = url;
+        if (image.complete && image.naturalWidth > 0) {
+          image.hidden = false;
+          if (imageLoader) imageLoader.hidden = true;
+        }
       } else if (mime === 'application/pdf') {
         window.requestAnimationFrame(function () { renderPdf(url, token); });
       } else {
@@ -792,6 +803,12 @@
       if (closeButton) window.setTimeout(function () { closeButton.focus(); }, 20);
     }
 
+    if (image) image.addEventListener('load', function () {
+      var imageToken = parseInt(image.getAttribute('data-preview-token'), 10);
+      if (isNaN(imageToken) || imageToken !== previewVersion) return;
+      image.hidden = false;
+      if (imageLoader) imageLoader.hidden = true;
+    });
     if (image) image.addEventListener('error', function () {
       var imageToken = parseInt(image.getAttribute('data-preview-token'), 10);
       if (!isNaN(imageToken)) showError('Gambar belum dapat ditampilkan. Silakan unduh untuk melihat berkasnya.', imageToken);

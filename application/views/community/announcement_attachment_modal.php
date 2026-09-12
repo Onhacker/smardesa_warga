@@ -14,6 +14,10 @@
             <button type="button" class="community-v22-attachment-close" data-announcement-attachment-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
         </header>
         <div class="community-v22-attachment-viewer" data-announcement-attachment-viewer>
+            <div class="community-v22-attachment-image-loader" data-announcement-attachment-image-loader role="status" aria-live="polite" hidden>
+                <span class="community-v22-attachment-image-spinner" aria-hidden="true"><i class="fa fa-spinner fa-spin"></i></span>
+                <span>Memuat gambar…</span>
+            </div>
             <img data-announcement-attachment-image alt="" hidden>
             <div class="community-v22-pdf-preview" data-announcement-attachment-pdf hidden>
                 <p class="community-v22-pdf-status" data-announcement-attachment-pdf-status role="status"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i><span>Menyiapkan PDF…</span></p>
