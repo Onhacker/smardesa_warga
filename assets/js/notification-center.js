@@ -88,7 +88,7 @@
         var unread = Math.max(0, parseInt(data.unread, 10) || 0);
         setUnreadCount(unread);
         if (description) description.textContent = unread > 0
-          ? unread + ' pemberitahuan belum dibaca · 10 per halaman'
+          ? unread + ' pemberitahuan belum dibaca'
           : 'Tidak ada pemberitahuan yang belum dibaca.';
       }).catch(function (error) {
         if (sequence !== requestSequence || error.name === 'AbortError') return;

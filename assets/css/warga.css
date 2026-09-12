@@ -6914,6 +6914,68 @@ body.theme-dark .warga-confirm-actions .warga-confirm-cancel { border-color: #41
   .warga-account-form-actions .btn { flex: 1; padding-right: 10px; padding-left: 10px; }
 }
 
+/* Keep the edit-account introduction compact while giving the editable
+ * controls enough room for comfortable typing on touch screens. */
+#page .warga-account-edit-page > .warga-page-intro {
+  gap: 13px;
+  min-height: 0;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+}
+#page .warga-account-edit-page > .warga-page-intro > div { min-width: 0; }
+#page .warga-account-edit-page > .warga-page-intro p { margin-bottom: 1px; font-size: 10px; line-height: 1.2; }
+#page .warga-account-edit-page > .warga-page-intro h1 { margin-bottom: 2px; font-size: 23px; line-height: 1.1; }
+#page .warga-account-edit-page > .warga-page-intro > div > span { font-size: 12px; line-height: 1.25; }
+#page .warga-account-edit-page > .warga-page-intro .warga-intro-icon {
+  flex-basis: 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 18px;
+}
+#page .warga-account-edit-page .warga-account-form-card .content { padding: 24px 22px; }
+#page .warga-account-edit-page .warga-account-form-field { margin-bottom: 20px; }
+#page .warga-account-edit-page .warga-account-form-field > label { margin-bottom: 8px; font-size: 16px; line-height: 1.35; }
+#page .warga-account-edit-page .warga-account-form-input {
+  min-height: 56px;
+  padding-right: 14px;
+  padding-left: 14px;
+  border-radius: 14px;
+}
+#page .warga-account-edit-page .warga-account-form-input > input {
+  height: 54px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+#page .warga-account-edit-page .warga-account-form-input > i { width: 20px; font-size: 17px; }
+#page .warga-account-edit-page .warga-account-form-field > small { margin-top: 7px; font-size: 13px; line-height: 1.45; }
+#page .warga-account-edit-page .warga-password-toggle { flex-basis: 38px; width: 38px; height: 38px; }
+#page .warga-account-edit-page .warga-account-form-actions { margin-top: 26px; }
+#page .warga-account-edit-page .warga-account-form-actions .btn {
+  min-height: 48px;
+  padding: 10px 17px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+#page .warga-account-edit-page .warga-account-form-actions .warga-form-submit,
+#page .warga-account-edit-page .warga-account-form-actions .warga-form-submit:hover,
+#page .warga-account-edit-page .warga-account-form-actions .warga-form-submit:focus,
+#page .warga-account-edit-page .warga-account-form-actions .warga-form-submit > i,
+#page .warga-account-edit-page .warga-account-form-actions .warga-form-submit > span { color: #fff !important; }
+
+@media (max-width: 460px) {
+  #page .warga-account-edit-page > .warga-page-intro { padding: 14px 15px; }
+  #page .warga-account-edit-page > .warga-page-intro h1 { font-size: 21px; }
+  #page .warga-account-edit-page > .warga-page-intro > div > span { font-size: 11px; }
+  #page .warga-account-edit-page > .warga-page-intro .warga-intro-icon { flex-basis: 42px; width: 42px; height: 42px; border-radius: 13px; font-size: 17px; }
+  #page .warga-account-edit-page .warga-account-form-card .content { padding: 20px 16px; }
+  #page .warga-account-edit-page .warga-account-form-field > label { font-size: 15px; }
+  #page .warga-account-edit-page .warga-account-form-input { min-height: 54px; }
+  #page .warga-account-edit-page .warga-account-form-input > input { height: 52px; font-size: 17px; }
+  #page .warga-account-edit-page .warga-account-form-field > small { font-size: 12px; }
+  #page .warga-account-edit-page .warga-account-form-actions .btn { min-height: 46px; padding-right: 11px; padding-left: 11px; font-size: 15px; }
+}
+
 /* Request status journey: follow the AppKit v22 timeline pattern with a
  * coloured icon rail and one readable card per event. The status classes are
  * presentation-only; the history data and its order remain unchanged. */
