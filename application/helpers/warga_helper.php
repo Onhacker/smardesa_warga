@@ -283,6 +283,35 @@ if (!function_exists('warga_request_service_icon')) {
     }
 }
 
+if (!function_exists('warga_notification_icon')) {
+    /**
+     * Resolve a notification to a small, semantic icon catalogue.
+     *
+     * Notifications created before a dedicated `type` column existed can
+     * still be classified reliably from their tenant-scoped target path. The
+     * title fallback keeps legacy rows useful without changing the database.
+     */
+    function warga_notification_icon(array $notification)
+    {
+        $target = strtolower(trim((string) ($notification['target_path'] ?? '')));
+        $title = function_exists('mb_strtolower')
+            ? mb_strtolower(trim((string) ($notification['title'] ?? '')), 'UTF-8')
+            : strtolower(trim((string) ($notification['title'] ?? '')));
+
+        if (strpos($target, 'pengumuman/') === 0 || strpos($title, 'pengumuman') !== FALSE) {
+            return array('type' => 'announcement', 'icon' => 'fa fa-bullhorn', 'class' => 'is-announcement', 'label' => 'Pengumuman');
+        }
+        if (strpos($target, 'pengaduan/') === 0 || strpos($title, 'pengaduan') !== FALSE || strpos($title, 'aduan') !== FALSE) {
+            return array('type' => 'complaint', 'icon' => 'fa fa-comments', 'class' => 'is-complaint', 'label' => 'Pengaduan');
+        }
+        if (strpos($target, 'permohonan/') === 0 || strpos($target, 'petugas/permohonan/') === 0
+            || !empty($notification['request_id']) || strpos($title, 'surat') !== FALSE || strpos($title, 'permohonan') !== FALSE) {
+            return array('type' => 'letter', 'icon' => 'fa fa-envelope', 'class' => 'is-letter', 'label' => 'Surat');
+        }
+        return array('type' => 'general', 'icon' => 'fa fa-bell', 'class' => 'is-general', 'label' => 'Pemberitahuan');
+    }
+}
+
 if (!function_exists('warga_uuid')) {
     function warga_uuid()
     {

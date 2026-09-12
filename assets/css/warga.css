@@ -3191,6 +3191,376 @@ body.theme-dark #page .community-item p { color: #bdc9d0; }
   }
 }
 
+/* -------------------------------------------------------------------------
+   Notification centre and compact notification page
+   ------------------------------------------------------------------------- */
+body.warga-notification-center-open,
+body.warga-notification-search-open { overflow: hidden; }
+
+.warga-notification-center {
+  position: fixed;
+  z-index: 10020;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  padding: max(18px, env(safe-area-inset-top, 0px)) 15px max(18px, env(safe-area-inset-bottom, 0px));
+}
+.warga-notification-center[hidden] { display: none !important; }
+.warga-notification-center-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(10, 28, 49, .58);
+  cursor: pointer;
+  backdrop-filter: blur(2px);
+}
+.warga-notification-center-dialog {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(100%, 500px);
+  max-height: min(84vh, 760px);
+  margin-top: min(8vh, 72px);
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--warga-line);
+  border-radius: 22px;
+  background: var(--warga-surface, #fff);
+  box-shadow: 0 24px 65px rgba(8, 30, 55, .3);
+  color: var(--warga-ink);
+}
+.warga-notification-center-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--warga-line);
+}
+.warga-notification-center-head-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  background: #fce8ea;
+  color: #bd2f3d;
+  font-size: 19px;
+}
+.warga-notification-center-head p {
+  margin: 0 0 2px;
+  color: #bd2f3d !important;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .09em;
+  line-height: 1.3;
+}
+.warga-notification-center-head h2 {
+  margin: 0;
+  color: var(--warga-ink) !important;
+  font-size: 21px;
+  font-weight: 850;
+  line-height: 1.15;
+}
+.warga-notification-center-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--warga-muted) !important;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.warga-notification-center-close {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--warga-line);
+  border-radius: 11px;
+  background: var(--warga-bg);
+  color: var(--warga-muted);
+  cursor: pointer;
+}
+.warga-notification-center-results {
+  min-height: 170px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--warga-bg);
+}
+.warga-notification-center-list { display: grid; gap: 9px; padding: 12px; }
+.warga-notification-center-item {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 10px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid #cfdfef;
+  border-radius: 15px;
+  background: var(--warga-surface, #fff);
+  color: var(--warga-ink) !important;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(31, 70, 110, .05);
+}
+.warga-notification-center-item:hover,
+.warga-notification-center-item:focus-visible { border-color: #83abd7; outline: 0; }
+.warga-notification-center-item > .fa-chevron-right { color: #9aa9b6 !important; font-size: 10px; }
+.warga-notification-center-copy { min-width: 0; }
+.warga-notification-center-copy small {
+  display: block;
+  margin: 0 0 2px;
+  color: var(--warga-muted) !important;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .055em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+.warga-notification-center-copy strong {
+  display: block;
+  overflow: hidden;
+  color: var(--warga-ink) !important;
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.warga-notification-center-copy p {
+  display: -webkit-box;
+  margin: 3px 0 5px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--warga-muted) !important;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.warga-notification-center-copy time {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #356da9 !important;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+.warga-notification-type-icon {
+  display: grid;
+  place-items: center;
+  background: #fce8ea;
+  color: #bd2f3d;
+}
+.warga-notification-type-icon.is-letter { background: #e6f0fc; color: #2766ad; }
+.warga-notification-type-icon.is-announcement { background: #eee8fb; color: #7549bd; }
+.warga-notification-type-icon.is-complaint { background: #fff0e4; color: #b9571d; }
+.warga-notification-type-icon.is-general { background: #fce8ea; color: #bd2f3d; }
+.warga-notification-center-item .warga-notification-type-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  font-size: 16px;
+}
+.warga-notification-center-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 12px 13px;
+}
+.warga-notification-center-pagination button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--warga-teal-dark);
+  color: #fff;
+}
+.warga-notification-center-pagination button:disabled { background: #dce3e9; color: #8b99a5; opacity: .65; }
+.warga-notification-center-pagination span { color: var(--warga-muted); font-size: 11px; font-weight: 750; }
+.warga-notification-center-empty { padding: 35px 20px; text-align: center; }
+.warga-notification-center-empty > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 10px;
+  place-items: center;
+  border-radius: 16px;
+  background: #e8f5ec;
+  color: #2d783b;
+  font-size: 20px;
+}
+.warga-notification-center-empty h3 { margin: 0 0 4px; color: var(--warga-ink); font-size: 16px; }
+.warga-notification-center-empty p { margin: 0; color: var(--warga-muted); font-size: 12px; }
+.warga-notification-center-loading { display: grid; gap: 9px; padding: 12px; }
+.warga-notification-center-loading i {
+  display: block;
+  height: 78px;
+  border-radius: 15px;
+  background: linear-gradient(105deg, #dfe8ef 24%, #f7fafc 38%, #dfe8ef 52%);
+  background-size: 220% 100%;
+  animation: warga-skeleton-shimmer 1.15s ease-in-out infinite;
+}
+.warga-notification-center-error { margin: 0; padding: 13px 16px; border-top: 1px solid #efc3c7; background: #fff0f1; color: #9f2934; font-size: 12px; }
+.warga-notification-center-error[hidden] { display: none !important; }
+.warga-notification-center-error button { padding: 2px 4px; border: 0; background: transparent; color: #9f2934; font: inherit; font-weight: 850; text-decoration: underline; }
+.warga-notification-center-footer { padding: 12px 16px max(12px, env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--warga-line); background: var(--warga-surface, #fff); }
+.warga-notification-center-footer a { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; border-radius: 12px; background: #e7f0fb; color: #235fa4 !important; font-size: 13px; font-weight: 850; }
+
+/* Semantic colours also apply to the full notification history. */
+#page .warga-notification-list .warga-notification-type-icon { border-radius: 15px; }
+#page .warga-notification-list .warga-notification-type-icon,
+#page .warga-notification-list .warga-notification-type-icon i { color: #bd2f3d !important; }
+#page .warga-notification-list .warga-notification-type-icon.is-letter,
+#page .warga-notification-list .warga-notification-type-icon.is-letter i { color: #2766ad !important; }
+#page .warga-notification-list .warga-notification-type-icon.is-announcement,
+#page .warga-notification-list .warga-notification-type-icon.is-announcement i { color: #7549bd !important; }
+#page .warga-notification-list .warga-notification-type-icon.is-complaint,
+#page .warga-notification-list .warga-notification-type-icon.is-complaint i { color: #b9571d !important; }
+
+/* The page lead card is intentionally content-height: it introduces the
+ * screen without pushing the useful controls below the first viewport. */
+#page .community-v22-notification-page .community-v22-page-hero {
+  min-height: 0;
+  gap: 13px;
+  margin-bottom: 14px;
+  padding: 15px 17px;
+  border-radius: 18px;
+}
+#page .community-v22-notification-page .community-v22-page-hero-icon {
+  flex-basis: 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 18px;
+}
+#page .community-v22-notification-page .community-v22-page-hero h1 { margin-bottom: 2px; font-size: clamp(22px, 4.4vw, 28px); }
+#page .community-v22-notification-page .community-v22-page-hero .community-v22-eyebrow { margin-bottom: 2px; font-size: 10px; }
+#page .community-v22-notification-page .community-v22-page-hero p:last-child { font-size: 12px; line-height: 1.35; }
+
+.warga-notification-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 13px;
+}
+#page .community-v22-notification-page .warga-notification-actions { margin: 0; }
+#page .community-v22-notification-page .warga-notification-actions .community-button {
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 11px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+.warga-notification-search-trigger {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #c8d9eb;
+  border-radius: 11px;
+  background: #e7f0fb;
+  color: #235fa4;
+  font-size: 14px;
+  cursor: pointer;
+}
+.warga-notification-search-trigger:hover,
+.warga-notification-search-trigger:focus-visible { border-color: #7ea7d4; outline: 0; }
+
+.warga-notification-search-modal {
+  position: fixed;
+  z-index: 10010;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  padding: max(18px, env(safe-area-inset-top, 0px)) 15px 18px;
+}
+.warga-notification-search-modal[hidden] { display: none !important; }
+.warga-notification-search-backdrop { position: absolute; z-index: 0; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: rgba(10, 28, 49, .56); backdrop-filter: blur(2px); }
+.warga-notification-search-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 460px);
+  margin-top: min(14vh, 115px);
+  padding: 17px 15px 15px;
+  border: 1px solid var(--warga-line);
+  border-radius: 19px;
+  background: var(--warga-surface, #fff);
+  box-shadow: 0 20px 55px rgba(8, 30, 55, .28);
+}
+.warga-notification-search-dialog > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+#page .warga-notification-search-dialog > header p { margin: 0 0 3px; color: #235fa4 !important; font-size: 10px; }
+#page .warga-notification-search-dialog > header h2 { margin: 0; color: var(--warga-ink) !important; font-size: 21px; font-weight: 850; line-height: 1.2; }
+.warga-notification-search-dialog > header button { display: grid; width: 34px; height: 34px; place-items: center; padding: 0; border: 1px solid var(--warga-line); border-radius: 10px; background: var(--warga-bg); color: var(--warga-muted); }
+#page .warga-notification-search-dialog .warga-list-search { margin: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; }
+.warga-notification-search-dialog .warga-list-search-fields { grid-template-columns: minmax(0, 1fr); gap: 11px; }
+.warga-notification-search-dialog .warga-list-search-actions > * { flex: 1 1 0; }
+.warga-notification-search-dialog .warga-list-feedback:not(:empty) { margin: 10px 0 0; }
+#page .warga-notification-search-dialog .warga-list-error { margin: 10px 0 0; }
+.warga-notification-active-filter { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 11px; padding: 8px 10px; border-radius: 10px; background: #e7f0fb; color: var(--warga-muted); font-size: 11px; }
+.warga-notification-active-filter i { margin-right: 5px; color: #235fa4; }
+#page .warga-notification-active-filter a { color: #235fa4 !important; font-weight: 850; }
+
+#page .community-v22-notification-page .warga-notification-list { gap: 9px; margin-bottom: 18px; }
+#page .community-v22-notification-page .warga-notification-item {
+  grid-template-columns: 46px minmax(0, 1fr) 10px;
+  gap: 11px;
+  min-height: 0;
+  padding: 12px;
+  border-radius: 15px;
+}
+#page .community-v22-notification-page .warga-notification-icon { width: 46px; height: 46px; font-size: 17px; }
+#page .community-v22-notification-page .warga-notification-item strong { font-size: 15px; line-height: 1.3; }
+#page .community-v22-notification-page .warga-notification-item p { margin: 3px 0; font-size: 12px; line-height: 1.4; }
+#page .community-v22-notification-page .warga-notification-meta { margin-top: 6px; }
+#page .community-v22-notification-page .warga-notification-state { padding: 4px 7px; font-size: 9px; }
+#page .community-v22-notification-page .warga-notification-date { padding: 4px 7px; font-size: 11px; }
+
+body.theme-dark .warga-notification-center-dialog,
+body.theme-dark .warga-notification-search-dialog { border-color: #3a4b57; background: #202a30; }
+body.theme-dark .warga-notification-center-results { background: #172127; }
+body.theme-dark .warga-notification-center-item { border-color: #344b60; background: #202d35; }
+body.theme-dark .warga-notification-center-loading i { background-image: linear-gradient(105deg, #26323b 24%, #35434e 38%, #26323b 52%); }
+body.theme-dark .warga-notification-type-icon.is-letter { background: #1c3b5e; }
+body.theme-dark .warga-notification-type-icon.is-announcement { background: #3b2c56; }
+body.theme-dark .warga-notification-type-icon.is-complaint { background: #50321f; }
+body.theme-dark .warga-notification-type-icon.is-general,
+body.theme-dark .warga-notification-center-head-icon { background: #542a31; }
+body.theme-dark .warga-notification-center-footer { background: #202a30; }
+body.theme-dark .warga-notification-center-footer a,
+body.theme-dark .warga-notification-search-trigger,
+body.theme-dark .warga-notification-active-filter { background: #1b3858; color: #b8d5f4 !important; }
+
+@media (max-width: 480px) {
+  .warga-notification-center { place-items: end center; padding: 0; }
+  .warga-notification-center-dialog { width: 100%; max-height: min(86vh, 740px); margin: 0; border-width: 1px 0 0; border-radius: 23px 23px 0 0; }
+  .warga-notification-center-head { grid-template-columns: 44px minmax(0, 1fr) 34px; gap: 10px; padding: 14px 13px; }
+  .warga-notification-center-head-icon { width: 44px; height: 44px; border-radius: 13px; font-size: 17px; }
+  .warga-notification-center-head h2 { font-size: 19px; }
+  .warga-notification-center-list { gap: 8px; padding: 10px; }
+  .warga-notification-center-item { grid-template-columns: 42px minmax(0, 1fr) 9px; gap: 9px; padding: 10px; border-radius: 14px; }
+  .warga-notification-center-item .warga-notification-type-icon { width: 42px; height: 42px; }
+  .warga-notification-search-dialog { margin-top: min(10vh, 78px); }
+  #page .community-v22-notification-page .community-v22-page-hero { padding: 13px 14px; }
+  #page .community-v22-notification-page .community-v22-page-hero-icon { flex-basis: 42px; width: 42px; height: 42px; }
+  #page .community-v22-notification-page .community-v22-page-hero h1 { font-size: 21px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .warga-notification-center-loading i { animation: none !important; }
+}
+
 /* Compact home previews reuse the catalogue/card language while keeping the
  * dashboard limited to four products and a clear path to each full listing. */
 #page .community-v22-market-preview {
@@ -6999,4 +7369,36 @@ body.theme-dark .warga-media-loading::before {
   form[data-disable-submit].is-submitting button[type="submit"] .fa-spinner {
     animation: none !important;
   }
+}
+
+/* Final notification-page overrides sit after the legacy responsive rules. */
+#page .community-v22-notification-page .warga-notification-list { gap: 9px; margin: 0 0 18px; }
+#page .community-v22-notification-page .warga-notification-item {
+  grid-template-columns: 46px minmax(0, 1fr) 10px;
+  gap: 11px;
+  min-height: 0;
+  padding: 12px;
+  border-radius: 15px;
+}
+#page .community-v22-notification-page .warga-notification-icon { width: 46px; height: 46px; border-radius: 15px; font-size: 17px; }
+#page .community-v22-notification-page .warga-notification-item strong { font-size: 15px; line-height: 1.3; }
+#page .community-v22-notification-page .warga-notification-item p { margin: 3px 0; font-size: 12px; line-height: 1.4; }
+#page .community-v22-notification-page .warga-notification-meta { margin-top: 6px; }
+#page .community-v22-notification-page .warga-notification-state { padding: 4px 7px; font-size: 9px; }
+#page .community-v22-notification-page .warga-notification-date { padding: 4px 7px; font-size: 11px; }
+
+body #page .page-content .warga-notification-type-icon,
+body #page .page-content .warga-notification-type-icon i { color: #bd2f3d !important; }
+body #page .page-content .warga-notification-type-icon.is-letter,
+body #page .page-content .warga-notification-type-icon.is-letter i { color: #2766ad !important; }
+body #page .page-content .warga-notification-type-icon.is-announcement,
+body #page .page-content .warga-notification-type-icon.is-announcement i { color: #7549bd !important; }
+body #page .page-content .warga-notification-type-icon.is-complaint,
+body #page .page-content .warga-notification-type-icon.is-complaint i { color: #b9571d !important; }
+
+@media (max-width: 380px) {
+  #page .community-v22-notification-page .warga-notification-item { grid-template-columns: 42px minmax(0, 1fr) 8px; gap: 9px; padding: 10px; }
+  #page .community-v22-notification-page .warga-notification-icon { width: 42px; height: 42px; font-size: 15px; }
+  #page .community-v22-notification-page .warga-notification-meta { gap: 5px; }
+  #page .community-v22-notification-page .warga-notification-date { max-width: 62%; font-size: 10px; }
 }

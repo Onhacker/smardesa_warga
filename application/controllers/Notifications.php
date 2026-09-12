@@ -56,6 +56,30 @@ class Notifications extends Public_Controller
         return $this->json(array('unread' => $this->Notification_model->unread($this->currentUser['id'])));
     }
 
+    /** Load a compact, unread-only page for the header modal. */
+    public function unread()
+    {
+        if (!$this->require_json_authentication()) return;
+        $this->load->model('Notification_model');
+        $listing = $this->Notification_model->unread_listing(
+            $this->currentUser,
+            $this->input->get('page', TRUE),
+            10
+        );
+        $data = array(
+            'notifications' => $listing['items'],
+            'listing' => $listing,
+            'institutionLabel' => $this->institution_label()
+        );
+        $this->output->set_header('Cache-Control: no-store, private');
+        return $this->json(array(
+            'html' => $this->load->view('notifications/unread_modal_results', $data, TRUE),
+            'unread' => $listing['total'],
+            'page' => $listing['page'],
+            'pages' => $listing['pages']
+        ));
+    }
+
     public function read()
     {
         $this->require_authentication();

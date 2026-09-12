@@ -50,6 +50,39 @@ class Notification_model extends CI_Model
         return $this->ready() ? (int)$this->db->where('user_id',$userId)->where('read_at',null)->count_all_results('notifications') : 0;
     }
 
+    /** Return one page of unread notifications for the header notification centre. */
+    public function unread_listing(array $user, $page = 1, $perPage = 10)
+    {
+        $page = max(1, (int) $page);
+        $perPage = max(1, min(10, (int) $perPage));
+        $total = $this->unread((int) $user['id']);
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $pages);
+        $rows = array();
+        if ($total && $this->ready()) {
+            $rows = $this->db->select('n.*, n.created_at AS occurred_at, t.target_path')
+                ->from('notifications n')
+                ->join('warga_notification_targets t', 't.notification_id=n.id', 'left')
+                ->where('n.user_id', (int) $user['id'])
+                ->where('n.read_at', NULL)
+                ->order_by('n.created_at', 'DESC')
+                ->order_by('n.id', 'DESC')
+                ->limit($perPage, ($page - 1) * $perPage)
+                ->get()->result_array();
+            foreach ($rows as &$row) $row['target_path'] = $this->target($row, $user);
+            unset($row);
+        }
+        return array(
+            'items' => $rows,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => $perPage,
+            'from' => $total ? (($page - 1) * $perPage) + 1 : 0,
+            'to' => min($page * $perPage, $total)
+        );
+    }
+
     public function read($userId)
     {
         if ($this->ready()) $this->db->where('user_id',$userId)->where('read_at',null)->update('notifications',array('read_at'=>date('Y-m-d H:i:s')));

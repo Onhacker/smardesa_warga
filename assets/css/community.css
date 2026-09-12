@@ -1298,3 +1298,29 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   #page .community-v22-announcement-card-copy strong { font-size: 20px; }
   #page .community-v22-announcement-card-body { padding: 14px 13px 15px 16px; }
 }
+
+/* Compact notification introduction: keep the useful actions and first card
+ * visible without changing the sizing of announcement/complaint heroes. */
+#page .community-v22-notification-page .community-v22-page-hero {
+  min-height: 0;
+  gap: 13px;
+  margin-bottom: 14px;
+  padding: 15px 17px;
+  border-radius: 18px;
+}
+#page .community-v22-notification-page .community-v22-page-hero-icon {
+  flex-basis: 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  font-size: 18px;
+}
+#page .community-v22-notification-page .community-v22-page-hero h1 { margin-bottom: 2px; font-size: clamp(22px, 4.4vw, 28px); }
+#page .community-v22-notification-page .community-v22-page-hero .community-v22-eyebrow { margin-bottom: 2px; font-size: 10px; }
+#page .community-v22-notification-page .community-v22-page-hero p:last-child { font-size: 12px; line-height: 1.35; }
+
+@media (max-width: 480px) {
+  #page .community-v22-notification-page .community-v22-page-hero { min-height: 0; padding: 13px 14px; }
+  #page .community-v22-notification-page .community-v22-page-hero-icon { flex-basis: 42px; width: 42px; height: 42px; }
+  #page .community-v22-notification-page .community-v22-page-hero h1 { font-size: 21px; }
+}

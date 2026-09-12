@@ -36,6 +36,7 @@ $route['pasar/produk/(:any)/hapus'] = 'marketplace/delete_product/$1';
 $route['pasar/produk/(:any)/rating'] = 'marketplace/rating/$1';
 $route['pasar/produk/(:any)'] = 'marketplace/show/$1';
 $route['notifikasi/ringkasan'] = 'notifications/summary';
+$route['notifikasi/belum-dibaca'] = 'notifications/unread';
 $route['notifikasi/buka/(:any)'] = 'notifications/open/$1';
 $route['notifikasi/baca'] = 'notifications/read';
 $route['notifikasi/push'] = 'notifications/subscribe';
