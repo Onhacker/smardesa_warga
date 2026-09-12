@@ -504,6 +504,16 @@
     var pdfLoadingTask = null;
     var pdfDocument = null;
     var pdfObserver = null;
+    // Keep the bytes fetched for the PDF preview so the download action does
+    // not need a second authenticated navigation.  This is important in an
+    // installed PWA/TWA, where a same-origin `download` link can be opened as
+    // an ordinary page instead of being handed to the download manager.
+    var attachmentSourceUrl = '';
+    var attachmentDownloadUrl = '';
+    var attachmentDownloadName = 'lampiran';
+    var attachmentMime = '';
+    var attachmentBlob = null;
+    var attachmentBlobPromise = null;
 
     function focusableItems() {
       return Array.prototype.slice.call(modal.querySelectorAll('a[href],button:not([disabled])')).filter(function (item) {
@@ -540,6 +550,12 @@
       previewVersion += 1;
       if (previewController) previewController.abort();
       previewController = null;
+      attachmentSourceUrl = '';
+      attachmentDownloadUrl = '';
+      attachmentDownloadName = 'lampiran';
+      attachmentMime = '';
+      attachmentBlob = null;
+      attachmentBlobPromise = null;
       if (image) { image.hidden = true; image.removeAttribute('src'); image.removeAttribute('data-preview-token'); }
       resetPdf();
       if (error) error.hidden = true;
@@ -554,6 +570,47 @@
         if (message) error.textContent = message;
         error.hidden = false;
       }
+    }
+
+    function fetchAttachmentBlob(url, mime, token) {
+      if (attachmentBlob && attachmentSourceUrl === url) return Promise.resolve(attachmentBlob);
+      if (attachmentBlobPromise && attachmentSourceUrl === url) return attachmentBlobPromise;
+      var options = {credentials: 'same-origin', cache: 'no-store', headers: {'Accept': mime || '*/*'}};
+      attachmentBlobPromise = fetch(url, options).then(function (response) {
+        if (response.redirected || response.status === 401 || response.status === 403) {
+          throw new Error('Sesi Anda telah berakhir. Silakan masuk kembali.');
+        }
+        if (!response.ok) throw new Error('Lampiran belum dapat diunduh.');
+        return response.blob();
+      }).then(function (blob) {
+        if (token !== previewVersion) throw new Error('Unduhan dibatalkan.');
+        var type = blob && blob.type ? blob.type : (mime || 'application/octet-stream');
+        attachmentBlob = blob && blob.type === type ? blob : new Blob([blob], {type: type});
+        return attachmentBlob;
+      }).catch(function (reason) {
+        // A late response from an attachment that was closed must not clear a
+        // newer attachment's in-flight download promise.
+        if (attachmentSourceUrl === url) attachmentBlobPromise = null;
+        throw reason;
+      });
+      return attachmentBlobPromise;
+    }
+
+    function triggerBlobDownload(blob, name) {
+      if (!blob || typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function') return false;
+      var objectUrl = URL.createObjectURL(blob);
+      var link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = name || 'lampiran';
+      link.rel = 'noopener';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      // Android's download manager may still be opening the object URL after
+      // the click returns, so keep it alive for a short, safe window.
+      window.setTimeout(function () { URL.revokeObjectURL(objectUrl); }, 60000);
+      return true;
     }
 
     function loadPdfLibrary() {
@@ -659,7 +716,16 @@
         if (response.redirected || !response.ok || (response.headers.get('Content-Type') || '').toLowerCase().indexOf('application/pdf') === -1) {
           throw new Error('Berkas PDF tidak dapat dimuat.');
         }
-        return response.arrayBuffer().then(function (buffer) { return {pdfjs: pdfjs, buffer: buffer}; });
+        return response.arrayBuffer().then(function (buffer) {
+          // A PDF request may finish after the modal has been closed or a
+          // different attachment has been opened. Do not let that stale
+          // response replace the bytes belonging to the current attachment.
+          if (token !== previewVersion) throw new Error('Unduhan dibatalkan.');
+          var responseType = (response.headers.get('Content-Type') || '').split(';')[0].trim();
+          attachmentBlob = new Blob([buffer], {type: responseType || attachmentMime || 'application/pdf'});
+          attachmentBlobPromise = Promise.resolve(attachmentBlob);
+          return {pdfjs: pdfjs, buffer: buffer};
+        });
       }).then(function (payload) {
         if (!payload || token !== previewVersion) return null;
         pdfLoadingTask = payload.pdfjs.getDocument({
@@ -697,11 +763,15 @@
       var name = trigger.getAttribute('data-attachment-name') || 'Lampiran pengumuman';
       var mime = (trigger.getAttribute('data-attachment-mime') || '').toLowerCase();
       var token = resetPreview();
+      attachmentSourceUrl = url;
+      attachmentMime = mime;
+      attachmentDownloadName = name.replace(/[\\/\u0000-\u001f\u007f]+/g, '_') || 'lampiran';
+      attachmentDownloadUrl = url + (url.indexOf('?') === -1 ? '?' : '&') + 'download=1';
       if (title) title.textContent = name;
       if (error) error.hidden = true;
       if (download) {
-        download.href = url + (url.indexOf('?') === -1 ? '?' : '&') + 'download=1';
-        download.download = name.replace(/[\\/\u0000-\u001f\u007f]+/g, '_') || 'lampiran';
+        download.href = attachmentDownloadUrl;
+        download.download = attachmentDownloadName;
         download.setAttribute('data-download-name', download.download);
         download.setAttribute('aria-label', 'Unduh ' + name);
       }
@@ -731,6 +801,7 @@
         event.preventDefault();
         return;
       }
+      event.preventDefault();
       var icon = download.querySelector('i');
       var label = download.querySelector('span');
       download.setAttribute('aria-busy', 'true');
@@ -738,16 +809,26 @@
       download.classList.add('is-loading');
       if (icon) icon.className = 'fa fa-spinner fa-spin';
       if (label) label.textContent = 'Mengunduh…';
-      // Keep the browser's native, same-origin download navigation. It retains
-      // the user's click gesture in installed Android PWAs, whereas a delayed
-      // Blob click can be blocked after an asynchronous fetch completes.
-      window.setTimeout(function () {
+      var token = previewVersion;
+      var blobPromise = (attachmentBlob && attachmentSourceUrl) ? Promise.resolve(attachmentBlob) : fetchAttachmentBlob(attachmentSourceUrl, attachmentMime, token);
+      blobPromise.then(function (blob) {
+        if (!triggerBlobDownload(blob, attachmentDownloadName)) throw new Error('Browser belum mendukung unduhan langsung.');
+      }).catch(function (reason) {
+        // Preserve a useful fallback for browsers that do not support Blob
+        // URLs. The authenticated server endpoint still sends Content-
+        // Disposition: attachment and can be handled by the browser itself.
+        if (attachmentDownloadUrl) window.location.assign(attachmentDownloadUrl);
+        if (error && reason && reason.message) {
+          error.textContent = reason.message;
+          error.hidden = false;
+        }
+      }).then(function () {
         download.removeAttribute('aria-busy');
         download.removeAttribute('aria-disabled');
         download.classList.remove('is-loading');
         if (icon) icon.className = 'fa fa-download';
         if (label) label.textContent = 'Unduh';
-      }, 2500);
+      });
     });
     modal.querySelectorAll('[data-announcement-attachment-close]').forEach(function (button) {
       button.addEventListener('click', function (event) { event.preventDefault(); close(); });

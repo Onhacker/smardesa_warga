@@ -1165,6 +1165,18 @@ body.community-v22-attachment-open { overflow: hidden; }
 #page .community-v22-attachment-actions .community-button:not(.is-secondary) > span {
   color: #fff !important;
 }
+/* The modal is moved to document.body at runtime, outside #page. Keep the
+ * download label and icon white there as well, including its loading state. */
+.community-v22-attachment-actions .community-button:not(.is-secondary),
+.community-v22-attachment-actions .community-button:not(.is-secondary):hover,
+.community-v22-attachment-actions .community-button:not(.is-secondary):focus,
+.community-v22-attachment-actions .community-button:not(.is-secondary):active,
+.community-v22-attachment-actions .community-button:not(.is-secondary):visited,
+.community-v22-attachment-actions .community-button:not(.is-secondary):disabled,
+.community-v22-attachment-actions .community-button:not(.is-secondary).is-loading,
+.community-v22-attachment-actions .community-button:not(.is-secondary)[aria-disabled="true"],
+.community-v22-attachment-actions .community-button:not(.is-secondary) > i,
+.community-v22-attachment-actions .community-button:not(.is-secondary) > span { color: #fff !important; }
 .community-v22-attachment-actions .community-button { width: 100%; min-height: 45px; margin: 0; border-radius: 12px; text-decoration: none; }
 .community-v22-attachment-actions .community-button.is-secondary { border: 0; }
 .community-v22-attachment-actions .community-button.is-loading { cursor: wait; opacity: .82; pointer-events: none; }

@@ -7371,8 +7371,11 @@ body.theme-dark .warga-media-loading::before {
   }
 }
 
-/* Final notification-page overrides sit after the legacy responsive rules. */
-#page .community-v22-notification-page .warga-notification-list { gap: 9px; margin: 0 0 18px; }
+/* Final notification-page overrides sit after the legacy responsive rules.
+ * Notification copy is intentionally larger than the compact dashboard
+ * preview.  Keep the metadata flexible so the larger labels remain readable
+ * on narrow phones instead of forcing the card to overflow horizontally. */
+#page .community-v22-notification-page .warga-notification-list { gap: 10px; margin: 0 0 18px; }
 #page .community-v22-notification-page .warga-notification-item {
   grid-template-columns: 46px minmax(0, 1fr) 10px;
   gap: 11px;
@@ -7381,11 +7384,58 @@ body.theme-dark .warga-media-loading::before {
   border-radius: 15px;
 }
 #page .community-v22-notification-page .warga-notification-icon { width: 46px; height: 46px; border-radius: 15px; font-size: 17px; }
-#page .community-v22-notification-page .warga-notification-item strong { font-size: 15px; line-height: 1.3; }
-#page .community-v22-notification-page .warga-notification-item p { margin: 3px 0; font-size: 12px; line-height: 1.4; }
-#page .community-v22-notification-page .warga-notification-meta { margin-top: 6px; }
-#page .community-v22-notification-page .warga-notification-state { padding: 4px 7px; font-size: 9px; }
-#page .community-v22-notification-page .warga-notification-date { padding: 4px 7px; font-size: 11px; }
+#page .community-v22-notification-page .warga-notification-item strong {
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.35;
+}
+#page .community-v22-notification-page .warga-notification-item p {
+  margin: 5px 0 0;
+  font-size: clamp(13px, 1.55vw, 15px);
+  line-height: 1.5;
+}
+#page .community-v22-notification-page .warga-notification-meta {
+  align-items: center;
+  gap: 8px 9px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+#page .community-v22-notification-page .warga-notification-state {
+  flex: 0 1 auto;
+  padding: 5px 8px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+#page .community-v22-notification-page .warga-notification-list .warga-notification-meta .warga-notification-date {
+  flex: 1 1 150px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 5px 8px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* The activation prompt is shared with the home shell, but appears here as
+ * page content.  Match the larger list typography without changing the
+ * compact dashboard prompt. */
+#page .community-v22-notification-page .warga-notification-enable-copy h2 { font-size: 18px; }
+#page .community-v22-notification-page .warga-notification-enable-copy p { font-size: 14px; line-height: 1.5; }
+#page .community-v22-notification-page .warga-notification-enable-copy [data-push-status] { font-size: 12px; }
+
+/* Keep the action label legible while allowing it to shrink within the
+ * toolbar next to the search control on phones. */
+#page .community-v22-notification-page .warga-notification-toolbar { gap: 10px; }
+#page .community-v22-notification-page .warga-notification-actions { flex: 1 1 auto; min-width: 0; }
+#page .community-v22-notification-page .warga-notification-actions .community-button {
+  min-height: 44px;
+  width: 100%;
+  padding: 9px 13px;
+  font-size: clamp(12px, 1.6vw, 14px);
+  line-height: 1.3;
+}
+#page .community-v22-notification-page .warga-notification-search-trigger { font-size: 16px; }
+#page .community-v22-notification-page .warga-notification-active-filter { font-size: 12px; }
 
 body #page .page-content .warga-notification-type-icon,
 body #page .page-content .warga-notification-type-icon i { color: #bd2f3d !important; }
@@ -7399,6 +7449,15 @@ body #page .page-content .warga-notification-type-icon.is-complaint i { color: #
 @media (max-width: 380px) {
   #page .community-v22-notification-page .warga-notification-item { grid-template-columns: 42px minmax(0, 1fr) 8px; gap: 9px; padding: 10px; }
   #page .community-v22-notification-page .warga-notification-icon { width: 42px; height: 42px; font-size: 15px; }
-  #page .community-v22-notification-page .warga-notification-meta { gap: 5px; }
-  #page .community-v22-notification-page .warga-notification-date { max-width: 62%; font-size: 10px; }
+  #page .community-v22-notification-page .warga-notification-meta { gap: 7px; }
+  #page .community-v22-notification-page .warga-notification-item strong { font-size: 16px; }
+  #page .community-v22-notification-page .warga-notification-item p { font-size: 13px; }
+  #page .community-v22-notification-page .warga-notification-list .warga-notification-meta .warga-notification-date {
+    flex-basis: 100%;
+    font-size: 12px;
+  }
+  #page .community-v22-notification-page .warga-notification-actions .community-button {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
 }
