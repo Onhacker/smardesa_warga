@@ -34,7 +34,6 @@ $pictureUrl = static function ($name) {
                 <p class="community-v22-eyebrow">Akses cepat</p>
                 <h2 id="community-services-title">Layanan untuk Anda</h2>
             </div>
-            <span>Geser untuk melihat <i class="fa fa-arrow-right" aria-hidden="true"></i></span>
         </header>
 
         <nav class="community-v22-slider splide double-slider visible-slider slider-no-dots" id="community-services-slider" aria-label="Layanan utama">

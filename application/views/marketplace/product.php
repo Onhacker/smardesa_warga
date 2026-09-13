@@ -120,7 +120,7 @@ $relatedProducts = isset($related) && is_array($related) ? array_slice(array_val
                     <p class="market-eyebrow market-eyebrow-blue">PRODUK LAINNYA</p>
                     <h2 id="market-related-products-title">Produk terkait</h2>
                 </div>
-                <span class="market-related-hint">Geser untuk melihat</span>
+                <span class="market-related-hint"><i class="fa fa-arrows-alt-h" aria-hidden="true"></i><span>Geser untuk melihat</span></span>
             </div>
             <div class="market-related-slider" role="region" tabindex="0" aria-label="Produk terkait, geser horizontal untuk melihat lebih banyak">
                 <div class="market-related-track">
