@@ -182,6 +182,16 @@
   color: #2d6bb2;
 }
 
+/* Keep contact-dialog glyphs white even when theme rules target nested
+ * Font Awesome elements. This applies to the header icon and the phone/
+ * email tiles without changing the text colour of each contact row. */
+#warga-footer-contact-dialog .warga-footer-modal-icon.is-contact,
+#warga-footer-contact-dialog .warga-footer-modal-icon.is-contact i,
+#warga-footer-contact-dialog .warga-footer-contact-item-icon,
+#warga-footer-contact-dialog .warga-footer-contact-item-icon i {
+  color: #fff !important;
+}
+
 .warga-footer-modal-panel h2 {
   margin: 0;
   color: var(--warga-ink);

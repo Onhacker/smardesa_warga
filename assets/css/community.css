@@ -1332,6 +1332,15 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   margin-right: 14px;
 }
 
+/* The lightweight Bootstrap subset does not include AppKit's pagination
+ * reset. Splide therefore falls back to the browser's default list marker,
+ * which appears as a stray dot below the service cards. The cards remain
+ * swipeable, so the redundant pagination controls are intentionally hidden
+ * for this slider only. */
+#page #community-services-slider.slider-no-dots .splide__pagination {
+  display: none !important;
+}
+
 @media (max-width: 480px) {
   #page .community-v22-slider.splide {
     width: calc(100% + 12px);
