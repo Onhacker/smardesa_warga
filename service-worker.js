@@ -1,25 +1,36 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-13-sidapulik-notification-badge-104';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-13-sidapulik-cache-bounded-105';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
-const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
+const SDW_IMAGE_CACHE_PREFIX = 'smartdesa-warga-market-images-';
+const SDW_IMAGE_CACHE = SDW_IMAGE_CACHE_PREFIX + 'v2';
+// Keep the image bucket bounded even when a device browses many products. A
+// product can have one full-size and one thumbnail entry, so 120 entries keep
+// roughly the last 60 products while preventing unbounded Cache Storage use.
+const SDW_IMAGE_CACHE_MAX_ENTRIES = 120;
+const SDW_ICON_URL = 'assets/pwa/icon-192.png?v=20260913-icon-1';
 const scopeUrl = new URL(self.registration.scope);
 const appPath = scopeUrl.pathname.endsWith('/') ? scopeUrl.pathname : scopeUrl.pathname + '/';
 const assetPath = new URL('assets/', scopeUrl).pathname;
+const pdfAssetPath = new URL('assets/vendor/pdfjs/', scopeUrl).pathname;
 const marketplaceImagePath = new URL('pasar/gambar/', scopeUrl).pathname;
 const privateAnnouncementPath = new URL('pengumuman/', scopeUrl).pathname;
 const offlineUrl = new URL('offline.html', scopeUrl).href;
 const notificationFallbackUrl = new URL('notifikasi', scopeUrl);
 const precache = [
   'offline.html',
-  'assets/pwa/icon-192.png',
+  SDW_ICON_URL,
   'assets/pwa/notification-badge.png?v=20260913-badge-2'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {
   if (request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(assetPath)) return false;
+  // PDF.js is loaded only when a PDF viewer is opened. Let the browser's HTTP
+  // cache handle it instead of retaining ~1.8 MB of parser/worker files in
+  // the service-worker static bucket for every user.
+  if (url.pathname.startsWith(pdfAssetPath)) return false;
   if (request.headers.has('authorization') || request.headers.has('range') || request.headers.get('x-requested-with')) return false;
   return /\.(?:css|m?js|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf)$/i.test(url.pathname);
 }
@@ -42,6 +53,21 @@ function isPrivateAnnouncementAttachment(request, url) {
 
 function marketplaceImageFamily(url) {
   return url.pathname + '::' + (url.searchParams.get('variant') === 'thumb' ? 'thumb' : 'full');
+}
+
+function cacheKeyUrl(key) {
+  return key && key.url ? key.url : String(key || '');
+}
+
+async function trimMarketplaceImageCache(cache, protectedUrl) {
+  var keys = await cache.keys();
+  if (keys.length <= SDW_IMAGE_CACHE_MAX_ENTRIES) return;
+  var removeCount = keys.length - SDW_IMAGE_CACHE_MAX_ENTRIES;
+  // Cache.keys() is insertion ordered in Cache Storage. Preserve the request
+  // just stored (important when many image requests finish concurrently), then
+  // evict the oldest remaining entries first.
+  var candidates = keys.filter(function (key) { return cacheKeyUrl(key) !== protectedUrl; });
+  return Promise.all(candidates.slice(0, removeCount).map(function (key) { return cache.delete(key); }));
 }
 
 function notificationUrl(value) {
@@ -114,9 +140,18 @@ self.addEventListener('activate', function (event) {
     ? self.registration.navigationPreload.enable().catch(function () {})
     : Promise.resolve();
   var removeOldCaches = caches.keys().then(function (keys) {
-    return Promise.all(keys.map(function (key) { return key.startsWith(SDW_CACHE_PREFIX) && key !== SDW_CACHE ? caches.delete(key) : false; }));
+    return Promise.all(keys.map(function (key) {
+      var oldStaticCache = key.startsWith(SDW_CACHE_PREFIX) && key !== SDW_CACHE;
+      var oldImageCache = key.startsWith(SDW_IMAGE_CACHE_PREFIX) && key !== SDW_IMAGE_CACHE;
+      return (oldStaticCache || oldImageCache) ? caches.delete(key) : false;
+    }));
   });
-  event.waitUntil(Promise.all([enableNavigationPreload, removeOldCaches]).then(function () { return self.clients.claim(); }));
+  var trimCurrentImageCache = removeOldCaches.then(function () {
+    return caches.open(SDW_IMAGE_CACHE).then(function (cache) {
+      return trimMarketplaceImageCache(cache).catch(function () {});
+    });
+  });
+  event.waitUntil(Promise.all([enableNavigationPreload, removeOldCaches, trimCurrentImageCache]).then(function () { return self.clients.claim(); }));
 });
 
 self.addEventListener('fetch', function (event) {
@@ -154,7 +189,7 @@ self.addEventListener('fetch', function (event) {
                   var keyUrl = new URL(key.url);
                   return key.url !== request.url && marketplaceImageFamily(keyUrl) === family;
                 }).map(function (key) { return cache.delete(key); }));
-              });
+              }).then(function () { return trimMarketplaceImageCache(cache, request.url); });
             }).catch(function () {}).then(function () { return response; });
           }
           return response;
@@ -172,15 +207,43 @@ self.addEventListener('fetch', function (event) {
   }));
 });
 
-self.addEventListener('message', function (event) { if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting(); });
+function updateAppBadge(value) {
+  // The Badging API is optional and is not exposed by every Android/TWA
+  // runtime. Treat a missing API (or a rejected call) as a no-op so it never
+  // prevents the visible notification from being shown.
+  var count = Number(value);
+  if (!Number.isFinite(count) || count < 0 || typeof navigator === 'undefined') return Promise.resolve();
+  try {
+    if (count > 0 && typeof navigator.setAppBadge === 'function') {
+      return Promise.resolve(navigator.setAppBadge(Math.floor(count))).catch(function () {});
+    }
+    if (count <= 0 && typeof navigator.clearAppBadge === 'function') {
+      return Promise.resolve(navigator.clearAppBadge()).catch(function () {});
+    }
+  } catch (_) {}
+  return Promise.resolve();
+}
+
+self.addEventListener('message', function (event) {
+  if (!event.data) return;
+  if (event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+  if (event.data.type === 'SDW_SET_APP_BADGE') {
+    var badgeUpdate = updateAppBadge(event.data.unreadCount);
+    if (event.waitUntil) event.waitUntil(badgeUpdate);
+  }
+});
 
 self.addEventListener('push', function (event) {
   var data = {};
   try { data = event.data ? event.data.json() : {}; } catch (_) {}
   var url = notificationUrl(data.url);
-  event.waitUntil(self.registration.showNotification(data.title || 'SI DAPULIK', {
+  var badgeUpdate = updateAppBadge(data.unreadCount);
+  event.waitUntil(Promise.all([badgeUpdate, self.registration.showNotification(data.title || 'SI DAPULIK', {
     body: data.body || 'Ada pembaruan layanan untuk Anda.',
-    icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
+    icon: new URL(SDW_ICON_URL, scopeUrl).href,
     // Android renders `badge` as a monochrome alpha mask. Never use the
     // opaque, full-colour launcher icon here or it becomes a solid circle.
     badge: new URL('assets/pwa/notification-badge.png?v=20260913-badge-2',scopeUrl).href,
@@ -188,7 +251,7 @@ self.addEventListener('push', function (event) {
     vibrate: [200,100,200],
     navigate: url.href,
     data: {url:url.href}
-  }));
+  })]));
 });
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();

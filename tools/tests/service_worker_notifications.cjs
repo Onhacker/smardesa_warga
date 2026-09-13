@@ -14,10 +14,16 @@ function runtime(scope, windows) {
   const calls = {
     matchOptions: [],
     opened: [],
-    shown: []
+    shown: [],
+    appBadges: [],
+    clearedAppBadges: 0
   };
   const scopeUrl = new URL(scope);
   const clientList = Array.isArray(windows) ? windows : [];
+  const navigator = {
+    setAppBadge: async function (value) { calls.appBadges.push(value); },
+    clearAppBadge: async function () { calls.clearedAppBadges += 1; }
+  };
   const self = {
     registration: {
       scope,
@@ -42,6 +48,7 @@ function runtime(scope, windows) {
   };
   const context = vm.createContext({
     self,
+    navigator,
     URL,
     Promise,
     Number,
@@ -159,7 +166,8 @@ async function test(label, callback) {
           return {
             title: 'SI DAPULIK',
             body: 'Ada pembaruan layanan untuk Anda.',
-            url: 'notifikasi/buka/66666666-6666-4666-8666-666666666666'
+            url: 'notifikasi/buka/66666666-6666-4666-8666-666666666666',
+            unreadCount: 7
           };
         }
       },
@@ -168,12 +176,24 @@ async function test(label, callback) {
     await completion;
 
     assert.equal(instance.calls.shown.length, 1);
-    assert.equal(instance.calls.shown[0].options.icon, 'https://warga.example/assets/pwa/icon-192.png');
+    assert.equal(instance.calls.shown[0].options.icon, 'https://warga.example/assets/pwa/icon-192.png?v=20260913-icon-1');
     assert.equal(instance.calls.shown[0].options.badge, 'https://warga.example/assets/pwa/notification-badge.png?v=20260913-badge-2');
     assert.equal(
       instance.calls.shown[0].options.data.url,
       'https://warga.example/notifikasi/buka/66666666-6666-4666-8666-666666666666'
     );
+    assert.deepEqual(instance.calls.appBadges, [7]);
+  });
+
+  await test('page messages can clear the optional app badge', async function () {
+    const instance = runtime('https://warga.example/', []);
+    let completion;
+    instance.handlers.message({
+      data: {type: 'SDW_SET_APP_BADGE', unreadCount: 0},
+      waitUntil: function (promise) { completion = promise; }
+    });
+    await completion;
+    assert.equal(instance.calls.clearedAppBadges, 1);
   });
 
   process.stdout.write('OK: ' + passed + ' service-worker notification checks passed.\n');

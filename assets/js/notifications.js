@@ -283,6 +283,26 @@
       element.hidden = unread < 1;
       element.setAttribute('aria-hidden', unread > 0 ? 'false' : 'true');
     });
+    syncAppBadge(unread);
+  }
+
+  function syncAppBadge(value) {
+    var unread = Math.max(0, parseInt(value, 10) || 0);
+    try {
+      if (unread > 0 && typeof navigator.setAppBadge === 'function') {
+        Promise.resolve(navigator.setAppBadge(unread)).catch(function () {});
+        return;
+      }
+      if (unread < 1 && typeof navigator.clearAppBadge === 'function') {
+        Promise.resolve(navigator.clearAppBadge()).catch(function () {});
+        return;
+      }
+      // Some installed runtimes expose the API only to the worker context.
+      // Forward the state when possible; unsupported runtimes simply ignore it.
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({type: 'SDW_SET_APP_BADGE', unreadCount: unread});
+      }
+    } catch (_) {}
   }
 
   function markVisibleNotificationsRead() {
