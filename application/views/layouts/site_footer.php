@@ -118,11 +118,10 @@ foreach (array(
 <?php if ($footerHasContact): ?>
 <div class="warga-footer-modal" id="warga-footer-contact-dialog" data-footer-modal hidden aria-hidden="true">
     <button type="button" class="warga-footer-modal-backdrop" data-footer-modal-close tabindex="-1" aria-label="Tutup informasi kontak"></button>
-    <section class="warga-footer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="warga-footer-contact-heading" aria-describedby="warga-footer-contact-description">
+    <section class="warga-footer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="warga-footer-contact-heading">
         <button type="button" class="warga-footer-modal-close" data-footer-modal-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
         <span class="warga-footer-modal-icon is-contact" aria-hidden="true"><i class="fa fa-address-book"></i></span>
         <h2 id="warga-footer-contact-heading">Kontak <?= e($footerBrand) ?></h2>
-        <p id="warga-footer-contact-description">Nomor telepon dan email ditampilkan lebih dahulu. Ketuk kontak yang ingin digunakan.</p>
         <div class="warga-footer-contact-list">
             <?php if ($footerPhoneHref !== ''): ?>
                 <a class="warga-footer-contact-item is-phone" href="<?= e($footerPhoneHref) ?>">
