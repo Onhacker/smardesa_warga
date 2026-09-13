@@ -133,18 +133,32 @@
 .market-search-clear:hover, .market-search-clear:focus-visible { border-color: var(--market-blue); color: var(--market-blue); outline: 0; }
 body.market-search-open { overflow: hidden; }
 
-/* Pasar discovery controls.  The search field stays visible on the page,
- * while the secondary sort/category controls remain behind the filter icon. */
+/* Pasar discovery controls. The search field stays visible on the page,
+ * while the secondary sort/category controls remain behind the filter icon.
+ * The composer follows /ausi/produk: the clear action is attached to the
+ * input so the whole control reads as one compact search bar. */
 .market-inline-search { display: flex; align-items: center; gap: 9px; margin: 0 0 11px; }
-.market-inline-search-field { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: 9px; min-height: 45px; padding: 0 13px; border: 1px solid var(--market-line); border-radius: 12px; background: var(--market-surface); color: var(--market-blue); box-shadow: 0 3px 12px rgba(31,62,96,.05); }
-.market-inline-search-field:focus-within { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
+.market-inline-search-composer { display: flex; flex: 1 1 auto; min-width: 0; align-items: stretch; overflow: hidden; border: 1px solid var(--market-line); border-radius: 12px; background: var(--market-surface); box-shadow: 0 3px 12px rgba(31,62,96,.05); transition: border-color .18s ease, box-shadow .18s ease; }
+.market-inline-search-composer:focus-within { border-color: var(--market-blue); box-shadow: 0 0 0 3px rgba(45,107,178,.12); }
+.market-inline-search-field { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: 9px; min-height: 45px; margin: 0; padding: 0 13px; border: 0; border-radius: 0; background: transparent; color: var(--market-blue); box-shadow: none; }
 .market-inline-search-field > i { flex: 0 0 auto; font-size: 15px; }
 .market-inline-search-field input { width: 100%; min-width: 0; height: 43px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--market-ink); font: inherit; font-size: 14px; }
-.market-inline-search-field input::placeholder { color: var(--market-muted); opacity: .85; }
+.market-inline-search-field input::-webkit-search-cancel-button { display: none; -webkit-appearance: none; appearance: none; }
+.market-inline-search-field input::-ms-clear { display: none; width: 0; height: 0; }
+.market-inline-search-field input::placeholder { color: #c8324b; opacity: 1; }
+.market-inline-search-clear { display: grid; flex: 0 0 42px; width: 42px; min-height: 45px; place-items: center; padding: 0; border: 0; border-left: 1px solid rgba(255,255,255,.24); border-radius: 0; background: #f1556c; color: #fff; font: inherit; font-size: 15px; line-height: 1; cursor: pointer; transition: background .18s ease, opacity .18s ease; }
+.market-inline-search-clear:hover, .market-inline-search-clear:focus-visible { background: #d94358; color: #fff; outline: 0; }
+.market-inline-search-clear.is-empty { opacity: .82; }
+.market-inline-search-clear i { color: inherit !important; }
 .market-inline-filter { flex: 0 0 45px; width: 45px; height: 45px; border-radius: 12px; font-size: 15px; }
-.market-category-shortcuts { display: flex; align-items: stretch; gap: 8px; margin: 0 -1px 4px; overflow-x: auto; padding: 2px 1px 2px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
-.market-category-shortcuts::-webkit-scrollbar { display: none; }
-.market-category-chip { display: flex; flex: 0 0 67px; min-width: 67px; align-items: center; flex-direction: column; gap: 5px; padding: 0 2px; border: 0; background: transparent; color: var(--market-muted); font: inherit; cursor: pointer; text-align: center; }
+
+/* AppKit's shared typography layer applies a broad !important placeholder
+ * colour and a smaller input size. Keep the marketplace composer readable
+ * and visually consistent with the AUSI search affordance. */
+#page .marketplace-page .market-inline-search-field input { font-size: 14px !important; }
+#page .marketplace-page .market-inline-search-field input::placeholder { color: #c8324b !important; opacity: 1 !important; }
+.market-category-shortcuts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); align-items: start; gap: 6px; margin: 0 -1px 4px; overflow: visible; padding: 2px 1px 2px; }
+.market-category-chip { display: flex; width: 100%; min-width: 0; align-items: center; flex-direction: column; gap: 5px; padding: 0 1px; border: 0; background: transparent; color: var(--market-muted); font: inherit; cursor: pointer; text-align: center; }
 .market-category-chip:focus-visible { outline: 2px solid var(--market-blue); outline-offset: 3px; border-radius: 10px; }
 .market-category-chip-icon { display: grid; width: 43px; height: 43px; place-items: center; border: 1px solid rgba(45,107,178,.25); border-radius: 14px; background: #e0ecfb; color: #1e5b9c; font-size: 17px; box-shadow: 0 4px 10px rgba(31,62,96,.10); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
 .market-category-chip-icon > i { color: inherit !important; }
@@ -846,6 +860,11 @@ body.theme-dark .market-search-dialog { background: var(--market-surface); color
 body.theme-dark .market-search-dialog h2, body.theme-dark .market-filter-status strong { color: var(--market-ink); }
 body.theme-dark .market-inline-search-field { background: var(--market-surface); color: #9fc5f3; }
 body.theme-dark .market-inline-search-field input { color: var(--market-ink); }
+body.theme-dark .market-inline-search-composer { background: var(--market-surface); }
+body.theme-dark .market-inline-search-field input::placeholder { color: #ff9eab; }
+body.theme-dark #page .marketplace-page .market-inline-search-field input::placeholder { color: #ff9eab !important; }
+body.theme-dark .market-inline-search-clear { border-left-color: rgba(255,255,255,.18); background: #c9475a; }
+body.theme-dark .market-inline-search-clear:hover, body.theme-dark .market-inline-search-clear:focus-visible { background: #ad3549; }
 body.theme-dark .market-category-chip { color: var(--market-muted); }
 body.theme-dark .market-category-chip.is-active { color: #b8d8fa; }
 body.theme-dark .market-category-chip-icon { border-color: #4b6b8c; background: #23496d; color: #c2e0ff; }
@@ -922,11 +941,6 @@ body.theme-dark .market-review-login-notice, body.theme-dark .market-review-stat
 body.theme-dark .market-review-login-notice-copy strong, body.theme-dark .market-review-status.is-login .market-review-status-message { color: #e6f2ff; }
 body.theme-dark .market-review-login-notice-copy p { color: #c1dcf7; }
 
-@media (min-width: 600px) {
-  .market-category-shortcuts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; }
-  .market-category-chip { min-width: 0; }
-}
-
 @media (max-width: 560px) {
   .market-search-filter-grid { gap: 7px; }
   .market-products-heading .market-result-note { display: none; }
@@ -962,11 +976,19 @@ body.theme-dark .market-review-login-notice-copy p { color: #c1dcf7; }
   .market-hero { padding: 20px 17px; }
   .market-hero-copy h1 { font-size: 25px; }
   .market-hero-icon { flex-basis: 48px; width: 48px; height: 48px; }
-  .market-category-shortcuts { gap: 5px; }
-  .market-category-chip { flex-basis: 62px; min-width: 62px; }
-  .market-category-chip-icon { width: 40px; height: 40px; border-radius: 12px; font-size: 15px; }
-  .market-category-chip-label { font-size: 9px; }
+  .market-inline-search { gap: 6px; }
+  .market-inline-search-clear { flex-basis: 39px; width: 39px; }
+  .market-category-shortcuts { gap: 3px; }
+  .market-category-chip { gap: 4px; padding-right: 0; padding-left: 0; }
+  .market-category-chip-icon { width: 38px; height: 38px; border-radius: 11px; font-size: 14px; }
+  .market-category-chip-label { font-size: 8.5px; line-height: 1.15; }
   .market-quick-actions { gap: 7px; }
   .market-action { padding-right: 8px; padding-left: 8px; font-size: 12px; }
   .market-form-two-col { grid-template-columns: 1fr; gap: 0; }
+}
+
+@media (max-width: 340px) {
+  .market-category-shortcuts { gap: 2px; }
+  .market-category-chip-icon { width: 34px; height: 34px; border-radius: 10px; font-size: 13px; }
+  .market-category-chip-label { font-size: 8px; }
 }

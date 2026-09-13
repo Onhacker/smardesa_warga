@@ -16,12 +16,11 @@ $categoryName = function ($category) {
 $categorySlug = function ($category) {
     return trim((string) ($category['slug'] ?? ''));
 };
-// Keep the most useful categories visible beside the search field. The
-// remaining active categories are available from the lazy "Semua Kategori"
-// dialog, so the first paint stays compact even when an administrator adds
-// many categories later.
+// Keep the six discovery choices stable and predictable. The complete list
+// remains available from the lazy "Semua Kategori" dialog, but the first
+// paint always presents the same order on every village catalogue.
 $quickCategories = array();
-$quickSlugs = array('makanan-minuman', 'kerajinan', 'jasa');
+$quickSlugs = array('makanan-minuman', 'kerajinan', 'hasil-tani', 'jasa');
 foreach ($quickSlugs as $preferredSlug) {
     foreach ($categories as $categoryOption) {
         $categoryId = (string) ($categoryOption['id'] ?? '');
@@ -30,6 +29,21 @@ foreach ($quickSlugs as $preferredSlug) {
         break;
     }
 }
+$typingPhrases = array(
+    'Cari makanan & minuman?',
+    'Cari kerajinan lokal?',
+    'Cari hasil tani?',
+    'Cari jasa warga?'
+);
+foreach (array_slice($products, 0, 4) as $typingProduct) {
+    $typingName = trim((string) ($typingProduct['name'] ?? ''));
+    if ($typingName === '') continue;
+    if (function_exists('mb_substr')) $typingName = mb_substr($typingName, 0, 32, 'UTF-8');
+    else $typingName = substr($typingName, 0, 32);
+    $typingPhrases[] = 'Cari ' . $typingName . '?';
+}
+$typingPhrases = array_values(array_unique($typingPhrases));
+$typingPhrasesJson = json_encode($typingPhrases, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
 $listingPages = max(1, (int) ($listing['pages'] ?? 1));
 $listingPage = max(1, (int) ($listing['page'] ?? 1));
 $listingTotal = max(0, (int) ($listing['total'] ?? count($products)));
@@ -96,7 +110,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
     </div>
 
     <!-- The complete category list is fetched only when a visitor asks for it.
-         The initial catalogue therefore renders only the five compact choices. -->
+         The initial catalogue therefore renders only the six compact choices. -->
     <div class="market-category-modal" id="market-category-modal" data-market-category-modal hidden aria-hidden="true">
         <button type="button" class="market-category-backdrop" data-market-category-close aria-label="Tutup daftar kategori"></button>
         <section class="market-category-dialog" role="dialog" aria-modal="true" aria-labelledby="market-category-title" aria-describedby="market-category-description">
@@ -130,11 +144,16 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
 
     <section class="market-products" aria-label="Katalog produk Pasar Dapulik">
         <form class="market-inline-search" data-market-inline-search-form role="search" action="<?= e(site_url('pasar')) ?>" method="get">
-            <label class="market-inline-search-field" for="market-inline-search-input">
-                <i class="fa fa-search" aria-hidden="true"></i>
-                <span class="sr-only">Cari produk</span>
-                <input type="search" id="market-inline-search-input" name="q" value="<?= e($search) ?>" placeholder="Cari produk…" autocomplete="off" data-market-query-field>
-            </label>
+            <div class="market-inline-search-composer">
+                <label class="market-inline-search-field" for="market-inline-search-input">
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                    <span class="sr-only">Cari produk</span>
+                    <input type="search" id="market-inline-search-input" name="q" value="<?= e($search) ?>" placeholder="Cari produk…" autocomplete="off" data-market-query-field data-market-typing-phrases="<?= e($typingPhrasesJson ?: '[]') ?>">
+                </label>
+                <button type="button" class="market-inline-search-clear" data-market-inline-query-clear aria-label="Bersihkan pencarian">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
             <button type="button" class="market-search-trigger market-inline-filter" data-market-search-open aria-label="Buka filter produk" aria-haspopup="dialog" aria-controls="market-search-modal">
                 <i class="fa fa-filter" aria-hidden="true"></i>
             </button>
@@ -163,7 +182,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
                 </button>
             <?php endforeach; ?>
             <button type="button" class="market-category-chip market-category-chip-all" data-market-all-categories-open aria-label="Buka semua kategori" aria-haspopup="dialog" aria-controls="market-category-modal">
-                <span class="market-category-chip-icon" aria-hidden="true"><i class="fa fa-th-large"></i></span>
+                <span class="market-category-chip-icon" aria-hidden="true"><i class="fa fa-tags"></i></span>
                 <span class="market-category-chip-label">Semua Kategori</span>
             </button>
         </div>

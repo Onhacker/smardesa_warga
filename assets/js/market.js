@@ -67,11 +67,19 @@
 
   function debounce(fn, delay) {
     var timer = null;
-    return function () {
+    function debounced() {
       var args = arguments;
       clearTimeout(timer);
-      timer = setTimeout(function () { fn.apply(null, args); }, delay);
+      timer = setTimeout(function () {
+        timer = null;
+        fn.apply(null, args);
+      }, delay);
+    }
+    debounced.cancel = function () {
+      clearTimeout(timer);
+      timer = null;
     };
+    return debounced;
   }
 
   function setHidden(element, hidden) {
@@ -116,6 +124,7 @@
     var sortSelect = root.querySelector('#market-sort');
     var queryField = root.querySelector('[data-market-query-field]');
     var inlineSearchForm = root.querySelector('[data-market-inline-search-form]');
+    var inlineSearchClear = root.querySelector('[data-market-inline-query-clear]');
     var status = root.querySelector('[data-market-filter-status]');
     var queryLabel = root.querySelector('[data-market-query-label]');
     var productsTitle = root.querySelector('[data-market-products-title]');
@@ -135,6 +144,8 @@
     var categoryLoaded = false;
     var categoryLastFocus = null;
     var lastFocus = null;
+    var liveInlineSearch = null;
+    var liveSearch = null;
     if (!list || !endpoint) return;
 
     var state = {
@@ -152,6 +163,113 @@
     };
     state.hasMore = state.page < state.pages;
     root.classList.add('is-ajax');
+
+    // Match the lightweight /ausi/produk search affordance without changing
+    // the actual query value: only the placeholder is animated. This keeps
+    // the field accessible, lets users type immediately, and pauses cleanly
+    // while the field is focused, populated, or the tab is hidden.
+    var typingPhrases = [];
+    if (queryField) {
+      try {
+        var encodedPhrases = queryField.getAttribute('data-market-typing-phrases') || '[]';
+        var parsedPhrases = JSON.parse(encodedPhrases);
+        if (Array.isArray(parsedPhrases)) {
+          typingPhrases = parsedPhrases.map(function (phrase) { return String(phrase || '').trim(); }).filter(function (phrase) { return phrase !== ''; });
+        }
+      } catch (error) { typingPhrases = []; }
+    }
+    if (typingPhrases.length < 2) typingPhrases = ['Cari makanan & minuman?', 'Cari produk warga?'];
+    var typingFallback = 'Cari produk…';
+    var typingTimer = null;
+    var typingRunning = false;
+    var typingIndex = 0;
+    var typingCharacter = 0;
+    var typingDeleting = false;
+    var reduceTypingMotion = false;
+    if (typeof window.matchMedia === 'function') {
+      try { reduceTypingMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (error) { reduceTypingMotion = false; }
+    }
+
+    function clearTypingTimer() {
+      if (typingTimer !== null) {
+        window.clearTimeout(typingTimer);
+        typingTimer = null;
+      }
+    }
+
+    function typingShouldRun() {
+      return !!queryField && document.documentElement.contains(queryField) && queryField.value.trim() === '' && document.activeElement !== queryField && document.visibilityState !== 'hidden';
+    }
+
+    function stopInlineTyping(clearPlaceholder) {
+      typingRunning = false;
+      clearTypingTimer();
+      if (clearPlaceholder && queryField && queryField.value.trim() === '') queryField.setAttribute('placeholder', '');
+    }
+
+    function scheduleInlineTyping(delay) {
+      clearTypingTimer();
+      typingTimer = window.setTimeout(function () {
+        typingTimer = null;
+        typeInlinePlaceholder();
+      }, delay);
+    }
+
+    function typeInlinePlaceholder() {
+      if (!typingRunning || !typingShouldRun()) {
+        if (!typingShouldRun()) stopInlineTyping(false);
+        return;
+      }
+      var phrase = typingPhrases[typingIndex % typingPhrases.length];
+      if (!typingDeleting) {
+        typingCharacter += 1;
+        queryField.setAttribute('placeholder', phrase.slice(0, typingCharacter));
+        if (typingCharacter >= phrase.length) {
+          typingDeleting = true;
+          scheduleInlineTyping(1500);
+        } else {
+          scheduleInlineTyping(60);
+        }
+        return;
+      }
+      typingCharacter -= 1;
+      queryField.setAttribute('placeholder', phrase.slice(0, Math.max(0, typingCharacter)));
+      if (typingCharacter <= 0) {
+        typingDeleting = false;
+        typingIndex = (typingIndex + 1) % typingPhrases.length;
+        scheduleInlineTyping(180);
+      } else {
+        scheduleInlineTyping(30);
+      }
+    }
+
+    function startInlineTyping() {
+      if (reduceTypingMotion || typingRunning || !typingShouldRun()) return;
+      typingRunning = true;
+      typingCharacter = 0;
+      typingDeleting = false;
+      if (queryField) queryField.setAttribute('placeholder', '');
+      scheduleInlineTyping(60);
+    }
+
+    function syncInlineSearchVisuals() {
+      if (!queryField) return;
+      var hasQuery = queryField.value.trim() !== '';
+      if (inlineSearchClear) {
+        inlineSearchClear.classList.toggle('is-empty', !hasQuery);
+        inlineSearchClear.setAttribute('aria-label', hasQuery ? 'Hapus kata pencarian' : 'Bersihkan pencarian');
+      }
+      if (hasQuery) {
+        stopInlineTyping(false);
+      } else if (document.activeElement === queryField) {
+        stopInlineTyping(true);
+      } else if (reduceTypingMotion) {
+        stopInlineTyping(false);
+        queryField.setAttribute('placeholder', typingPhrases[0] || typingFallback);
+      } else {
+        startInlineTyping();
+      }
+    }
 
     function categoryIconClass(slug) {
       var key = String(slug || '').toLowerCase();
@@ -302,9 +420,13 @@
     }
 
     function syncStatus() {
-      if (queryField) queryField.value = state.query;
+      // Never replace text that a visitor is actively composing. An earlier
+      // AJAX response may finish during the debounce window; preserving the
+      // focused field prevents that response from erasing freshly typed text.
+      if (queryField && document.activeElement !== queryField) queryField.value = state.query;
       if (searchInput && document.activeElement !== searchInput) searchInput.value = state.query;
       if (queryLabel) queryLabel.textContent = state.query;
+      syncInlineSearchVisuals();
       setHidden(status, state.query === '');
       if (modalCategory) modalCategory.value = state.category;
       if (modalSort) modalSort.value = state.sort;
@@ -471,6 +593,8 @@
     });
     root.querySelectorAll('[data-market-query-clear]').forEach(function (button) {
       button.addEventListener('click', function () {
+        if (liveInlineSearch) liveInlineSearch.cancel();
+        if (liveSearch) liveSearch.cancel();
         state.query = '';
         state.category = '';
         state.sort = 'newest';
@@ -485,6 +609,8 @@
     });
     root.querySelectorAll('[data-market-search-clear]').forEach(function (button) {
       button.addEventListener('click', function () {
+        if (liveInlineSearch) liveInlineSearch.cancel();
+        if (liveSearch) liveSearch.cancel();
         state.query = '';
         state.category = '';
         state.sort = 'newest';
@@ -499,6 +625,7 @@
     });
     if (searchForm) searchForm.addEventListener('submit', function (event) {
       event.preventDefault();
+      if (liveSearch) liveSearch.cancel();
       state.query = searchInput ? searchInput.value.trim() : '';
       syncStatus();
       closeSearch();
@@ -506,32 +633,59 @@
     });
     if (inlineSearchForm) inlineSearchForm.addEventListener('submit', function (event) {
       event.preventDefault();
+      if (liveInlineSearch) liveInlineSearch.cancel();
       state.query = queryField ? queryField.value.trim() : '';
       syncStatus();
       requestCatalog(1, false, true);
     });
+    if (inlineSearchClear) inlineSearchClear.addEventListener('click', function () {
+      if (liveInlineSearch) liveInlineSearch.cancel();
+      var hadQuery = state.query !== '' || (queryField && queryField.value.trim() !== '');
+      if (queryField) {
+        queryField.value = '';
+        queryField.focus();
+      }
+      state.query = '';
+      syncStatus();
+      if (hadQuery) requestCatalog(1, false, true);
+    });
     if (queryField) {
-      var liveInlineSearch = debounce(function () {
+      liveInlineSearch = debounce(function () {
         state.query = queryField.value.trim();
         syncStatus();
         requestCatalog(1, false, true);
       }, 350);
-      queryField.addEventListener('input', liveInlineSearch);
+      queryField.addEventListener('input', function () {
+        // Keep state current immediately even though the network request is
+        // debounced. This also preserves the draft if the visitor taps a
+        // category before the 350 ms delay finishes.
+        state.query = queryField.value.trim();
+        syncInlineSearchVisuals();
+        liveInlineSearch();
+      });
       queryField.addEventListener('keydown', function (event) {
         if (event.key !== 'Enter') return;
         event.preventDefault();
+        liveInlineSearch.cancel();
         state.query = queryField.value.trim();
         syncStatus();
         requestCatalog(1, false, true);
       });
+      queryField.addEventListener('focus', function () { syncInlineSearchVisuals(); });
+      queryField.addEventListener('blur', function () {
+        window.setTimeout(function () { syncInlineSearchVisuals(); }, 90);
+      });
     }
     if (searchInput) {
-      var liveSearch = debounce(function () {
+      liveSearch = debounce(function () {
         state.query = searchInput.value.trim();
         syncStatus();
         requestCatalog(1, false, true);
       }, 350);
-      searchInput.addEventListener('input', liveSearch);
+      searchInput.addEventListener('input', function () {
+        state.query = searchInput.value.trim();
+        liveSearch();
+      });
     }
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && modal && !modal.hidden) closeSearch();
@@ -553,6 +707,10 @@
         event.preventDefault();
         categoryFirst.focus();
       }
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'hidden') stopInlineTyping(false);
+      else syncInlineSearchVisuals();
     });
     if (pagination) pagination.querySelectorAll('[data-market-page-link]').forEach(function (link) {
       link.addEventListener('click', function (event) {
