@@ -201,6 +201,25 @@ body.market-search-open { overflow: hidden; }
 .market-all-category-item:hover, .market-all-category-item:focus-visible { border-color: #9bbce0; background: var(--market-blue-soft); outline: 0; transform: translateY(-1px); }
 .market-all-category-item[aria-pressed="true"] { border-color: var(--market-blue); background: var(--market-blue-soft); }
 .market-all-category-icon { display: grid; flex: 0 0 35px; width: 35px; height: 35px; place-items: center; border-radius: 10px; background: var(--market-blue-soft); color: var(--market-blue); font-size: 14px; }
+.market-all-category-icon > i { color: inherit !important; }
+/* Give the lazy category dialog the same visual language as the shortcut
+ * row, while retaining a distinct colour for every common category. */
+#page .marketplace-page .market-all-category-item[data-market-category-slug="makanan-minuman"] .market-all-category-icon { background: #ffe3d2; color: #a64e16 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="hasil-tani"] .market-all-category-icon { background: #d9f0df; color: #246b38 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="peternakan-perikanan"] .market-all-category-icon { background: #d7eff2; color: #176d78 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="kerajinan"] .market-all-category-icon { background: #e8dcfa; color: #5f3b98 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="pakaian-aksesori"] .market-all-category-icon { background: #f8ddec; color: #a23a78 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="jasa"] .market-all-category-icon { background: #dceafd; color: #185796 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="kebutuhan-rumah-tangga"] .market-all-category-icon { background: #fff0c9; color: #93600c !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="elektronik-aksesori"] .market-all-category-icon { background: #dfe5fb; color: #3e4fa0 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="peralatan-bahan-bangunan"] .market-all-category-icon { background: #f1e1d1; color: #8b4f20 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="pendidikan-buku"] .market-all-category-icon { background: #d8f0ee; color: #176e6a !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="tanaman-bibit"] .market-all-category-icon { background: #e1f3c8; color: #4f7620 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="otomotif-suku-cadang"] .market-all-category-icon { background: #f8d9dc; color: #a12f3d !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="perawatan-pribadi"] .market-all-category-icon { background: #f7dce8; color: #9b3d68 !important; }
+#page .marketplace-page .market-all-category-item[data-market-category-slug="lainnya"] .market-all-category-icon { background: #e3e8ee; color: #3f566b !important; }
+#page .marketplace-page .market-all-category-item[aria-pressed="true"] .market-all-category-icon,
+#page .marketplace-page .market-all-category-item[aria-pressed="true"] .market-all-category-icon > i { background: var(--market-blue); color: #fff !important; }
 .market-all-category-label { min-width: 0; overflow: hidden; font-size: 12px; font-weight: 800; line-height: 1.25; text-overflow: ellipsis; }
 body.market-category-open { overflow: hidden; }
 
@@ -287,7 +306,7 @@ body.market-category-open { overflow: hidden; }
 .market-product-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .market-product-thumb.is-active { border-color: var(--market-blue); box-shadow: 0 0 0 2px rgba(45,107,178,.15); }
 .market-product-info-card { position: relative; z-index: 1; margin-top: 0; overflow: visible; }
-.market-product-info-card .content { padding: 20px 15px 17px; }
+#page .marketplace-product-page .market-product-info-card > .content { margin-top: 0 !important; padding: 14px 15px 17px; }
 .market-product-category { display: inline-flex; align-items: center; gap: 5px; color: var(--market-blue); font-size: 11px; font-weight: 800; }
 .market-product-info-card h1 { display: block; max-width: 100%; min-width: 0; margin: 6px 0 7px; overflow: hidden; color: var(--market-ink); font-size: 28px; font-weight: 850; line-height: 1.16; text-overflow: ellipsis; white-space: nowrap; }
 /* The detail title is content, not a compact catalogue label. Let long
@@ -852,6 +871,24 @@ body.theme-dark .market-category-dialog-head h2 { color: var(--market-ink); }
 body.theme-dark .market-all-category-item { background: var(--market-surface); color: var(--market-ink); }
 body.theme-dark .market-all-category-item:hover, body.theme-dark .market-all-category-item:focus-visible, body.theme-dark .market-all-category-item[aria-pressed="true"] { background: var(--market-blue-soft); }
 body.theme-dark .market-all-category-icon { background: var(--market-blue-soft); color: #a9cff8; }
+body.theme-dark #page .marketplace-page .market-all-category-icon { background: #23496d; color: #c2e0ff !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="makanan-minuman"] .market-all-category-icon { background: #613b2b; color: #ffc095 !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="hasil-tani"] .market-all-category-icon { background: #245238; color: #a9e2b5 !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="peternakan-perikanan"] .market-all-category-icon { background: #1f525b; color: #a4e1e8 !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="kerajinan"] .market-all-category-icon { background: #4b3769; color: #dec6ff !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="pakaian-aksesori"] .market-all-category-icon { background: #633752; color: #f4b9dc !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="jasa"] .market-all-category-icon { background: #214d79; color: #c7e5ff !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="kebutuhan-rumah-tangga"] .market-all-category-icon { background: #5d4b24; color: #f5d98d !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="elektronik-aksesori"] .market-all-category-icon { background: #343e72; color: #c3ceff !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="peralatan-bahan-bangunan"] .market-all-category-icon { background: #5d4027; color: #edc19a !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="pendidikan-buku"] .market-all-category-icon { background: #245553; color: #a8e1dc !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="tanaman-bibit"] .market-all-category-icon { background: #3d5727; color: #c4e69d !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="otomotif-suku-cadang"] .market-all-category-icon { background: #653039; color: #f2abb4 !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="perawatan-pribadi"] .market-all-category-icon { background: #63374d; color: #f1b5d0 !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[data-market-category-slug="lainnya"] .market-all-category-icon { background: #354756; color: #d3e2ee !important; }
+body.theme-dark #page .marketplace-page .market-all-category-icon > i { color: inherit !important; }
+body.theme-dark #page .marketplace-page .market-all-category-item[aria-pressed="true"] .market-all-category-icon,
+body.theme-dark #page .marketplace-page .market-all-category-item[aria-pressed="true"] .market-all-category-icon > i { background: var(--market-blue); color: #fff !important; }
 body.theme-dark .market-category-error button { border-color: #704047; background: #46282d; color: #f4a1aa; }
 body.theme-dark .market-product-skeleton-media, body.theme-dark .market-product-skeleton-line { background: linear-gradient(110deg, #213c5a 25%, #2b4054 37%, #213c5a 63%); background-size: 400% 100%; }
 body.theme-dark .market-contact-modal { --market-ink: #edf3fa; --market-muted: #aab8c7; --market-line: #405263; --market-blue-soft: #213c5a; --market-surface: #1c2733; }
