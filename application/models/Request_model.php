@@ -861,7 +861,16 @@ class Request_model extends CI_Model
     {
         if (warga_demo_mode()) {
             $request = $this->find_demo_request($requestId);
-            return !empty($request['documents']) ? $request['documents'] : array();
+            if (empty($request['documents']) || !is_array($request['documents'])) return array();
+            return array_values(array_map(function ($document) {
+                return array(
+                    'id' => trim((string) ($document['id'] ?? '')),
+                    'field_key' => isset($document['field_key']) ? $document['field_key'] : NULL,
+                    'original_name' => (string) ($document['original_name'] ?? 'Berkas'),
+                    'mime_type' => strtolower(trim((string) ($document['mime_type'] ?? ''))),
+                    'file_size' => (int) ($document['file_size'] ?? 0)
+                );
+            }, $request['documents']));
         }
         if (!warga_database_available()) return array();
         $request = $this->find_for_staff($requestId, $user);
@@ -871,7 +880,21 @@ class Request_model extends CI_Model
 
     public function document_for_staff($documentId, array $user)
     {
-        if (warga_demo_mode() || !warga_database_available()) return NULL;
+        if (warga_demo_mode()) {
+            $documentId = trim((string) $documentId);
+            if ($documentId === '') return NULL;
+            foreach ($this->demo_requests() as $request) {
+                foreach (!empty($request['documents']) && is_array($request['documents']) ? $request['documents'] : array() as $document) {
+                    $candidateId = trim((string) ($document['id'] ?? ''));
+                    if ($candidateId !== '' && hash_equals($candidateId, $documentId) && !empty($document['storage_path'])) {
+                        $document['request_id'] = $request['id'];
+                        return $document;
+                    }
+                }
+            }
+            return NULL;
+        }
+        if (!warga_database_available()) return NULL;
         $this->db->select('d.*, r.id AS request_id')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')->where('d.id', (string) $documentId);
         $request = $this->db->get()->row_array();
         if (!$request || !$this->find_for_staff($request['request_id'], $user)) return NULL;
@@ -929,7 +952,23 @@ class Request_model extends CI_Model
             $created = array('id' => $id, 'request_code' => 'SDW-' . date('Y') . '-' . strtoupper(substr(str_replace('-', '', $id), 0, 6)), 'citizen_user_id' => (int) $user['id'], 'service_slug' => $service['slug'], 'service_name' => $service['name'], 'service_icon' => $service['icon'], 'status' => 'submitted', 'submitted_at' => $now, 'updated_at' => $now, 'purpose' => $purpose, 'note' => $note, 'form_data' => $validated['values'], 'form_schema' => $service['form_schema'], 'form_schema_version' => $validated['schema_version'], 'local_reference' => NULL, 'document_path' => NULL, 'citizen_name' => $user['name'], 'citizen_phone' => $user['phone'], 'village_name' => $user['village_name']);
             $uploaded = $this->collect_uploaded_documents($id, $service['form_schema']);
             if (!empty($uploaded['error'])) return array('success' => FALSE, 'message' => $uploaded['error']);
-            $created['documents'] = array_map(function ($file) { return array('field_key' => isset($file['field_key']) ? $file['field_key'] : NULL, 'original_name' => $file['original_name'], 'mime_type' => $file['mime_type'], 'file_size' => $file['file_size']); }, $uploaded['files']);
+            // Keep the same document shape as the database path in demo mode
+            // so a locally uploaded image/PDF can be opened through the very
+            // same authenticated attachment endpoint.  The physical path is
+            // kept in the server-side session only and is never rendered.
+            $created['documents'] = array();
+            foreach ($uploaded['files'] as $file) {
+                $file['id'] = warga_uuid();
+                $created['documents'][] = array(
+                    'id' => $file['id'],
+                    'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL,
+                    'original_name' => $file['original_name'],
+                    'stored_name' => $file['stored_name'],
+                    'storage_path' => $file['storage_path'],
+                    'mime_type' => $file['mime_type'],
+                    'file_size' => (int) $file['file_size']
+                );
+            }
             $saved = $this->session->userdata('warga_demo_requests');
             if (!is_array($saved)) $saved = array();
             array_unshift($saved, $created);
@@ -1039,9 +1078,47 @@ class Request_model extends CI_Model
             $request = $this->find_demo_request($id);
             if (!$request || (int) $request['citizen_user_id'] !== (int) $user['id']) return array('success' => FALSE, 'message' => 'Permohonan tidak ditemukan.');
             if ((string) $request['status'] !== 'revision') return array('success' => FALSE, 'message' => 'Permohonan ini tidak sedang menunggu perbaikan.');
+            $service = NULL;
+            foreach ($this->demo_services() as $candidate) {
+                if ((string) $candidate['slug'] === (string) ($request['service_slug'] ?? '')) {
+                    $service = $candidate;
+                    break;
+                }
+            }
+            if (!$service) return array('success' => FALSE, 'message' => 'Jenis layanan tidak ditemukan.');
+            $existingDocuments = !empty($request['documents']) && is_array($request['documents']) ? $request['documents'] : array();
+            $existingCounts = array();
+            foreach ($existingDocuments as $document) {
+                $fieldKey = trim((string) ($document['field_key'] ?? ''));
+                if ($fieldKey !== '') $existingCounts[$fieldKey] = isset($existingCounts[$fieldKey]) ? $existingCounts[$fieldKey] + 1 : 1;
+            }
+            $uploaded = $this->collect_uploaded_documents($id, $service['form_schema'], $existingCounts);
+            if (!empty($uploaded['error'])) return array('success' => FALSE, 'message' => $uploaded['error']);
+            $replaceKeys = array_values(array_filter(array_map('strval', isset($uploaded['replace_field_keys']) ? $uploaded['replace_field_keys'] : array())));
+            $documentMeta = array();
+            foreach ($existingDocuments as $document) {
+                $fieldKey = trim((string) ($document['field_key'] ?? ''));
+                if ($fieldKey !== '' && in_array($fieldKey, $replaceKeys, TRUE)) {
+                    if (!empty($document['storage_path']) && is_file($document['storage_path'])) @unlink($document['storage_path']);
+                    continue;
+                }
+                $documentMeta[] = $document;
+            }
+            foreach ($uploaded['files'] as $file) {
+                $file['id'] = warga_uuid();
+                $documentMeta[] = array(
+                    'id' => $file['id'],
+                    'field_key' => isset($file['field_key']) ? $file['field_key'] : NULL,
+                    'original_name' => $file['original_name'],
+                    'stored_name' => $file['stored_name'],
+                    'storage_path' => $file['storage_path'],
+                    'mime_type' => $file['mime_type'],
+                    'file_size' => (int) $file['file_size']
+                );
+            }
             $overrides = $this->session->userdata('warga_demo_request_overrides');
             if (!is_array($overrides)) $overrides = array();
-            $overrides[$id] = array('status' => 'submitted', 'updated_at' => date('Y-m-d H:i:s'), 'purpose' => $purpose, 'note' => $note, 'form_data' => $formFields);
+            $overrides[$id] = array('status' => 'submitted', 'updated_at' => date('Y-m-d H:i:s'), 'purpose' => $purpose, 'note' => $note, 'form_data' => $formFields, 'documents' => $documentMeta);
             $this->session->set_userdata('warga_demo_request_overrides', $overrides);
             return array('success' => TRUE, 'id' => $id);
         }
@@ -1155,25 +1232,110 @@ class Request_model extends CI_Model
 
     public function documents_for_user($requestId, $userId)
     {
-        if (warga_demo_mode() || !warga_database_available()) return array();
+        if (warga_demo_mode()) {
+            $request = $this->find_demo_request($requestId);
+            if (!$request || (int) ($request['citizen_user_id'] ?? 0) !== (int) $userId) return array();
+            $documents = !empty($request['documents']) && is_array($request['documents']) ? $request['documents'] : array();
+            return array_values(array_map(function ($document) {
+                return array(
+                    'id' => trim((string) ($document['id'] ?? '')),
+                    'field_key' => isset($document['field_key']) ? $document['field_key'] : NULL,
+                    'original_name' => (string) ($document['original_name'] ?? 'Berkas'),
+                    'mime_type' => strtolower(trim((string) ($document['mime_type'] ?? ''))),
+                    'file_size' => (int) ($document['file_size'] ?? 0)
+                );
+            }, $documents));
+        }
+        if (!warga_database_available()) return array();
+        if (!$this->request_document_fields_available(array('id', 'request_id', 'field_key', 'original_name', 'mime_type', 'file_size'), 'request_documents')) return array();
         return $this->db->select('d.id,d.field_key,d.original_name,d.mime_type,d.file_size')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')
             ->where(array('d.request_id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId))->order_by('d.created_at', 'ASC')->get()->result_array();
+    }
+
+    /**
+     * Resolve one uploaded document only when it belongs to the requesting
+     * citizen's own service request.  The storage path is intentionally kept
+     * server-side and is consumed only by the authenticated stream endpoint.
+     */
+    public function document_for_user($requestId, $documentId, $userId)
+    {
+        if (warga_demo_mode()) {
+            $request = $this->find_demo_request($requestId);
+            if (!$request || (int) ($request['citizen_user_id'] ?? 0) !== (int) $userId) return NULL;
+            $documentId = trim((string) $documentId);
+            $documents = !empty($request['documents']) && is_array($request['documents']) ? $request['documents'] : array();
+            foreach ($documents as $document) {
+                $candidateId = trim((string) ($document['id'] ?? ''));
+                if ($documentId !== '' && $candidateId !== '' && hash_equals($candidateId, $documentId) && !empty($document['storage_path'])) {
+                    return $document;
+                }
+            }
+            return NULL;
+        }
+        if (!warga_database_available()) return NULL;
+        if (!$this->request_document_fields_available(array('id', 'request_id', 'storage_path', 'original_name', 'mime_type'), 'request_documents')) return NULL;
+        return $this->db->select('d.*')->from('request_documents d')->join('service_requests r', 'r.id=d.request_id')
+            ->where(array(
+                'd.id' => (string) $documentId,
+                'd.request_id' => (string) $requestId,
+                'r.citizen_user_id' => (int) $userId
+            ))->limit(1)->get()->row_array();
     }
 
     public function official_document_for_user($requestId, $userId)
     {
         if (warga_demo_mode() || !warga_database_available()) return NULL;
-        return $this->db->select('r.document_path, r.document_sha256, r.local_reference')->from('service_requests r')
+        if (!$this->request_document_fields_available(array('document_path', 'document_sha256'))) return NULL;
+        $select = 'r.document_path, r.document_sha256, r.local_reference';
+        $hasFormat = $this->request_document_fields_available(array('document_format'));
+        if ($hasFormat) $select .= ', r.document_format';
+        $row = $this->db->select($select)->from('service_requests r')
             ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued'))
             ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
+        if (!$row || trim((string) ($row['document_path'] ?? '')) === ''
+            || !preg_match('/^[a-f0-9]{64}$/i', trim((string) ($row['document_sha256'] ?? '')))) return NULL;
+
+        // Migration 011 adds document_format. Older installations retain the
+        // legacy PDF columns, so infer the format from the path when the
+        // column is not available (or contains an unexpected value).
+        $format = $hasFormat ? strtolower(trim((string) ($row['document_format'] ?? ''))) : '';
+        if (!in_array($format, array('html', 'pdf'), TRUE)) {
+            $extension = strtolower((string) pathinfo((string) $row['document_path'], PATHINFO_EXTENSION));
+            $format = in_array($extension, array('html', 'htm'), TRUE) ? 'html' : ($extension === 'pdf' ? 'pdf' : '');
+        }
+        if ($format === '') return NULL;
+        $row['document_format'] = $format;
+        $row['document_sha256'] = strtolower(trim((string) $row['document_sha256']));
+        return $row;
     }
 
     public function official_html_for_user($requestId, $userId)
     {
-        if (warga_demo_mode() || !warga_database_available()) return NULL;
-        return $this->db->select('r.document_path, r.document_sha256, r.local_reference, r.document_format')->from('service_requests r')
-            ->where(array('r.id' => (string) $requestId, 'r.citizen_user_id' => (int) $userId, 'r.status' => 'issued', 'r.document_format' => 'html'))
-            ->where('r.document_sha256 IS NOT NULL', NULL, FALSE)->get()->row_array();
+        $document = $this->official_document_for_user($requestId, $userId);
+        return $document && (string) ($document['document_format'] ?? '') === 'html' ? $document : NULL;
+    }
+
+    /**
+     * Check the request/document schema before building a query. Deployments
+     * may receive the application before their migration has run; a missing
+     * optional column should result in a graceful empty state rather than a
+     * database exception on the resident detail page.
+     */
+    private function request_document_fields_available(array $fields, $table = 'service_requests')
+    {
+        static $available = array();
+        if (!warga_database_available()) return FALSE;
+        $table = trim((string) $table) !== '' ? trim((string) $table) : 'service_requests';
+        foreach ($fields as $field) {
+            $field = trim((string) $field);
+            if ($field === '') continue;
+            $key = $table . '.' . $field;
+            if (!array_key_exists($key, $available)) {
+                $available[$key] = !method_exists($this->db, 'field_exists') || $this->db->field_exists($field, $table);
+            }
+            if (empty($available[$key])) return FALSE;
+        }
+        return TRUE;
     }
 
 }

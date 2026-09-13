@@ -1,5 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $formRows = warga_request_form_rows($request); $fileLabels = warga_request_file_labels($request); $requestIcon = warga_request_service_icon($request); ?>
+<?php
+$formRows = warga_request_form_rows($request);
+$fileLabels = warga_request_file_labels($request);
+$requestIcon = warga_request_service_icon($request);
+$officialDocumentFormat = strtolower(trim((string) ($request['official_document_format'] ?? '')));
+$requestStatus = strtolower(trim((string) ($request['status'] ?? '')));
+$showAttachmentModal = !empty($request['documents']) || ($requestStatus === 'issued' && $officialDocumentFormat === 'pdf');
+?>
 <div class="warga-request-detail">
 <section class="warga-detail-head">
     <span class="warga-detail-icon <?= e($requestIcon['class']) ?>"><i class="<?= e($requestIcon['icon']) ?>" aria-hidden="true"></i></span>
@@ -31,15 +38,56 @@
     <div class="warga-form-title"><span><i class="fa fa-paperclip"></i></span><div><h2>Berkas yang Dikirim</h2><p>Daftar berkas pendukung pada permohonan ini.</p></div></div>
     <div class="warga-request-document-list">
         <?php foreach ($request['documents'] as $document): ?>
-            <?php $fieldKey = isset($document['field_key']) ? (string) $document['field_key'] : ''; $fileLabel = $fieldKey !== '' && isset($fileLabels[$fieldKey]) ? $fileLabels[$fieldKey] : 'Berkas pendukung'; ?>
-            <div class="warga-request-document"><i class="fa fa-file-alt"></i><div><strong><?= e($fileLabel) ?></strong><span><?= e(isset($document['original_name']) ? $document['original_name'] : 'Berkas') ?></span></div></div>
+            <?php
+            $fieldKey = isset($document['field_key']) ? (string) $document['field_key'] : '';
+            $fileLabel = $fieldKey !== '' && isset($fileLabels[$fieldKey]) ? $fileLabels[$fieldKey] : 'Berkas pendukung';
+            $documentId = trim((string) ($document['id'] ?? ''));
+            $documentName = trim((string) ($document['original_name'] ?? 'Berkas')) ?: 'Berkas';
+            $documentMime = strtolower(trim((string) ($document['mime_type'] ?? '')));
+            // A few early request rows did not persist MIME metadata. Infer
+            // only the presentation type from the safe original filename;
+            // the authenticated stream endpoint still validates the actual
+            // bytes before returning anything.
+            if ($documentMime === '' || $documentMime === 'application/octet-stream') {
+                $documentExtension = strtolower((string) pathinfo($documentName, PATHINFO_EXTENSION));
+                $documentMime = in_array($documentExtension, array('jpg', 'jpeg'), TRUE)
+                    ? 'image/jpeg'
+                    : ($documentExtension === 'png' ? 'image/png' : ($documentExtension === 'webp' ? 'image/webp' : ($documentExtension === 'pdf' ? 'application/pdf' : '')));
+            }
+            $documentIsImage = strpos($documentMime, 'image/') === 0;
+            $documentIcon = $documentIsImage ? 'fa-file-image' : ($documentMime === 'application/pdf' ? 'fa-file-pdf' : 'fa-file-alt');
+            $documentUrl = $documentId !== ''
+                ? site_url('permohonan/' . rawurlencode((string) $request['id']) . '/lampiran/' . rawurlencode($documentId))
+                : '';
+            ?>
+            <?php if ($documentUrl !== ''): ?>
+                <button type="button" class="warga-request-document" data-announcement-attachment-open data-attachment-url="<?= e($documentUrl) ?>" data-attachment-mime="<?= e($documentMime) ?>" data-attachment-name="<?= e($documentName) ?>" aria-label="Buka <?= e($fileLabel) ?>">
+                    <i class="fa <?= e($documentIcon) ?>" aria-hidden="true"></i>
+                    <div><strong><?= e($fileLabel) ?></strong><span><?= e($documentName) ?></span><small class="warga-request-document-hint">Ketuk untuk melihat</small></div>
+                    <i class="fa fa-chevron-right warga-request-document-arrow" aria-hidden="true"></i>
+                </button>
+            <?php else: ?>
+                <div class="warga-request-document"><i class="fa <?= e($documentIcon) ?>" aria-hidden="true"></i><div><strong><?= e($fileLabel) ?></strong><span><?= e($documentName) ?></span></div></div>
+            <?php endif; ?>
         <?php endforeach; ?>
     </div>
 </div></section>
 <?php endif; ?>
 
-<?php if ($request['status'] === 'issued'): ?>
-<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi mengikuti tampilan surat <?= e($institutionLower) ?> dan siap dilihat di sini.</p></div><?php if (!empty($request['official_html_available'])): ?><div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-warga-letter-open data-html-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat-html')) ?>" data-html-name="<?= e('surat-' . $request['local_reference'] . '.html') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div><?php else: ?><div class="warga-result-pending"><i class="fa fa-info-circle"></i> Tampilan surat sedang disiapkan oleh <?= e($institutionLower) ?>.</div><?php endif; ?></section>
+<?php if ($showAttachmentModal): ?>
+<?php $this->load->view('community/announcement_attachment_modal', array('attachmentModalLabel' => 'Lampiran permohonan')); ?>
+<?php endif; ?>
+
+<?php if ($requestStatus === 'issued'): ?>
+<section class="warga-result-band"><span><i class="fa fa-check"></i></span><div><strong>Surat telah diterbitkan</strong><p>Surat resmi mengikuti tampilan surat <?= e($institutionLower) ?> dan siap dilihat di sini.</p></div>
+    <?php if ($officialDocumentFormat === 'html'): ?>
+        <div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-warga-letter-open data-html-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat-html')) ?>" data-html-name="<?= e('surat-' . ($request['local_reference'] ?? 'resmi') . '.html') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div>
+    <?php elseif ($officialDocumentFormat === 'pdf' && $showAttachmentModal): ?>
+        <div class="warga-result-actions"><button type="button" class="btn btn-s bg-green-dark color-white rounded-s" data-announcement-attachment-open data-attachment-url="<?= e(site_url('permohonan/' . rawurlencode($request['id']) . '/surat')) ?>" data-attachment-mime="application/pdf" data-attachment-name="<?= e('surat-' . ($request['local_reference'] ?? 'resmi') . '.pdf') ?>"><i class="fa fa-eye"></i><span>Lihat Surat</span></button></div>
+    <?php else: ?>
+        <div class="warga-result-pending"><i class="fa fa-info-circle"></i> Tampilan surat sedang disiapkan oleh <?= e($institutionLower) ?>.</div>
+    <?php endif; ?>
+</section>
 <div id="warga-letter-modal" class="warga-letter-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="warga-letter-modal-title">
     <button type="button" class="warga-letter-modal-backdrop" data-warga-letter-close aria-label="Tutup surat"></button>
     <section class="warga-letter-modal-panel" role="document">
@@ -96,5 +144,4 @@ $timelineIcons = array(
     <?php endforeach; ?>
 </section>
 
-<section class="warga-home-notice"><i class="fa fa-info-circle"></i><div><strong>Pembaruan status</strong><p>Verifikasi Sekretaris <?= e($institutionLabel) ?>, persetujuan Kepala <?= e($institutionLabel) ?>, dan penerbitan surat akan tampil pada halaman ini.</p></div></section>
 </div>

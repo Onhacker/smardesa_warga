@@ -123,8 +123,48 @@ class Permohonan extends Citizen_Controller
         $request = $this->Request_model->find_for_user($id, $this->currentUser['id']);
         if (!$request) show_404();
         $request['documents'] = $this->Request_model->documents_for_user($id, $this->currentUser['id']);
-        $request['official_html_available'] = (bool) $this->Request_model->official_html_for_user($id, $this->currentUser['id']);
-        $this->render('permohonan/show', array('pageTitle' => 'Detail Permohonan', 'request' => $request, 'history' => $this->Request_model->history($id)));
+        // A published letter can be the newer HTML representation or the
+        // legacy PDF returned by older local installations. Resolve it once
+        // and let the view choose the matching preview component.
+        $officialDocument = $this->Request_model->official_document_for_user($id, $this->currentUser['id']);
+        $request['official_document_available'] = (bool) $officialDocument;
+        $request['official_document_format'] = $officialDocument ? (string) $officialDocument['document_format'] : '';
+        // Keep this flag for older partials/custom themes that still read it.
+        $request['official_html_available'] = $officialDocument && (string) $officialDocument['document_format'] === 'html';
+        $hasAttachmentViewer = !empty($request['documents'])
+            || ((string) $request['official_document_format'] === 'pdf' && !empty($request['official_document_available']));
+        $this->render('permohonan/show', array(
+            'pageTitle' => 'Detail Permohonan',
+            'request' => $request,
+            'history' => $this->Request_model->history($id),
+            // The request page reuses the announcement attachment viewer only
+            // when an attachment is present. Keep the PDF renderer lazy and
+            // avoid shipping the community bundle for an HTML-only request.
+            'loadCommunityStyles' => $hasAttachmentViewer,
+            'loadCommunityScript' => $hasAttachmentViewer
+        ));
+    }
+
+    /**
+     * Stream a resident-uploaded request document after enforcing both the
+     * request owner and document/request relationship.  The physical path is
+     * never exposed to the browser.
+     */
+    public function attachment($requestId, $documentId)
+    {
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        $this->output->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+        $this->load->model('Request_model');
+        $request = $this->Request_model->find_for_user($requestId, $this->currentUser['id']);
+        if (!$request) show_404();
+        $document = $this->Request_model->document_for_user($requestId, $documentId, $this->currentUser['id']);
+        if (!$document || empty($document['storage_path'])) show_404();
+        $disposition = (string) $this->input->get('download', TRUE) === '1' ? 'attachment' : 'inline';
+        if (!$this->stream_private_file(
+            $document['storage_path'],
+            $document['original_name'] ?? 'lampiran',
+            $disposition
+        )) show_404();
     }
 
     public function document_html($id)
@@ -138,7 +178,23 @@ class Permohonan extends Citizen_Controller
 
     public function document($id)
     {
-        return $this->document_html($id);
+        $this->load->model('Request_model');
+        $document = $this->Request_model->official_document_for_user($id, $this->currentUser['id']);
+        if (!$document || empty($document['document_path'])) show_404();
+        $format = (string) ($document['document_format'] ?? '');
+        if ($format === 'html') {
+            return $this->document_html($id);
+        }
+        if ($format !== 'pdf') show_404();
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        $disposition = (string) $this->input->get('download', TRUE) === '1' ? 'attachment' : 'inline';
+        $name = 'surat-' . (string) ($document['local_reference'] ?? 'resmi') . '.pdf';
+        if (!$this->stream_private_file(
+            $document['document_path'],
+            $name,
+            $disposition,
+            (string) ($document['document_sha256'] ?? '')
+        )) show_404();
     }
 
     private function verified_citizen()

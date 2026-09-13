@@ -1349,6 +1349,14 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
 #page .community-v22-home #community-services-slider.splide .splide__track { height: 218px; }
 #page .community-v22-home #community-services-slider.splide .community-v22-slide { height: 218px; }
 
+/* The home slider is a visual banner; remove its card shadow so it sits
+ * cleanly against the page surface while other community cards retain depth. */
+#page .community-v22-home #community-services-slider .community-v22-slide,
+#page .community-v22-home #community-services-slider .community-v22-slide:hover,
+#page .community-v22-home #community-services-slider .community-v22-slide:focus-visible {
+  box-shadow: none;
+}
+
 @media (max-width: 480px) {
   #page .community-v22-slider.splide {
     width: calc(100% + 12px);

@@ -35,15 +35,14 @@
             <i class="fa fa-check-circle warga-service-catalog-action color-green-dark" aria-hidden="true"></i>
         </div>
         <p class="warga-service-availability d-none" data-service-availability role="status"></p>
-        <div class="warga-service-requirements d-none" data-service-requirements><div class="warga-requirement-head"><i class="fa fa-clipboard-check"></i><strong>Dokumen yang diperlukan</strong></div><ul data-requirement-list></ul></div>
     </div></section>
 
     <section class="card card-style warga-form-card" aria-labelledby="request-purpose-title"><div class="content">
         <div class="warga-form-title"><span aria-hidden="true">2</span><div><h2 id="request-purpose-title">Keperluan</h2><p>Isi tujuan penggunaan surat.</p></div></div>
         <div class="warga-request-field">
             <label for="request-purpose">Keperluan Surat <em>*</em></label>
-            <textarea name="purpose" id="request-purpose" class="form-control" rows="4" minlength="5" maxlength="500" required placeholder="Contoh: Persyaratan administrasi sekolah" aria-describedby="request-purpose-help"><?= e($editMode ? $request['purpose'] : old('purpose')) ?></textarea>
-            <small id="request-purpose-help">Minimal 5 karakter, maksimal 500 karakter.</small>
+            <textarea name="purpose" id="request-purpose" class="form-control" rows="4" minlength="5" maxlength="500" required aria-describedby="request-purpose-help"><?= e($editMode ? $request['purpose'] : old('purpose')) ?></textarea>
+            <small id="request-purpose-help">Contoh: Persyaratan administrasi sekolah. Minimal 5 karakter, maksimal 500 karakter.</small>
         </div>
         <div class="warga-request-field">
             <label for="request-note">Catatan Tambahan <small>Opsional</small></label>

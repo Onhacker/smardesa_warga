@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php $attachmentModalLabel = isset($attachmentModalLabel) && trim((string) $attachmentModalLabel) !== '' ? trim((string) $attachmentModalLabel) : 'Lampiran pengumuman'; ?>
 <div
     class="community-v22-attachment-modal"
     data-announcement-attachment-modal
@@ -10,7 +11,7 @@
     <button type="button" class="community-v22-attachment-backdrop" data-announcement-attachment-close aria-label="Tutup lampiran"></button>
     <section class="community-v22-attachment-dialog" role="dialog" aria-modal="true" aria-labelledby="community-v22-attachment-title">
         <header class="community-v22-attachment-dialog-head">
-            <div><span class="community-v22-eyebrow">Lampiran pengumuman</span><h2 id="community-v22-attachment-title" data-announcement-attachment-title>Lampiran</h2></div>
+            <div><span class="community-v22-eyebrow"><?= e($attachmentModalLabel) ?></span><h2 id="community-v22-attachment-title" data-announcement-attachment-title>Lampiran</h2></div>
             <button type="button" class="community-v22-attachment-close" data-announcement-attachment-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
         </header>
         <div class="community-v22-attachment-viewer" data-announcement-attachment-viewer>
