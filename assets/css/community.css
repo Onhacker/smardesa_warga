@@ -1523,3 +1523,70 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
   #page .community-v22-announcement-page .community-v22-announcement-page-hero p.community-v22-hero-subtitle { font-size: 11px; }
   #page .community-v22-announcement-page .community-v22-announcement-card-copy > strong { font-size: 19px; }
 }
+
+/* Complaint page hero: tighten the copy and vertical rhythm without changing
+ * the shared announcement/contact hero sizing. The text can still wrap on
+ * narrow screens, so the card grows naturally when the village name is long. */
+#page .community-v22-complaint-page .community-v22-page-hero {
+  min-height: 104px;
+  margin-bottom: 16px;
+  padding: 16px 20px;
+  gap: 12px;
+}
+#page .community-v22-complaint-page .community-v22-page-hero-icon {
+  flex-basis: 52px;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  font-size: 21px;
+}
+#page .community-v22-complaint-page .community-v22-page-hero .community-v22-eyebrow {
+  margin-bottom: 2px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+#page .community-v22-complaint-page .community-v22-page-hero h1 {
+  margin-bottom: 3px;
+  font-size: clamp(23px, 4.6vw, 31px);
+  line-height: 1.06;
+}
+#page .community-v22-complaint-page .community-v22-page-hero p:last-child {
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  #page .community-v22-complaint-page .community-v22-page-hero {
+    min-height: 92px;
+    gap: 11px;
+    margin-bottom: 14px;
+    padding: 14px 16px;
+  }
+  #page .community-v22-complaint-page .community-v22-page-hero-icon {
+    flex-basis: 46px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    font-size: 19px;
+  }
+  #page .community-v22-complaint-page .community-v22-page-hero h1 { font-size: 23px; }
+  #page .community-v22-complaint-page .community-v22-page-hero p:last-child { font-size: 12px; }
+}
+
+@media (max-width: 360px) {
+  #page .community-v22-complaint-page .community-v22-page-hero {
+    min-height: 84px;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  #page .community-v22-complaint-page .community-v22-page-hero-icon {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    font-size: 17px;
+  }
+  #page .community-v22-complaint-page .community-v22-page-hero h1 { font-size: 21px; }
+  #page .community-v22-complaint-page .community-v22-page-hero p:last-child { font-size: 11px; }
+}

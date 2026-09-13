@@ -1,7 +1,7 @@
 'use strict';
 
 const SDW_CACHE_PREFIX = 'smartdesa-warga-static-';
-const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-13-sidapulik-market-categories-103';
+const SDW_CACHE = SDW_CACHE_PREFIX + '2026-09-13-sidapulik-notification-badge-104';
 // Product images are versioned by the server (`?v=<token>`), so they can live
 // in a separate cache across static-shell releases without serving stale data.
 const SDW_IMAGE_CACHE = 'smartdesa-warga-market-images-v1';
@@ -15,7 +15,7 @@ const notificationFallbackUrl = new URL('notifikasi', scopeUrl);
 const precache = [
   'offline.html',
   'assets/pwa/icon-192.png',
-  'assets/pwa/notification-badge.png?v=20260913'
+  'assets/pwa/notification-badge.png?v=20260913-badge-2'
 ].map(function (path) { return new URL(path, scopeUrl).href; });
 
 function isStaticAsset(request, url) {
@@ -183,7 +183,7 @@ self.addEventListener('push', function (event) {
     icon: new URL('assets/pwa/icon-192.png',scopeUrl).href,
     // Android renders `badge` as a monochrome alpha mask. Never use the
     // opaque, full-colour launcher icon here or it becomes a solid circle.
-    badge: new URL('assets/pwa/notification-badge.png?v=20260913',scopeUrl).href,
+    badge: new URL('assets/pwa/notification-badge.png?v=20260913-badge-2',scopeUrl).href,
     tag: data.tag || 'sdw-notification', renotify: true, silent: false,
     vibrate: [200,100,200],
     navigate: url.href,
