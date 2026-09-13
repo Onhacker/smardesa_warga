@@ -1578,6 +1578,16 @@ body {
   overflow-wrap: anywhere;
 }
 
+#menu-main .warga-menu-tagline {
+  max-width: 100%;
+  margin: 3px 0 0;
+  color: rgba(255, 255, 255, .86) !important;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
 #menu-main .warga-menu-location {
   display: flex;
   min-width: 0;
@@ -1740,6 +1750,24 @@ body {
 #menu-main .warga-menu-list > a.active-nav > i:last-child {
   color: var(--warga-teal-dark) !important;
   font-weight: 800;
+}
+
+#menu-main .warga-menu-list > label.warga-menu-toggle-row.active-nav {
+  background: #eaf1fa;
+  box-shadow: inset 3px 0 0 var(--warga-teal);
+}
+
+#menu-main .warga-menu-list > label.warga-menu-toggle-row.active-nav > span:not(.warga-menu-toggle-control) {
+  color: var(--warga-teal-dark) !important;
+  font-weight: 800;
+}
+
+.theme-dark #menu-main .warga-menu-list > label.warga-menu-toggle-row.active-nav {
+  background: #172f51;
+}
+
+.theme-dark #menu-main .warga-menu-list > label.warga-menu-toggle-row.active-nav > span:not(.warga-menu-toggle-control) {
+  color: #a9c8ee !important;
 }
 
 #menu-main .warga-menu-list > a:hover,
@@ -7687,6 +7715,7 @@ body #page .page-content .warga-notification-type-icon.is-complaint i { color: #
   }
 
   #menu-main .warga-menu-head h2 { font-size: 18px; }
+  #menu-main .warga-menu-tagline { font-size: 9px; line-height: 1.25; }
   #menu-main .warga-menu-location { margin-top: 6px; padding-top: 5px; }
   #menu-main .warga-menu-location strong { font-size: 13px; }
   #menu-main .warga-menu-location span { font-size: 10px; }
