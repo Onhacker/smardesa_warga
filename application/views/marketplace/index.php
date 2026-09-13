@@ -7,7 +7,8 @@ $canManage = !empty($canManage);
 $marketplaceReady = isset($marketplaceReady) ? (bool) $marketplaceReady : TRUE;
 $listingFilters = isset($listing['filters']) && is_array($listing['filters']) ? $listing['filters'] : array();
 $search = trim((string) ($listingFilters['q'] ?? ''));
-$selectedCategory = (string) ($listingFilters['category_id'] ?? '');
+$selectedCategoryValue = (int) ($listingFilters['category_id'] ?? 0);
+$selectedCategory = $selectedCategoryValue > 0 ? (string) $selectedCategoryValue : '';
 $selectedSort = (string) ($listingFilters['sort'] ?? 'newest');
 $categoryName = function ($category) {
     return trim((string) ($category['name'] ?? ($category['label'] ?? '')));
@@ -16,27 +17,18 @@ $categorySlug = function ($category) {
     return trim((string) ($category['slug'] ?? ''));
 };
 // Keep the most useful categories visible beside the search field. The
-// remaining active categories are available from the lazy "Lihat semua"
+// remaining active categories are available from the lazy "Semua Kategori"
 // dialog, so the first paint stays compact even when an administrator adds
 // many categories later.
 $quickCategories = array();
-$quickSlugs = array('makanan-minuman', 'hasil-tani', 'kerajinan', 'jasa', 'lainnya');
-$usedCategoryIds = array();
+$quickSlugs = array('makanan-minuman', 'kerajinan', 'jasa');
 foreach ($quickSlugs as $preferredSlug) {
     foreach ($categories as $categoryOption) {
         $categoryId = (string) ($categoryOption['id'] ?? '');
-        if ($categoryId === '' || isset($usedCategoryIds[$categoryId]) || $categorySlug($categoryOption) !== $preferredSlug) continue;
+        if ($categoryId === '' || $categorySlug($categoryOption) !== $preferredSlug) continue;
         $quickCategories[] = $categoryOption;
-        $usedCategoryIds[$categoryId] = TRUE;
         break;
     }
-}
-foreach ($categories as $categoryOption) {
-    if (count($quickCategories) >= 5) break;
-    $categoryId = (string) ($categoryOption['id'] ?? '');
-    if ($categoryId === '' || isset($usedCategoryIds[$categoryId])) continue;
-    $quickCategories[] = $categoryOption;
-    $usedCategoryIds[$categoryId] = TRUE;
 }
 $listingPages = max(1, (int) ($listing['pages'] ?? 1));
 $listingPage = max(1, (int) ($listing['page'] ?? 1));
@@ -104,7 +96,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
     </div>
 
     <!-- The complete category list is fetched only when a visitor asks for it.
-         The initial catalogue therefore renders just the five quick choices. -->
+         The initial catalogue therefore renders only the five compact choices. -->
     <div class="market-category-modal" id="market-category-modal" data-market-category-modal hidden aria-hidden="true">
         <button type="button" class="market-category-backdrop" data-market-category-close aria-label="Tutup daftar kategori"></button>
         <section class="market-category-dialog" role="dialog" aria-modal="true" aria-labelledby="market-category-title" aria-describedby="market-category-description">
@@ -149,6 +141,10 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
         </form>
 
         <div class="market-category-shortcuts" data-market-category-shortcuts role="list" aria-label="Kategori pilihan">
+            <button type="button" class="market-category-chip market-category-chip-all-products<?= $selectedCategory === '' ? ' is-active' : '' ?>" data-market-category-quick data-market-category-id="" data-market-category-slug="semua-produk" aria-pressed="<?= $selectedCategory === '' ? 'true' : 'false' ?>">
+                <span class="market-category-chip-icon" aria-hidden="true"><i class="fa fa-th-large"></i></span>
+                <span class="market-category-chip-label">Semua Produk</span>
+            </button>
             <?php foreach ($quickCategories as $quickCategory): ?>
                 <?php
                 $quickId = (string) ($quickCategory['id'] ?? '');
@@ -161,14 +157,14 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
                 elseif ($quickSlug === 'kerajinan') $quickIcon = 'fa-palette';
                 elseif ($quickSlug === 'jasa') $quickIcon = 'fa-wrench';
                 ?>
-                <button type="button" class="market-category-chip" data-market-category-quick data-market-category-id="<?= e($quickId) ?>" data-market-category-slug="<?= e($quickSlug) ?>" aria-pressed="<?= $selectedCategory === $quickId ? 'true' : 'false' ?>">
+                <button type="button" class="market-category-chip<?= $selectedCategory === $quickId ? ' is-active' : '' ?>" data-market-category-quick data-market-category-id="<?= e($quickId) ?>" data-market-category-slug="<?= e($quickSlug) ?>" aria-pressed="<?= $selectedCategory === $quickId ? 'true' : 'false' ?>">
                     <span class="market-category-chip-icon" aria-hidden="true"><i class="fa <?= e($quickIcon) ?>"></i></span>
                     <span class="market-category-chip-label"><?= e($quickLabel !== '' ? $quickLabel : 'Kategori') ?></span>
                 </button>
             <?php endforeach; ?>
-            <button type="button" class="market-category-chip market-category-chip-all" data-market-all-categories-open aria-haspopup="dialog" aria-controls="market-category-modal">
+            <button type="button" class="market-category-chip market-category-chip-all" data-market-all-categories-open aria-label="Buka semua kategori" aria-haspopup="dialog" aria-controls="market-category-modal">
                 <span class="market-category-chip-icon" aria-hidden="true"><i class="fa fa-th-large"></i></span>
-                <span class="market-category-chip-label">Lihat semua</span>
+                <span class="market-category-chip-label">Semua Kategori</span>
             </button>
         </div>
 
