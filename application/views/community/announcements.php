@@ -83,7 +83,7 @@ $announcementAttachment = static function (array $item) {
             ?>
             <article class="community-v22-announcement-card">
                 <a class="community-v22-announcement-card-head" href="<?= site_url('pengumuman/'.$item['id']) ?>">
-                    <span class="community-v22-announcement-date-tile" aria-label="Tanggal <?= e(tanggal_id($item['created_at'])) ?>"><b><?= e($announcementDate['day']) ?></b><small><?= e($announcementDate['month']) ?></small></span>
+                    <span class="community-v22-announcement-date-tile" aria-label="Tanggal <?= e(tanggal_id($item['created_at'])) ?>"><b><?= e($announcementDate['day']) ?></b><small class="color-white"><?= e($announcementDate['month']) ?></small></span>
                     <span class="community-v22-announcement-card-copy">
                         <span class="community-v22-announcement-card-eyebrow">PENGUMUMAN <?= e($announcementScopeUpper) ?></span>
                         <strong><?= e($item['title']) ?></strong>

@@ -660,6 +660,80 @@ body.market-review-open { overflow: hidden; }
 .marketplace-store-page #market-store-whatsapp,
 .marketplace-store-page #market-store-phone { font-variant-numeric: tabular-nums; letter-spacing: .01em; }
 
+/* Keep the Tokoku and store-identity headers compact on small screens.  The
+ * copy can still wrap naturally when a village or store name is long. */
+.marketplace-tokoku-page > .market-hero,
+.marketplace-store-page > .market-hero {
+  min-height: 96px;
+  margin-bottom: 14px;
+  padding: 14px 17px;
+  gap: 12px;
+}
+.marketplace-tokoku-page > .market-hero .market-hero-copy h1,
+.marketplace-store-page > .market-hero .market-hero-copy h1 {
+  margin: 1px 0 3px;
+  font-size: 26px;
+  line-height: 1.08;
+}
+.marketplace-tokoku-page > .market-hero .market-hero-copy > span,
+.marketplace-store-page > .market-hero .market-hero-copy > span {
+  font-size: 13px;
+  line-height: 1.3;
+}
+.marketplace-tokoku-page > .market-hero .market-hero-icon,
+.marketplace-store-page > .market-hero .market-hero-icon {
+  flex-basis: 48px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 20px;
+}
+
+/* The identity summary should show the useful contact details without a
+ * large empty band between the heading and the first product. */
+.marketplace-tokoku-page .market-store-summary-card { margin-bottom: 18px; }
+.marketplace-tokoku-page .market-store-summary-card .content { padding: 13px 14px 12px; }
+.marketplace-tokoku-page .market-tokoku-store-head { gap: 8px; }
+.marketplace-tokoku-page .market-tokoku-store-head .market-eyebrow { font-size: 12px; line-height: 1.2; }
+.marketplace-tokoku-page .market-tokoku-store-head h2 { margin: 2px 0 2px; font-size: 20px; line-height: 1.12; }
+.marketplace-tokoku-page .market-tokoku-store-head p:last-child { font-size: 13px; line-height: 1.3; }
+.marketplace-tokoku-page .market-tokoku-edit { width: 34px; height: 34px; flex-basis: 34px; font-size: 13px; }
+.marketplace-tokoku-page .market-tokoku-contact-row {
+  gap: 5px 12px;
+  margin: 8px 0 0 53px;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.marketplace-tokoku-page .market-tokoku-contact-row span { min-width: 0; overflow-wrap: anywhere; }
+.marketplace-tokoku-page .market-tokoku-contact-row i { flex: 0 0 auto; }
+
+/* Store form: helper text is easier to read than a disappearing placeholder,
+ * and all editable values use the same comfortable phone-sized type. */
+.marketplace-store-page .market-form-card .content { padding-top: 15px; padding-bottom: 16px; }
+.marketplace-store-page .market-form-section-title { margin-bottom: 13px; }
+.marketplace-store-page .market-form-field { margin-bottom: 11px; }
+.marketplace-store-page .market-form-field > input,
+.marketplace-store-page .market-form-field > select,
+.marketplace-store-page .market-form-field > textarea {
+  min-height: 54px;
+  font-size: clamp(16px, 4.6vw, 18px);
+  line-height: 1.4;
+}
+.marketplace-store-page .market-form-field > textarea { min-height: 112px; }
+#page .marketplace-store-page .market-form-help {
+  display: block;
+  margin-top: 5px;
+  color: var(--market-muted) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.35;
+}
+body.theme-light #page .page-content .marketplace-store-page .market-form-help { color: var(--market-muted) !important; }
+body.theme-dark #page .page-content .marketplace-store-page .market-form-help { color: #b9c8d8 !important; }
+.marketplace-store-page .market-form-error { margin-top: 4px; }
+.marketplace-store-page .market-form-two-col { gap: 9px; }
+.marketplace-store-page .market-form-actions { margin-top: 17px; }
+
 .market-product-consent {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);

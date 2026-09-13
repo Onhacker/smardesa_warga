@@ -1020,6 +1020,16 @@ body.theme-light #page .community-v22-home .community-v22-feature-copy > span { 
 }
 #page .community-v22-announcement-detail .community-v22-detail-hero .community-v22-announcement-date-tile b { color: #172431 !important; }
 #page .community-v22-announcement-detail .community-v22-detail-hero .community-v22-announcement-date-tile small { color: #fff !important; }
+#page .community-v22-announcement-date-tile small {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+  text-shadow: 0 1px 1px rgba(122, 20, 18, .28);
+}
+body.theme-light #page .page-content .community-v22-announcement-date-tile small,
+body.theme-dark #page .page-content .community-v22-announcement-date-tile small {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
 #page .community-v22-announcement-detail .community-v22-detail-hero {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr);

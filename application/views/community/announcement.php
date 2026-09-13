@@ -30,7 +30,7 @@ $attachmentIsImage = strpos($attachmentMime, 'image/') === 0;
 ?>
 <article class="warga-community community-detail community-v22-detail community-v22-announcement-detail">
     <header class="community-v22-detail-hero">
-        <div class="community-v22-announcement-date-tile is-detail" aria-label="Tanggal <?= e(tanggal_id($item['created_at'], true)) ?>"><b><?= e($announcementDate['day']) ?></b><small><?= e($announcementDate['month']) ?></small></div>
+        <div class="community-v22-announcement-date-tile is-detail" aria-label="Tanggal <?= e(tanggal_id($item['created_at'], true)) ?>"><b><?= e($announcementDate['day']) ?></b><small class="color-white"><?= e($announcementDate['month']) ?></small></div>
         <div>
             <p class="community-v22-eyebrow">PENGUMUMAN <?= e($announcementScopeUpper) ?></p>
             <h1><?= e($item['title']) ?></h1>
