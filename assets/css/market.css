@@ -462,7 +462,8 @@ body.theme-dark .market-product-seller-meta > a.market-product-seller-store:focu
 
 /* AppKit-inspired product ratings and comments. */
 .market-review-card { margin-top: 16px; }
-.market-review-card .content { padding: 19px 15px 16px; }
+.market-review-card .content { padding: 14px 15px 16px; }
+#page .marketplace-product-page .market-review-card > .content { margin-top: 0 !important; }
 .market-review-card .market-eyebrow { font-size: 14px; }
 .market-review-card h2 { margin: 4px 0 13px; color: var(--market-ink); font-size: 21px; font-weight: 850; line-height: 1.15; }
 .market-review-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--market-line); }
