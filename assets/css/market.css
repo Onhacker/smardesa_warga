@@ -146,20 +146,35 @@ body.market-search-open { overflow: hidden; }
 .market-category-shortcuts::-webkit-scrollbar { display: none; }
 .market-category-chip { display: flex; flex: 0 0 67px; min-width: 67px; align-items: center; flex-direction: column; gap: 5px; padding: 0 2px; border: 0; background: transparent; color: var(--market-muted); font: inherit; cursor: pointer; text-align: center; }
 .market-category-chip:focus-visible { outline: 2px solid var(--market-blue); outline-offset: 3px; border-radius: 10px; }
-.market-category-chip-icon { display: grid; width: 43px; height: 43px; place-items: center; border: 1px solid rgba(45,107,178,.12); border-radius: 14px; background: #e8f1fc; color: var(--market-blue); font-size: 17px; box-shadow: 0 4px 10px rgba(31,62,96,.06); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+.market-category-chip-icon { display: grid; width: 43px; height: 43px; place-items: center; border: 1px solid rgba(45,107,178,.25); border-radius: 14px; background: #e0ecfb; color: #1e5b9c; font-size: 17px; box-shadow: 0 4px 10px rgba(31,62,96,.10); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
+.market-category-chip-icon > i { color: inherit !important; }
 .market-category-chip-label { display: -webkit-box; width: 100%; min-height: 2.35em; overflow: hidden; font-size: 10px; font-weight: 750; line-height: 1.17; text-overflow: ellipsis; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .market-category-chip.is-active { color: var(--market-blue-dark); }
 .market-category-chip.is-active .market-category-chip-icon { border-color: var(--market-blue); background: var(--market-blue); color: #fff; box-shadow: 0 6px 15px rgba(45,107,178,.26); transform: translateY(-1px); }
 .market-category-chip.is-active .market-category-chip-icon,
 .market-category-chip.is-active .market-category-chip-icon i { color: #fff !important; }
-.market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { background: #e8f1fc; color: #2d6bb2; }
-.market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { background: #fff0e8; color: #c96b2c; }
-.market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { background: #e9f7ec; color: #32844a; }
-.market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { background: #f2eafd; color: #7952b3; }
-.market-category-chip[data-market-category-slug="jasa"] .market-category-chip-icon { background: #e8f1fc; color: #2d6bb2; }
-.market-category-chip[data-market-category-slug="peternakan-perikanan"] .market-category-chip-icon { background: #e5f5f7; color: #23808b; }
-.market-category-chip-all .market-category-chip-icon { background: #eef1f5; color: #566a80; }
+.market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { background: #dceafd; color: #185796; }
+.market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { background: #ffe3d2; color: #a64e16; }
+.market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { background: #d9f0df; color: #246b38; }
+.market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { background: #e8dcfa; color: #5f3b98; }
+.market-category-chip[data-market-category-slug="jasa"] .market-category-chip-icon { background: #dceafd; color: #185796; }
+.market-category-chip[data-market-category-slug="peternakan-perikanan"] .market-category-chip-icon { background: #d7eff2; color: #176d78; }
+.market-category-chip-all .market-category-chip-icon { background: #e3e8ee; color: #3f566b; }
 .market-category-chip.is-active[data-market-category-slug] .market-category-chip-icon { background: var(--market-blue); color: #fff; }
+/* The shared AppKit typography layer gives plain spans a black colour with
+ * higher specificity. Keep each category glyph's semantic colour visible
+ * until the chip is selected, then switch the glyph to white. */
+#page .marketplace-page .market-category-chip-icon { color: #1e5b9c !important; }
+#page .marketplace-page .market-category-chip-icon > i { color: inherit !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { color: #185796 !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { color: #a64e16 !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { color: #246b38 !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { color: #5f3b98 !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="jasa"] .market-category-chip-icon { color: #185796 !important; }
+#page .marketplace-page .market-category-chip[data-market-category-slug="peternakan-perikanan"] .market-category-chip-icon { color: #176d78 !important; }
+#page .marketplace-page .market-category-chip-all .market-category-chip-icon { color: #3f566b !important; }
+#page .marketplace-page .market-category-chip.is-active .market-category-chip-icon,
+#page .marketplace-page .market-category-chip.is-active .market-category-chip-icon > i { color: #fff !important; }
 .market-results-summary { display: flex; align-items: center; justify-content: flex-end; min-height: 0; margin: 0 0 4px; }
 .market-results-summary .market-result-note { font-size: 11px; }
 
@@ -263,11 +278,11 @@ body.market-category-open { overflow: hidden; }
 .market-pagination a.is-active { border-color: var(--market-blue); background: var(--market-blue); color: #fff; }
 
 /* Product detail */
-.market-product-gallery { margin: 0 15px 17px; }
+.market-product-gallery { margin: 0 15px 8px; }
 .market-product-hero-image { position: relative; height: min(62vw, 360px); min-height: 205px; margin: 0; overflow: hidden; border-radius: 20px; background: #dfeaf7; box-shadow: var(--market-shadow); }
 .market-product-hero-image::after { position: absolute; right: 0; bottom: 0; left: 0; height: 42%; background: linear-gradient(transparent, rgba(9,29,57,.66)); content: ''; pointer-events: none; }
 .market-product-hero-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.market-product-thumbs { display: flex; gap: 8px; margin-top: 9px; overflow-x: auto; padding: 2px 1px 4px; }
+.market-product-thumbs { display: flex; gap: 8px; margin-top: 9px; overflow-x: auto; padding: 2px 1px 1px; }
 .market-product-thumb { flex: 0 0 58px; width: 58px; height: 50px; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: 9px; background: #e6eef8; cursor: pointer; }
 .market-product-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .market-product-thumb.is-active { border-color: var(--market-blue); box-shadow: 0 0 0 2px rgba(45,107,178,.15); }
@@ -814,13 +829,24 @@ body.theme-dark .market-inline-search-field { background: var(--market-surface);
 body.theme-dark .market-inline-search-field input { color: var(--market-ink); }
 body.theme-dark .market-category-chip { color: var(--market-muted); }
 body.theme-dark .market-category-chip.is-active { color: #b8d8fa; }
-body.theme-dark .market-category-chip-icon { border-color: #405263; background: #213c5a; color: #a9cff8; }
-body.theme-dark .market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { background: #213c5a; color: #a9cff8; }
-body.theme-dark .market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { background: #4c3429; color: #f0b27d; }
-body.theme-dark .market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { background: #244531; color: #9ed6aa; }
-body.theme-dark .market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { background: #3d3153; color: #cbb2ee; }
-body.theme-dark .market-category-chip-all .market-category-chip-icon { background: #2d3a47; color: #b7c5d3; }
+body.theme-dark .market-category-chip-icon { border-color: #4b6b8c; background: #23496d; color: #c2e0ff; }
+body.theme-dark .market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { background: #214d79; color: #c7e5ff; }
+body.theme-dark .market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { background: #613b2b; color: #ffc095; }
+body.theme-dark .market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { background: #245238; color: #a9e2b5; }
+body.theme-dark .market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { background: #4b3769; color: #dec6ff; }
+body.theme-dark .market-category-chip-all .market-category-chip-icon { background: #354756; color: #d3e2ee; }
 body.theme-dark .market-category-chip.is-active[data-market-category-slug] .market-category-chip-icon { background: var(--market-blue); color: #fff; }
+body.theme-dark #page .marketplace-page .market-category-chip-icon { color: #c2e0ff !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="semua-produk"] .market-category-chip-icon { color: #c7e5ff !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="makanan-minuman"] .market-category-chip-icon { color: #ffc095 !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="hasil-tani"] .market-category-chip-icon { color: #a9e2b5 !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="kerajinan"] .market-category-chip-icon { color: #dec6ff !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="jasa"] .market-category-chip-icon { color: #c7e5ff !important; }
+body.theme-dark #page .marketplace-page .market-category-chip[data-market-category-slug="peternakan-perikanan"] .market-category-chip-icon { color: #a4e1e8 !important; }
+body.theme-dark #page .marketplace-page .market-category-chip-all .market-category-chip-icon { color: #d3e2ee !important; }
+body.theme-dark #page .marketplace-page .market-category-chip-icon > i { color: inherit !important; }
+body.theme-dark #page .marketplace-page .market-category-chip.is-active .market-category-chip-icon,
+body.theme-dark #page .marketplace-page .market-category-chip.is-active .market-category-chip-icon > i { color: #fff !important; }
 body.theme-dark .market-category-dialog { background: var(--market-surface); color: var(--market-ink); }
 body.theme-dark .market-category-dialog-head h2 { color: var(--market-ink); }
 body.theme-dark .market-all-category-item { background: var(--market-surface); color: var(--market-ink); }
