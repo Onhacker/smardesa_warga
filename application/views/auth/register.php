@@ -35,7 +35,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     )); ?>
-    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>"><link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-subset.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>"><link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
@@ -92,7 +92,7 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
 </main>
 <?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl)); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script><script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,footerActionsUrl:<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script><script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

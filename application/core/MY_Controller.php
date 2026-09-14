@@ -108,17 +108,34 @@ class MY_Controller extends CI_Controller
             $data['backUrl'] = $view === 'staff/show' ? site_url('petugas') : site_url('permohonan');
         }
         // Page-specific bundles keep marketplace/community code out of routes
-        // that do not use it. The dashboard home intentionally needs both:
-        // community owns its slider while marketplace owns the product cards.
+        // that do not use it.  The dashboard still renders the compact market
+        // preview cards, so it needs the marketplace stylesheet, but it does
+        // not need the full interactive catalogue runtime.  That runtime is
+        // loaded on demand when a home-card review is opened (see app.php).
         $data['loadCommunityStyles'] = array_key_exists('loadCommunityStyles', $data)
             ? (bool) $data['loadCommunityStyles']
             : (strpos($view, 'community/') === 0 || strpos($view, 'notifications/') === 0);
+        // The small notification core is global because the push onboarding
+        // dialog is rendered by the shared layout. The larger history/center
+        // sheet is route-scoped and loaded only when needed.
+        $data['loadNotificationStyles'] = array_key_exists('loadNotificationStyles', $data)
+            ? (bool) $data['loadNotificationStyles']
+            : ($view === 'notifications/index');
         $data['loadCommunityScript'] = array_key_exists('loadCommunityScript', $data)
             ? (bool) $data['loadCommunityScript']
             : (strpos($view, 'community/') === 0);
+        $data['loadComplaintPaginationScript'] = array_key_exists('loadComplaintPaginationScript', $data)
+            ? (bool) $data['loadComplaintPaginationScript']
+            : ($view === 'community/complaints');
         $data['loadMarketplaceAssets'] = array_key_exists('loadMarketplaceAssets', $data)
             ? (bool) $data['loadMarketplaceAssets']
             : (strpos($view, 'marketplace/') === 0 || $view === 'community/home');
+        $data['loadMarketplaceStyles'] = array_key_exists('loadMarketplaceStyles', $data)
+            ? (bool) $data['loadMarketplaceStyles']
+            : (bool) $data['loadMarketplaceAssets'];
+        $data['loadMarketplaceScript'] = array_key_exists('loadMarketplaceScript', $data)
+            ? (bool) $data['loadMarketplaceScript']
+            : ((bool) $data['loadMarketplaceAssets'] && $view !== 'community/home');
         $data['contentView'] = $view;
         $this->load->view('layouts/app', $data);
     }

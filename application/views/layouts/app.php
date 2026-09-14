@@ -30,12 +30,14 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
         'shareImageHeight' => $shareImageHeight
     )); ?>
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>">
-    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
+    <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-subset.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
+    <link rel="stylesheet" data-lazy-style="notification-core" href="<?= warga_asset_url('assets/css/warga-notification-core.min.css') ?>">
     <?php if (!empty($loadCommunityStyles)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/community.min.css') ?>"><?php endif; ?>
-    <?php if (!empty($loadMarketplaceAssets)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/market.css') ?>"><?php endif; ?>
+    <?php if (!empty($loadNotificationStyles)): ?><link rel="stylesheet" data-lazy-style="notification-center" href="<?= warga_asset_url('assets/css/warga-notifications.min.css') ?>"><?php endif; ?>
+    <?php if (!empty($loadMarketplaceStyles)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/market.css') ?>"><?php endif; ?>
     <style id="warga-letters-icon-override">
         body #page .page-content .warga-letters-head .warga-intro-icon,
         body #page .page-content .warga-letters-head .warga-intro-icon > i {
@@ -117,8 +119,166 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
 <?php else: ?>
 <script src="<?= warga_asset_url('assets/js/notifications.min.js') ?>"></script>
 <?php endif; ?>
-<?php if (!empty($loadMarketplaceAssets)): ?><script src="<?= warga_asset_url('assets/js/market.js') ?>"></script><?php endif; ?>
-<script src="<?= warga_asset_url('assets/js/notification-center.min.js') ?>"></script>
-<script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
+<?php if (!empty($loadMarketplaceScript)): ?><script src="<?= warga_asset_url('assets/js/market.js') ?>"></script><?php endif; ?>
+<?php if (!empty($loadComplaintPaginationScript)): ?><script src="<?= warga_asset_url('assets/js/complaint-pagination.min.js') ?>"></script><?php endif; ?>
+<script>
+(function () {
+    'use strict';
+
+    /*
+     * The notification center, footer dialogs, and the marketplace runtime
+     * are interaction-only features on most screens.  Keep them out of the
+     * critical path and load each bundle only when a matching control is
+     * actually used.  The click is replayed after the bundle has initialised
+     * so the first tap behaves exactly like a normal, eagerly loaded script.
+     */
+    var config = window.SDW = window.SDW || {};
+    var lazyScripts = config.__lazyScripts = config.__lazyScripts || {};
+    var lazyStyles = config.__lazyStyles = config.__lazyStyles || {};
+    var notificationSrc = <?= json_encode(warga_asset_url('assets/js/notification-center.min.js')) ?>;
+    var notificationCssSrc = <?= json_encode(warga_asset_url('assets/css/warga-notifications.min.css')) ?>;
+    var footerSrc = <?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>;
+    var marketplaceSrc = <?= json_encode(warga_asset_url('assets/js/market.js')) ?>;
+    var marketplaceAlreadyLoaded = <?= !empty($loadMarketplaceScript) ? 'true' : 'false' ?>;
+
+    function loadScript(name, source) {
+        if (lazyScripts[name]) return lazyScripts[name];
+        lazyScripts[name] = new Promise(function (resolve, reject) {
+            var script = document.createElement('script');
+            script.src = source;
+            script.async = true;
+            script.onload = function () { resolve(script); };
+            script.onerror = function () {
+                delete lazyScripts[name];
+                reject(new Error('Fitur belum dapat dimuat.'));
+            };
+            (document.head || document.documentElement).appendChild(script);
+        });
+        return lazyScripts[name];
+    }
+
+    function loadStylesheet(name, source) {
+        if (lazyStyles[name]) return lazyStyles[name];
+        lazyStyles[name] = new Promise(function (resolve, reject) {
+            var existing = document.querySelector('link[data-lazy-style="' + name + '"]');
+            if (existing) { resolve(existing); return; }
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = source;
+            link.dataset.lazyStyle = name;
+            link.onload = function () { resolve(link); };
+            link.onerror = function () {
+                delete lazyStyles[name];
+                reject(new Error('Gaya fitur belum dapat dimuat.'));
+            };
+            (document.head || document.documentElement).appendChild(link);
+        });
+        return lazyStyles[name];
+    }
+
+    function replayClick(target) {
+        if (!target || !document.documentElement.contains(target)) return;
+        var event;
+        try {
+            event = new MouseEvent('click', {bubbles: true, cancelable: true, view: window, button: 0});
+        } catch (error) {
+            event = document.createEvent('MouseEvents');
+            event.initMouseEvent('click', true, true, window, 1, 0, 0, 0, 0, false, false, false, false, 0, null);
+        }
+        target.dispatchEvent(event);
+    }
+
+    function closestTarget(target, selector) {
+        return target && typeof target.closest === 'function' ? target.closest(selector) : null;
+    }
+
+    /* Notification center/search: preserve the ordinary link when there is no
+     * unread badge, but open the AJAX dialog immediately when one is present. */
+    var notificationTriggers = document.querySelectorAll('[data-notification-center-trigger], [data-notification-search-open]');
+    if (notificationTriggers.length) {
+        var replayingNotificationClick = false;
+        document.addEventListener('click', function (event) {
+            if (replayingNotificationClick) return;
+            var trigger = closestTarget(event.target, '[data-notification-center-trigger], [data-notification-search-open]');
+            if (!trigger) return;
+            var isCenter = trigger.hasAttribute('data-notification-center-trigger');
+            if (isCenter) {
+                var badge = document.querySelector('[data-notification-count]:not([hidden])');
+                if (!badge || Math.max(0, parseInt(badge.textContent, 10) || 0) < 1) return;
+            }
+            if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            loadStylesheet('notification-center', notificationCssSrc).then(function () {
+                return loadScript('notification-center', notificationSrc);
+            }).then(function () {
+                replayingNotificationClick = true;
+                try { replayClick(trigger); } finally { replayingNotificationClick = false; }
+            }).catch(function () {
+                /* A failed enhancement must retain the original navigation. */
+                if (isCenter && trigger.href) window.location.assign(trigger.href);
+            });
+        }, true);
+    }
+
+    /* Footer contact/share/install dialogs are not needed to paint the page.
+     * Keep only the tiny installed-mode synchroniser inline so the install
+     * panel does not flash for users who already installed the PWA. */
+    var footerControls = document.querySelectorAll('[data-footer-contact-open], [data-footer-share-open], [data-footer-ios-install]');
+    var installPanels = document.querySelectorAll('[data-footer-install-panel]');
+    function isInstalledExperience() {
+        var standalone = false;
+        try {
+            standalone = !!(window.matchMedia && (
+                window.matchMedia('(display-mode: standalone)').matches ||
+                window.matchMedia('(display-mode: minimal-ui)').matches ||
+                window.matchMedia('(display-mode: fullscreen)').matches ||
+                window.matchMedia('(display-mode: window-controls-overlay)').matches
+            ));
+        } catch (error) {}
+        return standalone || window.navigator.standalone === true || /^android-app:\/\//i.test(document.referrer || '');
+    }
+    function syncInstallPanels() {
+        var installed = isInstalledExperience();
+        installPanels.forEach(function (panel) {
+            panel.hidden = installed;
+            panel.setAttribute('aria-hidden', installed ? 'true' : 'false');
+        });
+    }
+    if (installPanels.length) {
+        syncInstallPanels();
+        window.addEventListener('pageshow', syncInstallPanels);
+        window.addEventListener('appinstalled', syncInstallPanels);
+    }
+    if (footerControls.length) {
+        var replayingFooterClick = false;
+        document.addEventListener('click', function (event) {
+            if (replayingFooterClick) return;
+            var trigger = closestTarget(event.target, '[data-footer-contact-open], [data-footer-share-open], [data-footer-ios-install]');
+            if (!trigger || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            loadScript('footer-actions', footerSrc).then(function () {
+                replayingFooterClick = true;
+                try { replayClick(trigger); } finally { replayingFooterClick = false; }
+            }).catch(function () {});
+        }, true);
+    }
+
+    /* Home renders product cards but not the interactive catalogue.  Load the
+     * market runtime only if a resident actually opens a rating/review modal. */
+    if (!marketplaceAlreadyLoaded && document.querySelector('[data-market-review-open]')) {
+        var replayingMarketClick = false;
+        document.addEventListener('click', function (event) {
+            if (replayingMarketClick) return;
+            var trigger = closestTarget(event.target, '[data-market-review-open]');
+            if (!trigger || event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            event.preventDefault();
+            loadScript('marketplace', marketplaceSrc).then(function () {
+                replayingMarketClick = true;
+                try { replayClick(trigger); } finally { replayingMarketClick = false; }
+            }).catch(function () {});
+        }, true);
+    }
+}());
+</script>
 </body>
 </html>

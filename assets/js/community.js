@@ -303,6 +303,26 @@
       element.hidden = unread < 1;
       element.setAttribute('aria-hidden', unread > 0 ? 'false' : 'true');
     });
+    syncAppBadge(unread);
+  }
+
+  function syncAppBadge(value) {
+    var unread = Math.max(0, parseInt(value, 10) || 0);
+    try {
+      if (unread > 0 && typeof navigator.setAppBadge === 'function') {
+        Promise.resolve(navigator.setAppBadge(unread)).catch(function () {});
+        return;
+      }
+      if (unread < 1 && typeof navigator.clearAppBadge === 'function') {
+        Promise.resolve(navigator.clearAppBadge()).catch(function () {});
+        return;
+      }
+      // Some installed runtimes expose the API only to the worker context.
+      // Forward the state when possible; unsupported runtimes simply ignore it.
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({type: 'SDW_SET_APP_BADGE', unreadCount: unread});
+      }
+    } catch (_) {}
   }
   var pending=false, stopped=!isAuthenticated, timer;
   async function poll() {
@@ -452,11 +472,32 @@
       }).then(function (data) {
         if (form.matches('[data-complaint-form]')) {
           var list = document.querySelector('[data-complaint-list]');
-          var empty = list && list.querySelector('[data-complaint-empty]');
-          if (empty) empty.remove();
-          if (list && data.item_html) list.insertAdjacentHTML('afterbegin', data.item_html);
+          var pagination = document.querySelector('[data-complaint-pagination-wrap]');
+          if (list && typeof data.items_html === 'string') {
+            list.innerHTML = data.items_html;
+          } else {
+            var empty = list && list.querySelector('[data-complaint-empty]');
+            if (empty) empty.remove();
+            if (list && data.item_html) list.insertAdjacentHTML('afterbegin', data.item_html);
+          }
+          if (pagination && typeof data.pagination_html === 'string') pagination.innerHTML = data.pagination_html;
           var count = document.querySelector('[data-complaint-count]');
-          if (count) count.textContent = String((parseInt(count.textContent, 10) || 0) + 1) + ' laporan';
+          if (count) {
+            var total = Number.isFinite(Number(data.total))
+              ? Math.max(0, parseInt(data.total, 10) || 0)
+              : (parseInt(count.textContent, 10) || 0) + 1;
+            count.textContent = String(total) + ' laporan';
+          }
+          // The newest complaint always belongs to page one. Keep the URL,
+          // pagination bindings, and assistive status in sync without a reload.
+          try {
+            var currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.delete('page');
+            window.history.replaceState({complaintPage: 1}, '', currentUrl.href);
+          } catch (_) {}
+          document.dispatchEvent(new CustomEvent('sdw:complaints-updated', {
+            detail: {page: 1, total: parseInt(data.total, 10) || 0}
+          }));
           form.reset();
           // reset() restores the hidden input's original value, so put the
           // rotated CSRF hash returned by the JSON response back afterwards.

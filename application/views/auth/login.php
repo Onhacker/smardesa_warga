@@ -28,9 +28,10 @@ $loginBrand = 'SI DAPULIK';
     ));
     ?>
     <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>">
-    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-all.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-subset.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
     <link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>">
     <link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
@@ -82,6 +83,7 @@ $loginBrand = 'SI DAPULIK';
 </div>
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>
-<script src="<?= warga_asset_url('assets/js/footer-actions.js') ?>"></script>
+<script>window.SDW.footerActionsUrl=<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>;</script>
+<script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>
 </body>
 </html>

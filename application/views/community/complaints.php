@@ -26,20 +26,13 @@
     <?php endif; ?>
 
     <section class="community-v22-feed" aria-label="Daftar pengaduan">
-        <div class="community-v22-feed-heading"><h2>Daftar pengaduan</h2><span data-complaint-count><?= count($items) ?> laporan</span></div>
-        <div class="community-list" data-complaint-list>
-            <?php if (!$items): ?>
-            <div class="community-v22-empty-card" role="status" data-complaint-empty>
-                <span class="community-v22-empty-icon is-complaint" aria-hidden="true"><i class="fa fa-comments"></i></span>
-                <span class="community-v22-empty-copy">
-                    <strong>Belum ada pengaduan</strong>
-                    <span>Pengaduan warga akan tampil di sini setelah dikirim.</span>
-                </span>
-            </div>
-            <?php endif; ?>
-            <?php foreach ($items as $item): ?>
-                <?php $this->load->view('community/complaint_item', array('item' => $item, 'canManage' => $canManage)); ?>
-            <?php endforeach; ?>
+        <div class="community-v22-feed-heading"><h2>Daftar pengaduan</h2><span data-complaint-count><?= (int) ($total ?? count($items)) ?> laporan</span></div>
+        <div class="community-list" data-complaint-list data-complaint-data-url="<?= e(site_url('pengaduan/data')) ?>">
+            <?php $this->load->view('community/complaint_items', array('items' => $items, 'canManage' => $canManage)); ?>
         </div>
+        <div data-complaint-pagination-wrap>
+            <?php $this->load->view('community/complaint_pagination', array('page' => $page ?? 1, 'pages' => $pages ?? 0)); ?>
+        </div>
+        <p class="community-pagination-status" data-complaint-pagination-status role="status" hidden></p>
     </section>
 </div>

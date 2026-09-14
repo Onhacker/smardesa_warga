@@ -94,8 +94,30 @@ class Community extends Public_Controller
     public function complaints()
     {
         $this->require_authentication();
-        $this->render('community/complaints', array('pageTitle' => 'Pengaduan', 'items' => $this->community->complaints($this->currentUser),
+        $listing = $this->community->complaints_page($this->currentUser, $this->input->get('page', TRUE), 10);
+        $this->render('community/complaints', array('pageTitle' => 'Pengaduan',
+            'items' => $listing['items'], 'total' => $listing['total'], 'page' => $listing['page'],
+            'pages' => $listing['pages'], 'perPage' => $listing['per_page'],
             'canManage' => $this->community->can_manage($this->currentUser), 'ready' => $this->community->ready()));
+    }
+
+    /** AJAX page endpoint used by the complaint list; visibility stays tenant-scoped. */
+    public function complaints_data()
+    {
+        if (!$this->currentUser && $this->wants_json()) {
+            return $this->json(array('success' => FALSE, 'message' => 'Sesi login berakhir. Silakan masuk kembali.', 'login_url' => site_url('login')), 401);
+        }
+        $this->require_authentication();
+        $listing = $this->community->complaints_page($this->currentUser, $this->input->get('page', TRUE), 10);
+        $canManage = $this->community->can_manage($this->currentUser);
+        return $this->json(array(
+            'success' => TRUE,
+            'items_html' => $this->load->view('community/complaint_items', array('items' => $listing['items'], 'canManage' => $canManage), TRUE),
+            'pagination_html' => $this->load->view('community/complaint_pagination', $listing, TRUE),
+            'total' => $listing['total'],
+            'page' => $listing['page'],
+            'pages' => $listing['pages']
+        ));
     }
 
     public function submit()
@@ -125,12 +147,21 @@ class Community extends Public_Controller
         if ($this->wants_json()) {
             if (!$id) return $this->json(array('success' => FALSE, 'message' => $message), 422);
             $item = $this->community->complaint($id, $this->currentUser);
+            // Return the canonical first page as part of the mutation. This
+            // prevents a successful insert from leaving 11 cards on screen or
+            // placing the newest complaint on a stale later page.
+            $listing = $this->community->complaints_page($this->currentUser, 1, 10);
             return $this->json(array(
                 'success' => TRUE,
                 'message' => $message,
                 'id' => $id,
                 'url' => site_url('pengaduan/'.$id),
-                'item_html' => $this->load->view('community/complaint_item', array('item' => $item, 'canManage' => FALSE), TRUE)
+                'item_html' => $this->load->view('community/complaint_item', array('item' => $item, 'canManage' => FALSE), TRUE),
+                'items_html' => $this->load->view('community/complaint_items', array('items' => $listing['items'], 'canManage' => FALSE), TRUE),
+                'pagination_html' => $this->load->view('community/complaint_pagination', $listing, TRUE),
+                'total' => $listing['total'],
+                'page' => $listing['page'],
+                'pages' => $listing['pages']
             ));
         }
         $this->redirect_with($id ? 'pengaduan/'.$id : 'pengaduan', $id ? 'success' : 'error', $message);

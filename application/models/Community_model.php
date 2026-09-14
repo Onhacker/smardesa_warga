@@ -371,13 +371,47 @@ class Community_model extends CI_Model
         }
     }
 
+    /**
+     * Return one bounded page of complaints together with the total count.
+     *
+     * Complaint lists are tenant-scoped and the resident view is additionally
+     * restricted to the current citizen.  Keeping the count and page query in
+     * one model method prevents controllers/AJAX endpoints from accidentally
+     * applying different visibility rules.
+     */
+    public function complaints_page(array $user, $page = 1, $perPage = 10)
+    {
+        $page = max(1, (int) $page);
+        $perPage = min(50, max(1, (int) $perPage));
+        if (!$this->ready() || empty($user['village_id'])) {
+            return array('items' => array(), 'total' => 0, 'page' => $page, 'per_page' => $perPage, 'pages' => 0);
+        }
+
+        $applyScope = function () use ($user) {
+            $this->db->where('c.village_id', $user['village_id']);
+            if (!$this->can_manage($user)) $this->db->where('c.citizen_user_id', $user['id']);
+        };
+
+        $this->db->from('warga_complaints c');
+        $applyScope();
+        $total = (int) $this->db->count_all_results();
+        $pages = $total > 0 ? (int) ceil($total / $perPage) : 0;
+        if ($pages > 0 && $page > $pages) $page = $pages;
+
+        $this->db->select('c.*,u.name AS citizen_name')->from('warga_complaints c')
+            ->join('users u', 'u.id=c.citizen_user_id');
+        $applyScope();
+        $items = $this->db->order_by('c.updated_at', 'DESC')->order_by('c.id', 'DESC')
+            ->limit($perPage, max(0, ($page - 1) * $perPage))->get()->result_array();
+
+        return array('items' => $items, 'total' => $total, 'page' => $page,
+            'per_page' => $perPage, 'pages' => $pages);
+    }
+
+    /** Backwards-compatible unpaged accessor for detail/legacy callers. */
     public function complaints(array $user)
     {
-        if (!$this->ready() || empty($user['village_id'])) return array();
-        $this->db->select('c.*,u.name AS citizen_name')->from('warga_complaints c')->join('users u','u.id=c.citizen_user_id')
-            ->where('c.village_id', $user['village_id']);
-        if (!$this->can_manage($user)) $this->db->where('c.citizen_user_id', $user['id']);
-        return $this->db->order_by('c.updated_at','DESC')->limit(100)->get()->result_array();
+        return $this->complaints_page($user, 1, 100)['items'];
     }
 
     public function complaint($id, array $user)

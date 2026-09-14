@@ -1635,6 +1635,37 @@ body.theme-light #page .community-v22-detail-hero .community-meta span { color: 
 }
 #page .community-v22-home .community-v22-quick-card.is-announcement .community-v22-quick-card-icon { color: #4a89dc !important; }
 #page .community-v22-home .community-v22-quick-card.is-complaint .community-v22-quick-card-icon { color: #ef5b4a !important; }
+
+/* Complaint history is paged in ten-row chunks and updated in place. */
+#page .community-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 18px 0 4px;
+}
+#page .community-pagination-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #c8d8eb;
+  border-radius: 12px;
+  background: #edf4fc;
+  color: #285ca8;
+  cursor: pointer;
+  transition: opacity .15s ease, transform .15s ease;
+}
+#page .community-pagination-button:not(:disabled):active { transform: scale(.96); }
+#page .community-pagination-button:disabled { opacity: .45; cursor: default; }
+#page .community-pagination-label { color: #53647a; font-size: 14px; font-weight: 700; }
+#page [data-complaint-pagination-wrap][aria-busy="true"] { opacity: .62; pointer-events: none; }
+#page .community-pagination-status { margin: 10px 0 0; font-size: 13px; font-weight: 700; text-align: center; }
+#page .community-pagination-status.is-success { color: #237a3d; }
+#page .community-pagination-status.is-error { color: #b42318; }
+body.theme-dark #page .community-pagination-button { border-color: #38577e; background: #1d3553; color: #c7dcf7; }
+body.theme-dark #page .community-pagination-label { color: #b9c9dc; }
 #page .community-v22-home .community-v22-quick-card.is-marketplace .community-v22-quick-card-icon { color: #f5b83d !important; }
 #page .community-v22-home .community-v22-quick-card-head strong {
   grid-column: 2;

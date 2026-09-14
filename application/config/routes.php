@@ -15,6 +15,7 @@ $route['pengumuman/(:any)/lampiran'] = 'community/attachment/$1';
 $route['pengumuman/(:any)/hapus'] = 'community/delete/$1';
 $route['pengumuman/(:any)'] = 'community/announcement/$1';
 $route['pengaduan'] = 'community/complaints';
+$route['pengaduan/data'] = 'community/complaints_data';
 $route['pengaduan/kirim'] = 'community/submit';
 $route['pengaduan/(:any)/tanggapan'] = 'community/reply/$1';
 $route['pengaduan/(:any)'] = 'community/complaint/$1';
