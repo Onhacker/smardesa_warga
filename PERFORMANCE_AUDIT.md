@@ -1,4 +1,4 @@
-# Audit performa PWA SmartDesa Warga
+# Audit performa PWA SI DAPULIK
 
 Dokumen ini mencatat perubahan performa yang masuk pada rilis 9 September 2026. Pengukuran
 ukuran file dilakukan terhadap aset yang tersimpan di repository; angka jaringan aktual tetap
@@ -43,6 +43,32 @@ bergantung pada Brotli/gzip dan cache Hostinger.
 - Loader navigasi/form tetap bekerja pada bundle ringan, termasuk halaman autentikasi yang tidak
   memuat runtime besar.
 
+### Batch 4 — cache dan JavaScript sesuai kebutuhan
+
+- Cache gambar marketplace dipisahkan dari cache shell, diberi versi, dan dibatasi maksimal 120
+  entri. Saat aktivasi worker lama (shell maupun gambar) dibersihkan; satu produk tetap hanya
+  menyimpan varian terbaru untuk mencegah Cache Storage tumbuh tanpa batas.
+- PDF.js tidak lagi masuk cache statis worker. Parser dan worker PDF tetap memakai HTTP cache dan
+  baru diminta ketika lampiran PDF benar-benar dibuka.
+- notification-center.min.js, footer-actions.js, dan runtime Pasar pada Beranda tidak lagi
+  menghalangi first paint. Masing-masing dimuat saat tombol yang memerlukan fitur tersebut
+  disentuh, lalu klik pertama diputar ulang setelah bundle siap.
+- Beranda tetap memuat CSS kartu preview Pasar, tetapi tidak mengirim runtime katalog penuh.
+
+### Batch 5 — CSS, ikon, aset legacy, dan daftar pengaduan
+
+- warga.min.css menjadi stylesheet dasar (sekitar 181 KB, sebelumnya sekitar 206 KB).
+  Aturan autentikasi dan pusat pemberitahuan dipindahkan ke warga-auth.min.css dan
+  warga-notifications.min.css; dialog izin push bersama memakai companion kecil
+  warga-notification-core.min.css.
+- Font Awesome diganti subset WOFF2 yang hanya memuat glyph yang dipakai aplikasi. Salinan CSS,
+  EOT/TTF/SVG/WOFF lama yang tidak lagi direferensikan dihapus.
+- Aset demo/duplikat Bootstrap lama, bundle app.js lama, Tabler yang tidak dipakai, dan aset
+  placeholder legacy dihapus setelah seluruh referensinya diaudit. Penghapusan tetap dapat
+  dipulihkan melalui Git.
+- Daftar Pengaduan dibatasi 10 item per halaman. Endpoint pengaduan/data mengganti isi daftar
+  dan pagination melalui AJAX dengan scope desa/akun yang sama seperti halaman penuh.
+
 ## Verifikasi rilis
 
 1. Jalankan lint PHP untuk file controller/model/view yang berubah dan `node --check` untuk semua
@@ -53,3 +79,6 @@ bergantung pada Brotli/gzip dan cache Hostinger.
    database produksi sebelum membuka Pasar Dapulik.
 4. Setelah rsync, cek `service-worker.js`, `assetlinks.json`, URL penghapusan akun, dan header
    cache aset berversi. Tutup tab PWA sekali agar worker baru mengambil alih.
+5. Setelah deploy Batch 4/5, kosongkan cache aplikasi/refresh PWA sekali untuk mengambil worker
+   cache-bounded-105; uji klik lonceng, kontak footer, ulasan kartu Beranda, dan pagination
+   Pengaduan pada koneksi lambat.
