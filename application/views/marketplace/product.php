@@ -61,7 +61,12 @@ $relatedProducts = isset($related) && is_array($related) ? array_slice(array_val
 
 <div class="marketplace-page marketplace-product-page">
     <section class="market-product-gallery" data-market-gallery aria-label="Foto <?= e($product['name'] ?? 'produk') ?>">
-        <figure class="market-product-hero-image"><img src="<?= e($galleryImages[0]['full']) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" data-market-gallery-main></figure>
+        <figure class="market-product-hero-image">
+            <button type="button" class="market-product-hero-open" data-market-image-viewer-open aria-label="Perbesar foto <?= e($product['name'] ?? 'produk') ?>" aria-haspopup="dialog" aria-controls="market-product-image-dialog">
+                <img src="<?= e($galleryImages[0]['full']) ?>" alt="<?= e($product['name'] ?? 'Produk warga') ?>" data-market-gallery-main>
+                <span class="market-product-hero-zoom-hint" aria-hidden="true"><i class="fa fa-expand-arrows-alt"></i><span>Perbesar</span></span>
+            </button>
+        </figure>
         <?php if (count($galleryImages) > 1): ?><div class="market-product-thumbs" role="list" aria-label="Galeri produk">
             <?php foreach ($galleryImages as $index => $image): ?><button type="button" class="market-product-thumb <?= $index === 0 ? 'is-active' : '' ?>" data-market-gallery-thumb data-image="<?= e($image['full']) ?>" aria-label="Lihat foto <?= $index + 1 ?>"><img src="<?= e($image['thumb']) ?>" alt="" loading="lazy"></button><?php endforeach; ?>
         </div><?php endif; ?>
@@ -141,3 +146,41 @@ $relatedProducts = isset($related) && is_array($related) ? array_slice(array_val
     'contactDescription' => 'Pilih cara yang paling nyaman untuk menghubungi penjual.'
 )); ?>
 <?php $this->load->view('marketplace/review_modal', array('isAuthenticated' => !empty($isAuthenticated))); ?>
+<?php $this->load->view('marketplace/product_image_modal', array(
+    'productImageTitle' => (string) ($product['name'] ?? 'Foto produk')
+)); ?>
+<script>
+(function () {
+    'use strict';
+    var source = <?= json_encode(warga_asset_url('assets/js/market-image-viewer.min.js')) ?>;
+    var loading = null;
+
+    document.addEventListener('click', function (event) {
+        var trigger = event.target && typeof event.target.closest === 'function'
+            ? event.target.closest('[data-market-image-viewer-open]')
+            : null;
+        if (!trigger || window.SDWMarketImageViewerReady) return;
+        if (event.button > 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        if (!loading) {
+            loading = new Promise(function (resolve, reject) {
+                var script = document.createElement('script');
+                script.src = source;
+                script.async = true;
+                script.onload = resolve;
+                script.onerror = function () {
+                    loading = null;
+                    reject(new Error('Penampil gambar belum dapat dimuat.'));
+                };
+                (document.head || document.documentElement).appendChild(script);
+            });
+        }
+
+        loading.then(function () {
+            if (document.documentElement.contains(trigger)) trigger.click();
+        }).catch(function () {});
+    }, true);
+}());
+</script>

@@ -93,7 +93,12 @@ $showAttachmentModal = !empty($request['documents']) || ($requestStatus === 'iss
     <section class="warga-letter-modal-panel" role="document">
         <header class="warga-letter-modal-header"><div><span>Surat Resmi</span><h2 id="warga-letter-modal-title"><?= e($request['service_name']) ?></h2></div><button type="button" class="warga-letter-icon-button" data-warga-letter-close aria-label="Tutup surat"><i class="fa fa-times"></i></button></header>
         <div class="warga-letter-modal-frame-wrap">
-            <div class="warga-letter-modal-status" data-warga-letter-status role="status">Memuat surat...</div>
+            <div class="warga-letter-modal-status" data-warga-letter-status role="status" aria-live="polite">
+                <span class="warga-letter-modal-status-card">
+                    <span class="warga-letter-modal-spinner" data-warga-letter-spinner aria-hidden="true"></span>
+                    <span data-warga-letter-status-text>Menyiapkan surat…</span>
+                </span>
+            </div>
             <div class="warga-letter-modal-scroll" data-warga-letter-viewport>
                 <div class="warga-letter-modal-canvas" data-warga-letter-canvas hidden>
                     <iframe class="warga-letter-modal-frame" data-warga-letter-frame title="Pratinjau surat resmi" sandbox="allow-same-origin" hidden></iframe>

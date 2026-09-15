@@ -736,6 +736,8 @@
     var zoomLevel = modal.querySelector('[data-warga-letter-zoom-level]');
     var zoomHint = modal.querySelector('[data-warga-letter-zoom-hint]');
     var status = modal.querySelector('[data-warga-letter-status]');
+    var statusText = modal.querySelector('[data-warga-letter-status-text]');
+    var statusSpinner = modal.querySelector('[data-warga-letter-spinner]');
     var download = modal.querySelector('[data-warga-letter-download]');
     var activeOpener = null;
     var currentHtml = '';
@@ -765,6 +767,14 @@
       if (zoomLevel) zoomLevel.textContent = Math.round(currentScale * 100) + '%';
       if (zoomOut) zoomOut.disabled = currentScale <= minScale + 0.001;
       if (zoomIn) zoomIn.disabled = currentScale >= maxScale - 0.001;
+    }
+
+    function setLetterStatus(message, isError) {
+      if (!status) return;
+      status.hidden = false;
+      status.classList.toggle('is-error', Boolean(isError));
+      if (statusText) statusText.textContent = message;
+      if (statusSpinner) statusSpinner.hidden = Boolean(isError);
     }
 
     function setCanvasScale(value, focus) {
@@ -998,8 +1008,7 @@
       if (zoomControls) zoomControls.hidden = true;
       if (zoomHint) zoomHint.hidden = true;
       status.classList.remove('is-error');
-      status.hidden = false;
-      status.textContent = 'Memuat surat...';
+      setLetterStatus('Menyiapkan surat…', false);
       if (download) download.disabled = true;
       if (controller) controller.abort();
       controller = window.AbortController ? new AbortController() : null;
@@ -1015,26 +1024,27 @@
         currentHtml = html;
         frameRequestNumber = requestNumber;
         frame.srcdoc = html;
-        frame.hidden = false;
-        if (canvas) canvas.hidden = false;
-        if (gestureLayer) gestureLayer.hidden = false;
-        if (zoomControls) zoomControls.hidden = false;
-        if (zoomHint) zoomHint.hidden = false;
-        status.hidden = true;
-        window.requestAnimationFrame(function () {
-          if (requestNumber === sequence && !modal.hidden) resetZoom();
-        });
-        if (download) download.disabled = false;
       }).catch(function (error) {
         if (error.name === 'AbortError' || requestNumber !== sequence || modal.hidden) return;
-        status.hidden = false;
-        status.classList.add('is-error');
-        status.textContent = error.message || 'Surat belum dapat dimuat. Coba lagi.';
+        setLetterStatus(error.message || 'Surat belum dapat dimuat. Coba lagi.', true);
       });
     }
 
     frame.addEventListener('load', function () {
-      if (frameRequestNumber > 0) observeFrameHeight(frameRequestNumber);
+      var requestNumber = frameRequestNumber;
+      if (requestNumber < 1 || requestNumber !== sequence || modal.hidden || !currentHtml) return;
+      frame.hidden = false;
+      if (canvas) canvas.hidden = false;
+      observeFrameHeight(requestNumber);
+      window.requestAnimationFrame(function () {
+        if (requestNumber !== sequence || modal.hidden) return;
+        resetZoom();
+        if (gestureLayer) gestureLayer.hidden = false;
+        if (zoomControls) zoomControls.hidden = false;
+        if (zoomHint) zoomHint.hidden = false;
+        if (status) status.hidden = true;
+        if (download) download.disabled = false;
+      });
     });
 
     document.addEventListener('click', function (event) {
