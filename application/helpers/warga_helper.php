@@ -80,6 +80,12 @@ if (!function_exists('warga_notification_display_text')) {
             array('SI DAPULIK', 'diverifikasi', 'disetujui'),
             (string) $text
         );
+        $localized = preg_replace_callback('/\bpengumuman\b/iu', static function ($match) {
+            $value = (string) ($match[0] ?? '');
+            if ($value !== '' && $value === strtoupper($value)) return 'INFO';
+            if ($value !== '' && $value === strtolower($value)) return 'info';
+            return 'Info';
+        }, $localized !== NULL ? $localized : (string) $text);
         return $localized !== NULL ? $localized : (string) $text;
     }
 }
@@ -319,7 +325,7 @@ if (!function_exists('warga_notification_icon')) {
             : strtolower(trim((string) ($notification['title'] ?? '')));
 
         if (strpos($target, 'pengumuman/') === 0 || strpos($title, 'pengumuman') !== FALSE) {
-            return array('type' => 'announcement', 'icon' => 'fa fa-bullhorn', 'class' => 'is-announcement', 'label' => 'Pengumuman');
+            return array('type' => 'announcement', 'icon' => 'fa fa-bullhorn', 'class' => 'is-announcement', 'label' => 'Info');
         }
         if (strpos($target, 'pengaduan/') === 0 || strpos($title, 'pengaduan') !== FALSE || strpos($title, 'aduan') !== FALSE) {
             return array('type' => 'complaint', 'icon' => 'fa fa-comments', 'class' => 'is-complaint', 'label' => 'Pengaduan');

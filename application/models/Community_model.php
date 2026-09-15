@@ -160,7 +160,7 @@ class Community_model extends CI_Model
     {
         $this->lastError = '';
         if (!$this->ready() || !$this->can_manage($user)) {
-            $this->lastError = 'Pengumuman belum dapat diterbitkan.';
+            $this->lastError = 'Info belum dapat diterbitkan.';
             return false;
         }
         $hasUpload = is_array($upload) && (int) ($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
@@ -183,7 +183,7 @@ class Community_model extends CI_Model
         }
         if (!$this->db->trans_begin()) {
             $this->cleanup_paths($storedPaths);
-            $this->lastError = 'Pengumuman belum dapat dimulai. Silakan coba lagi.';
+            $this->lastError = 'Info belum dapat dimulai. Silakan coba lagi.';
             return false;
         }
         $this->db->insert('warga_announcements', array('id' => $id, 'village_id' => $user['village_id'],
@@ -197,7 +197,7 @@ class Community_model extends CI_Model
         $this->db->query("INSERT INTO notifications (id,user_id,title,message)
             SELECT MD5(CONCAT(?,u.id)),u.id,?,? FROM users u JOIN roles r ON r.id=u.role_id
             WHERE u.village_id=? AND u.is_active=1 AND r.slug='warga'",
-            array($id, $title, 'Pengumuman baru dari pemerintah ' . $institutionLower . '.', $user['village_id']));
+            array($id, $title, 'Info baru dari pemerintah ' . $institutionLower . '.', $user['village_id']));
         // A stable announcement ID in targets also supports direct notification links.
         $this->db->query("INSERT INTO warga_notification_targets (notification_id,target_path)
             SELECT n.id,? FROM notifications n JOIN users u ON u.id=n.user_id
@@ -207,12 +207,12 @@ class Community_model extends CI_Model
         if (!$this->db->trans_status()) {
             $this->db->trans_rollback();
             $this->cleanup_paths($storedPaths);
-            $this->lastError = 'Pengumuman belum dapat disimpan.';
+            $this->lastError = 'Info belum dapat disimpan.';
             return false;
         }
         if (!$this->db->trans_commit()) {
             $this->cleanup_paths($storedPaths);
-            $this->lastError = 'Pengumuman belum dapat disimpan.';
+            $this->lastError = 'Info belum dapat disimpan.';
             return false;
         }
         return $id;

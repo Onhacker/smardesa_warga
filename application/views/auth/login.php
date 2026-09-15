@@ -14,7 +14,7 @@ $loginBrand = 'SI DAPULIK';
     <title><?= e($pageTitle) ?></title>
     <?php
     $shareTitle = 'SI DAPULIK ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
-    $shareDescription = 'Akses layanan surat, pengumuman, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
+    $shareDescription = 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
     $shareUrl = base_url();
     $shareImage = warga_asset_url('assets/pwa/share-preview.png');
     $this->load->view('layouts/social_meta', array(
@@ -45,7 +45,7 @@ $loginBrand = 'SI DAPULIK';
         <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home"></i><span>Beranda</span></a>
         <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope"></i><span>Surat</span></a>
         <a class="circle-nav" href="<?= site_url('pasar') ?>"><i class="fa fa-store"></i><span>Pasar</span><strong aria-hidden="true"><u></u></strong></a>
-        <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Pengumuman</span></a>
+        <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn"></i><span>Info</span></a>
         <a class="active-nav" href="<?= site_url('login') ?>"><i class="fa fa-sign-in-alt"></i><span>Login</span></a>
     </nav>
     <main class="page-content header-clear-medium warga-auth-page">

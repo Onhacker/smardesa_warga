@@ -1,5 +1,5 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $attachmentModalLabel = isset($attachmentModalLabel) && trim((string) $attachmentModalLabel) !== '' ? trim((string) $attachmentModalLabel) : 'Lampiran pengumuman'; ?>
+<?php $attachmentModalLabel = isset($attachmentModalLabel) && trim((string) $attachmentModalLabel) !== '' ? trim((string) $attachmentModalLabel) : 'Lampiran info'; ?>
 <div
     class="community-v22-attachment-modal"
     data-announcement-attachment-modal

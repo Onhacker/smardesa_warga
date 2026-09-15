@@ -5,7 +5,7 @@
         <div>
             <p class="community-v22-eyebrow">Pembaruan layanan</p>
             <h1 id="notification-page-title">Pemberitahuan</h1>
-            <p>Surat, pengumuman, dan pengaduan terbaru Anda.</p>
+            <p>Surat, info, dan pengaduan terbaru Anda.</p>
         </div>
     </header>
 

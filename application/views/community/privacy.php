@@ -22,7 +22,7 @@
             <ul>
                 <li>memverifikasi identitas dan kelayakan akun warga;</li>
                 <li>memproses, memantau, dan menerbitkan permohonan surat;</li>
-                <li>mengirim pemberitahuan status, pengumuman, dan tanggapan pengaduan; dan</li>
+                <li>mengirim pemberitahuan status, info, dan tanggapan pengaduan; dan</li>
                 <li>menjaga keamanan, mencegah penyalahgunaan, serta memperbaiki kualitas layanan.</li>
             </ul>
         </section>

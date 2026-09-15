@@ -18,7 +18,7 @@ class Community extends Public_Controller
         $this->require_authentication();
         $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
         $items = $this->community->announcements($this->currentUser);
-        $this->render('community/announcements', array('pageTitle' => 'Pengumuman',
+        $this->render('community/announcements', array('pageTitle' => 'Info',
             'items' => $items,
             'canManage' => $this->community->can_manage($this->currentUser),
             'ready' => $this->community->ready()));
@@ -40,7 +40,7 @@ class Community extends Public_Controller
         // remain untouched.
         $this->load->model('Notification_model');
         $this->Notification_model->mark_target_read($this->currentUser['id'], 'pengumuman/' . (string) $id);
-        $this->render('community/announcement', array('pageTitle' => 'Pengumuman', 'item' => $item,
+        $this->render('community/announcement', array('pageTitle' => 'Info', 'item' => $item,
             'canManage' => $this->community->can_manage($this->currentUser), 'showBackButton' => true, 'backUrl' => site_url('pengumuman')));
     }
 
@@ -50,7 +50,7 @@ class Community extends Public_Controller
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
         $this->form_validation->set_rules('title', 'Judul', 'trim|required|max_length[180]');
-        $this->form_validation->set_rules('body', 'Isi pengumuman', 'trim|required|min_length[10]|max_length[10000]');
+        $this->form_validation->set_rules('body', 'Isi info', 'trim|required|min_length[10]|max_length[10000]');
         if (!$this->form_validation->run()) $this->redirect_with('pengumuman', 'error', trim(strip_tags(validation_errors())));
         $upload = isset($_FILES['announcement_attachment']) && is_array($_FILES['announcement_attachment'])
             ? $_FILES['announcement_attachment'] : NULL;
@@ -60,7 +60,7 @@ class Community extends Public_Controller
             trim((string)$this->input->post('body')),
             $upload
         );
-        $message = $id ? 'Pengumuman diterbitkan.' : ($this->community->last_error() ?: 'Pengumuman belum dapat disimpan.');
+        $message = $id ? 'Info diterbitkan.' : ($this->community->last_error() ?: 'Info belum dapat disimpan.');
         $this->redirect_with($id ? 'pengumuman/'.$id : 'pengumuman', $id ? 'success' : 'error', $message);
     }
 
@@ -88,7 +88,7 @@ class Community extends Public_Controller
         $this->require_post();
         if (!$this->community->can_manage($this->currentUser)) show_error('Akses ditolak.', 403);
         $ok = $this->community->delete_announcement($id, $this->currentUser);
-        $this->redirect_with('pengumuman', $ok ? 'success' : 'error', $ok ? 'Pengumuman dihapus.' : 'Pengumuman tidak ditemukan.');
+        $this->redirect_with('pengumuman', $ok ? 'success' : 'error', $ok ? 'Info dihapus.' : 'Info tidak ditemukan.');
     }
 
     public function complaints()

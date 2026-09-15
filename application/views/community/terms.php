@@ -32,7 +32,7 @@
         </section>
         <section>
             <h2>4. Pengaduan dan informasi</h2>
-            <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Pengumuman, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah <?= e($institutionLower) ?>.</p>
+            <p>Pengaduan harus disampaikan dengan bahasa yang sopan dan informasi yang dapat diperiksa. Info, status layanan, dan waktu tanggapan dapat berubah sesuai kondisi lapangan dan keputusan pemerintah <?= e($institutionLower) ?>.</p>
         </section>
         <section id="pasar-digital">
             <h2>5. Pasar Dapulik dan produk terlarang</h2>

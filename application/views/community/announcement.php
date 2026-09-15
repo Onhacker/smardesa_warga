@@ -25,14 +25,14 @@ if ($attachmentUrl === '' && !empty($nestedAttachment['id']) && !empty($item['id
     $attachmentUrl = site_url('pengumuman/' . rawurlencode((string) $item['id']) . '/lampiran');
 }
 $attachmentMime = strtolower(trim((string) ($nestedAttachment['mime_type'] ?? $nestedAttachment['mime'] ?? $item['attachment_mime_type'] ?? $item['attachment_mime'] ?? '')));
-$attachmentName = trim((string) ($nestedAttachment['original_name'] ?? $nestedAttachment['name'] ?? $item['attachment_original_name'] ?? $item['attachment_name'] ?? 'Lampiran pengumuman'));
+$attachmentName = trim((string) ($nestedAttachment['original_name'] ?? $nestedAttachment['name'] ?? $item['attachment_original_name'] ?? $item['attachment_name'] ?? 'Lampiran info'));
 $attachmentIsImage = strpos($attachmentMime, 'image/') === 0;
 ?>
 <article class="warga-community community-detail community-v22-detail community-v22-announcement-detail">
     <header class="community-v22-detail-hero">
         <div class="community-v22-announcement-date-tile is-detail" aria-label="Tanggal <?= e(tanggal_id($item['created_at'], true)) ?>"><b><?= e($announcementDate['day']) ?></b><small class="color-white"><?= e($announcementDate['month']) ?></small></div>
         <div>
-            <p class="community-v22-eyebrow">PENGUMUMAN <?= e($announcementScopeUpper) ?></p>
+            <p class="community-v22-eyebrow">INFO <?= e($announcementScopeUpper) ?></p>
             <h1><?= e($item['title']) ?></h1>
             <div class="community-meta community-v22-announcement-detail-meta"><span class="community-v22-announcement-card-meta-item"><i class="far fa-calendar-alt" aria-hidden="true"></i><time><?= e(tanggal_id($item['created_at'], true)) ?></time></span><span class="community-v22-announcement-card-meta-item"><i class="fa fa-user-tie" aria-hidden="true"></i><span><?= e($announcementAuthor) ?></span></span></div>
         </div>
@@ -40,7 +40,7 @@ $attachmentIsImage = strpos($attachmentMime, 'image/') === 0;
     <div class="community-v22-detail-body">
         <div class="community-prose"><?= nl2br(e($item['body'])) ?></div>
         <?php if ($attachmentUrl !== ''): ?><button type="button" class="community-v22-attachment-button is-detail" data-announcement-attachment-open data-attachment-url="<?= e($attachmentUrl) ?>" data-attachment-mime="<?= e($attachmentMime) ?>" data-attachment-name="<?= e($attachmentName) ?>"><i class="fa <?= $attachmentIsImage ? 'fa-file-image' : 'fa-file-pdf' ?>" aria-hidden="true"></i><span>Lihat lampiran</span><small><?= e($attachmentName) ?></small></button><?php endif; ?>
-        <?php if ($canManage): ?><form method="post" action="<?= site_url('pengumuman/'.$item['id'].'/hapus') ?>" data-confirm="Pengumuman ini akan dihapus secara permanen. Lanjutkan?" data-confirm-title="Hapus pengumuman?" data-confirm-button="Hapus" data-confirm-tone="danger" data-disable-submit><?= csrf_field() ?><button class="community-button bg-red-dark color-white"><i class="fa fa-trash" aria-hidden="true"></i><span>Hapus</span></button></form><?php endif; ?>
+        <?php if ($canManage): ?><form method="post" action="<?= site_url('pengumuman/'.$item['id'].'/hapus') ?>" data-confirm="Info ini akan dihapus secara permanen. Lanjutkan?" data-confirm-title="Hapus info?" data-confirm-button="Hapus" data-confirm-tone="danger" data-disable-submit><?= csrf_field() ?><button class="community-button bg-red-dark color-white"><i class="fa fa-trash" aria-hidden="true"></i><span>Hapus</span></button></form><?php endif; ?>
     </div>
 </article>
 

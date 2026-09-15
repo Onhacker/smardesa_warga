@@ -56,7 +56,7 @@ $menuNotificationsActive = nav_is('notifications');
 <div class="list-group list-custom-small list-menu warga-menu-list">
     <a class="<?= $menuMarketActive ? 'active-nav' : '' ?>" href="<?= site_url('pasar') ?>"><i class="fa fa-store warga-menu-icon is-green"></i><span>Pasar Dapulik</span><i class="fa fa-angle-right"></i></a>
     <a class="<?= $menuLettersActive ? 'active-nav' : '' ?>" href="<?= site_url('surat') ?>"><i class="fa fa-envelope warga-menu-icon is-teal"></i><span>Surat</span><i class="fa fa-angle-right"></i></a>
-    <a class="<?= $menuAnnouncementsActive ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn warga-menu-icon is-purple"></i><span>Pengumuman</span><i class="fa fa-angle-right"></i></a>
+    <a class="<?= $menuAnnouncementsActive ? 'active-nav' : '' ?>" href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn warga-menu-icon is-purple"></i><span>Info</span><i class="fa fa-angle-right"></i></a>
     <a class="<?= $menuComplaintsActive ? 'active-nav' : '' ?>" href="<?= site_url('pengaduan') ?>"><i class="fa fa-comments warga-menu-icon is-amber"></i><span>Aduan</span><i class="fa fa-angle-right"></i></a>
 </div>
 

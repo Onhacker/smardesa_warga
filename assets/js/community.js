@@ -804,7 +804,7 @@
       var url = trigger.getAttribute('data-attachment-url') || '';
       if (!url) return;
       previousFocus = document.activeElement;
-      var name = trigger.getAttribute('data-attachment-name') || 'Lampiran pengumuman';
+      var name = trigger.getAttribute('data-attachment-name') || 'Lampiran info';
       var mime = (trigger.getAttribute('data-attachment-mime') || '').toLowerCase();
       var token = resetPreview();
       attachmentSourceUrl = url;

@@ -60,12 +60,12 @@ $pictureUrl = static function ($name) {
                 </span>
             </a>
             <?php if ($isAuthenticated): ?><a class="community-v22-slide splide__slide is-announcement" href="<?= site_url('pengumuman') ?>" data-dashboard-media-card>
-                <img src="<?= $pictureUrl('pengumuman-layanan') ?>" srcset="<?= $pictureUrl('pengumuman-layanan-480') ?> 480w, <?= $pictureUrl('pengumuman-layanan-768') ?> 768w, <?= $pictureUrl('pengumuman-layanan') ?> 1200w" sizes="(max-width: 560px) 86vw, (max-width: 900px) 58vw, 720px" alt="Ilustrasi layanan pengumuman" loading="lazy" decoding="async" width="1200" height="676">
+                <img src="<?= $pictureUrl('pengumuman-layanan') ?>" srcset="<?= $pictureUrl('pengumuman-layanan-480') ?> 480w, <?= $pictureUrl('pengumuman-layanan-768') ?> 768w, <?= $pictureUrl('pengumuman-layanan') ?> 1200w" sizes="(max-width: 560px) 86vw, (max-width: 900px) 58vw, 720px" alt="Ilustrasi layanan info" loading="lazy" decoding="async" width="1200" height="676">
                 <span class="community-v22-slide-overlay" aria-hidden="true"></span>
                 <span class="community-v22-slide-icon"><i class="fa fa-bullhorn" aria-hidden="true"></i></span>
                 <span class="community-v22-slide-copy">
                     <small>Informasi <?= e($institutionLower) ?></small>
-                    <strong>Pengumuman</strong>
+                    <strong>Info</strong>
                     <span><?= $announcements ? number_format(count($announcements)) . ' informasi terbaru' : 'Belum ada informasi terbaru' ?></span>
                 </span>
             </a><?php endif; ?>
@@ -157,7 +157,7 @@ $pictureUrl = static function ($name) {
                 <span class="community-v22-feature-copy">
                     <small>Kabar layanan</small>
                     <strong>Pemberitahuan</strong>
-                    <span>Pantau perkembangan layanan dan pengumuman terbaru.</span>
+                    <span>Pantau perkembangan layanan dan info terbaru.</span>
                     <b>Buka pemberitahuan <span data-notification-count></span> <i class="fa fa-arrow-right" aria-hidden="true"></i></b>
                 </span>
             </a>
@@ -178,7 +178,7 @@ $pictureUrl = static function ($name) {
         <?php if ($isAuthenticated): ?><a class="community-v22-quick-card is-announcement" href="<?= site_url('pengumuman') ?>">
             <span class="community-v22-quick-card-head">
                 <span class="community-v22-quick-card-icon" aria-hidden="true"><i class="fa fa-bullhorn"></i></span>
-                <strong>Pengumuman</strong>
+                <strong>Info</strong>
             </span>
             <span class="community-v22-quick-card-copy">
                 <?= $announcements ? number_format(count($announcements)) . ' informasi terbaru.' : 'Belum ada informasi terbaru.' ?>
