@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Request_model extends CI_Model
 {
     private $catalog_schema_ready = false;
+    private $global_catalog_ready = NULL;
 
     private function institution_for_context(array $context = array())
     {
@@ -333,6 +334,9 @@ class Request_model extends CI_Model
         if (!warga_database_available()) return array();
         $this->ensure_catalog_schema();
         $villageId = trim((string) $villageId);
+        if ($this->global_catalog_is_ready()) {
+            return $this->global_service_types($villageId);
+        }
         if ($villageId !== '') {
             $rows = $this->db->select('c.*, st.id AS legacy_service_type_id')
                 ->from('village_service_catalog c')
@@ -390,6 +394,107 @@ class Request_model extends CI_Model
     }
 
     /**
+     * Migrasi 022 mengaktifkan katalog tunggal. Selama rollout, instalasi yang
+     * belum dimigrasikan tetap membaca katalog desa lama agar tidak ada jeda
+     * layanan.
+     */
+    private function global_catalog_is_ready()
+    {
+        if ($this->global_catalog_ready !== NULL) return $this->global_catalog_ready;
+        $this->global_catalog_ready = FALSE;
+        if (!$this->db->table_exists('global_service_catalog_state')
+            || !$this->db->table_exists('village_service_overrides')
+            || !$this->db->field_exists('form_schema_json', 'service_types')
+            || !$this->db->field_exists('minimum_app_version', 'service_types')) {
+            return FALSE;
+        }
+        $state = $this->db->select('is_ready')->where('id', 1)->limit(1)->get('global_service_catalog_state')->row_array();
+        $this->global_catalog_ready = $state && (int) $state['is_ready'] === 1;
+        return $this->global_catalog_ready;
+    }
+
+    private function global_service_types($villageId, $slug = '')
+    {
+        $villageId = trim((string) $villageId);
+        $slug = strtolower(trim((string) $slug));
+        $this->db->select('st.*');
+        if ($villageId !== '') {
+            $this->db->select('vo.is_visible AS override_is_visible, vo.submission_enabled AS override_submission_enabled, vo.availability_note AS override_availability_note', FALSE)
+                ->from('service_types st')
+                ->join('village_service_overrides vo', 'vo.service_type_id=st.id AND vo.village_id=' . $this->db->escape($villageId), 'left', FALSE);
+        } else {
+            $this->db->select('NULL AS override_is_visible, NULL AS override_submission_enabled, NULL AS override_availability_note', FALSE)
+                ->from('service_types st');
+        }
+        $this->db->where('st.is_active', 1);
+        if ($slug !== '') $this->db->where('st.slug', $slug);
+        $rows = $this->db->order_by('st.sort_order', 'ASC')->order_by('st.name', 'ASC')->get()->result_array();
+        $appVersion = $villageId !== '' ? $this->active_installation_version($villageId) : '';
+        $services = array();
+        foreach ($rows as $row) {
+            if (array_key_exists('override_is_visible', $row) && $row['override_is_visible'] !== NULL
+                && (int) $row['override_is_visible'] !== 1) continue;
+            if ($villageId !== '' && !$this->installation_supports_service($appVersion, isset($row['minimum_app_version']) ? $row['minimum_app_version'] : '0.0.0')) continue;
+            $services[] = $this->normalise_global_service_row($row);
+        }
+        return $services;
+    }
+
+    private function normalise_global_service_row(array $row)
+    {
+        $requirements = json_decode((string) (isset($row['requirements_json']) ? $row['requirements_json'] : ''), TRUE);
+        $schema = json_decode((string) (isset($row['form_schema_json']) ? $row['form_schema_json'] : ''), TRUE);
+        if (!is_array($requirements)) $requirements = array();
+        if (!is_array($schema) || !isset($schema['fields']) || !is_array($schema['fields'])) {
+            $schema = array('version' => max(1, (int) (isset($row['schema_version']) ? $row['schema_version'] : 1)), 'fields' => array());
+        }
+        $submission = !isset($row['submission_enabled']) || (int) $row['submission_enabled'] === 1;
+        if (array_key_exists('override_submission_enabled', $row) && $row['override_submission_enabled'] !== NULL) {
+            $submission = (int) $row['override_submission_enabled'] === 1;
+        }
+        $availability = (string) (isset($row['availability_note']) ? $row['availability_note'] : '');
+        if (array_key_exists('override_availability_note', $row) && $row['override_availability_note'] !== NULL) {
+            $availability = (string) $row['override_availability_note'];
+        }
+        return array(
+            'id' => (int) $row['id'],
+            'legacy_service_type_id' => (int) $row['id'],
+            'catalog_id' => 0,
+            'slug' => (string) $row['slug'],
+            'name' => (string) $row['name'],
+            'short_name' => (string) $row['short_name'],
+            'icon' => !empty($row['icon']) ? (string) $row['icon'] : 'fa-file-alt',
+            'description' => (string) (isset($row['description']) ? $row['description'] : ''),
+            'requirements' => $requirements,
+            'form_schema' => $schema,
+            'schema_version' => (int) $schema['version'],
+            'template_key' => (string) (isset($row['template_key']) ? $row['template_key'] : $row['slug']),
+            'submission_enabled' => $submission,
+            'availability_note' => $availability,
+            'minimum_app_version' => (string) (isset($row['minimum_app_version']) ? $row['minimum_app_version'] : '0.0.0'),
+            'is_catalog' => TRUE,
+            'catalog_scope' => 'global'
+        );
+    }
+
+    private function active_installation_version($villageId)
+    {
+        if (!$this->db->table_exists('village_installations')) return '';
+        $row = $this->db->select('app_version')->where(array('village_id' => (string) $villageId, 'status' => 'active'))
+            ->order_by('updated_at', 'DESC')->limit(1)->get('village_installations')->row_array();
+        return $row ? trim((string) $row['app_version']) : '';
+    }
+
+    private function installation_supports_service($current, $minimum)
+    {
+        $minimum = ltrim(trim((string) $minimum), 'vV');
+        if ($minimum === '' || $minimum === '0' || $minimum === '0.0' || $minimum === '0.0.0') return TRUE;
+        $current = ltrim(trim((string) $current), 'vV');
+        if ($current === '') return FALSE;
+        return version_compare($current, $minimum, '>=');
+    }
+
+    /**
      * Resolve the legacy service_types row required by the existing foreign
      * key. Catalog rows are per-village and their IDs are not interchangeable.
      */
@@ -437,6 +542,10 @@ class Request_model extends CI_Model
         $slug = strtolower(trim((string) $slug));
         $villageId = trim((string) $villageId);
         $this->ensure_catalog_schema();
+        if ($this->global_catalog_is_ready()) {
+            $services = $this->global_service_types($villageId, $slug);
+            return !empty($services) ? $services[0] : NULL;
+        }
         if ($villageId !== '') {
             $row = $this->db->select('c.*, st.id AS legacy_service_type_id')
                 ->from('village_service_catalog c')->join('service_types st', 'st.slug=c.service_key', 'left')

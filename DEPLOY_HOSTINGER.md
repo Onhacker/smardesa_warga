@@ -97,7 +97,7 @@ smartdesa-warga/database/seed.sql
 
 Jika database sudah pernah dibuat, impor berkas pada `database/migrations` sesuai urutan dan
 catat migration yang sudah pernah dijalankan. Jangan mengimpor ulang migration lama yang tidak
-idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `021_*.sql` dan
+idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `022_*.sql` dan
 menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
@@ -108,6 +108,9 @@ rating/ulasan. `018_global_nik_uniqueness.sql` dan `019_monitoring_auth.sql` dij
 kebutuhan instalasi setelah migration pendahulunya selesai. `020_announcement_attachments.sql`
 wajib dijalankan untuk fitur lampiran pengumuman. `021_marketplace_categories.sql` menambahkan
 kategori Pasar Dapulik terbaru pada instalasi yang sudah menjalankan migration marketplace.
+`022_global_service_catalog.sql` mengalihkan daftar layanan PWA ke satu katalog global yang
+diterbitkan SmartDesa pusat. Karena API dan PWA memakai database yang sama, migration `022`
+cukup dijalankan satu kali.
 
 Contoh menjalankan migration Pasar Dapulik dari root repository (password dimasukkan pada
 prompt `mysql`, tidak ditulis di terminal history):
@@ -129,6 +132,10 @@ mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" 
   < "$REPO/database/migrations/020_announcement_attachments.sql"
 mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
   < "$REPO/database/migrations/021_marketplace_categories.sql"
+
+# Katalog layanan surat global (jalankan sekali pada database bersama API/PWA)
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/022_global_service_catalog.sql"
 ```
 
 Kode aplikasi tidak lagi menjalankan `CREATE TABLE`, `ALTER TABLE`, atau pemeriksaan metadata

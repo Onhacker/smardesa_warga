@@ -37,6 +37,12 @@ Untuk dashboard monitoring pada server SmartDesa pusat, jalankan `migrations/019
 
 Jalankan `migrations/020_announcement_attachments.sql` untuk mengaktifkan lampiran gambar atau PDF pada pengumuman kampung. Setelah itu, jalankan `migrations/021_marketplace_categories.sql` pada database yang sudah memakai Pasar Dapulik untuk menambahkan kategori produk terbaru. Kedua migrasi idempoten dan aman dijalankan ulang.
 
+Jalankan `migrations/022_global_service_catalog.sql` untuk mengaktifkan katalog layanan
+global. Migrasi ini aman untuk rollout bertahap: katalog per kampung tetap digunakan sampai
+SmartDesa pusat berhasil menerbitkan snapshot global pertama. Setelah status global aktif,
+PWA membaca katalog pusat yang sama untuk seluruh kampung, menerapkan pengecualian kampung
+bila ada, dan menyembunyikan layanan yang membutuhkan versi SmartDesa lokal lebih baru.
+
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.
