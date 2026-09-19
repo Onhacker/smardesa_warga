@@ -39,13 +39,13 @@ if (isset($selectedServiceRow['requirements']) && is_array($selectedServiceRow['
             <span class="warga-service-icon <?= e($selectedServiceIcon['class']) ?>"><i class="<?= e($selectedServiceIcon['icon']) ?>" aria-hidden="true"></i></span>
             <div class="warga-service-catalog-copy">
                 <strong><?= e(isset($selectedServiceRow['name']) ? $selectedServiceRow['name'] : '') ?></strong>
-                <div class="warga-service-requirements<?= empty($serviceRequirements) ? ' d-none' : '' ?>" data-service-requirements aria-label="Dokumen atau data yang perlu disiapkan">
-                    <div class="warga-requirement-head"><i class="fa fa-clipboard-check" aria-hidden="true"></i><b>Siapkan dokumen/data</b></div>
-                    <ul data-requirement-list><?php foreach ($serviceRequirements as $requirement): ?><li><?= e($requirement) ?></li><?php endforeach; ?></ul>
-                </div>
                 <span class="warga-service-description"><?= e(!empty($selectedServiceRow['description']) ? $selectedServiceRow['description'] : 'Layanan administrasi untuk kebutuhan warga.') ?></span>
             </div>
             <i class="fa fa-check-circle warga-service-catalog-action color-green-dark" aria-hidden="true"></i>
+        </div>
+        <div class="warga-service-requirements<?= empty($serviceRequirements) ? ' d-none' : '' ?>" data-service-requirements aria-label="Dokumen atau data yang perlu disiapkan">
+            <div class="warga-requirement-head"><i class="fa fa-clipboard-check" aria-hidden="true"></i><b>Siapkan dokumen/data</b></div>
+            <ul data-requirement-list><?php foreach ($serviceRequirements as $requirement): ?><li><?= e($requirement) ?></li><?php endforeach; ?></ul>
         </div>
         <p class="warga-service-availability d-none" data-service-availability role="status"></p>
     </div></section>
