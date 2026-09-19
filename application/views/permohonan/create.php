@@ -3,6 +3,15 @@
 <?php $selectedServiceRow = isset($selected_service) && is_array($selected_service) ? $selected_service : array(); ?>
 <?php $selectedService = isset($selectedServiceRow['slug']) ? (string) $selectedServiceRow['slug'] : ''; ?>
 <?php $selectedServiceIcon = warga_service_icon($selectedServiceRow); ?>
+<?php
+$serviceRequirements = array();
+if (isset($selectedServiceRow['requirements']) && is_array($selectedServiceRow['requirements'])) {
+    foreach ($selectedServiceRow['requirements'] as $requirement) {
+        $requirement = trim((string) $requirement);
+        if ($requirement !== '') $serviceRequirements[] = $requirement;
+    }
+}
+?>
 <?php $initialFields = $editMode && isset($request['form_data']) && is_array($request['form_data']) ? $request['form_data'] : array(); ?>
 <?php $existingDocuments = $editMode && isset($request['documents']) && is_array($request['documents']) ? $request['documents'] : array(); ?>
 <div class="warga-request-create">
@@ -28,10 +37,14 @@
         <div class="warga-form-title"><span aria-hidden="true">1</span><div><h2 id="request-service-title">Surat yang Diajukan</h2><p>Jenis surat dipilih dari katalog layanan.</p></div></div>
         <div class="warga-service-catalog-item" aria-label="Jenis surat yang dipilih">
             <span class="warga-service-icon <?= e($selectedServiceIcon['class']) ?>"><i class="<?= e($selectedServiceIcon['icon']) ?>" aria-hidden="true"></i></span>
-            <span class="warga-service-catalog-copy">
+            <div class="warga-service-catalog-copy">
                 <strong><?= e(isset($selectedServiceRow['name']) ? $selectedServiceRow['name'] : '') ?></strong>
+                <div class="warga-service-requirements<?= empty($serviceRequirements) ? ' d-none' : '' ?>" data-service-requirements aria-label="Dokumen atau data yang perlu disiapkan">
+                    <div class="warga-requirement-head"><i class="fa fa-clipboard-check" aria-hidden="true"></i><b>Siapkan dokumen/data</b></div>
+                    <ul data-requirement-list><?php foreach ($serviceRequirements as $requirement): ?><li><?= e($requirement) ?></li><?php endforeach; ?></ul>
+                </div>
                 <span class="warga-service-description"><?= e(!empty($selectedServiceRow['description']) ? $selectedServiceRow['description'] : 'Layanan administrasi untuk kebutuhan warga.') ?></span>
-            </span>
+            </div>
             <i class="fa fa-check-circle warga-service-catalog-action color-green-dark" aria-hidden="true"></i>
         </div>
         <p class="warga-service-availability d-none" data-service-availability role="status"></p>
