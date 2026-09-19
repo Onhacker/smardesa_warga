@@ -25,11 +25,10 @@ class MY_Controller extends CI_Controller
         $policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; "
             . "script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; "
             . "img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' blob:; "
-            . "connect-src 'self' https:; worker-src 'self' blob:; frame-src 'self' blob:; manifest-src 'self'; "
-            . "upgrade-insecure-requests";
+            . "connect-src 'self' https:; worker-src 'self' blob:; frame-src 'self' blob:; manifest-src 'self'";
         $this->output->set_header('Content-Security-Policy-Report-Only: ' . $policy);
         if (getenv('WARGA_CSP_ENFORCE') === '1') {
-            $this->output->set_header('Content-Security-Policy: ' . $policy);
+            $this->output->set_header('Content-Security-Policy: ' . $policy . '; upgrade-insecure-requests');
         }
         // Product uploads use <input capture="environment"> on mobile. Keep
         // camera access limited to this origin while denying unrelated sensor
