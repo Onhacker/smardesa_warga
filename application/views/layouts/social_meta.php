@@ -7,7 +7,8 @@ $socialImage = trim((string) ($shareImage ?? warga_asset_url('assets/pwa/share-p
 $socialImageAlt = trim((string) ($shareImageAlt ?? 'SI DAPULIK, layanan digital warga'));
 $socialImageWidth = max(1, (int) ($shareImageWidth ?? 1200));
 $socialImageHeight = max(1, (int) ($shareImageHeight ?? 630));
-$socialSiteName = 'Kabupaten Jayawijaya';
+$socialSiteName = 'SI DAPULIK';
+$socialAlternateName = 'SI DAPULIK Jayawijaya';
 
 if ($socialTitle === '') $socialTitle = 'SI DAPULIK — Layanan Digital Warga';
 if ($socialDescription === '') $socialDescription = 'Akses layanan warga dalam satu aplikasi.';
@@ -16,16 +17,34 @@ if (!filter_var($socialImage, FILTER_VALIDATE_URL)) $socialImage = warga_asset_u
 $socialWebsiteUrl = rtrim((string) base_url(), '/') . '/';
 $socialStructuredData = array(
     '@context' => 'https://schema.org',
-    '@type' => 'WebSite',
-    '@id' => $socialWebsiteUrl . '#website',
-    'url' => $socialWebsiteUrl,
-    'name' => $socialSiteName,
-    'alternateName' => 'SI DAPULIK',
-    'description' => $socialDescription,
-    'inLanguage' => 'id-ID'
+    '@graph' => array(
+        array(
+            '@type' => 'WebSite',
+            '@id' => $socialWebsiteUrl . '#website',
+            'url' => $socialWebsiteUrl,
+            'name' => $socialSiteName,
+            'alternateName' => $socialAlternateName,
+            'description' => $socialDescription,
+            'inLanguage' => 'id-ID',
+            'publisher' => array('@id' => $socialWebsiteUrl . '#organization')
+        ),
+        array(
+            '@type' => 'Organization',
+            '@id' => $socialWebsiteUrl . '#organization',
+            'name' => $socialSiteName,
+            'alternateName' => $socialAlternateName,
+            'url' => $socialWebsiteUrl,
+            'logo' => array(
+                '@type' => 'ImageObject',
+                'url' => warga_asset_url('assets/pwa/icon-512.png')
+            )
+        )
+    )
 );
 ?>
 <meta name="description" content="<?= e($socialDescription) ?>">
+<meta name="application-name" content="<?= e($socialSiteName) ?>">
+<meta name="apple-mobile-web-app-title" content="<?= e($socialSiteName) ?>">
 <meta property="og:locale" content="id_ID">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="<?= e($socialSiteName) ?>">

@@ -16,9 +16,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <meta name="theme-color" content="#235fa4">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SI DAPULIK">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="SI DAPULIK">
     <title><?= e($pageTitle) ?> | SI DAPULIK</title>
     <?php $this->load->view('layouts/social_meta', array(
         'shareTitle' => $shareTitle,
