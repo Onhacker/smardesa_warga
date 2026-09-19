@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(180) NULL UNIQUE,
   phone VARCHAR(30) NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  session_version BIGINT UNSIGNED NOT NULL DEFAULT 1,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   last_login_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -430,6 +431,16 @@ CREATE TABLE IF NOT EXISTS login_failures (
   attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY idx_login_identity (identity_hash, attempted_at),
   KEY idx_login_ip (ip_address, attempted_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS registration_attempts (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  identity_hash CHAR(64) NOT NULL,
+  ip_address VARCHAR(45) NOT NULL,
+  attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_registration_identity (identity_hash, attempted_at),
+  KEY idx_registration_ip (ip_address, attempted_at),
+  KEY idx_registration_time (attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS settings (

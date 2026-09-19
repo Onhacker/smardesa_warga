@@ -808,15 +808,14 @@ class Marketplace_model extends CI_Model
         $finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : NULL;
         if (!$finfo) return array('files' => array(), 'paths' => array(), 'error' => 'Pemeriksaan gambar belum tersedia pada server.');
         $allowed = array('image/jpeg' => TRUE, 'image/png' => TRUE, 'image/webp' => TRUE); $out = array(); $paths = array();
+        $this->load->library('warga_image_optimizer');
         try {
             foreach ($entries as $entry) {
                 if ($entry['error'] !== UPLOAD_ERR_OK || $entry['size'] < 1 || $entry['size'] > 5 * 1024 * 1024 || !is_uploaded_file($entry['tmp_name'])) throw new RuntimeException('Setiap gambar harus berformat JPG, PNG, atau WEBP dan maksimal 5 MB.');
                 $mime = strtolower(trim((string) finfo_file($finfo, $entry['tmp_name'])));
                 if (!isset($allowed[$mime])) throw new RuntimeException('Format gambar hanya boleh JPG, PNG, atau WEBP.');
-                $dimensions = @getimagesize($entry['tmp_name']);
-                if (!is_array($dimensions) || (int) ($dimensions[0] ?? 0) < 1 || (int) ($dimensions[1] ?? 0) < 1
-                    || (int) $dimensions[0] > 20000 || (int) $dimensions[1] > 20000
-                    || ((int) $dimensions[0] * (int) $dimensions[1]) > 24000000) throw new RuntimeException('Dimensi gambar terlalu besar untuk diproses.');
+                $validation = $this->warga_image_optimizer->validate($entry['tmp_name'], $mime, Warga_image_optimizer::MAX_INPUT_DIMENSION, Warga_image_optimizer::MAX_INPUT_PIXELS);
+                if (empty($validation['success'])) throw new RuntimeException((string) ($validation['message'] ?? 'Dimensi gambar terlalu besar untuk diproses.'));
                 $base = $productId . '-' . bin2hex(random_bytes(8));
                 $name = $base . '.webp'; $thumbName = $base . '-thumb.webp';
                 $destination = $dir . DIRECTORY_SEPARATOR . $name; $thumbDestination = $dir . DIRECTORY_SEPARATOR . $thumbName;
@@ -841,30 +840,16 @@ class Marketplace_model extends CI_Model
     /** Re-encode an uploaded image as metadata-free WebP and create its card thumbnail. */
     private function optimize_image_file($source, $mime, $destination, $thumbDestination)
     {
-        $loaders = array('image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp');
-        if (!isset($loaders[$mime]) || !function_exists($loaders[$mime])) return NULL;
-        $image = @call_user_func($loaders[$mime], $source);
-        if (!$image) return NULL;
-        $main = NULL; $thumb = NULL;
-        try {
-            if (function_exists('imagepalettetotruecolor')) @imagepalettetotruecolor($image);
-            if ($mime === 'image/jpeg') {
-                $oriented = $this->apply_jpeg_orientation($image, $source);
-                if (!$oriented) return NULL;
-                if ($oriented !== $image) @imagedestroy($image);
-                $image = $oriented;
-            }
-            $main = $this->resize_image_canvas($image, 1600);
-            $thumb = $this->resize_image_canvas($image, 640);
-            if (!$this->write_webp_atomic($main, $destination, 84) || !$this->write_webp_atomic($thumb, $thumbDestination, 82)) {
-                @unlink($destination); @unlink($thumbDestination); return NULL;
-            }
-            return array('width' => (int) @imagesx($main), 'height' => (int) @imagesy($main));
-        } finally {
-            if (is_object($main) || is_resource($main)) @imagedestroy($main);
-            if (is_object($thumb) || is_resource($thumb)) @imagedestroy($thumb);
-            if (is_object($image) || is_resource($image)) @imagedestroy($image);
+        $optimized = $this->warga_image_optimizer->optimize($source, $mime, $destination, 1600, 84);
+        if (empty($optimized['success'])) return NULL;
+        // Generate the card thumbnail from the already bounded WebP. This
+        // avoids keeping the full camera bitmap plus two canvases in memory.
+        if (!$this->create_thumbnail_file($destination, 'image/webp', $thumbDestination)) {
+            @unlink($destination);
+            @unlink($thumbDestination);
+            return NULL;
         }
+        return array('width' => (int) ($optimized['width'] ?? 0), 'height' => (int) ($optimized['height'] ?? 0));
     }
 
     private function apply_jpeg_orientation($image, $source)
@@ -891,17 +876,22 @@ class Marketplace_model extends CI_Model
         $width = max(1, (int) @imagesx($image)); $height = max(1, (int) @imagesy($image));
         $scale = min(1, (float) $maxDimension / max($width, $height));
         $newWidth = max(1, (int) round($width * $scale)); $newHeight = max(1, (int) round($height * $scale));
-        $canvas = imagecreatetruecolor($newWidth, $newHeight);
-        imagealphablending($canvas, FALSE); imagesavealpha($canvas, TRUE);
-        $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
-        imagefilledrectangle($canvas, 0, 0, $newWidth, $newHeight, $transparent);
-        imagecopyresampled($canvas, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        imagealphablending($canvas, TRUE); imagesavealpha($canvas, TRUE);
+        $canvas = @imagecreatetruecolor($newWidth, $newHeight);
+        if (!$canvas) return NULL;
+        @imagealphablending($canvas, FALSE); @imagesavealpha($canvas, TRUE);
+        $transparent = @imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+        if ($transparent !== FALSE) @imagefilledrectangle($canvas, 0, 0, $newWidth, $newHeight, $transparent);
+        if (!@imagecopyresampled($canvas, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height)) {
+            @imagedestroy($canvas);
+            return NULL;
+        }
+        @imagealphablending($canvas, TRUE); @imagesavealpha($canvas, TRUE);
         return $canvas;
     }
 
     private function write_webp_atomic($image, $destination, $quality)
     {
+        if (!is_object($image) && !is_resource($image)) return FALSE;
         $temporary = $destination . '.tmp-' . bin2hex(random_bytes(6));
         if (!@imagewebp($image, $temporary, (int) $quality) || !is_file($temporary) || (int) @filesize($temporary) < 1) { @unlink($temporary); return FALSE; }
         @chmod($temporary, 0640);
@@ -911,20 +901,25 @@ class Marketplace_model extends CI_Model
 
     private function create_thumbnail_file($source, $mime, $destination)
     {
+        $this->load->library('warga_image_optimizer');
         $loaders = array('image/jpeg' => 'imagecreatefromjpeg', 'image/png' => 'imagecreatefrompng', 'image/webp' => 'imagecreatefromwebp');
         if (!isset($loaders[$mime]) || !function_exists($loaders[$mime])) return FALSE;
+        $dimensions = @getimagesize($source);
+        if (!is_array($dimensions) || !$this->warga_image_optimizer->decode_budget_ok((int) ($dimensions[0] ?? 0), (int) ($dimensions[1] ?? 0))) return FALSE;
         $image = @call_user_func($loaders[$mime], $source); if (!$image) return FALSE;
         $thumb = NULL;
         try {
             if (function_exists('imagepalettetotruecolor')) @imagepalettetotruecolor($image);
-            if ($mime === 'image/jpeg') {
-                $oriented = $this->apply_jpeg_orientation($image, $source);
-                if (!$oriented) return FALSE;
-                if ($oriented !== $image) @imagedestroy($image);
-                $image = $oriented;
-            }
-            if (!$image) return FALSE;
             $thumb = $this->resize_image_canvas($image, 640);
+            if (is_object($image) || is_resource($image)) @imagedestroy($image);
+            $image = NULL;
+            if (!$thumb) return FALSE;
+            if ($mime === 'image/jpeg') {
+                $oriented = $this->apply_jpeg_orientation($thumb, $source);
+                if (!$oriented) return FALSE;
+                if ($oriented !== $thumb) @imagedestroy($thumb);
+                $thumb = $oriented;
+            }
             return $this->write_webp_atomic($thumb, $destination, 82);
         } finally {
             if (is_object($thumb) || is_resource($thumb)) @imagedestroy($thumb);

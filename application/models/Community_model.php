@@ -296,8 +296,13 @@ class Community_model extends CI_Model
         finfo_close($finfo);
         $allowed = array('image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'application/pdf' => 'pdf');
         if (!isset($allowed[$mime])) return array('success' => FALSE, 'message' => 'Lampiran hanya boleh berupa JPG, PNG, WebP, atau PDF.');
-        if (strpos($mime, 'image/') === 0 && function_exists('getimagesize') && @getimagesize($tmp) === FALSE) {
-            return array('success' => FALSE, 'message' => 'Isi gambar tidak dapat dibaca. Pilih gambar yang valid.');
+        $isImage = strpos($mime, 'image/') === 0;
+        if ($isImage) {
+            $this->load->library('warga_image_optimizer');
+            $validation = $this->warga_image_optimizer->validate($tmp, $mime, Warga_image_optimizer::MAX_INPUT_DIMENSION, Warga_image_optimizer::MAX_INPUT_PIXELS);
+            if (empty($validation['success'])) {
+                return array('success' => FALSE, 'message' => (string) ($validation['message'] ?? 'Isi gambar tidak dapat dibaca. Pilih gambar yang valid.'));
+            }
         }
 
         $storage = $this->private_storage_path();
@@ -311,13 +316,33 @@ class Community_model extends CI_Model
         } catch (Exception $exception) {
             $random = sha1(uniqid('', TRUE) . mt_rand());
         }
-        $storedName = (string) $announcementId . '-' . $random . '.' . $allowed[$mime];
+        $baseName = (string) $announcementId . '-' . $random;
+        $storedName = $baseName . '.' . $allowed[$mime];
         $destination = $directory . DIRECTORY_SEPARATOR . $storedName;
-        if (!move_uploaded_file($tmp, $destination)) {
+        $storedMime = $mime;
+        $storedSize = $size;
+        if ($isImage) {
+            $optimizedName = $baseName . '.webp';
+            $optimizedDestination = $directory . DIRECTORY_SEPARATOR . $optimizedName;
+            $optimized = $this->warga_image_optimizer->optimize($tmp, $mime, $optimizedDestination, 1600, 84);
+            if (!empty($optimized['success'])) {
+                $storedName = $optimizedName;
+                $destination = $optimizedDestination;
+                $storedMime = 'image/webp';
+                $storedSize = (int) @filesize($destination);
+            } elseif (($optimized['code'] ?? '') === 'unsupported') {
+                @rmdir($directory);
+                return array('success' => FALSE, 'message' => 'Server belum mendukung kompresi WebP. Aktifkan GD WebP sebelum menerima gambar.');
+            } else {
+                @rmdir($directory);
+                return array('success' => FALSE, 'message' => 'Gambar belum dapat dioptimalkan. Pilih gambar lain atau coba lagi.');
+            }
+        } elseif (!move_uploaded_file($tmp, $destination)) {
             @rmdir($directory);
             return array('success' => FALSE, 'message' => 'Lampiran belum dapat disimpan.');
+        } else {
+            @chmod($destination, 0640);
         }
-        @chmod($destination, 0640);
 
         $sha256 = hash_file('sha256', $destination);
         if (!is_string($sha256) || !preg_match('/^[a-f0-9]{64}$/D', $sha256)) {
@@ -341,8 +366,8 @@ class Community_model extends CI_Model
                 'original_name' => $originalName,
                 'stored_name' => $storedName,
                 'storage_path' => $destination,
-                'mime_type' => $mime,
-                'file_size' => $size,
+                'mime_type' => $storedMime,
+                'file_size' => $storedSize > 0 ? $storedSize : (int) @filesize($destination),
                 'sha256' => $sha256
             )
         );

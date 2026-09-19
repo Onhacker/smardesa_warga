@@ -43,6 +43,12 @@ SmartDesa pusat berhasil menerbitkan snapshot global pertama. Setelah status glo
 PWA membaca katalog pusat yang sama untuk seluruh kampung, menerapkan pengecualian kampung
 bila ada, dan menyembunyikan layanan yang membutuhkan versi SmartDesa lokal lebih baru.
 
+Jalankan `migrations/023_security_hardening.sql` pada MariaDB Hostinger untuk menambahkan versi
+session terpusat (pencabutan session setelah perubahan password) dan tabel pembatasan percobaan
+pendaftaran. Migrasi ini idempoten dan tidak menghapus data lama. Periksa `SELECT VERSION()` dan
+buat backup sebelum DDL; setelah selesai verifikasi dengan `SHOW CREATE TABLE users` dan
+`SHOW CREATE TABLE registration_attempts`.
+
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

@@ -50,8 +50,24 @@ if (ENVIRONMENT === 'production') {
 $config['encryption_key'] = $appKey !== '' ? $appKey : hash('sha256', FCPATH . '|smartdesa-warga');
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'smartdesa_warga_session';
-$config['sess_expiration'] = 2592000;
-$config['sess_save_path'] = APPPATH . 'sessions';
+$sessionExpiration = (int) getenv('WARGA_SESSION_EXPIRATION');
+$config['sess_expiration'] = $sessionExpiration >= 900 && $sessionExpiration <= 2592000 ? $sessionExpiration : 604800;
+$sessionPath = trim((string) getenv('WARGA_SESSION_SAVE_PATH'));
+if ($sessionPath !== '' && ENVIRONMENT === 'production') {
+    $sessionReal = realpath($sessionPath);
+    $publicReal = realpath(FCPATH);
+    $sessionPrefix = $sessionReal !== FALSE ? rtrim($sessionReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : '';
+    $publicPrefix = $publicReal !== FALSE ? rtrim($publicReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : '';
+    $invalidSessionPath = $sessionPath[0] !== DIRECTORY_SEPARATOR || $sessionReal === FALSE
+        || !is_dir($sessionReal) || !is_readable($sessionReal) || !is_writable($sessionReal)
+        || ($publicPrefix !== '' && strpos($sessionPrefix, $publicPrefix) === 0);
+    if ($invalidSessionPath) {
+        header('HTTP/1.1 503 Service Unavailable', TRUE, 503);
+        header('Content-Type: text/plain; charset=utf-8');
+        exit('Penyimpanan session privat belum dikonfigurasi.');
+    }
+}
+$config['sess_save_path'] = $sessionPath !== '' ? $sessionPath : APPPATH . 'sessions';
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
 $config['sess_regenerate_destroy'] = TRUE;

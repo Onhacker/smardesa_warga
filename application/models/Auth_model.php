@@ -5,6 +5,8 @@ class Auth_model extends CI_Model
 {
     private $lastError = '';
     private $identity_schema_ready = false;
+    private $session_version_available = NULL;
+    private $registration_throttle_available = NULL;
 
     private function client_ip()
     {
@@ -39,6 +41,73 @@ class Auth_model extends CI_Model
     {
         if (warga_demo_mode() || !warga_database_available()) return;
         $this->db->where('identity_hash', $this->login_identity_hash($identity))->delete('login_failures');
+    }
+
+    private function session_version_ready()
+    {
+        if ($this->session_version_available !== NULL) return $this->session_version_available;
+        if (warga_demo_mode() || !warga_database_available()) return $this->session_version_available = FALSE;
+        return $this->session_version_available = (bool) $this->db->field_exists('session_version', 'users');
+    }
+
+    private function registration_throttle_ready()
+    {
+        if ($this->registration_throttle_available !== NULL) return $this->registration_throttle_available;
+        if (warga_demo_mode() || !warga_database_available()) return $this->registration_throttle_available = FALSE;
+        return $this->registration_throttle_available = (bool) $this->db->table_exists('registration_attempts');
+    }
+
+    private function registration_identity_hash($contact, $nik, $villageCode)
+    {
+        $contact = trim((string) $contact);
+        // Treat formatting variants of one email/phone as one registration
+        // identity, otherwise a client could evade the per-identity window by
+        // adding spaces, punctuation, or different email casing.
+        if (filter_var($contact, FILTER_VALIDATE_EMAIL)) {
+            $contact = strtolower($contact);
+        } else {
+            $contact = preg_replace('/\D+/', '', $contact);
+        }
+        $identity = $contact . '|' . preg_replace('/\D+/', '', (string) $nik) . '|' . strtoupper(trim((string) $villageCode));
+        return hash_hmac('sha256', $identity, (string) $this->config->item('encryption_key'));
+    }
+
+    private function registration_is_throttled($contact, $nik, $villageCode)
+    {
+        if (!$this->registration_throttle_ready()) return FALSE;
+        $since = date('Y-m-d H:i:s', time() - 900);
+        $identityHash = $this->registration_identity_hash($contact, $nik, $villageCode);
+        $identityCount = $this->db->where('identity_hash', $identityHash)->where('attempted_at >=', $since)
+            ->count_all_results('registration_attempts');
+        $ipCount = $this->db->where('ip_address', $this->client_ip())->where('attempted_at >=', $since)
+            ->count_all_results('registration_attempts');
+        return $identityCount >= 5 || $ipCount >= 20;
+    }
+
+    private function record_registration_attempt($contact, $nik, $villageCode)
+    {
+        if (!$this->registration_throttle_ready()) return;
+        if (mt_rand(1, 20) === 1) {
+            $this->db->where('attempted_at <', date('Y-m-d H:i:s', time() - 86400))->delete('registration_attempts');
+        }
+        $this->db->insert('registration_attempts', array(
+            'identity_hash' => $this->registration_identity_hash($contact, $nik, $villageCode),
+            'ip_address' => $this->client_ip()
+        ));
+    }
+
+    private function clear_registration_attempts($contact, $nik, $villageCode)
+    {
+        if (!$this->registration_throttle_ready()) return;
+        $this->db->where('identity_hash', $this->registration_identity_hash($contact, $nik, $villageCode))
+            ->delete('registration_attempts');
+    }
+
+    private function set_authenticated_session(array $user)
+    {
+        $data = array('warga_logged_in' => TRUE, 'warga_user_id' => (int) $user['id']);
+        if ($this->session_version_ready()) $data['warga_session_version'] = max(1, (int) ($user['session_version'] ?? 1));
+        $this->session->set_userdata($data);
     }
 
     public function error()
@@ -124,7 +193,7 @@ class Auth_model extends CI_Model
                 $demoPasswordHash = $this->demo_password_hash($override);
                 if (password_verify((string) $password, $demoPasswordHash) && in_array($identity, array(strtolower($effective['username']), strtolower($effective['email']), strtolower($effective['phone'])), TRUE)) {
                     $this->session->sess_regenerate(TRUE);
-                    $this->session->set_userdata(array('warga_logged_in' => TRUE, 'warga_user_id' => (int) $user['id']));
+                    $this->set_authenticated_session($user);
                     return $user;
                 }
             }
@@ -143,14 +212,14 @@ class Auth_model extends CI_Model
         $this->db->where('u.is_active', 1);
         $this->db->group_start()->where('u.username', $identity)->or_where('u.email', $identity)->or_where('u.phone', $identity)->group_end();
         $user = $this->db->get()->row_array();
-        if (!$user || !password_verify((string) $password, $user['password_hash'])) {
+        if (!$user || !warga_role_is_allowed($user['role_slug'] ?? '') || !password_verify((string) $password, $user['password_hash'])) {
             $this->record_login_failure($identity);
             return FALSE;
         }
 
         $this->clear_login_failures($identity);
         $this->session->sess_regenerate(TRUE);
-        $this->session->set_userdata(array('warga_logged_in' => TRUE, 'warga_user_id' => (int) $user['id']));
+        $this->set_authenticated_session($user);
         $this->db->where('id', $user['id'])->update('users', array('last_login_at' => date('Y-m-d H:i:s')));
         return $user;
     }
@@ -162,14 +231,35 @@ class Auth_model extends CI_Model
         if (!warga_database_available()) return NULL;
         $this->ensure_identity_schema();
         $select = 'u.id,u.role_id,u.name,u.username,u.email,u.phone,u.is_active,u.last_login_at,u.village_id,r.name AS role_name,r.slug AS role_slug,v.village_code,v.name AS village_name,v.district_name,v.regency_code,v.regency_name';
+        if ($this->session_version_ready()) $select .= ',u.session_version';
         $select .= ',cp.verification_status AS citizen_verification_status,cp.local_citizen_key';
         $this->db->select($select, FALSE)->from('users u')
             ->join('roles r', 'r.id=u.role_id')
             ->join('village_tenants v', 'v.id=u.village_id', 'left')
             ->join('citizen_profiles cp', 'cp.user_id=u.id', 'left');
-        return $this->db
+        $user = $this->db
             ->where(array('u.id' => (int) $this->session->userdata('warga_user_id'), 'u.is_active' => 1))
             ->get()->row_array();
+        if (!$user || !warga_role_is_allowed($user['role_slug'] ?? '')) {
+            $this->logout();
+            return NULL;
+        }
+        if ($this->session_version_ready()) {
+            $currentVersion = max(1, (int) ($user['session_version'] ?? 1));
+            $sessionVersion = $this->session->userdata('warga_session_version');
+            if ($sessionVersion === NULL || $sessionVersion === '') {
+                // A session created before migration 023 has no trustworthy
+                // revocation epoch. Expire it once instead of adopting the
+                // current value, otherwise a session that was revoked while
+                // dormant could silently become valid again.
+                $this->logout();
+                return NULL;
+            } elseif ((int) $sessionVersion !== $currentVersion) {
+                $this->logout();
+                return NULL;
+            }
+        }
+        return $user;
     }
 
     private function normalize_profile_phone($value)
@@ -237,13 +327,24 @@ class Auth_model extends CI_Model
             unset($all[(string) $userId]['password']);
             $this->session->set_userdata('warga_demo_overrides', $all);
             $this->session->sess_regenerate(TRUE);
+            $this->session->set_userdata('warga_session_version', 1);
             return array('success' => TRUE);
         }
         if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
         $hash = password_hash($newPassword, PASSWORD_DEFAULT);
         if (!is_string($hash) || $hash === '') return array('success' => FALSE, 'message' => 'Kata sandi belum dapat diubah.');
-        $updated = $this->db->where('id', $userId)->update('users', array('password_hash' => $hash, 'updated_at' => date('Y-m-d H:i:s')));
-        if ($updated) $this->session->sess_regenerate(TRUE);
+        $values = array('password_hash' => $hash, 'updated_at' => date('Y-m-d H:i:s'));
+        if ($this->session_version_ready()) {
+            $this->db->set('session_version', 'session_version + 1', FALSE);
+        }
+        $updated = $this->db->where('id', $userId)->update('users', $values);
+        if ($updated) {
+            $this->session->sess_regenerate(TRUE);
+            if ($this->session_version_ready()) {
+                $row = $this->db->select('session_version')->where('id', $userId)->limit(1)->get('users')->row_array();
+                $this->session->set_userdata('warga_session_version', max(1, (int) ($row['session_version'] ?? 1)));
+            }
+        }
         return $updated ? array('success' => TRUE) : array('success' => FALSE, 'message' => 'Kata sandi belum dapat diubah.');
     }
 
@@ -366,6 +467,10 @@ class Auth_model extends CI_Model
         if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
             return array('success' => FALSE, 'message' => 'Pilihan distrik dan wilayah tidak sesuai. Silakan pilih ulang.');
         }
+        if ($this->registration_is_throttled($contact, $nik, $villageCode)) {
+            return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 15 menit lalu coba lagi.');
+        }
+        $this->record_registration_attempt($contact, $nik, $villageCode);
         $verification = $this->verify_resident_central($villageCode, $name, $nik, $kk);
         if (empty($verification['success'])) {
             return array('success' => FALSE, 'message' => isset($verification['message']) ? $verification['message'] : 'Data penduduk belum dapat diverifikasi.');
@@ -454,6 +559,7 @@ class Auth_model extends CI_Model
         if (!$this->db->trans_commit()) {
             return array('success' => FALSE, 'message' => 'Pendaftaran belum dapat diselesaikan. Silakan coba lagi.');
         }
+        $this->clear_registration_attempts($contact, $nik, $villageCode);
         return array('success' => TRUE);
     }
 
@@ -577,7 +683,7 @@ class Auth_model extends CI_Model
 
     public function logout()
     {
-        $this->session->unset_userdata(array('warga_logged_in', 'warga_user_id', 'intended_url'));
+        $this->session->unset_userdata(array('warga_logged_in', 'warga_user_id', 'warga_session_version', 'intended_url'));
         $this->session->sess_regenerate(TRUE);
     }
 }

@@ -9,8 +9,33 @@ class MY_Controller extends CI_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->apply_security_headers();
         $this->load->model('Auth_model');
         $this->currentUser = $this->Auth_model->current_user();
+    }
+
+    /**
+     * Start CSP in report-only mode so existing inline AppKit/PWA handlers can
+     * be observed before enforcement.  Set WARGA_CSP_ENFORCE=1 only after the
+     * staging report is clean; the same policy is then applied for real.
+     */
+    private function apply_security_headers()
+    {
+        if (ENVIRONMENT !== 'production') return;
+        $policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; "
+            . "script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; "
+            . "img-src 'self' data: blob: https:; font-src 'self' data:; media-src 'self' blob:; "
+            . "connect-src 'self' https:; worker-src 'self' blob:; frame-src 'self' blob:; manifest-src 'self'; "
+            . "upgrade-insecure-requests";
+        $this->output->set_header('Content-Security-Policy-Report-Only: ' . $policy);
+        if (getenv('WARGA_CSP_ENFORCE') === '1') {
+            $this->output->set_header('Content-Security-Policy: ' . $policy);
+        }
+        // Product uploads use <input capture="environment"> on mobile. Keep
+        // camera access limited to this origin while denying unrelated sensor
+        // capabilities; this preserves the existing direct-photo workflow.
+        $this->output->set_header('Permissions-Policy: camera=(self), microphone=(), geolocation=()');
+        $this->output->set_header('X-Permitted-Cross-Domain-Policies: none');
     }
 
     protected function institution_label()

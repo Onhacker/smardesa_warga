@@ -147,6 +147,7 @@ class Request_model extends CI_Model
         }));
         $counts = array();
         $genericCount = 0;
+        $imageOptimizerLoaded = FALSE;
         foreach ($uploadedEntries as $entry) {
             $fieldKey = trim((string) $entry['field_key']);
             if ($fieldKey === '') {
@@ -206,20 +207,48 @@ class Request_model extends CI_Model
             if ($field && !$this->file_accepts_mime($mime, (string) ($field['accept'] ?? ''))) {
                 return $fail('Jenis berkas "' . $field['label'] . '" tidak sesuai dengan ketentuan layanan.');
             }
-            $name = $requestId . '-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
+            $isImage = strpos($mime, 'image/') === 0;
+            $randomName = $requestId . '-' . bin2hex(random_bytes(8));
+            $name = $randomName . '.' . $allowed[$mime];
             $destination = $storage . DIRECTORY_SEPARATOR . 'requests' . DIRECTORY_SEPARATOR . $name;
             $directory = dirname($destination);
             if (!is_dir($directory) && !@mkdir($directory, 0750, TRUE) && !is_dir($directory)) return $fail('Folder berkas belum dapat dibuat.');
-            if (!move_uploaded_file($tmp, $destination)) return $fail('Berkas belum dapat disimpan.');
-            @chmod($destination, 0640);
+            $storedName = $name;
+            $storedMime = $mime;
+            $storedSize = $size;
+            if ($isImage) {
+                if (!$imageOptimizerLoaded) {
+                    $this->load->library('warga_image_optimizer');
+                    $imageOptimizerLoaded = TRUE;
+                }
+                $validation = $this->warga_image_optimizer->validate($tmp, $mime, Warga_image_optimizer::MAX_INPUT_DIMENSION, Warga_image_optimizer::MAX_INPUT_PIXELS);
+                if (empty($validation['success'])) return $fail((string) ($validation['message'] ?? 'Gambar tidak valid.'));
+                $optimizedName = $randomName . '.webp';
+                $optimizedDestination = $directory . DIRECTORY_SEPARATOR . $optimizedName;
+                $optimized = $this->warga_image_optimizer->optimize($tmp, $mime, $optimizedDestination, 1600, 84);
+                if (!empty($optimized['success'])) {
+                    $destination = $optimizedDestination;
+                    $storedName = $optimizedName;
+                    $storedMime = 'image/webp';
+                    $storedSize = (int) @filesize($destination);
+                } elseif (($optimized['code'] ?? '') === 'unsupported') {
+                    return $fail('Server belum mendukung kompresi WebP. Aktifkan GD WebP sebelum menerima upload gambar.');
+                } else {
+                    return $fail('Gambar belum dapat dioptimalkan. Pilih gambar lain atau coba lagi.');
+                }
+            } elseif (!move_uploaded_file($tmp, $destination)) {
+                return $fail('Berkas belum dapat disimpan.');
+            } else {
+                @chmod($destination, 0640);
+            }
             $paths[] = $destination;
             $files[] = array(
                 'field_key' => $fieldKey !== '' ? $fieldKey : NULL,
                 'original_name' => substr((string) $entry['name'], 0, 180),
-                'stored_name' => $name,
+                'stored_name' => $storedName,
                 'storage_path' => $destination,
-                'mime_type' => $mime,
-                'file_size' => $size
+                'mime_type' => $storedMime,
+                'file_size' => $storedSize > 0 ? $storedSize : (int) @filesize($destination)
             );
         }
         if ($finfo) finfo_close($finfo);

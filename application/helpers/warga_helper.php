@@ -179,10 +179,31 @@ if (!function_exists('warga_status_text')) {
     }
 }
 
+/**
+ * Roles accepted by the PWA. Unknown role slugs must never inherit citizen
+ * or staff privileges implicitly. Keep each guard independent so loading a
+ * project-specific helper with the same function name cannot hide the other
+ * allowlist helpers.
+ */
+if (!function_exists('warga_allowed_roles')) {
+    function warga_allowed_roles()
+    {
+        return array('warga', 'sekdes', 'kepala-desa', 'admin-desa', 'admin-kabupaten', 'admin-pusat');
+    }
+}
+
+if (!function_exists('warga_role_is_allowed')) {
+    function warga_role_is_allowed($role)
+    {
+        return in_array(trim((string) $role), warga_allowed_roles(), TRUE);
+    }
+}
+
 if (!function_exists('warga_is_staff')) {
     function warga_is_staff($user)
     {
-        return is_array($user) && isset($user['role_slug']) && $user['role_slug'] !== 'warga';
+        $role = is_array($user) && isset($user['role_slug']) ? trim((string) $user['role_slug']) : '';
+        return $role !== '' && $role !== 'warga' && warga_role_is_allowed($role);
     }
 }
 
