@@ -59,7 +59,8 @@ if (isset($selectedServiceRow['requirements']) && is_array($selectedServiceRow['
         </div>
         <div class="warga-request-field">
             <label for="request-note">Catatan Tambahan <small>Opsional</small></label>
-            <textarea name="note" id="request-note" class="form-control" rows="3" maxlength="1000" placeholder="Catatan tambahan jika diperlukan"><?= e($editMode ? $request['note'] : old('note')) ?></textarea>
+            <textarea name="note" id="request-note" class="form-control" rows="3" maxlength="1000" aria-describedby="request-note-help"><?= e($editMode ? $request['note'] : old('note')) ?></textarea>
+            <small id="request-note-help">Isi jika ada informasi tambahan yang perlu disampaikan.</small>
         </div>
     </div></section>
 
