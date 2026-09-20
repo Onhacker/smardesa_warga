@@ -681,6 +681,77 @@ class Auth_model extends CI_Model
         return is_string($plain) && preg_match('/^[0-9]{16}$/', $plain) ? $plain : '';
     }
 
+    public function request_password_reset($email)
+    {
+        $email = strtolower(trim((string) $email));
+        if (strlen($email) > 180 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return array('success' => FALSE, 'message' => 'Masukkan alamat email yang valid.');
+        }
+        return $this->password_reset_api_post('password-resets/request', array('email' => $email));
+    }
+
+    public function complete_password_reset($requestToken, $otp, $newPassword)
+    {
+        return $this->password_reset_api_post('password-resets/complete', array(
+            'request_token' => strtolower(trim((string) $requestToken)),
+            'otp' => preg_replace('/\D+/', '', (string) $otp),
+            'new_password' => (string) $newPassword
+        ));
+    }
+
+    private function password_reset_api_post($endpoint, array $payload)
+    {
+        $base = rtrim(trim((string) getenv('WARGA_CENTRAL_API_URL')), '/');
+        $url = $base . '/' . trim((string) $endpoint, '/');
+        $parts = parse_url($url);
+        if ($base === '' || !is_array($parts) || empty($parts['host'])
+            || (ENVIRONMENT === 'production' && strtolower((string) (isset($parts['scheme']) ? $parts['scheme'] : '')) !== 'https')) {
+            return array('success' => FALSE, 'message' => 'Layanan reset password belum dikonfigurasi.');
+        }
+        if (!function_exists('curl_init')) {
+            return array('success' => FALSE, 'message' => 'Layanan reset password belum tersedia pada server.');
+        }
+        $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($body)) return array('success' => FALSE, 'message' => 'Data reset password belum dapat diproses.');
+
+        $timeout = max(5, min(30, (int) (getenv('WARGA_CENTRAL_API_TIMEOUT') ?: 15)));
+        $handle = curl_init($url);
+        curl_setopt_array($handle, array(
+            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_FOLLOWLOCATION => FALSE,
+            CURLOPT_CONNECTTIMEOUT => min(10, $timeout),
+            CURLOPT_TIMEOUT => $timeout,
+            CURLOPT_HTTP_VERSION => defined('CURL_HTTP_VERSION_1_1') ? CURL_HTTP_VERSION_1_1 : 0,
+            CURLOPT_HTTPHEADER => array(
+                'Accept: application/json',
+                'Content-Type: application/json',
+                'Cache-Control: no-store',
+                'Origin: ' . rtrim((string) getenv('APP_URL'), '/')
+            ),
+            CURLOPT_POST => TRUE,
+            CURLOPT_POSTFIELDS => $body,
+            CURLOPT_SSL_VERIFYPEER => TRUE,
+            CURLOPT_SSL_VERIFYHOST => 2
+        ));
+        $response = curl_exec($handle);
+        $status = (int) curl_getinfo($handle, CURLINFO_HTTP_CODE);
+        $error = curl_error($handle);
+        curl_close($handle);
+        if ($response === FALSE || $error !== '') {
+            return array('success' => FALSE, 'message' => 'Layanan reset password sedang tidak dapat dihubungi. Periksa koneksi lalu coba lagi.');
+        }
+        $decoded = json_decode((string) $response, TRUE);
+        if (!is_array($decoded)) return array('success' => FALSE, 'message' => 'Respons layanan reset password tidak valid.');
+        if ($status < 200 || $status >= 300 || empty($decoded['success'])) {
+            return array(
+                'success' => FALSE,
+                'message' => isset($decoded['message']) ? (string) $decoded['message'] : 'Reset password belum dapat diproses.',
+                'status' => $status
+            );
+        }
+        return $decoded;
+    }
+
     public function logout()
     {
         $this->session->unset_userdata(array('warga_logged_in', 'warga_user_id', 'warga_session_version', 'intended_url'));

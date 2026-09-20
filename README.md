@@ -32,6 +32,9 @@ Untuk membuat ulang konfigurasi demo, salin `.env.local.example` menjadi `.env`.
 - Arahkan `APP_URL` ke `https://warga-smartdesa.mediaverse.co.id/`.
 - Arahkan `WARGA_CENTRAL_API_URL` ke `https://api-warga-smartdesa.mediaverse.co.id/v1/`.
 - Gunakan document root dan `.env` terpisah untuk domain PWA dan domain API.
+- Lupa kata sandi PWA memakai `POST /v1/password-resets/*` pada API Warga; konfigurasi SMTP
+  tidak disimpan di PWA. Super Admin mengaturnya satu kali pada **Pengaturan Notifikasi**
+  SmartDesa pusat.
 
 PWA menggunakan database pusat untuk halaman warga dan menyimpan berkas pada `PRIVATE_STORAGE_PATH` di luar `public_html`. API menggunakan database yang sama dengan user database yang dibatasi sesuai kebutuhan.
 - Jangan memakai database atau API key milik `smartdesa.mediaverse.co.id`.

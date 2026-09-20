@@ -6,6 +6,11 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route['login'] = 'auth/login';
 $route['register'] = 'auth/register';
+$route['lupa-password'] = 'auth/forgot_password';
+$route['lupa-password/kirim'] = 'auth/forgot_password_request';
+$route['lupa-password/kirim-ulang'] = 'auth/forgot_password_resend';
+$route['lupa-password/selesaikan'] = 'auth/forgot_password_complete';
+$route['lupa-password/ulang'] = 'auth/forgot_password_restart';
 $route['logout'] = 'auth/logout';
 $route['dashboard'] = 'dashboard/index';
 $route['surat'] = 'dashboard/letters';

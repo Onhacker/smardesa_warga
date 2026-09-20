@@ -49,6 +49,11 @@ pendaftaran. Migrasi ini idempoten dan tidak menghapus data lama. Periksa `SELEC
 buat backup sebelum DDL; setelah selesai verifikasi dengan `SHOW CREATE TABLE users` dan
 `SHOW CREATE TABLE registration_attempts`.
 
+Jalankan `migrations/024_password_reset.sql` untuk mengaktifkan lupa kata sandi PWA melalui kode
+OTP email. API Warga hanya menyimpan hash token, OTP, email, dan alamat IP. Pengiriman email tetap
+memakai satu konfigurasi SMTP pada halaman Pengaturan Notifikasi SmartDesa pusat; tidak ada
+kredensial SMTP di PWA. Karena API dan PWA berbagi database, migration ini cukup dijalankan sekali.
+
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

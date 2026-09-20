@@ -60,7 +60,7 @@ $loginBrand = 'SI DAPULIK';
                 <p class="mb-4">Gunakan akun warga yang telah terdaftar.</p>
                 <?php $loginSuccess = $this->session->flashdata('success'); ?>
                 <?php if ($loginSuccess): ?>
-                    <?php $this->load->view('layouts/flash_alert', array('flashType' => 'success', 'flashTitle' => 'Pendaftaran berhasil', 'flashMessage' => $loginSuccess)); ?>
+                    <?php $this->load->view('layouts/flash_alert', array('flashType' => 'success', 'flashTitle' => $this->session->flashdata('success_title') ?: 'Pendaftaran berhasil', 'flashMessage' => $loginSuccess)); ?>
                 <?php endif; ?>
                 <?php if (!empty($error)): ?>
                     <?php $this->load->view('layouts/flash_alert', array('flashType' => 'error', 'flashTitle' => 'Tidak dapat masuk', 'flashMessage' => $error)); ?>
@@ -71,6 +71,7 @@ $loginBrand = 'SI DAPULIK';
                     <?= csrf_field() ?>
                     <div class="input-style no-borders has-icon mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="login-identity" name="identity" value="<?= e(old('identity', $demoMode ? 'warga' : '')) ?>" placeholder="Email atau Nomor Telepon" required autocomplete="username"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="login-identity" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
                     <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-lock"></i><input type="password" class="form-control" id="login-password" name="password" value="<?= $demoMode ? 'demo12345' : '' ?>" placeholder="Kata Sandi" required autocomplete="current-password"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="login-password" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="login-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
+                    <div class="warga-auth-forgot"><a href="<?= site_url('lupa-password') ?>">Lupa kata sandi?</a></div>
                     <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
                 </form>
                 <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>

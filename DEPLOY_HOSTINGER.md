@@ -106,7 +106,7 @@ smartdesa-warga/database/seed.sql
 
 Jika database sudah pernah dibuat, impor berkas pada `database/migrations` sesuai urutan dan
 catat migration yang sudah pernah dijalankan. Jangan mengimpor ulang migration lama yang tidak
-idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `022_*.sql` dan
+idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `024_*.sql` dan
 menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
@@ -121,6 +121,7 @@ kategori Pasar Dapulik terbaru pada instalasi yang sudah menjalankan migration m
 diterbitkan SmartDesa pusat. Karena API dan PWA memakai database yang sama, migration `022`
 cukup dijalankan satu kali. `023_security_hardening.sql` menambahkan pencabutan session
 terpusat dan pembatasan percobaan pendaftaran; jalankan sekali setelah `022`.
+`024_password_reset.sql` menambahkan OTP lupa kata sandi PWA; jalankan sekali setelah `023`.
 
 Migration `023` menargetkan MariaDB Hostinger dan memakai `ADD ... IF NOT EXISTS`. Periksa versi
 database lebih dahulu dan buat backup tepat sebelum DDL dijalankan. Contoh menjalankan migration
@@ -150,10 +151,12 @@ mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" 
   < "$REPO/database/migrations/022_global_service_catalog.sql"
 mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
   < "$REPO/database/migrations/023_security_hardening.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/024_password_reset.sql"
 
-# Verifikasi kolom dan indeks setelah migration 023
+# Verifikasi kolom, indeks, dan tabel reset password
 mysql -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
-  -e 'SHOW CREATE TABLE users\G SHOW CREATE TABLE registration_attempts\G'
+  -e 'SHOW CREATE TABLE users\G SHOW CREATE TABLE registration_attempts\G SHOW CREATE TABLE warga_password_reset_requests\G'
 ```
 
 Kode aplikasi tidak lagi menjalankan `CREATE TABLE` atau `ALTER TABLE` pada request. Beberapa
