@@ -1,6 +1,4 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-$loginInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Kampung')));
-if ($loginInstitution === '') $loginInstitution = 'Kampung';
 $branding = isset($branding) && is_array($branding) ? $branding : array();
 $loginBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
@@ -52,9 +50,9 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
         <a class="active-nav" href="<?= site_url('login') ?>"><i class="fa fa-sign-in-alt"></i><span>Login</span></a>
     </nav>
     <main class="page-content header-clear-medium warga-auth-page">
-        <section class="warga-auth-brand">
+        <section class="warga-auth-brand warga-auth-login-brand">
             <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo <?= e($loginBrand) ?>">
-            <div><p>LAYANAN DIGITAL WARGA</p><h1><?= e($loginBrand) ?></h1><span><?= e($loginInstitution) ?> terhubung, layanan lebih dekat.</span></div>
+            <div><p>LAYANAN DIGITAL WARGA</p><h1><?= e($loginBrand) ?></h1><span><?= e($loginTagline) ?></span></div>
         </section>
         <section class="card card-style warga-auth-card">
             <div class="content">

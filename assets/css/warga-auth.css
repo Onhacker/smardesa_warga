@@ -229,6 +229,44 @@ body #page .page-content .warga-auth-error-item{
   background: #233d5d;
   color: #f3f8ff !important;
 }
+.warga-auth-login-brand{
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 18px 18px;
+}
+.warga-auth-login-brand img{
+  flex-basis: 64px;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+}
+.warga-auth-login-brand h1{
+  margin-bottom: 1px;
+  line-height: 1.15;
+}
+#page .page-content.warga-auth-page .warga-auth-login-brand p{
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+#page .page-content.warga-auth-page .warga-auth-login-brand span{
+  line-height: 1.3;
+}
+@media (max-width: 460px){
+  .warga-auth-login-brand{
+    gap: 10px;
+    margin-bottom: 9px;
+    padding: 16px 14px;
+  }
+  .warga-auth-login-brand img{
+    flex-basis: 56px;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+  }
+  .warga-auth-login-brand h1{
+    line-height: 1.1;
+  }
+}
 .warga-reset-destination{
   display: flex;
   align-items: center;
