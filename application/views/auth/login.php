@@ -78,10 +78,10 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
                     <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
                 </form>
                 <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>
-                <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="color-highlight font-600" href="<?= site_url('register') ?>">Daftar warga</a></p>
+                <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="warga-auth-switch-link" href="<?= site_url('register') ?>">Daftar Warga</a></p>
             </div>
         </section>
-        <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install', array('branding' => $branding)); ?></div>
+        <div class="card card-style warga-auth-install" data-pwa-install-container aria-hidden="false"><?php $this->load->view('layouts/pwa_install', array('branding' => $branding)); ?></div>
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl, 'branding' => $branding)); ?>
     </main>
 </div>

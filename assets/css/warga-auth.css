@@ -197,7 +197,39 @@ body #page .page-content .warga-auth-error-item{
   color: var(--warga-teal-dark);
   font-size: 13px;
   font-weight: 700;
-}.warga-reset-destination{
+}
+#page .page-content.warga-auth-page .warga-auth-switch-link{
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  margin-left: 4px;
+  padding: 7px 12px;
+  border: 1px solid #aec8e8;
+  border-radius: 10px;
+  background: #eaf2fc;
+  color: #174f99 !important;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+  vertical-align: middle;
+}
+#page .page-content.warga-auth-page .warga-auth-switch-link:hover,
+#page .page-content.warga-auth-page .warga-auth-switch-link:focus-visible{
+  border-color: #174f99;
+  background: #dceafb;
+  color: #123e78 !important;
+}
+#page .page-content.warga-auth-page .warga-auth-switch-link:focus-visible{
+  outline: 3px solid #174f99;
+  outline-offset: 2px;
+}
+.theme-dark #page .page-content.warga-auth-page .warga-auth-switch-link{
+  border-color: #5c85b6;
+  background: #233d5d;
+  color: #f3f8ff !important;
+}
+.warga-reset-destination{
   display: flex;
   align-items: center;
   gap: 11px;

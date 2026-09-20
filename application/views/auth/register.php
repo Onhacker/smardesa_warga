@@ -44,6 +44,13 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
 <header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
+<nav id="footer-bar" class="footer-bar-6 warga-footer" aria-label="Navigasi utama">
+    <a href="<?= site_url('dashboard') ?>"><i class="fa fa-home" aria-hidden="true"></i><span>Beranda</span></a>
+    <a href="<?= site_url('surat') ?>"><i class="fa fa-envelope" aria-hidden="true"></i><span>Surat</span></a>
+    <a class="circle-nav" href="<?= site_url('pasar') ?>"><i class="fa fa-store" aria-hidden="true"></i><span>Pasar</span><strong aria-hidden="true"><u></u></strong></a>
+    <a href="<?= site_url('pengumuman') ?>"><i class="fa fa-bullhorn" aria-hidden="true"></i><span>Info</span></a>
+    <a class="active-nav" href="<?= site_url('login') ?>"><i class="fa fa-sign-in-alt" aria-hidden="true"></i><span>Login</span></a>
+</nav>
 <main class="page-content header-clear-medium warga-auth-page">
     <section class="warga-auth-brand compact"><img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo <?= e($registerBrand) ?>"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">
@@ -86,13 +93,12 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
                     <label for="register-village" class="color-highlight">Wilayah</label><em>*</em>
                 </div>
             </div>
-            <div class="warga-region-hint" id="register-region-hint" aria-live="polite">Pilih distrik/kecamatan terlebih dahulu. Kode wilayah disimpan otomatis.</div>
             <?php if (!$registrationRegions): ?><div class="warga-region-empty" role="alert"><i class="fa fa-info-circle"></i><span>Daftar wilayah belum tersedia. Hubungi administrator pusat.</span></div><?php endif; ?>
             <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-lock"></i><input type="password" class="form-control" id="register-password" name="password" placeholder="Kata Sandi" required minlength="8" autocomplete="new-password"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="register-password" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="register-password" class="color-highlight">Kata Sandi</label><em>*</em></div>
             <div class="input-style no-borders has-icon validate-field mb-4 warga-auth-password-field"><i class="fa fa-check-circle"></i><input type="password" class="form-control" id="register-confirm" name="password_confirm" placeholder="Ulangi Kata Sandi" required minlength="8" autocomplete="new-password"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><button type="button" class="warga-password-toggle" data-password-toggle aria-controls="register-confirm" aria-pressed="false" aria-label="Tampilkan kata sandi"><i class="fa fa-eye" aria-hidden="true"></i></button><label for="register-confirm" class="color-highlight">Ulangi Kata Sandi</label><em>*</em></div>
             <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Daftar Akun</span><i class="fa fa-arrow-right ms-2"></i></button>
         </form>
-        <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="color-highlight font-600" href="<?= site_url('login') ?>">Masuk</a></p>
+        <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="warga-auth-switch-link" href="<?= site_url('login') ?>">Masuk</a></p>
     </div></section>
 </main>
 <?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl, 'branding' => $branding)); ?>
@@ -106,23 +112,9 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
     function initRegionCascade() {
         var district = document.getElementById('register-district');
         var village = document.getElementById('register-village');
-        var hint = document.getElementById('register-region-hint');
         var regions = Array.isArray(window.SDW_REGISTER_REGIONS) ? window.SDW_REGISTER_REGIONS : [];
-        if (!district || !village || !hint || district.dataset.regionCascadeReady === '1') return;
+        if (!district || !village || district.dataset.regionCascadeReady === '1') return;
         district.dataset.regionCascadeReady = '1';
-
-        function updateHint() {
-            var selected = regions.find(function (region) {
-                return String(region.village_code || '') === String(village.value || '');
-            });
-            if (selected) {
-                hint.textContent = 'Wilayah terpilih: ' + (selected.village_name || selected.village_code) + '. Kode wilayah disimpan otomatis.';
-            } else if (district.value) {
-                hint.textContent = 'Pilih wilayah. Kode wilayah disimpan otomatis.';
-            } else {
-                hint.textContent = 'Pilih distrik/kecamatan terlebih dahulu. Kode wilayah disimpan otomatis.';
-            }
-        }
 
         function fillVillages(preferredCode) {
             var selectedDistrict = String(district.value || '');
@@ -145,7 +137,6 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
                 return String(region.village_code || '') === String(preferredCode || '');
             });
             village.value = selected ? String(preferredCode) : '';
-            updateHint();
         }
 
         if (!district.value && oldVillage) {
@@ -158,7 +149,6 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         }
         fillVillages(oldVillage);
         district.addEventListener('change', function () { fillVillages(''); });
-        village.addEventListener('change', updateHint);
     }
 
     if (document.readyState === 'loading') {
