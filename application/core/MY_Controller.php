@@ -11,10 +11,13 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
         $this->apply_security_headers();
-        $this->load->model('Branding_model');
-        $this->branding = $this->Branding_model->current();
         $this->load->model('Auth_model');
         $this->currentUser = $this->Auth_model->current_user();
+        $this->load->model('Branding_model');
+        $tenantCode = is_array($this->currentUser) && !empty($this->currentUser['regency_code'])
+            ? (string) $this->currentUser['regency_code']
+            : warga_tenant_code('default');
+        $this->branding = $this->Branding_model->current($tenantCode);
     }
 
     /**

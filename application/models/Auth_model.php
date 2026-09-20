@@ -115,18 +115,40 @@ class Auth_model extends CI_Model
         return $this->lastError;
     }
 
+    private function configured_tenant_code()
+    {
+        $code = function_exists('warga_tenant_code') ? warga_tenant_code('') : '';
+        $code = function_exists('warga_normalize_tenant_code')
+            ? warga_normalize_tenant_code($code, '')
+            : strtoupper(trim((string) $code));
+        return strtolower((string) $code) === 'default' ? '' : (string) $code;
+    }
+
+    private function tenant_allows($regencyCode)
+    {
+        $tenantCode = $this->configured_tenant_code();
+        if ($tenantCode === '') return TRUE;
+        $regencyCode = function_exists('warga_normalize_tenant_code')
+            ? warga_normalize_tenant_code($regencyCode, '')
+            : strtoupper(trim((string) $regencyCode));
+        return $regencyCode !== '' && hash_equals($tenantCode, $regencyCode);
+    }
+
     /**
      * Daftar wilayah aktif untuk formulir pendaftaran warga.
      * Kode wilayah tetap berasal dari server; warga hanya memilih nama wilayah.
      */
     public function registration_regions()
     {
+        $tenantCode = $this->configured_tenant_code();
         if (warga_demo_mode()) {
+            if ($tenantCode !== '' && $tenantCode !== '95.01') return array();
             return array(array(
                 'district_code' => '95.01.03',
                 'district_name' => 'Asologaima',
                 'village_code' => '95.01.03.2003',
                 'village_name' => 'Kampung Araboda',
+                'regency_code' => '95.01',
                 'regency_name' => 'Jayawijaya',
                 'province_name' => 'Papua Pegunungan'
             ));
@@ -136,9 +158,11 @@ class Auth_model extends CI_Model
             return array();
         }
 
+        $this->db
+            ->select('district_code, district_name, village_code, name AS village_name, regency_code, regency_name, province_name')
+            ->where('status', 'active');
+        if ($tenantCode !== '') $this->db->where('regency_code', $tenantCode);
         return $this->db
-            ->select('district_code, district_name, village_code, name AS village_name, regency_name, province_name')
-            ->where('status', 'active')
             ->order_by('district_name', 'ASC')
             ->order_by('name', 'ASC')
             ->get('village_tenants')
@@ -185,6 +209,10 @@ class Auth_model extends CI_Model
         $this->lastError = '';
         $identity = trim((string) $identity);
         if (warga_demo_mode()) {
+            if (!$this->tenant_allows('95.01')) {
+                $this->lastError = 'Akun demo tidak tersedia pada layanan kabupaten ini.';
+                return FALSE;
+            }
             $identity = strtolower($identity);
             foreach ($this->demo_users() as $user) {
                 $effective = $this->demo_user((int) $user['id']);
@@ -216,6 +244,11 @@ class Auth_model extends CI_Model
             $this->record_login_failure($identity);
             return FALSE;
         }
+        if (!$this->tenant_allows(isset($user['regency_code']) ? $user['regency_code'] : '')) {
+            $this->lastError = 'Akun ini terdaftar pada layanan kabupaten lain.';
+            $this->record_login_failure($identity);
+            return FALSE;
+        }
 
         $this->clear_login_failures($identity);
         $this->session->sess_regenerate(TRUE);
@@ -227,7 +260,14 @@ class Auth_model extends CI_Model
     public function current_user()
     {
         if (!$this->session->userdata('warga_logged_in') || !$this->session->userdata('warga_user_id')) return NULL;
-        if (warga_demo_mode()) return $this->demo_user((int) $this->session->userdata('warga_user_id'));
+        if (warga_demo_mode()) {
+            $user = $this->demo_user((int) $this->session->userdata('warga_user_id'));
+            if (!$user || !$this->tenant_allows(isset($user['regency_code']) ? $user['regency_code'] : '')) {
+                $this->logout();
+                return NULL;
+            }
+            return $user;
+        }
         if (!warga_database_available()) return NULL;
         $this->ensure_identity_schema();
         $select = 'u.id,u.role_id,u.name,u.username,u.email,u.phone,u.is_active,u.last_login_at,u.village_id,r.name AS role_name,r.slug AS role_slug,v.village_code,v.name AS village_name,v.district_name,v.regency_code,v.regency_name';
@@ -241,6 +281,10 @@ class Auth_model extends CI_Model
             ->where(array('u.id' => (int) $this->session->userdata('warga_user_id'), 'u.is_active' => 1))
             ->get()->row_array();
         if (!$user || !warga_role_is_allowed($user['role_slug'] ?? '')) {
+            $this->logout();
+            return NULL;
+        }
+        if (!$this->tenant_allows(isset($user['regency_code']) ? $user['regency_code'] : '')) {
             $this->logout();
             return NULL;
         }
@@ -470,6 +514,9 @@ class Auth_model extends CI_Model
 
         $village = $this->db->where('village_code', $villageCode)->where('status', 'active')->get('village_tenants')->row_array();
         if (!$village) return array('success' => FALSE, 'message' => 'Wilayah yang dipilih belum terdaftar atau tidak aktif.');
+        if (!$this->tenant_allows(isset($village['regency_code']) ? $village['regency_code'] : '')) {
+            return array('success' => FALSE, 'message' => 'Wilayah yang dipilih tidak termasuk layanan kabupaten ini.');
+        }
         if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
             return array('success' => FALSE, 'message' => 'Pilihan distrik dan wilayah tidak sesuai. Silakan pilih ulang.');
         }
@@ -731,6 +778,8 @@ class Auth_model extends CI_Model
 
     private function password_reset_api_post($endpoint, array $payload)
     {
+        $tenantCode = $this->configured_tenant_code();
+        if ($tenantCode !== '' && !isset($payload['tenant_code'])) $payload['tenant_code'] = $tenantCode;
         $base = rtrim(trim((string) getenv('WARGA_CENTRAL_API_URL')), '/');
         $url = $base . '/' . trim((string) $endpoint, '/');
         $parts = parse_url($url);

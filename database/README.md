@@ -54,6 +54,11 @@ OTP email. API Warga hanya menyimpan hash token, OTP, email, dan alamat IP. Peng
 memakai satu konfigurasi SMTP pada halaman Pengaturan Notifikasi SmartDesa pusat; tidak ada
 kredensial SMTP di PWA. Karena API dan PWA berbagi database, migration ini cukup dijalankan sekali.
 
+Jalankan `migrations/025_account_security_branding.sql` untuk OTP perubahan akun dan branding
+publik, lalu `migrations/026_multi_tenant_branding.sql` agar branding tersimpan per kabupaten.
+Setiap deployment/domain PWA mengisi `WARGA_TENANT_CODE` dengan kode kabupaten, misalnya
+`95.01`; deployment lama yang kosong tetap memakai branding `default`.
+
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 
 `seed.sql` berisi peran, jenis layanan, dan seluruh tenant wilayah Kabupaten Jayawijaya. Setiap baris aktif pada `village_tenants` mewakili satu kampung/kelurahan yang dapat dipilih warga. Password pengguna tidak disimpan di berkas seed. Buat akun administrator dan warga melalui endpoint administrasi yang akan dibuat pada tahap berikutnya.

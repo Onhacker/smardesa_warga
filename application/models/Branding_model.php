@@ -8,9 +8,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Branding_model extends CI_Model
 {
-    public function current()
+    public function current($tenantCode = '')
     {
+        $tenantCode = warga_normalize_tenant_code(
+            $tenantCode !== '' ? $tenantCode : warga_tenant_code('default'),
+            'default'
+        );
         $branding = array(
+            'tenant_code' => $tenantCode,
+            'tenant_name' => '',
             'nama_sistem' => $this->fallback('WARGA_SYSTEM_NAME', 'PUBLIC_SYSTEM_NAME', 'SIDAPULIK'),
             'kepanjangan' => $this->fallback('WARGA_SYSTEM_EXPANSION', 'PUBLIC_SYSTEM_EXPANSION', ''),
             'tagline' => $this->fallback('WARGA_SYSTEM_TAGLINE', 'PUBLIC_SYSTEM_TAGLINE', 'Bersama Membangun Kampung Digital')
@@ -24,19 +30,23 @@ class Branding_model extends CI_Model
         }
 
         $fields = array();
-        foreach (array('nama_sistem', 'kepanjangan', 'tagline') as $field) {
+        foreach (array('tenant_code', 'tenant_name', 'nama_sistem', 'kepanjangan', 'tagline') as $field) {
             if ($db->field_exists($field, 'app_public_branding')) {
                 $fields[] = $field;
             }
         }
         if (empty($fields)) return $this->normalise($branding);
 
-        $row = $db
-            ->select(implode(', ', $fields))
-            ->where('id', 1)
-            ->limit(1)
-            ->get('app_public_branding')
-            ->row_array();
+        $db->select(implode(', ', $fields));
+        if ($db->field_exists('tenant_code', 'app_public_branding')) {
+            $row = $db->where('tenant_code', $tenantCode)->limit(1)->get('app_public_branding')->row_array();
+            if (!$row && $tenantCode !== 'default') {
+                $db->reset_query();
+                $row = $db->select(implode(', ', $fields))->where('tenant_code', 'default')->limit(1)->get('app_public_branding')->row_array();
+            }
+        } else {
+            $row = $db->where('id', 1)->limit(1)->get('app_public_branding')->row_array();
+        }
         if (is_array($row)) {
             foreach ($fields as $field) {
                 if (isset($row[$field]) && trim((string) $row[$field]) !== '') {
@@ -60,6 +70,8 @@ class Branding_model extends CI_Model
     private function normalise(array $branding)
     {
         return array(
+            'tenant_code' => warga_normalize_tenant_code($branding['tenant_code'] ?? 'default', 'default'),
+            'tenant_name' => $this->clean($branding['tenant_name'] ?? '', 120, ''),
             'nama_sistem' => $this->clean($branding['nama_sistem'] ?? 'SIDAPULIK', 100, 'SIDAPULIK'),
             'kepanjangan' => $this->clean($branding['kepanjangan'] ?? '', 180, ''),
             'tagline' => $this->clean($branding['tagline'] ?? '', 255, 'Bersama Membangun Kampung Digital')

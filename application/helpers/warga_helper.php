@@ -110,6 +110,53 @@ if (!function_exists('warga_system_name')) {
     }
 }
 
+if (!function_exists('warga_normalize_tenant_code')) {
+    function warga_normalize_tenant_code($value, $fallback = '')
+    {
+        $value = strtoupper(trim((string) $value));
+        if ($value === '') return trim((string) $fallback);
+        if (strtolower($value) === 'default') return 'default';
+        if (preg_match('/^[0-9]{4}$/', $value)) {
+            $value = substr($value, 0, 2) . '.' . substr($value, 2, 2);
+        }
+        if (preg_match('/^([0-9]{2}\.[0-9]{2})(?:\.|$)/', $value, $match)) {
+            $value = $match[1];
+        }
+        return preg_match('/^[A-Z0-9][A-Z0-9._-]{1,29}$/', $value)
+            ? $value
+            : trim((string) $fallback);
+    }
+}
+
+if (!function_exists('warga_tenant_code')) {
+    /**
+     * Tenant publik dikunci per deployment/domain PWA. WARGA_TENANT_HOST_MAP
+     * bersifat opsional dan memakai JSON {"warga.example.id":"95.01"}.
+     */
+    function warga_tenant_code($fallback = 'default')
+    {
+        $configured = getenv('WARGA_TENANT_CODE');
+        if ($configured === false || trim((string) $configured) === '') {
+            $configured = getenv('PUBLIC_TENANT_CODE');
+        }
+        if ($configured !== false && trim((string) $configured) !== '') {
+            return warga_normalize_tenant_code($configured, $fallback);
+        }
+
+        $mapJson = getenv('WARGA_TENANT_HOST_MAP');
+        if ($mapJson !== false && trim((string) $mapJson) !== '') {
+            $map = json_decode((string) $mapJson, TRUE);
+            $host = strtolower(trim((string) (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '')));
+            $host = preg_replace('/:\d+$/', '', $host);
+            if (is_array($map) && $host !== '' && isset($map[$host])) {
+                return warga_normalize_tenant_code($map[$host], $fallback);
+            }
+        }
+
+        return warga_normalize_tenant_code($fallback, $fallback);
+    }
+}
+
 function warga_complaint_status($status)
 {
     $labels = array('submitted'=>'Dikirim','received'=>'Diterima','processing'=>'Ditindaklanjuti','resolved'=>'Selesai','rejected'=>'Ditolak');
