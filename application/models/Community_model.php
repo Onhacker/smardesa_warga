@@ -136,6 +136,72 @@ class Community_model extends CI_Model
         return array_map(array($this, 'with_attachment_aliases'), $rows);
     }
 
+    /**
+     * Return one tenant-scoped page of announcements for the citizen feed.
+     *
+     * The dashboard deliberately keeps using announcements() for its compact
+     * preview.  This separate accessor bounds the full Info page to ten rows
+     * and applies the same visibility rule to the count and result queries.
+     */
+    public function announcements_page(array $user, array $filters = array(), $perPage = 10)
+    {
+        $queryValue = isset($filters['q']) && is_scalar($filters['q']) ? trim((string) $filters['q']) : '';
+        $query = function_exists('mb_substr')
+            ? mb_substr($queryValue, 0, 180, 'UTF-8')
+            : substr($queryValue, 0, 180);
+        $date = isset($filters['date']) && is_scalar($filters['date']) ? trim((string) $filters['date']) : '';
+        $parsedDate = DateTime::createFromFormat('!Y-m-d', $date);
+        if (!$parsedDate || $parsedDate->format('Y-m-d') !== $date) $date = '';
+
+        $pageValue = isset($filters['page']) && is_scalar($filters['page']) ? (string) $filters['page'] : '1';
+        $requestedPage = ctype_digit($pageValue) ? max(1, (int) $pageValue) : 1;
+        $perPage = max(1, min(50, (int) $perPage));
+        $normalisedFilters = array('q' => $query, 'date' => $date);
+
+        if (!$this->ready() || empty($user['village_id'])) {
+            return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1,
+                'per_page' => $perPage, 'from' => 0, 'to' => 0, 'filters' => $normalisedFilters);
+        }
+
+        $applyScope = function () use ($user, $query, $date) {
+            $this->db->where('a.village_id', $user['village_id']);
+            if (!$this->can_manage($user)) $this->db->where('a.status', 'published');
+            if ($query !== '') $this->db->like('a.title', $query);
+            if ($date !== '') {
+                $nextDate = date('Y-m-d', strtotime($date . ' +1 day'));
+                $this->db->where('a.created_at >=', $date . ' 00:00:00')
+                    ->where('a.created_at <', $nextDate . ' 00:00:00');
+            }
+        };
+
+        $this->db->from('warga_announcements a');
+        $applyScope();
+        $total = (int) $this->db->count_all_results();
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($requestedPage, $pages);
+        $offset = ($page - 1) * $perPage;
+        $items = array();
+
+        if ($total > 0) {
+            $this->announcement_query_base();
+            $applyScope();
+            $rows = $this->db->order_by('a.created_at', 'DESC')->order_by('a.id', 'DESC')
+                ->limit($perPage, $offset)->get()->result_array();
+            $items = array_map(array($this, 'with_attachment_aliases'), $rows);
+        }
+
+        return array(
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => $perPage,
+            'from' => $total > 0 ? $offset + 1 : 0,
+            'to' => min($offset + count($items), $total),
+            'filters' => $normalisedFilters
+        );
+    }
+
     public function announcement($id, array $user)
     {
         if (!$this->ready() || empty($user['village_id'])) return null;

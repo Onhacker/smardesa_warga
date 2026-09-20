@@ -15,13 +15,42 @@ class Community extends Public_Controller
         // Announcements contain tenant-scoped information.  Do not expose a
         // public catalogue: the model query below always filters by the
         // authenticated user's village_id.
+        if (!$this->currentUser && $this->wants_json()) {
+            return $this->json(array(
+                'success' => FALSE,
+                'message' => 'Sesi login berakhir. Silakan masuk kembali.',
+                'login_url' => site_url('login')
+            ), 401);
+        }
         $this->require_authentication();
         $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
-        $items = $this->community->announcements($this->currentUser);
-        $this->render('community/announcements', array('pageTitle' => 'Info',
-            'items' => $items,
+        $listing = $this->community->announcements_page($this->currentUser, array(
+            'q' => $this->input->get('q', TRUE),
+            'date' => $this->input->get('date', TRUE),
+            'page' => $this->input->get('page', TRUE)
+        ), 10);
+        $data = array('pageTitle' => 'Info',
+            'items' => $listing['items'],
+            'listing' => $listing,
+            'listUrl' => site_url('pengumuman'),
             'canManage' => $this->community->can_manage($this->currentUser),
-            'ready' => $this->community->ready()));
+            'ready' => $this->community->ready(),
+            // The AJAX branch renders the partial directly, so provide the
+            // shared identity values normally added by render().
+            'currentUser' => $this->currentUser,
+            'institutionLabel' => $this->institution_label(),
+            'institutionLower' => $this->institution_label_lower()
+        );
+        if ($this->input->is_ajax_request()) {
+            return $this->json(array(
+                'html' => $this->load->view('community/announcement_results', $data, TRUE),
+                'page' => $listing['page'],
+                'pages' => $listing['pages'],
+                'total' => $listing['total'],
+                'filters' => $listing['filters']
+            ));
+        }
+        $this->render('community/announcements', $data);
     }
 
     public function announcement($id)

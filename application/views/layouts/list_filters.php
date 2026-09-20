@@ -1,10 +1,16 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $isNotificationList = $listKind === 'notifications'; ?>
-<form method="get" action="<?= e($listUrl) ?>" class="warga-list-search" data-list-search aria-label="Pencarian <?= $listKind === 'notifications' ? 'pemberitahuan' : 'permohonan' ?>">
+<?php
+$isNotificationList = $listKind === 'notifications';
+$isAnnouncementList = $listKind === 'announcements';
+$listLabel = $isNotificationList ? 'pemberitahuan' : ($isAnnouncementList ? 'info' : 'permohonan');
+$queryLabel = $isNotificationList ? 'Judul atau isi' : ($isAnnouncementList ? 'Judul info' : 'Nama surat');
+$queryPlaceholder = $isNotificationList ? 'Cari pemberitahuan' : ($isAnnouncementList ? 'Cari judul info' : 'Cari nama surat');
+?>
+<form method="get" action="<?= e($listUrl) ?>" class="warga-list-search" data-list-search aria-label="Pencarian <?= e($listLabel) ?>">
     <div class="warga-list-search-fields">
         <div class="warga-list-field">
-            <label for="warga-list-name"><?= $isNotificationList ? 'Judul atau isi' : 'Nama surat' ?></label>
-            <div class="warga-list-input"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="warga-list-name" name="q" value="<?= e($listing['filters']['q']) ?>" placeholder="<?= $isNotificationList ? 'Cari pemberitahuan' : 'Cari nama surat' ?>" maxlength="180"></div>
+            <label for="warga-list-name"><?= e($queryLabel) ?></label>
+            <div class="warga-list-input"><i class="fa fa-search" aria-hidden="true"></i><input type="search" id="warga-list-name" name="q" value="<?= e($listing['filters']['q']) ?>" placeholder="<?= e($queryPlaceholder) ?>" maxlength="180"></div>
         </div>
         <div class="warga-list-field">
             <label for="warga-list-date"><?= e($dateLabel) ?></label>

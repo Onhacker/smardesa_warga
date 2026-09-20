@@ -910,6 +910,60 @@
   }
   initAnnouncementAttachmentModal();
 
+  function initAnnouncementSearchModal() {
+    var modal = document.querySelector('[data-announcement-search-modal]');
+    var openers = document.querySelectorAll('[data-announcement-search-open]');
+    if (!modal || !openers.length) return;
+    var dialog = modal.querySelector('[role="dialog"]');
+    var form = modal.querySelector('[data-list-search]');
+    var lastFocused = null;
+
+    function focusableItems() {
+      return Array.prototype.slice.call(modal.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled])'))
+        .filter(function (item) { return item.offsetParent !== null; });
+    }
+    function open() {
+      lastFocused = document.activeElement;
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('community-announcement-search-open');
+      window.requestAnimationFrame(function () {
+        var search = modal.querySelector('input[name="q"]');
+        if (search) search.focus();
+        else if (dialog) dialog.focus();
+      });
+    }
+    function close() {
+      if (modal.hidden) return;
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('community-announcement-search-open');
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    }
+
+    openers.forEach(function (button) {
+      button.addEventListener('click', function (event) { event.preventDefault(); open(); });
+    });
+    modal.querySelectorAll('[data-announcement-search-close]').forEach(function (button) {
+      button.addEventListener('click', function (event) { event.preventDefault(); close(); });
+    });
+    if (form) form.addEventListener('submit', function () { window.setTimeout(close, 0); });
+    modal.addEventListener('click', function (event) {
+      if (event.target && event.target.closest && event.target.closest('[data-list-reset]')) window.setTimeout(close, 0);
+    });
+    document.addEventListener('keydown', function (event) {
+      if (modal.hidden) return;
+      if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+      if (event.key !== 'Tab') return;
+      var items = focusableItems();
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+  }
+  initAnnouncementSearchModal();
+
   // AppKit v22's double-slider advances every four seconds.  Keep the
   // community slider equally useful when its lightweight scroll-snap markup
   // is used (Splide-marked sliders are initialized by custom.min.js instead).
