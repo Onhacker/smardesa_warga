@@ -245,7 +245,9 @@ class Community extends Public_Controller
     {
         $this->require_authentication();
         $village = $this->community->village($this->currentUser['village_id'], $this->currentUser['village_name'] ?? '');
-        $this->render('community/contact', array('pageTitle' => 'Kontak '.$village['institution'], 'village' => $village));
+        // Keep the compact app header short on phones; the full institution
+        // name remains visible in the account-style page hero below it.
+        $this->render('community/contact', array('pageTitle' => 'Kontak', 'village' => $village));
     }
 
     public function privacy()

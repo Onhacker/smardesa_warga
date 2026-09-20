@@ -1075,6 +1075,82 @@ body.theme-dark #page .page-content .community-v22-announcement-date-tile small 
 #page .community-v22-contact-page .community-contact > div { padding: 16px 18px; border-bottom: 1px solid var(--warga-line); }
 #page .community-v22-contact-page .community-contact > div:last-child { border-bottom: 0; }
 
+/* Kontak bentuk lembaga follows the same compact information hierarchy as
+ * the account screen.  The shared account components provide the geometry;
+ * these scoped rules only add contact-specific icon colours and link
+ * wrapping so long addresses never push the page sideways. */
+#page .warga-contact-page {
+  padding-bottom: 0;
+}
+#page .warga-contact-page .warga-contact-avatar {
+  color: var(--warga-teal-dark) !important;
+}
+#page .warga-contact-page .warga-contact-avatar > i {
+  color: inherit !important;
+  font-size: 21px;
+}
+#page .warga-contact-page .warga-contact-card {
+  margin-bottom: 0;
+}
+#page .warga-contact-page .warga-account-row > div {
+  min-width: 0;
+}
+#page .warga-contact-page .warga-account-row > div > strong,
+#page .warga-contact-page .warga-account-row > div > strong a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+#page .warga-contact-page .warga-account-row > div > strong a {
+  color: inherit !important;
+  text-decoration: none;
+}
+#page .warga-contact-page .warga-account-row > div > strong a:hover,
+#page .warga-contact-page .warga-account-row > div > strong a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+body #page .page-content .warga-contact-page .warga-account-row-icon.is-office {
+  background: #eee8fa;
+  color: #6749a8 !important;
+}
+body #page .page-content .warga-contact-page .warga-account-row-icon.is-website {
+  background: #e4f3ef;
+  color: #237a6a !important;
+}
+body #page .page-content .warga-contact-page .warga-account-row-icon.is-hours {
+  background: #fff0d9;
+  color: #a86616 !important;
+}
+body #page .page-content .warga-contact-page .warga-account-row-icon.is-region {
+  background: #e8edf8;
+  color: #4b6397 !important;
+}
+body.theme-dark #page .page-content .warga-contact-page .warga-account-row-icon.is-office {
+  background: #30284a;
+  color: #c1a9f3 !important;
+}
+body.theme-dark #page .page-content .warga-contact-page .warga-account-row-icon.is-website {
+  background: #1d3c38;
+  color: #8ed6c8 !important;
+}
+body.theme-dark #page .page-content .warga-contact-page .warga-account-row-icon.is-hours {
+  background: #46331d;
+  color: #efbe78 !important;
+}
+body.theme-dark #page .page-content .warga-contact-page .warga-account-row-icon.is-region {
+  background: #293550;
+  color: #a9bdea !important;
+}
+@media (max-width: 460px) {
+  #page .warga-contact-page .warga-account-card-title {
+    padding-top: 16px;
+    padding-bottom: 13px;
+  }
+  #page .warga-contact-page .warga-account-card-title h2 {
+    font-size: 19px;
+  }
+}
+
 body.community-v22-attachment-open { overflow: hidden; }
 .community-v22-attachment-modal[hidden] { display: none !important; }
 .community-v22-attachment-modal {
