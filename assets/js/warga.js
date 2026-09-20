@@ -1276,12 +1276,34 @@
   var deferredInstall = null;
   var installedAppName = String(config.brandName || 'SIDAPULIK').trim() || 'SIDAPULIK';
   var installPanels = Array.prototype.slice.call(document.querySelectorAll('[data-pwa-install-panel]'));
+  var installDisplayModes = ['standalone', 'minimal-ui', 'fullscreen', 'window-controls-overlay'];
+  function isInstalledExperience() {
+    var displayModeInstalled = false;
+    try {
+      displayModeInstalled = installDisplayModes.some(function (mode) {
+        return !!(window.matchMedia && window.matchMedia('(display-mode: ' + mode + ')').matches);
+      });
+    } catch (error) {}
+    return displayModeInstalled || window.navigator.standalone === true || /^android-app:\/\//i.test(document.referrer || '');
+  }
   function updateInstallStatus(message, installed) {
     installPanels.forEach(function (panel) {
       panel.classList.toggle('is-installed', !!installed);
       var status = panel.querySelector('[data-pwa-install-status]');
       if (status && message) status.textContent = message;
+      var container = panel.closest('[data-pwa-install-container]');
+      if (container) {
+        container.hidden = !!installed;
+        container.setAttribute('aria-hidden', installed ? 'true' : 'false');
+      }
     });
+  }
+  function syncInstalledExperience() {
+    var installed = isInstalledExperience();
+    updateInstallStatus(
+      installed ? installedAppName + ' sudah terpasang.' : 'Pasang aplikasi pada layar utama perangkat ini.',
+      installed
+    );
   }
   window.addEventListener('beforeinstallprompt', function (event) {
     event.preventDefault();
@@ -1301,7 +1323,19 @@
       });
     });
   });
-  if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) updateInstallStatus(installedAppName + ' sudah terpasang.', true);
+  window.addEventListener('appinstalled', function () {
+    deferredInstall = null;
+    updateInstallStatus(installedAppName + ' sudah terpasang.', true);
+  });
+  window.addEventListener('pageshow', syncInstalledExperience);
+  if (window.matchMedia) {
+    installDisplayModes.forEach(function (mode) {
+      var query = window.matchMedia('(display-mode: ' + mode + ')');
+      if (typeof query.addEventListener === 'function') query.addEventListener('change', syncInstalledExperience);
+      else if (typeof query.addListener === 'function') query.addListener(syncInstalledExperience);
+    });
+  }
+  syncInstalledExperience();
 
   if ('serviceWorker' in navigator && window.isSecureContext) {
     window.addEventListener('load', function () {

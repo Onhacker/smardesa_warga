@@ -168,7 +168,7 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
         </div>
     </section>
 
-    <section class="card card-style warga-install-card"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
+    <section class="card card-style warga-install-card" data-pwa-install-container aria-hidden="false"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
 
     <form method="post" action="<?= site_url('logout') ?>" class="content warga-account-logout" data-logout-form>
         <?= csrf_field() ?>

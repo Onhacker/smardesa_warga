@@ -440,6 +440,7 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
 .warga-pwa-install-copy h3 { margin: 0; font-size: 13px; }
 .warga-pwa-install-copy p { margin: 2px 0 0; color: var(--warga-muted); font-size: 12px; line-height: 1.4; }
 .warga-pwa-install.is-installed [data-pwa-install] { display: none; }
+[data-pwa-install-container][hidden] { display: none !important; }
 
 .warga-menu-head { position: relative; display: flex; align-items: center; gap: 12px; min-height: 135px; padding: 32px 18px 18px; background: var(--warga-teal-dark); color: #fff; }
 .warga-menu-head img { width: 55px; height: 55px; object-fit: contain; border: 2px solid #fff; border-radius: 8px; background: #fff; }
