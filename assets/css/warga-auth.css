@@ -250,3 +250,18 @@ body #page .page-content .warga-auth-error-item{
     gap: 2px;
   }
 }
+
+/* Utility actions below the reset form are links, not primary submit buttons. */
+#page .page-content.warga-auth-page .warga-auth-card .warga-reset-link{
+  min-height: 0 !important;
+  padding: 7px 2px;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--warga-teal-dark) !important;
+  box-shadow: none !important;
+}
+#page .page-content.warga-auth-page .warga-auth-card .warga-reset-link span,
+#page .page-content.warga-auth-page .warga-auth-card .warga-reset-link i{
+  color: inherit !important;
+}

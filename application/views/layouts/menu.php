@@ -1,6 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $menuInstitution = trim((string) ($institutionLabel ?? 'Desa'));
 if ($menuInstitution === '') $menuInstitution = 'Desa';
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$menuBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$menuTagline = trim((string) ($branding['tagline'] ?? 'Bersama Membangun Kampung Digital')) ?: 'Bersama Membangun Kampung Digital';
 $menuIsAuthenticated = !empty($currentUser) && is_array($currentUser);
 $menuCanManageMarketplace = !empty($canManageMarketplace);
 $menuFooterVillage = isset($footerVillage) && is_array($footerVillage) ? $footerVillage : array();
@@ -29,10 +32,10 @@ $menuNotificationsActive = nav_is('notifications');
 ?>
 <div class="warga-menu-head">
     <div class="warga-menu-brand-row">
-        <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo SI DAPULIK" width="56" height="56">
+        <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo <?= e($menuBrand) ?>" width="56" height="56">
         <div class="warga-menu-brand-copy">
-            <h2>SI DAPULIK</h2>
-            <p class="warga-menu-tagline">Bersama Membangun Kampung Digital</p>
+            <h2><?= e($menuBrand) ?></h2>
+            <p class="warga-menu-tagline"><?= e($menuTagline) ?></p>
             <div class="warga-menu-location" aria-label="Wilayah layanan">
                 <strong><?= e($menuArea) ?></strong>
                 <?php if ($menuDistrict !== '' || $menuRegency !== ''): ?><span><?= $menuDistrict !== '' ? e($menuDistrict) : '' ?><?= $menuDistrict !== '' && $menuRegency !== '' ? ' · ' : '' ?><?= $menuRegency !== '' ? e($menuRegency) : '' ?></span><?php endif; ?>

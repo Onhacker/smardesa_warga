@@ -1,17 +1,17 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; $legalBrand = trim((string) (($branding['nama_sistem'] ?? 'SIDAPULIK'))) ?: 'SIDAPULIK'; ?>
 <article class="warga-legal-page">
     <header class="warga-legal-hero">
         <div class="warga-legal-hero-icon"><i class="fa fa-file-signature" aria-hidden="true"></i></div>
         <div>
             <p class="warga-legal-kicker">Dokumen layanan</p>
             <h1>Syarat &amp; Ketentuan</h1>
-            <p>Aturan penggunaan SI DAPULIK untuk layanan administrasi warga.</p>
+            <p>Aturan penggunaan <?= e($legalBrand) ?> untuk layanan administrasi warga.</p>
         </div>
     </header>
 
     <div class="warga-legal-card">
         <p class="warga-legal-updated">Diperbarui: <?= e(tanggal_id('2026-09-13')) ?></p>
-        <p>Dengan membuat akun atau menggunakan SI DAPULIK, Anda menyetujui ketentuan berikut. Jika tidak setuju, jangan gunakan fitur pengajuan atau unggah berkas pada aplikasi.</p>
+        <p>Dengan membuat akun atau menggunakan <?= e($legalBrand) ?>, Anda menyetujui ketentuan berikut. Jika tidak setuju, jangan gunakan fitur pengajuan atau unggah berkas pada aplikasi.</p>
 
         <section>
             <h2>1. Akun warga</h2>
@@ -45,7 +45,7 @@
                 <li>barang curian, palsu, melanggar hak kekayaan intelektual, pornografi, layanan seksual, satwa dilindungi, atau barang lain yang dilarang oleh hukum; dan</li>
                 <li>makanan, kosmetik, atau barang konsumsi yang kedaluwarsa, berbahaya, tidak layak, atau wajib berizin tetapi belum memiliki izin yang diperlukan.</li>
             </ul>
-            <p>SI DAPULIK berhak menolak atau menghapus produk, membatasi akun penjual, serta meneruskan laporan kepada pihak berwenang jika ditemukan pelanggaran. Persetujuan pada formulir produk merupakan pernyataan penjual bahwa produk memenuhi ketentuan ini.</p>
+            <p><?= e($legalBrand) ?> berhak menolak atau menghapus produk, membatasi akun penjual, serta meneruskan laporan kepada pihak berwenang jika ditemukan pelanggaran. Persetujuan pada formulir produk merupakan pernyataan penjual bahwa produk memenuhi ketentuan ini.</p>
         </section>
         <section>
             <h2>6. Ketersediaan layanan</h2>

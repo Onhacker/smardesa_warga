@@ -5,11 +5,14 @@ class MY_Controller extends CI_Controller
 {
     protected $currentUser = NULL;
     protected $institutionLabel = '';
+    protected $branding = array();
 
     public function __construct()
     {
         parent::__construct();
         $this->apply_security_headers();
+        $this->load->model('Branding_model');
+        $this->branding = $this->Branding_model->current();
         $this->load->model('Auth_model');
         $this->currentUser = $this->Auth_model->current_user();
     }
@@ -61,6 +64,7 @@ class MY_Controller extends CI_Controller
 
     protected function render($view, array $data = array())
     {
+        $data['branding'] = isset($data['branding']) && is_array($data['branding']) ? $data['branding'] : $this->branding;
         $data['currentUser'] = $this->currentUser;
         $data['isAuthenticated'] = is_array($this->currentUser) && !empty($this->currentUser['id']);
         $this->load->model('Community_model');
@@ -86,7 +90,7 @@ class MY_Controller extends CI_Controller
         // components.  The footer uses this data for the identity and contact
         // buttons, while the page views remain responsible for their own data.
         $data['footerVillage'] = $contactVillage;
-        $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : 'SI DAPULIK';
+        $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : $this->branding['nama_sistem'];
         $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
         $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         $shareInstitution = trim((string) ($contactVillage['institution'] ?? '')) ?: $publicInstitution;
@@ -100,13 +104,13 @@ class MY_Controller extends CI_Controller
             }
             if ($shareAreaWithoutPrefix !== '') $shareArea = $shareAreaWithoutPrefix;
         }
-        $publicBrand = trim('SI DAPULIK' . ($shareArea !== '' ? ' ' . $shareArea : ''));
+        $publicBrand = trim($this->branding['nama_sistem'] . ($shareArea !== '' ? ' ' . $shareArea : ''));
         // Share links intentionally point at the public landing page. Private
         // account, notification, and letter URLs must never be exposed when a
         // resident shares the application from the common footer.
         $data['shareTitle'] = isset($data['shareTitle']) && trim((string) $data['shareTitle']) !== ''
             ? trim((string) $data['shareTitle'])
-            : $publicBrand . ' — Layanan Digital Warga';
+            : $publicBrand . ' — ' . ($this->branding['tagline'] ?: 'Layanan Digital Warga');
         $data['shareDescription'] = isset($data['shareDescription']) && trim((string) $data['shareDescription']) !== ''
             ? trim((string) $data['shareDescription'])
             : 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
@@ -114,7 +118,7 @@ class MY_Controller extends CI_Controller
             ? (string) $data['shareUrl'] : base_url();
         $data['shareImage'] = isset($data['shareImage']) && filter_var((string) $data['shareImage'], FILTER_VALIDATE_URL)
             ? (string) $data['shareImage'] : warga_asset_url('assets/pwa/share-preview.png');
-        $data['shareImageAlt'] = isset($data['shareImageAlt']) ? (string) $data['shareImageAlt'] : $publicBrand . ', layanan digital warga';
+        $data['shareImageAlt'] = isset($data['shareImageAlt']) ? (string) $data['shareImageAlt'] : $publicBrand . ', ' . strtolower($this->branding['tagline']);
         $data['shareImageWidth'] = isset($data['shareImageWidth']) ? (int) $data['shareImageWidth'] : 1200;
         $data['shareImageHeight'] = isset($data['shareImageHeight']) ? (int) $data['shareImageHeight'] : 630;
         $data['staffMode'] = isset($data['staffMode']) ? (bool) $data['staffMode'] : warga_is_staff($this->currentUser);

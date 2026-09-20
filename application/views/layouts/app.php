@@ -7,6 +7,8 @@ $notificationHeaderClass = $showBackButton ? 'header-icon-3' : 'header-icon-4';
 $notificationUrl = !empty($isAuthenticated) ? site_url('notifikasi') : site_url('login');
 $notificationLabel = !empty($isAuthenticated) ? 'Buka pemberitahuan' : 'Masuk untuk melihat pemberitahuan';
 $navSection = $this->uri->segment(1) ?: 'dashboard';
+$branding = isset($branding) && is_array($branding) ? $branding : array('nama_sistem' => 'SIDAPULIK', 'kepanjangan' => '', 'tagline' => 'Bersama Membangun Kampung Digital');
+$brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 ?>
 <!DOCTYPE HTML>
 <html lang="id">
@@ -17,11 +19,12 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
-    <title><?= e($pageTitle) ?> | SI DAPULIK</title>
+    <title><?= e($pageTitle) ?> | <?= e($brandName) ?></title>
     <?php $this->load->view('layouts/social_meta', array(
         'shareTitle' => $shareTitle,
-        'shareDescription' => $shareDescription,
-        'shareUrl' => $shareUrl,
+            'shareDescription' => $shareDescription,
+            'shareUrl' => $shareUrl,
+            'branding' => $branding,
         'shareImage' => $shareImage,
         'shareImageAlt' => $shareImageAlt,
         'shareImageWidth' => $shareImageWidth,
@@ -42,7 +45,7 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
             color: #fff !important;
         }
     </style>
-    <link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>">
+    <link rel="manifest" href="<?= site_url('manifest') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
@@ -96,18 +99,19 @@ $navSection = $this->uri->segment(1) ?: 'dashboard';
             'currentUser' => $currentUser,
             'shareTitle' => $shareTitle,
             'shareDescription' => $shareDescription,
-            'shareUrl' => $shareUrl
+            'shareUrl' => $shareUrl,
+            'branding' => $branding
         )); ?>
     </main>
 
     <aside id="menu-main" class="menu menu-box-left rounded-0" data-menu-width="300">
-        <?php $this->load->view('layouts/menu', array('currentUser' => $currentUser, 'footerVillage' => $footerVillage, 'staffMode' => $staffMode, 'institutionLabel' => $institutionLabel, 'canManageMarketplace' => !empty($canManageMarketplace))); ?>
+        <?php $this->load->view('layouts/menu', array('currentUser' => $currentUser, 'footerVillage' => $footerVillage, 'staffMode' => $staffMode, 'institutionLabel' => $institutionLabel, 'canManageMarketplace' => !empty($canManageMarketplace), 'branding' => $branding)); ?>
     </aside>
     <div class="menu-hider"></div>
     <?php if (!empty($isAuthenticated)): ?><?php $this->load->view('layouts/notification_center'); ?><?php endif; ?>
     <?php $this->load->view('layouts/notification_onboarding'); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($brandName) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= warga_asset_url('assets/v22/scripts/appkit-core.min.js') ?>"></script>
 <script src="<?= warga_asset_url('assets/v22/scripts/custom.min.js') ?>"></script>

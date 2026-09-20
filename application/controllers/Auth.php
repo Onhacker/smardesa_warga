@@ -12,8 +12,10 @@ class Auth extends Public_Controller
         // but it still uses the same public tenant identity as the shared
         // footer.  Keep that context available so the footer is branded
         // consistently before a session exists.
+        $brandName = $this->branding['nama_sistem'];
         $data = array(
-            'pageTitle' => 'Masuk | SI DAPULIK',
+            'pageTitle' => 'Masuk | ' . $brandName,
+            'branding' => $this->branding,
             'demoMode' => warga_demo_mode(),
             'currentUser' => NULL,
             'isAuthenticated' => FALSE,
@@ -54,7 +56,8 @@ class Auth extends Public_Controller
     {
         if ($this->currentUser) redirect('dashboard');
         $data = array(
-            'pageTitle' => 'Daftar Akun | SI DAPULIK',
+            'pageTitle' => 'Daftar Akun | ' . $this->branding['nama_sistem'],
+            'branding' => $this->branding,
             'demoMode' => warga_demo_mode(),
             'registrationRegions' => $this->Auth_model->registration_regions()
         );
@@ -62,7 +65,8 @@ class Auth extends Public_Controller
             $this->form_validation->set_rules('name', 'Nama lengkap', 'trim|required|min_length[3]|max_length[120]');
             $this->form_validation->set_rules('nik', 'NIK', 'trim|required|max_length[25]');
             $this->form_validation->set_rules('kk', 'No. KK', 'trim|required|max_length[25]');
-            $this->form_validation->set_rules('contact', 'Email atau nomor telepon', 'trim|required|max_length[160]');
+            $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|max_length[160]');
+            $this->form_validation->set_rules('phone', 'Nomor telepon', 'trim|max_length[30]');
             $this->form_validation->set_rules('district_code', 'Distrik/Kecamatan', 'trim|required|max_length[20]');
             $this->form_validation->set_rules('village_code', 'Wilayah', 'trim|required|max_length[30]');
             $this->form_validation->set_rules('password', 'Kata sandi', 'required|min_length[8]|max_length[200]');
@@ -72,7 +76,8 @@ class Auth extends Public_Controller
                     'name' => $this->input->post('name', TRUE),
                     'nik' => $this->input->post('nik', TRUE),
                     'kk' => $this->input->post('kk', TRUE),
-                    'contact' => $this->input->post('contact', TRUE),
+                    'email' => $this->input->post('email', TRUE),
+                    'phone' => $this->input->post('phone', TRUE),
                     'district_code' => $this->input->post('district_code', TRUE),
                     'village_code' => $this->input->post('village_code', TRUE),
                     'password' => (string) $this->input->post('password')
@@ -100,7 +105,7 @@ class Auth extends Public_Controller
             $expiredMessage = 'Kode sebelumnya sudah kedaluwarsa. Minta kode baru.';
         }
 
-        $data = $this->public_auth_data('Lupa Kata Sandi | SI DAPULIK');
+        $data = $this->public_auth_data('Lupa Kata Sandi | ' . $this->branding['nama_sistem']);
         $data['resetState'] = $state;
         $data['error'] = $this->session->flashdata('reset_error') ?: $expiredMessage;
         $data['notice'] = $this->session->flashdata('reset_notice');
@@ -134,7 +139,7 @@ class Auth extends Public_Controller
             'expires_at' => time() + max(60, (int) (isset($result['expires_in']) ? $result['expires_in'] : 600)),
             'resend_at' => time() + max(30, (int) (isset($result['resend_after']) ? $result['resend_after'] : 60))
         ));
-        $this->session->set_flashdata('reset_notice', isset($result['message']) ? $result['message'] : 'Jika email terdaftar, kode telah dikirim.');
+        $this->session->set_flashdata('reset_notice', isset($result['message']) ? $result['message'] : 'Jika email terdaftar, kode telah dikirim. Periksa Inbox, Spam, atau Promosi.');
         redirect('lupa-password');
     }
 
@@ -166,7 +171,7 @@ class Auth extends Public_Controller
         $state['expires_at'] = time() + max(60, (int) (isset($result['expires_in']) ? $result['expires_in'] : 600));
         $state['resend_at'] = time() + max(30, (int) (isset($result['resend_after']) ? $result['resend_after'] : 60));
         $this->session->set_userdata('warga_password_reset', $state);
-        $this->session->set_flashdata('reset_notice', 'Jika email terdaftar, kode baru telah dikirim.');
+        $this->session->set_flashdata('reset_notice', 'Jika email terdaftar, kode baru telah dikirim. Periksa Inbox, Spam, atau Promosi.');
         redirect('lupa-password');
     }
 
@@ -228,6 +233,7 @@ class Auth extends Public_Controller
         $area = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         return array(
             'pageTitle' => $page_title,
+            'branding' => $this->branding,
             'demoMode' => warga_demo_mode(),
             'currentUser' => NULL,
             'isAuthenticated' => FALSE,

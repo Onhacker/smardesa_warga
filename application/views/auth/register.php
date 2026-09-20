@@ -15,7 +15,10 @@ $registrationErrorHtml = !empty($error)
     : $registrationValidationErrors;
 $registerInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
 $registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
-$registerShareTitle = 'SI DAPULIK ' . $registerArea . ' — Layanan Digital Warga';
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$registerBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$registerTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
+$registerShareTitle = $registerBrand . ' ' . $registerArea . ' — ' . $registerTagline;
 $registerShareDescription = 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
 $registerShareUrl = base_url();
 $registerShareImage = warga_asset_url('assets/pwa/share-preview.png');
@@ -31,17 +34,18 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         'shareDescription' => $registerShareDescription,
         'shareUrl' => $registerShareUrl,
         'shareImage' => $registerShareImage,
-        'shareImageAlt' => 'SI DAPULIK, layanan digital warga',
+        'shareImageAlt' => $registerBrand . ', ' . strtolower($registerTagline),
+        'branding' => $branding,
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     )); ?>
-    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-subset.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>"><link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>"><link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/v22/styles/bootstrap-warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/v22/fonts/css/fontawesome-subset.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>"><link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>"><link rel="manifest" href="<?= site_url('manifest') ?>"><link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>"><link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
 <body class="theme-light warga-auth-body" data-base-url="<?= e(base_url()) ?>">
 <?php $this->load->view('layouts/page_skeleton'); ?><div id="page">
 <header class="header header-fixed header-logo-center"><a href="<?= site_url('register') ?>" class="header-title">Daftar Warga</a><a href="<?= site_url('login') ?>" class="header-icon header-icon-1" aria-label="Kembali"><i class="fa fa-chevron-left"></i></a><a href="<?= site_url('login') ?>" class="header-icon header-icon-4 warga-header-notification" aria-label="Masuk untuk melihat pemberitahuan"><i class="fas fa-bell" aria-hidden="true"></i><span class="badge bg-red-dark" data-notification-count hidden></span></a></header>
 <main class="page-content header-clear-medium warga-auth-page">
-    <section class="warga-auth-brand compact"><img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
+    <section class="warga-auth-brand compact"><img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo <?= e($registerBrand) ?>"><div><p>AKUN LAYANAN WARGA</p><h1>Daftar Akun</h1><span>Satu akun untuk permohonan layanan wilayah.</span></div></section>
     <section class="card card-style warga-auth-card"><div class="content">
         <?php if ($registrationErrorHtml !== ''): ?>
             <div class="warga-auth-error" role="alert" aria-live="assertive">
@@ -59,7 +63,8 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
             <div class="input-style no-borders has-icon mb-4"><i class="fa fa-id-card"></i><input type="text" class="form-control" id="register-nik" name="nik" value="<?= e(old('nik')) ?>" placeholder="NIK (16 digit)" required maxlength="25" inputmode="numeric" autocomplete="off"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-nik" class="color-highlight">NIK (16 digit)</label><em>*</em></div>
             <div class="input-style no-borders has-icon mb-4"><i class="fa fa-address-card"></i><input type="text" class="form-control" id="register-kk" name="kk" value="<?= e(old('kk')) ?>" placeholder="No. KK (16 digit)" required maxlength="25" inputmode="numeric" autocomplete="off"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-kk" class="color-highlight">No. KK (16 digit)</label><em>*</em></div>
             <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-user"></i><input type="text" class="form-control" id="register-name" name="name" value="<?= e(old('name')) ?>" placeholder="Nama Lengkap sesuai Data Penduduk" required maxlength="120"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-name" class="color-highlight">Nama Lengkap sesuai Data Penduduk</label><em>*</em></div>
-            <div class="input-style no-borders has-icon mb-4"><i class="fa fa-envelope"></i><input type="text" class="form-control" id="register-contact" name="contact" value="<?= e(old('contact')) ?>" placeholder="Email atau Nomor Telepon" required maxlength="160"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-contact" class="color-highlight">Email atau Nomor Telepon</label><em>*</em></div>
+            <div class="input-style no-borders has-icon validate-field mb-4"><i class="fa fa-envelope"></i><input type="email" class="form-control" id="register-email" name="email" value="<?= e(old('email')) ?>" placeholder="Email aktif" required maxlength="160" autocomplete="email"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-email" class="color-highlight">Email aktif</label><em>*</em></div>
+            <div class="input-style no-borders has-icon mb-4"><i class="fa fa-phone"></i><input type="tel" class="form-control" id="register-phone" name="phone" value="<?= e(old('phone')) ?>" placeholder="Nomor telepon (opsional)" maxlength="30" autocomplete="tel" inputmode="tel"><i class="fa fa-times disabled invalid color-red-dark" aria-hidden="true"></i><i class="fa fa-check disabled valid color-green-dark" aria-hidden="true"></i><label for="register-phone" class="color-highlight">Nomor telepon (opsional)</label></div>
             <div class="warga-region-grid">
                 <div class="input-style no-borders has-icon validate-field warga-region-field">
                     <i class="fa fa-map-marker-alt"></i>
@@ -90,9 +95,9 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
         <p class="text-center mt-4 mb-0">Sudah memiliki akun? <a class="color-highlight font-600" href="<?= site_url('login') ?>">Masuk</a></p>
     </div></section>
 </main>
-<?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl)); ?>
+<?php $this->load->view('layouts/site_footer', array('footerVillage' => $registerFooterVillage, 'currentUser' => NULL, 'shareTitle' => $registerShareTitle, 'shareDescription' => $registerShareDescription, 'shareUrl' => $registerShareUrl, 'branding' => $branding)); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,footerActionsUrl:<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script><script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($registerBrand) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,footerActionsUrl:<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>};window.SDW_REGISTER_REGIONS=<?= $registrationRegionsJson ?: '[]' ?>;</script><script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script><script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>
 <script>
 (function () {
     var oldVillage = <?= json_encode((string) old('village_code')) ?>;

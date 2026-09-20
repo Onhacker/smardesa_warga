@@ -9,7 +9,10 @@ if ($heroRegency === '') $heroRegency = trim((string) (getenv('PUBLIC_REGENCY_NA
 if ($heroRegency === '') $heroRegency = $publicArea !== '' ? $publicArea : 'Jayawijaya';
 $heroName = $isAuthenticated ? (string) ($currentUser['name'] ?? 'Warga') : 'Layanan warga';
 $heroLocation = $isAuthenticated ? (string) ($currentUser['village_name'] ?? $publicArea) : $publicArea;
-$heroTagline = 'Sistem Informasi Digitalisasi Administrasi, Pelayanan Umum, dan Layanan Informasi Kampung';
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$heroBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$heroTagline = trim((string) ($branding['kepanjangan'] ?? ''));
+if ($heroTagline === '') $heroTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 $pictureUrl = static function ($name) {
     return warga_asset_url('assets/v22/images/pictures/' . trim((string) $name) . '.webp');
 };
@@ -17,9 +20,9 @@ $pictureUrl = static function ($name) {
 <div class="warga-community community-v22-home" data-dashboard-home>
     <section class="community-home community-v22-hero" aria-labelledby="community-welcome-title">
         <div class="community-v22-hero-main">
-            <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo SI DAPULIK">
+            <img class="community-v22-hero-logo" src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" width="72" height="72" alt="Logo <?= e($heroBrand) ?>">
             <div class="community-v22-hero-copy">
-                <p class="community-v22-eyebrow community-v22-brandline">SI DAPULIK <?= e($heroRegency) ?></p>
+                <p class="community-v22-eyebrow community-v22-brandline"><?= e($heroBrand) ?> <?= e($heroRegency) ?></p>
                 <p class="community-v22-hero-tagline"><?= e($heroTagline) ?></p>
                 <h1 id="community-welcome-title"><?= $isAuthenticated ? 'Halo, ' : '' ?><?= e($heroName) ?></h1>
                 <p class="community-v22-location"><i class="fa fa-map-marker-alt" aria-hidden="true"></i> <?= e($heroLocation) ?></p>

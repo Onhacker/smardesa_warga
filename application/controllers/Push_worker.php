@@ -12,6 +12,9 @@ class Push_worker extends CI_Controller
     public function run()
     {
         $this->load->model('Notification_model');
+        $this->load->model('Branding_model');
+        $branding = $this->Branding_model->current();
+        $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
         if (!$this->Notification_model->ready()) { fwrite(STDERR, "Jalankan migrasi 013 terlebih dahulu.\n"); exit(1); }
         $public = trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'));
         $private = trim((string)getenv('WARGA_VAPID_PRIVATE_KEY'));
@@ -68,7 +71,7 @@ class Push_worker extends CI_Controller
                         $unreadCounts[$userId]=(int)$this->db->where('user_id',$userId)->where('read_at',null)->count_all_results('notifications');
                     }
                     $openPath = 'notifikasi/buka/' . rawurlencode((string)$row['notification_id']);
-                    $payload=json_encode(array('title'=>'SI DAPULIK','body'=>'Ada pembaruan layanan untuk Anda.',
+                    $payload=json_encode(array('title'=>$brandName,'body'=>'Ada pembaruan layanan untuk Anda.',
                         'tag'=>'sdw-'.$row['notification_id'],'url'=>$openPath,
                         'notificationId'=>(string)$row['notification_id'],
                         'unreadCount'=>$unreadCounts[$userId]), JSON_UNESCAPED_SLASHES);

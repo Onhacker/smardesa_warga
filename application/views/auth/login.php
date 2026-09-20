@@ -1,7 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $loginInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Kampung')));
 if ($loginInstitution === '') $loginInstitution = 'Kampung';
-$loginBrand = 'SI DAPULIK';
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$loginBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 ?>
 <!DOCTYPE HTML>
 <html lang="id">
@@ -13,7 +15,7 @@ $loginBrand = 'SI DAPULIK';
     <meta name="apple-mobile-web-app-title" content="<?= e($loginBrand) ?>">
     <title><?= e($pageTitle) ?></title>
     <?php
-    $shareTitle = 'SI DAPULIK ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — Layanan Digital Warga';
+    $shareTitle = $loginBrand . ' ' . trim((string) ($footerVillage['name'] ?? 'Jayawijaya')) . ' — ' . $loginTagline;
     $shareDescription = 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
     $shareUrl = base_url();
     $shareImage = warga_asset_url('assets/pwa/share-preview.png');
@@ -22,7 +24,8 @@ $loginBrand = 'SI DAPULIK';
         'shareDescription' => $shareDescription,
         'shareUrl' => $shareUrl,
         'shareImage' => $shareImage,
-        'shareImageAlt' => 'SI DAPULIK, layanan digital warga',
+        'shareImageAlt' => $loginBrand . ', ' . strtolower($loginTagline),
+        'branding' => $branding,
         'shareImageWidth' => 1200,
         'shareImageHeight' => 630
     ));
@@ -33,7 +36,7 @@ $loginBrand = 'SI DAPULIK';
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
-    <link rel="manifest" href="<?= warga_asset_url('manifest.webmanifest') ?>">
+    <link rel="manifest" href="<?= site_url('manifest') ?>">
     <link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
 </head>
@@ -50,7 +53,7 @@ $loginBrand = 'SI DAPULIK';
     </nav>
     <main class="page-content header-clear-medium warga-auth-page">
         <section class="warga-auth-brand">
-            <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo Kabupaten Jayawijaya">
+            <img src="<?= warga_asset_url('assets/pwa/icon-192.png') ?>" alt="Logo <?= e($loginBrand) ?>">
             <div><p>LAYANAN DIGITAL WARGA</p><h1><?= e($loginBrand) ?></h1><span><?= e($loginInstitution) ?> terhubung, layanan lebih dekat.</span></div>
         </section>
         <section class="card card-style warga-auth-card">
@@ -78,11 +81,11 @@ $loginBrand = 'SI DAPULIK';
                 <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="color-highlight font-600" href="<?= site_url('register') ?>">Daftar warga</a></p>
             </div>
         </section>
-        <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install'); ?></div>
-        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl)); ?>
+        <div class="card card-style warga-auth-install"><?php $this->load->view('layouts/pwa_install', array('branding' => $branding)); ?></div>
+        <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl, 'branding' => $branding)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($loginBrand) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
 <script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>
 <script>window.SDW.footerActionsUrl=<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>;</script>
 <script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>

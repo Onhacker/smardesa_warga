@@ -35,7 +35,12 @@ function contains(result, pattern, label) {
   checks++;
 }
 
-let result = await page('login');
+let result = await page('register');
+contains(result, /id="register-email"[^>]*name="email"/, 'Registration exposes a dedicated email field');
+contains(result, /id="register-phone"[^>]*name="phone"/, 'Registration exposes a dedicated phone field');
+assert.doesNotMatch(result.html, /name="contact"/, 'Registration no longer combines email and phone');
+checks++;
+result = await page('login');
 let token = csrf(result);
 redirects(await page('login', {sdw_csrf_token: token, identity: 'warga@demo.local', password: 'demo12345'}), 'Demo login');
 result = await page('akun/edit');
@@ -46,9 +51,9 @@ const contact = (overrides = {}) => page('akun/edit', {
   sdw_csrf_token: token, email: 'qa.account@demo.local', phone: '0812 9999-8888', current_password: 'demo12345', ...overrides
 });
 contains(await contact({current_password: 'incorrect'}), /Kata sandi saat ini tidak sesuai/, 'Reject wrong password');
-contains(await contact({email: 'not-email'}), /Email belum valid/, 'Reject invalid email');
+contains(await contact({email: 'not-email'}), /alamat email yang valid/i, 'Reject invalid email');
 contains(await contact({phone: '123'}), /Nomor telepon harus/, 'Reject invalid phone');
-contains(await contact({email: '', phone: ''}), /Isi minimal email/, 'Require contact');
+contains(await contact({email: '', phone: '081299998888'}), /Email aktif wajib/, 'Require recovery email');
 contains(await contact({email: 'sekdes@demo.local'}), /sudah digunakan akun lain/, 'Reject duplicate contact');
 redirects(await contact(), 'Save contact');
 result = await page('akun');

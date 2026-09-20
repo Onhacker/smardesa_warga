@@ -77,7 +77,7 @@ if (!function_exists('warga_notification_display_text')) {
                 '/\bverified\b/iu',
                 '/\bapproved\b/iu'
             ),
-            array('SI DAPULIK', 'diverifikasi', 'disetujui'),
+            array(function_exists('warga_system_name') ? warga_system_name() : 'SIDAPULIK', 'diverifikasi', 'disetujui'),
             (string) $text
         );
         $localized = preg_replace_callback('/\bpengumuman\b/iu', static function ($match) {
@@ -87,6 +87,26 @@ if (!function_exists('warga_notification_display_text')) {
             return 'Info';
         }, $localized !== NULL ? $localized : (string) $text);
         return $localized !== NULL ? $localized : (string) $text;
+    }
+}
+
+if (!function_exists('warga_system_name')) {
+    function warga_system_name()
+    {
+        static $name = null;
+        if ($name !== null) return $name;
+        $name = trim((string) (getenv('WARGA_SYSTEM_NAME') ?: getenv('PUBLIC_SYSTEM_NAME') ?: 'SIDAPULIK')) ?: 'SIDAPULIK';
+        if (!function_exists('get_instance')) return $name;
+        try {
+            $CI =& get_instance();
+            $CI->load->model('Branding_model');
+            $branding = $CI->Branding_model->current();
+            $candidate = trim((string) ($branding['nama_sistem'] ?? ''));
+            if ($candidate !== '') $name = $candidate;
+        } catch (Throwable $e) {
+            // Branding must never block notification rendering on an old DB.
+        }
+        return $name;
     }
 }
 

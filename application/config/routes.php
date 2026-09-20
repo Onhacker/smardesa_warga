@@ -12,6 +12,7 @@ $route['lupa-password/kirim-ulang'] = 'auth/forgot_password_resend';
 $route['lupa-password/selesaikan'] = 'auth/forgot_password_complete';
 $route['lupa-password/ulang'] = 'auth/forgot_password_restart';
 $route['logout'] = 'auth/logout';
+$route['manifest'] = 'manifest/index';
 $route['dashboard'] = 'dashboard/index';
 $route['surat'] = 'dashboard/letters';
 $route['pengumuman'] = 'community/announcements';

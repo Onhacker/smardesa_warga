@@ -3,6 +3,9 @@
 $footerVillage = isset($footerVillage) && is_array($footerVillage) ? $footerVillage : array();
 $footerContact = isset($footerVillage['contact']) && is_array($footerVillage['contact']) ? $footerVillage['contact'] : array();
 $footerUser = isset($currentUser) && is_array($currentUser) ? $currentUser : array();
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$footerSystemName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$footerSystemTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 $footerVillageName = trim((string) ($footerVillage['name'] ?? ($footerUser['village_name'] ?? '')));
 $footerInstitution = trim((string) ($footerContact['institution'] ?? ($footerVillage['institution'] ?? '')));
 $hasExplicitInstitution = $footerInstitution !== '';
@@ -21,11 +24,11 @@ if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
     $footerVillageName = $nameWithoutPrefix !== '' ? $nameWithoutPrefix : $footerVillageName;
 }
 if ($footerInstitution === '') $footerInstitution = 'Desa';
-$footerBrand = trim('SI DAPULIK' . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
+$footerBrand = trim($footerSystemName . ($footerVillageName !== '' ? ' ' . $footerVillageName : ''));
 $footerBrand = function_exists('mb_strtoupper')
     ? mb_strtoupper($footerBrand, 'UTF-8')
     : strtoupper($footerBrand);
-$footerTagline = 'Sistem Informasi Digitalisasi Administrasi, Pelayanan Umum, dan Layanan Informasi Kampung';
+$footerTagline = $footerSystemTagline;
 
 $footerShareUrl = trim((string) ($shareUrl ?? base_url()));
 if (!filter_var($footerShareUrl, FILTER_VALIDATE_URL)) $footerShareUrl = base_url();
@@ -103,8 +106,8 @@ foreach (array(
                 <span>Unduh untuk Android atau tambahkan ke Layar Utama iPhone.</span>
             </div>
             <div class="warga-footer-install-actions">
-                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download SI DAPULIK di Google Play"><img src="<?= warga_asset_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
-                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal SI DAPULIK di iOS"><img src="<?= warga_asset_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
+                <a href="<?= e($footerPlayStoreUrl) ?>" target="_blank" rel="noopener noreferrer" aria-label="Download <?= e($footerSystemName) ?> di Google Play"><img src="<?= warga_asset_url('assets/pwa/google-play.webp') ?>" width="600" height="169" loading="lazy" alt="Download di Google Play"></a>
+                <button type="button" data-footer-ios-install aria-controls="warga-footer-ios-dialog" aria-haspopup="dialog" aria-label="Instal <?= e($footerSystemName) ?> di iOS"><img src="<?= warga_asset_url('assets/pwa/install-ios.webp') ?>" width="600" height="168" loading="lazy" alt="Instal PWA di iOS"></button>
             </div>
         </section>
     </div>

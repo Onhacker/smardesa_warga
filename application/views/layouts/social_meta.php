@@ -1,16 +1,19 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-$socialTitle = trim((string) ($shareTitle ?? 'SI DAPULIK — Layanan Digital Warga'));
+$branding = isset($branding) && is_array($branding) ? $branding : array();
+$socialBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
+$socialTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
+$socialTitle = trim((string) ($shareTitle ?? ($socialBrand . ' — ' . $socialTagline)));
 $socialDescription = trim((string) ($shareDescription ?? 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.'));
 $socialUrl = trim((string) ($shareUrl ?? base_url()));
 $socialImage = trim((string) ($shareImage ?? warga_asset_url('assets/pwa/share-preview.png')));
-$socialImageAlt = trim((string) ($shareImageAlt ?? 'SI DAPULIK, layanan digital warga'));
+$socialImageAlt = trim((string) ($shareImageAlt ?? ($socialBrand . ', ' . strtolower($socialTagline))));
 $socialImageWidth = max(1, (int) ($shareImageWidth ?? 1200));
 $socialImageHeight = max(1, (int) ($shareImageHeight ?? 630));
-$socialSiteName = 'SI DAPULIK';
-$socialAlternateName = 'SI DAPULIK Jayawijaya';
+$socialSiteName = $socialBrand;
+$socialAlternateName = $socialBrand;
 
-if ($socialTitle === '') $socialTitle = 'SI DAPULIK — Layanan Digital Warga';
+if ($socialTitle === '') $socialTitle = $socialBrand . ' — ' . $socialTagline;
 if ($socialDescription === '') $socialDescription = 'Akses layanan warga dalam satu aplikasi.';
 if (!filter_var($socialUrl, FILTER_VALIDATE_URL)) $socialUrl = base_url();
 if (!filter_var($socialImage, FILTER_VALIDATE_URL)) $socialImage = warga_asset_url('assets/pwa/share-preview.png');

@@ -450,27 +450,33 @@ class Auth_model extends CI_Model
         if (!warga_database_available()) return array('success' => FALSE, 'message' => 'Database belum tersedia.');
 
         $name = trim((string) $data['name']);
-        $contact = trim((string) $data['contact']);
+        $legacyContact = trim((string) ($data['contact'] ?? ''));
+        $emailInput = trim((string) ($data['email'] ?? ''));
+        $phoneInput = trim((string) ($data['phone'] ?? ''));
+        if ($emailInput === '' && filter_var($legacyContact, FILTER_VALIDATE_EMAIL)) $emailInput = $legacyContact;
+        if ($phoneInput === '' && $legacyContact !== '' && !filter_var($legacyContact, FILTER_VALIDATE_EMAIL)) $phoneInput = $legacyContact;
         $nik = $this->identity_digits(isset($data['nik']) ? $data['nik'] : '');
         $kk = $this->identity_digits(isset($data['kk']) ? $data['kk'] : '');
         $districtCode = strtoupper(trim((string) (isset($data['district_code']) ? $data['district_code'] : '')));
         $villageCode = strtoupper(trim((string) $data['village_code']));
-        $email = filter_var($contact, FILTER_VALIDATE_EMAIL) ? strtolower($contact) : NULL;
-        $phone = $email === NULL ? preg_replace('/[^0-9+]/', '', $contact) : NULL;
+        $email = filter_var($emailInput, FILTER_VALIDATE_EMAIL) && strlen($emailInput) <= 160 ? strtolower($emailInput) : NULL;
+        $phone = $this->normalize_profile_phone($phoneInput);
+        $contactIdentity = strtolower((string) $email) . '|' . (string) $phone;
         if (!preg_match('/^[0-9]{16}$/', $nik) || !preg_match('/^[0-9]{16}$/', $kk)) {
             return array('success' => FALSE, 'message' => 'NIK dan No. KK harus terdiri dari 16 digit angka.');
         }
-        if ($email === NULL && strlen($phone) < 8) return array('success' => FALSE, 'message' => 'Email atau nomor telepon belum valid.');
+        if ($email === NULL) return array('success' => FALSE, 'message' => 'Masukkan alamat email yang valid untuk keamanan akun.');
+        if ($phone === FALSE) return array('success' => FALSE, 'message' => 'Nomor telepon harus berisi 8–15 digit angka.');
 
         $village = $this->db->where('village_code', $villageCode)->where('status', 'active')->get('village_tenants')->row_array();
         if (!$village) return array('success' => FALSE, 'message' => 'Wilayah yang dipilih belum terdaftar atau tidak aktif.');
         if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
             return array('success' => FALSE, 'message' => 'Pilihan distrik dan wilayah tidak sesuai. Silakan pilih ulang.');
         }
-        if ($this->registration_is_throttled($contact, $nik, $villageCode)) {
+        if ($this->registration_is_throttled($contactIdentity, $nik, $villageCode)) {
             return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 15 menit lalu coba lagi.');
         }
-        $this->record_registration_attempt($contact, $nik, $villageCode);
+        $this->record_registration_attempt($contactIdentity, $nik, $villageCode);
         $verification = $this->verify_resident_central($villageCode, $name, $nik, $kk);
         if (empty($verification['success'])) {
             return array('success' => FALSE, 'message' => isset($verification['message']) ? $verification['message'] : 'Data penduduk belum dapat diverifikasi.');
@@ -498,8 +504,8 @@ class Auth_model extends CI_Model
         }
 
         $this->db->group_start();
-        if ($email !== NULL) $this->db->where('email', $email);
-        if ($phone !== NULL) $this->db->or_where('phone', $phone);
+        $this->db->where('email', $email)->or_where('username', $email);
+        if ($phone !== '') $this->db->or_where('phone', $phone)->or_where('username', $phone);
         $this->db->group_end();
         if ($this->db->count_all_results('users') > 0) return array('success' => FALSE, 'message' => 'Email atau nomor telepon sudah terdaftar.');
 
@@ -518,7 +524,7 @@ class Auth_model extends CI_Model
             'name' => $canonicalName,
             'username' => $username,
             'email' => $email,
-            'phone' => $phone,
+            'phone' => $phone !== '' ? $phone : NULL,
             'password_hash' => password_hash((string) $data['password'], PASSWORD_DEFAULT),
             'is_active' => 1
         ));
@@ -559,7 +565,7 @@ class Auth_model extends CI_Model
         if (!$this->db->trans_commit()) {
             return array('success' => FALSE, 'message' => 'Pendaftaran belum dapat diselesaikan. Silakan coba lagi.');
         }
-        $this->clear_registration_attempts($contact, $nik, $villageCode);
+        $this->clear_registration_attempts($contactIdentity, $nik, $villageCode);
         return array('success' => TRUE);
     }
 
@@ -626,7 +632,7 @@ class Auth_model extends CI_Model
         }
         $code = isset($decoded['error']) ? (string) $decoded['error'] : '';
         if ($code === 'resident_directory_unavailable' || $code === 'service_unavailable') {
-            return array('success' => FALSE, 'message' => 'Data penduduk wilayah belum tersinkron ke layanan warga. Silakan coba lagi setelah SI DAPULIK terhubung ke internet.');
+            return array('success' => FALSE, 'message' => 'Data penduduk wilayah belum tersinkron ke layanan warga. Silakan coba lagi setelah aplikasi desa terhubung ke internet.');
         }
         if ($code === 'rate_limited') return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan. Silakan tunggu beberapa menit lalu coba lagi.');
         return array('success' => FALSE, 'message' => 'NIK, No. KK, atau Nama Lengkap tidak sesuai dengan data penduduk wilayah yang dipilih.');
@@ -699,6 +705,30 @@ class Auth_model extends CI_Model
         ));
     }
 
+    public function request_account_change($userId, $currentPassword, $purpose, $email = '', $phone = '')
+    {
+        return $this->password_reset_api_post('account-security/request', array(
+            'account_id' => (int) $userId,
+            'current_password' => (string) $currentPassword,
+            'purpose' => (string) $purpose,
+            'target_email' => strtolower(trim((string) $email)),
+            'target_phone' => trim((string) $phone)
+        ));
+    }
+
+    public function complete_account_change($userId, $purpose, $requestToken, $otp, $email = '', $phone = '', $newPassword = '')
+    {
+        return $this->password_reset_api_post('account-security/complete', array(
+            'account_id' => (int) $userId,
+            'purpose' => (string) $purpose,
+            'request_token' => (string) $requestToken,
+            'otp' => preg_replace('/\D+/', '', (string) $otp),
+            'target_email' => strtolower(trim((string) $email)),
+            'target_phone' => trim((string) $phone),
+            'new_password' => (string) $newPassword
+        ));
+    }
+
     private function password_reset_api_post($endpoint, array $payload)
     {
         $base = rtrim(trim((string) getenv('WARGA_CENTRAL_API_URL')), '/');
@@ -706,13 +736,13 @@ class Auth_model extends CI_Model
         $parts = parse_url($url);
         if ($base === '' || !is_array($parts) || empty($parts['host'])
             || (ENVIRONMENT === 'production' && strtolower((string) (isset($parts['scheme']) ? $parts['scheme'] : '')) !== 'https')) {
-            return array('success' => FALSE, 'message' => 'Layanan reset password belum dikonfigurasi.');
+            return array('success' => FALSE, 'message' => 'Layanan keamanan akun belum dikonfigurasi.');
         }
         if (!function_exists('curl_init')) {
-            return array('success' => FALSE, 'message' => 'Layanan reset password belum tersedia pada server.');
+            return array('success' => FALSE, 'message' => 'Layanan keamanan akun belum tersedia pada server.');
         }
         $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if (!is_string($body)) return array('success' => FALSE, 'message' => 'Data reset password belum dapat diproses.');
+        if (!is_string($body)) return array('success' => FALSE, 'message' => 'Data keamanan akun belum dapat diproses.');
 
         $timeout = max(5, min(30, (int) (getenv('WARGA_CENTRAL_API_TIMEOUT') ?: 15)));
         $handle = curl_init($url);
@@ -738,14 +768,14 @@ class Auth_model extends CI_Model
         $error = curl_error($handle);
         curl_close($handle);
         if ($response === FALSE || $error !== '') {
-            return array('success' => FALSE, 'message' => 'Layanan reset password sedang tidak dapat dihubungi. Periksa koneksi lalu coba lagi.');
+            return array('success' => FALSE, 'message' => 'Layanan keamanan akun sedang tidak dapat dihubungi. Periksa koneksi lalu coba lagi.');
         }
         $decoded = json_decode((string) $response, TRUE);
-        if (!is_array($decoded)) return array('success' => FALSE, 'message' => 'Respons layanan reset password tidak valid.');
+        if (!is_array($decoded)) return array('success' => FALSE, 'message' => 'Respons layanan keamanan akun tidak valid.');
         if ($status < 200 || $status >= 300 || empty($decoded['success'])) {
             return array(
                 'success' => FALSE,
-                'message' => isset($decoded['message']) ? (string) $decoded['message'] : 'Reset password belum dapat diproses.',
+                'message' => isset($decoded['message']) ? (string) $decoded['message'] : 'Permintaan keamanan akun belum dapat diproses.',
                 'status' => $status
             );
         }

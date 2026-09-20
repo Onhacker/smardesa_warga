@@ -1,4 +1,4 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); $supportEmail = isset($supportEmail) ? (string) $supportEmail : 'admin@mediaverse.co.id'; $legalBrand = trim((string) (($branding['nama_sistem'] ?? 'SIDAPULIK'))) ?: 'SIDAPULIK'; ?>
 <article class="warga-legal-page">
     <header class="warga-legal-hero">
         <div class="warga-legal-hero-icon"><i class="fa fa-shield-alt" aria-hidden="true"></i></div>
@@ -11,7 +11,7 @@
 
     <div class="warga-legal-card">
         <p class="warga-legal-updated">Terakhir diperbarui: <?= e(tanggal_id('2026-09-05')) ?></p>
-        <p>SI DAPULIK membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan <?= e($institutionLower) ?>.</p>
+        <p><?= e($legalBrand) ?> membantu warga mengajukan surat dan menerima informasi layanan secara digital. Kami menghormati privasi warga dan menggunakan data hanya untuk menjalankan layanan pemerintahan <?= e($institutionLower) ?>.</p>
 
         <section>
             <h2>1. Data yang kami gunakan</h2>

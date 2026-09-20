@@ -1,7 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 $pwaInstitution = trim((string) ($institutionLabel ?? 'Kampung'));
 if ($pwaInstitution === '') $pwaInstitution = 'Kampung';
-$pwaBrand = 'SI DAPULIK';
+$pwaBranding = isset($branding) && is_array($branding) ? $branding : array();
+$pwaBrand = trim((string) ($pwaBranding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 ?>
 <section class="warga-pwa-install" data-pwa-install-panel aria-label="Instal <?= e($pwaBrand) ?>">
     <div class="warga-pwa-install-icon"><i class="fa fa-mobile-alt"></i></div>
