@@ -577,9 +577,12 @@
     var retry = listing.querySelector('[data-list-retry]');
     var login = listing.querySelector('[data-list-login]');
     var filterLinks = listing.querySelectorAll('[data-list-filter]');
+    var totalElement = listing.querySelector('[data-list-total]');
+    var liveSearch = form && form.hasAttribute('data-list-live-search') ? form.querySelector('input[name="q"]') : null;
     var pendingController = null;
     var sequence = 0;
     var lastAttempt = null;
+    var liveSearchTimer = 0;
 
     if (!results || !feedback || !errorBox || !errorMessage || !retry || !login) return;
 
@@ -654,6 +657,10 @@
           });
         }
         syncFilters(url);
+        if (totalElement && Number.isFinite(Number(data.total))) {
+          var totalLabel = totalElement.getAttribute('data-list-total-label') || 'data';
+          totalElement.textContent = Number(data.total) + ' ' + totalLabel;
+        }
         try { window.history.replaceState(window.history.state, '', url.href); } catch (ignore) {}
         var summary = results.querySelector('[data-list-summary]');
         feedback.classList.add('visually-hidden');
@@ -681,6 +688,26 @@
     if (form) {
       form.addEventListener('submit', function (event) {
         event.preventDefault();
+        window.clearTimeout(liveSearchTimer);
+        loadPage(searchUrl(), false);
+      });
+    }
+    if (liveSearch) {
+      liveSearch.addEventListener('input', function () {
+        window.clearTimeout(liveSearchTimer);
+        // Invalidate any response already in flight before the debounce
+        // starts, otherwise it could restore an older query into the input.
+        sequence++;
+        if (pendingController) pendingController.abort();
+        pendingController = null;
+        results.setAttribute('aria-busy', 'false');
+        listing.classList.remove('is-loading');
+        liveSearchTimer = window.setTimeout(function () {
+          loadPage(searchUrl(), false);
+        }, 350);
+      });
+      liveSearch.addEventListener('search', function () {
+        window.clearTimeout(liveSearchTimer);
         loadPage(searchUrl(), false);
       });
     }
@@ -688,6 +715,7 @@
       var control = event.target.closest('[data-list-page], [data-list-filter], [data-list-reset], [data-list-retry]');
       if (!control || !listing.contains(control) || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
       event.preventDefault();
+      window.clearTimeout(liveSearchTimer);
       if (control.hasAttribute('data-list-retry')) {
         if (lastAttempt) loadPage(lastAttempt.url, lastAttempt.scroll);
       } else if (control.hasAttribute('data-list-filter')) {

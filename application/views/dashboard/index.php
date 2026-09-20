@@ -13,7 +13,7 @@ $lettersPage = !empty($lettersPage);
 </section>
 <?php endif; ?>
 <nav class="warga-letter-shortcuts" aria-label="Tindakan surat">
-    <a class="is-history" href="<?= site_url('permohonan') ?>"><i class="fa fa-history" aria-hidden="true"></i> Riwayat</a>
+    <a class="is-history bg-green-dark color-white" href="<?= site_url('permohonan') ?>"><i class="fa fa-history" aria-hidden="true"></i> Riwayat</a>
     <a class="is-create" href="<?= site_url('layanan') ?>"><i class="fa fa-plus" aria-hidden="true"></i> Ajukan Surat</a>
 </nav>
 <?php if (!$lettersPage): ?><section class="warga-home-head">
@@ -45,8 +45,8 @@ $lettersPage = !empty($lettersPage);
 
 <section class="warga-service-card warga-dashboard-services" aria-labelledby="warga-service-title">
     <div class="content warga-section-head warga-service-heading-card">
-        <div><p class="font-600 color-highlight mb-n1">Pelayanan <?= e($institutionLower) ?></p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2></div>
-        <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600">Semua Surat</a>
+        <div><p class="font-600 color-highlight mb-n1">Pelayanan <?= e($institutionLower) ?></p><h2 id="warga-service-title" class="font-22 mb-0">Ajukan Surat</h2><span class="warga-service-available-count"><?= number_format((int) (isset($serviceTotal) ? $serviceTotal : count($services))) ?> surat tersedia</span></div>
+        <a href="<?= site_url('layanan') ?>" class="font-12 color-highlight font-600" aria-label="Lihat semua <?= (int) (isset($serviceTotal) ? $serviceTotal : count($services)) ?> surat">Semua Surat</a>
     </div>
     <div class="warga-service-grid" id="wargaServiceGrid" aria-label="Jenis layanan">
         <?php foreach ($services as $index => $service): ?>

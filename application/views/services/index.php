@@ -8,51 +8,32 @@ $citizenVerified = !empty($citizenVerified);
         <span class="warga-intro-icon"><i class="fa fa-envelope" aria-hidden="true"></i></span>
     </section>
 
-    <section class="warga-service-catalog" aria-labelledby="warga-catalog-title">
+    <section class="warga-service-catalog warga-paged-list" data-paged-list aria-labelledby="warga-catalog-title">
         <div class="warga-service-catalog-head">
             <div><p>KATALOG SURAT</p><h2 id="warga-catalog-title">Pilih Jenis Surat</h2></div>
-            <span class="warga-service-total"><?= count($services) ?> surat</span>
+            <span class="warga-service-total" data-list-total data-list-total-label="surat"><?= (int) $listing['total'] ?> surat</span>
         </div>
 
-        <?php if ($services): ?>
-            <div class="warga-service-search warga-service-catalog-search">
-                <label for="wargaServiceSearch">Cari surat</label>
-                <div class="warga-service-search-input">
-                    <i class="fa fa-search" aria-hidden="true"></i>
-                    <input type="search" id="wargaServiceSearch" placeholder="Nama atau jenis surat" data-service-search aria-controls="wargaServiceGrid" autocomplete="off">
-                </div>
-                <span class="warga-service-count" data-service-count aria-live="polite"><?= count($services) ?> surat</span>
+        <form method="get" action="<?= e($listUrl) ?>" class="warga-service-search warga-service-catalog-search" data-list-search data-list-live-search aria-label="Pencarian surat">
+            <label for="wargaServiceSearch">Cari surat</label>
+            <div class="warga-service-search-input">
+                <i class="fa fa-search" aria-hidden="true"></i>
+                <input type="search" id="wargaServiceSearch" name="q" value="<?= e($listing['filters']['q']) ?>" placeholder="Nama atau jenis surat" aria-controls="wargaServiceGrid" autocomplete="off" maxlength="180">
+                <a href="<?= e($listUrl) ?>" class="warga-service-search-reset" data-list-reset aria-label="Hapus pencarian"><i class="fa fa-times" aria-hidden="true"></i></a>
             </div>
-        <?php endif; ?>
+            <button type="submit" class="visually-hidden">Cari</button>
+            <span class="warga-service-count" aria-live="polite">20 surat per halaman</span>
+        </form>
 
-        <div class="warga-service-catalog-grid" id="wargaServiceGrid" aria-label="Semua surat">
-            <?php foreach ($services as $index => $service): ?>
-                <?php
-                $serviceDescription = isset($service['description']) ? trim((string) $service['description']) : '';
-                $serviceShortName = isset($service['short_name']) ? $service['short_name'] : '';
-                $serviceSearch = $service['name'] . ' ' . $serviceShortName . ' ' . $service['slug'] . ' ' . $serviceDescription;
-                $requirementCount = isset($service['requirements']) && is_array($service['requirements']) ? count($service['requirements']) : 0;
-                $serviceIcon = warga_service_icon($service);
-                ?>
-                <?php if ($citizenVerified): ?>
-                    <a href="<?= site_url('permohonan/baru?layanan=' . rawurlencode($service['slug'])) ?>" class="warga-service-catalog-item" data-service-name="<?= e($serviceSearch) ?>">
-                <?php else: ?>
-                    <div class="warga-service-catalog-item is-locked" data-service-name="<?= e($serviceSearch) ?>" aria-disabled="true">
-                <?php endif; ?>
-                    <span class="warga-service-icon <?= e($serviceIcon['class']) ?>"><i class="<?= e($serviceIcon['icon']) ?>" aria-hidden="true"></i></span>
-                    <span class="warga-service-catalog-copy">
-                        <strong><?= e($service['name']) ?></strong>
-                        <span class="warga-service-description"><?= e($serviceDescription !== '' ? $serviceDescription : 'Layanan administrasi untuk kebutuhan warga.') ?></span>
-                        <?php if ($requirementCount): ?><small><i class="fa fa-clipboard-list" aria-hidden="true"></i><?= $requirementCount ?> persyaratan</small><?php endif; ?>
-                    </span>
-                    <i class="fa <?= $citizenVerified ? 'fa-chevron-right' : 'fa-lock' ?> warga-service-catalog-action" aria-hidden="true"></i>
-                <?php if ($citizenVerified): ?></a><?php else: ?></div><?php endif; ?>
-            <?php endforeach; ?>
+        <p class="warga-list-feedback" data-list-feedback role="status" aria-live="polite" aria-atomic="true"></p>
+        <div class="warga-list-error" data-list-error role="alert" hidden>
+            <span data-list-error-message></span>
+            <button type="button" data-list-retry>Coba lagi</button>
+            <a href="<?= site_url('login') ?>" data-list-login hidden>Masuk kembali</a>
         </div>
-        <div class="warga-service-empty" data-service-empty <?= $services ? 'hidden' : '' ?>>
-            <i class="fa <?= $services ? 'fa-search' : 'fa-folder-open' ?>" aria-hidden="true"></i>
-            <strong><?= $services ? 'Surat tidak ditemukan' : 'Belum ada surat dari ' . e($institutionLower) ?></strong>
-            <span><?= $services ? 'Coba gunakan kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh ' . e($institutionLower) . '.' ?></span>
+
+        <div data-list-results id="wargaServiceResults" aria-busy="false">
+            <?php $this->load->view('services/results'); ?>
         </div>
     </section>
 

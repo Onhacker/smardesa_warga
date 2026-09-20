@@ -666,6 +666,15 @@ body.theme-dark #page .warga-result-actions .warga-result-download { border-colo
   font-size: 19px;
   line-height: 1.2;
 }
+#page .warga-service-heading-card .warga-service-available-count {
+  display: block;
+  margin-top: 4px;
+  color: var(--warga-muted) !important;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+body.theme-dark #page .warga-service-heading-card .warga-service-available-count { color: #b2c0cd !important; }
 .warga-service-heading-card > a {
   display: inline-flex;
   align-items: center;
@@ -2411,6 +2420,7 @@ body #page .page-content .warga-action-buttons .btn i {
   color: #fff !important;
   font-weight: 750;
 }
+#page .page-content .warga-letter-shortcuts > a.is-history { background: var(--warga-green) !important; }
 #page .page-content .warga-letter-shortcuts > a.is-history > i,
 #page .page-content .warga-letter-shortcuts > a.is-create > i { color: #fff !important; }
 #page .page-content .warga-letter-shortcuts > a.is-history:hover,
@@ -5458,6 +5468,20 @@ body.theme-dark #page .warga-flash--error {
 #page .warga-service-catalog-search input { height: 48px; color: var(--warga-ink) !important; font-size: 16px; }
 #page .warga-service-catalog-search input::placeholder { color: var(--warga-muted); opacity: 1; }
 #page .warga-service-catalog-search .warga-service-count { margin-top: 9px; color: var(--warga-muted) !important; font-size: 13px; }
+#page .warga-service-search-reset {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--warga-surface);
+  color: var(--warga-muted) !important;
+}
+#page .warga-service-search-reset:hover,
+#page .warga-service-search-reset:focus-visible { color: var(--warga-red) !important; }
+.warga-service-catalog > .warga-list-feedback:not(:empty) { margin-top: 14px; }
+.warga-service-catalog > .warga-list-error { margin-top: 14px !important; }
 
 .warga-service-catalog-grid {
   display: grid;
@@ -5465,6 +5489,7 @@ body.theme-dark #page .warga-flash--error {
   gap: 12px;
   padding: 18px 20px 22px;
 }
+.warga-service-catalog-grid.is-empty { display: none; }
 
 .warga-service-catalog-item {
   display: grid;

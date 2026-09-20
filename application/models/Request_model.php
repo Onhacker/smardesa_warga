@@ -393,6 +393,58 @@ class Request_model extends CI_Model
         return $rows;
     }
 
+    /**
+     * Return a small, searchable catalogue page for the citizen UI. Keeping
+     * pagination here gives the initial HTML and AJAX responses one source of
+     * truth while preserving the existing tenant/catalog compatibility path.
+     */
+    public function paginated_service_types($villageId = '', array $filters = array(), $perPage = 20)
+    {
+        $query = isset($filters['q']) && is_scalar($filters['q']) ? trim((string) $filters['q']) : '';
+        $query = function_exists('mb_substr') ? mb_substr($query, 0, 180, 'UTF-8') : substr($query, 0, 180);
+        $pageValue = isset($filters['page']) && is_scalar($filters['page']) ? (string) $filters['page'] : '1';
+        $requestedPage = ctype_digit($pageValue) ? max(1, (int) $pageValue) : 1;
+        $perPage = max(1, min(100, (int) $perPage));
+        $services = $this->service_types($villageId);
+
+        if ($query !== '') {
+            $words = preg_split('/\s+/u', $query, -1, PREG_SPLIT_NO_EMPTY);
+            if (!is_array($words)) $words = array($query);
+            $services = array_values(array_filter($services, function ($service) use ($words) {
+                $searchable = str_replace('-', ' ', implode(' ', array(
+                    isset($service['name']) ? $service['name'] : '',
+                    isset($service['short_name']) ? $service['short_name'] : '',
+                    isset($service['slug']) ? $service['slug'] : '',
+                    isset($service['description']) ? $service['description'] : ''
+                )));
+                foreach ($words as $word) {
+                    $found = function_exists('mb_stripos')
+                        ? mb_stripos($searchable, $word, 0, 'UTF-8')
+                        : stripos($searchable, $word);
+                    if ($found === FALSE) return FALSE;
+                }
+                return TRUE;
+            }));
+        }
+
+        $total = count($services);
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min($requestedPage, $pages);
+        $offset = ($page - 1) * $perPage;
+        $items = array_slice($services, $offset, $perPage);
+
+        return array(
+            'items' => $items,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'per_page' => $perPage,
+            'from' => $total > 0 ? $offset + 1 : 0,
+            'to' => min($offset + count($items), $total),
+            'filters' => array('q' => $query, 'page' => $page)
+        );
+    }
+
     private function normalise_catalog_row(array $row)
     {
         $requirements = json_decode((string) (isset($row['requirements_json']) ? $row['requirements_json'] : ''), TRUE);
