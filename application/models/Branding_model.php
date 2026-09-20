@@ -16,19 +16,22 @@ class Branding_model extends CI_Model
             'tagline' => $this->fallback('WARGA_SYSTEM_TAGLINE', 'PUBLIC_SYSTEM_TAGLINE', 'Bersama Membangun Kampung Digital')
         );
 
-        if (!isset($this->db) || !$this->db->table_exists('app_public_branding')) {
+        // CodeIgniter exposes the database through CI_Model's magic getter;
+        // isset($this->db) therefore reports false even when the connection is ready.
+        $db = $this->db;
+        if (!is_object($db) || !$db->table_exists('app_public_branding')) {
             return $this->normalise($branding);
         }
 
         $fields = array();
         foreach (array('nama_sistem', 'kepanjangan', 'tagline') as $field) {
-            if ($this->db->field_exists($field, 'app_public_branding')) {
+            if ($db->field_exists($field, 'app_public_branding')) {
                 $fields[] = $field;
             }
         }
         if (empty($fields)) return $this->normalise($branding);
 
-        $row = $this->db
+        $row = $db
             ->select(implode(', ', $fields))
             ->where('id', 1)
             ->limit(1)

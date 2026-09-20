@@ -5,7 +5,8 @@ $footerContact = isset($footerVillage['contact']) && is_array($footerVillage['co
 $footerUser = isset($currentUser) && is_array($currentUser) ? $currentUser : array();
 $branding = isset($branding) && is_array($branding) ? $branding : array();
 $footerSystemName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
-$footerSystemTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
+$footerSystemExpansion = trim((string) ($branding['kepanjangan'] ?? ''));
+if ($footerSystemExpansion === '') $footerSystemExpansion = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 $footerVillageName = trim((string) ($footerVillage['name'] ?? ($footerUser['village_name'] ?? '')));
 $footerInstitution = trim((string) ($footerContact['institution'] ?? ($footerVillage['institution'] ?? '')));
 $hasExplicitInstitution = $footerInstitution !== '';
@@ -28,7 +29,7 @@ $footerBrand = trim($footerSystemName . ($footerVillageName !== '' ? ' ' . $foot
 $footerBrand = function_exists('mb_strtoupper')
     ? mb_strtoupper($footerBrand, 'UTF-8')
     : strtoupper($footerBrand);
-$footerTagline = $footerSystemTagline;
+$footerTagline = $footerSystemExpansion;
 
 $footerShareUrl = trim((string) ($shareUrl ?? base_url()));
 if (!filter_var($footerShareUrl, FILTER_VALIDATE_URL)) $footerShareUrl = base_url();
