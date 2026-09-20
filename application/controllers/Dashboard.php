@@ -30,7 +30,8 @@ class Dashboard extends Public_Controller
                 'name' => getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya',
                 'district_name' => getenv('PUBLIC_DISTRICT_NAME') ?: '',
                 'regency_name' => getenv('PUBLIC_REGENCY_NAME') ?: (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya'),
-                'institution' => getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung',
+                'institution' => $this->institution_label(),
+                'district_label' => $this->district_label(),
                 'contact' => array()
             );
             // Announcement content is tenant-private. Guests may still use

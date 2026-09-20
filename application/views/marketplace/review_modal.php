@@ -3,12 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $isAuthenticated = !empty($isAuthenticated);
 ?>
 <div class="market-review-modal" data-market-review-modal hidden>
-    <button type="button" class="market-review-backdrop" data-market-review-close aria-label="Tutup rating"></button>
+    <button type="button" class="market-review-backdrop" data-market-review-close aria-label="Tutup komentar/rating"></button>
     <section class="market-review-dialog" role="dialog" aria-modal="true" aria-labelledby="market-review-title">
         <div class="market-review-dialog-head">
             <div>
                 <p class="market-eyebrow market-eyebrow-blue">ULASAN PRODUK</p>
-                <h2 id="market-review-title" data-market-review-title>Beri rating</h2>
+                <h2 id="market-review-title" data-market-review-title>Beri Komentar/Rating</h2>
             </div>
             <button type="button" class="market-review-close" data-market-review-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
@@ -18,7 +18,7 @@ $isAuthenticated = !empty($isAuthenticated);
                     <span class="market-review-login-notice-icon" aria-hidden="true"><i class="fa fa-lock"></i></span>
                     <div class="market-review-login-notice-copy">
                         <strong>Login diperlukan.</strong>
-                        <p>Silakan masuk terlebih dahulu untuk memberi rating.</p>
+                        <p>Silakan masuk terlebih dahulu untuk memberi komentar/rating.</p>
                         <a href="<?= e(site_url('login')) ?>" class="market-review-login-link bg-red-dark"><span>Masuk sekarang</span><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
                     </div>
                 </div>

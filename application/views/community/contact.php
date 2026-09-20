@@ -1,7 +1,8 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $contact = isset($village['contact']) && is_array($village['contact']) ? $village['contact'] : array();
-$institution = trim((string) ($village['institution'] ?? 'Kampung')) ?: 'Kampung';
+$institution = trim((string) ($institutionLabel ?? ($village['institution'] ?? 'Desa'))) ?: 'Desa';
+$contactDistrictLabel = trim((string) ($districtLabel ?? ($village['district_label'] ?? 'Kecamatan'))) ?: 'Kecamatan';
 $areaName = trim((string) ($village['name'] ?? ($currentUser['village_name'] ?? '')));
 
 $contactValue = function ($key, $fallback = 'Belum tersedia') use ($contact) {
@@ -20,7 +21,7 @@ $rows = array(
     array('email', 'Email', 'fa-envelope', 'is-email'),
     array('website', 'Website', 'fa-globe', 'is-website'),
     array('office_hours', 'Jam pelayanan', 'fa-clock', 'is-hours'),
-    array('district_name', 'Distrik / Kecamatan', 'fa-map-marker-alt', 'is-location'),
+    array('district_name', $contactDistrictLabel, 'fa-map-marker-alt', 'is-location'),
     array('regency_name', 'Kabupaten', 'fa-map-marked-alt', 'is-region')
 );
 ?>
@@ -28,9 +29,9 @@ $rows = array(
     <section class="warga-account-head" aria-labelledby="warga-contact-title">
         <span class="warga-account-avatar warga-contact-avatar" aria-hidden="true"><i class="fa fa-address-book"></i></span>
         <div>
-            <p>KONTAK KAMPUNG</p>
+            <p>KONTAK <?= e(strtoupper($institution)) ?></p>
             <h1 id="warga-contact-title">Kontak <?= e($institution) ?></h1>
-            <span class="warga-account-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($areaName !== '' ? $areaName : 'Wilayah kampung') ?></span>
+            <span class="warga-account-village"><i class="fa fa-map-marker-alt" aria-hidden="true"></i><?= e($areaName !== '' ? $areaName : 'Wilayah ' . strtolower($institution)) ?></span>
         </div>
     </section>
 

@@ -2,7 +2,7 @@
 <?php
 $items = isset($items) && is_array($items) ? $items : array();
 $announcementArea = (string) ($currentUser['village_name'] ?? '');
-$announcementInstitutionLabel = trim((string) ($institutionLabel ?? $institutionLower ?? 'Kampung')) ?: 'Kampung';
+$announcementInstitutionLabel = trim((string) ($institutionLabel ?? $institutionLower ?? 'Desa')) ?: 'Desa';
 $announcementAreaName = trim((string) preg_replace('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', '', trim($announcementArea), 1));
 if ($announcementAreaName === '') $announcementAreaName = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
 $announcementScope = trim($announcementInstitutionLabel . ' ' . $announcementAreaName);

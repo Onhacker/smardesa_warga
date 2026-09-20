@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-$deletionInstitution = trim((string) ($village['institution'] ?? ($institutionLabel ?? 'Kampung')));
-if ($deletionInstitution === '') $deletionInstitution = 'Kampung';
+$deletionInstitution = trim((string) ($institutionLabel ?? ($village['institution'] ?? 'Desa')));
+if ($deletionInstitution === '') $deletionInstitution = 'Desa';
 $deletionBranding = isset($branding) && is_array($branding) ? $branding : array();
 $deletionAppName = trim((string) ($deletionBranding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 $deletionArea = trim((string) ($village['name'] ?? ''));
@@ -8,7 +8,7 @@ $deletionSubject = 'Permintaan penghapusan akun ' . $deletionAppName;
 $deletionBody = "Saya meminta penghapusan akun dan data terkait pada aplikasi {$deletionAppName}.\n\n"
     . "Nama lengkap:\n"
     . "Email atau nomor telepon yang terdaftar:\n"
-    . "Kampung/kelurahan yang dipilih saat mendaftar:\n"
+    . $deletionInstitution . " yang dipilih saat mendaftar:\n"
     . "Alasan (opsional):\n\n"
     . "Saya memahami bahwa data pelayanan yang wajib menjadi arsip pemerintah dapat tetap disimpan sesuai ketentuan yang berlaku.";
 $deletionMailto = 'mailto:' . $supportEmail
@@ -33,7 +33,7 @@ $deletionMailto = 'mailto:' . $supportEmail
             <h2 id="deletion-steps-title">1. Cara meminta penghapusan akun</h2>
             <ol>
                 <li>Tekan tombol <strong>Kirim Permintaan Penghapusan</strong> di bawah atau kirim email ke <a href="mailto:<?= e($supportEmail) ?>"><?= e($supportEmail) ?></a>.</li>
-                <li>Cantumkan nama lengkap, email atau nomor telepon yang terdaftar, serta kampung/kelurahan yang dipilih ketika mendaftar.</li>
+                <li>Cantumkan nama lengkap, email atau nomor telepon yang terdaftar, serta <?= e(strtolower($deletionInstitution)) ?> yang dipilih ketika mendaftar.</li>
                 <li>Gunakan subjek <strong>Permintaan penghapusan akun <?= e($deletionAppName) ?></strong>. Alasan penghapusan boleh dikosongkan.</li>
                 <li>Pengelola akan memverifikasi kepemilikan akun melalui kontak yang terdaftar. Permintaan yang telah terverifikasi diproses paling lambat 30 hari kalender.</li>
                 <li>Konfirmasi hasil penghapusan atau alasan data tertentu harus dipertahankan akan dikirim melalui kontak yang telah diverifikasi.</li>

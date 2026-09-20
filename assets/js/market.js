@@ -941,7 +941,7 @@
       form.setAttribute('data-review-url', trigger.getAttribute('data-review-url') || '');
       form.setAttribute('data-review-product-id', trigger.getAttribute('data-review-product-id') || '');
       var name = trigger.getAttribute('data-review-product-name') || 'produk ini';
-      if (title) title.textContent = 'Beri rating';
+      if (title) title.textContent = 'Beri Komentar/Rating';
       if (productLabel) productLabel.textContent = 'Bagaimana pengalaman Anda dengan ' + name + '?';
       if (comment) comment.value = '';
       setStatus('', '');

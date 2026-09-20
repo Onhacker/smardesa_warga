@@ -124,6 +124,28 @@ class Auth_model extends CI_Model
         return strtolower((string) $code) === 'default' ? '' : (string) $code;
     }
 
+    private function branding_region_label($field, $fallback)
+    {
+        static $labels = array();
+        $cacheKey = $field . '|' . $this->configured_tenant_code();
+        if (isset($labels[$cacheKey])) return $labels[$cacheKey];
+
+        $value = '';
+        try {
+            $this->load->model('Branding_model', 'authBranding');
+            $tenantCode = $this->configured_tenant_code();
+            $branding = $this->authBranding->current($tenantCode !== '' ? $tenantCode : warga_tenant_code('default'));
+            $value = trim((string) ($branding[$field] ?? ''));
+        } catch (Throwable $e) {
+            $value = '';
+        }
+        if ($value === '') $value = $fallback;
+        $value = function_exists('mb_convert_case')
+            ? mb_convert_case(mb_strtolower($value, 'UTF-8'), MB_CASE_TITLE, 'UTF-8')
+            : ucwords(strtolower($value));
+        return $labels[$cacheKey] = $value;
+    }
+
     private function tenant_allows($regencyCode)
     {
         $tenantCode = $this->configured_tenant_code();
@@ -143,11 +165,12 @@ class Auth_model extends CI_Model
         $tenantCode = $this->configured_tenant_code();
         if (warga_demo_mode()) {
             if ($tenantCode !== '' && $tenantCode !== '95.01') return array();
+            $institution = $this->branding_region_label('bentuk_lembaga', 'Desa');
             return array(array(
                 'district_code' => '95.01.03',
                 'district_name' => 'Asologaima',
                 'village_code' => '95.01.03.2003',
-                'village_name' => 'Kampung Araboda',
+                'village_name' => $institution . ' Araboda',
                 'regency_code' => '95.01',
                 'regency_name' => 'Jayawijaya',
                 'province_name' => 'Papua Pegunungan'
@@ -171,19 +194,20 @@ class Auth_model extends CI_Model
 
     private function demo_users()
     {
+        $institution = $this->branding_region_label('bentuk_lembaga', 'Desa');
         $scope = array(
             'village_id' => '00000000-0000-4000-8000-000000000001',
             'village_code' => '95.01.03.2003',
-            'village_name' => 'Kampung Araboda',
+            'village_name' => $institution . ' Araboda',
             'district_name' => 'Asologaima',
             'regency_code' => '95.01',
             'regency_name' => 'Jayawijaya',
-            'institution' => 'Kampung'
+            'institution' => $institution
         );
         return array(
             1 => array_merge($scope, array('id' => 1, 'role_id' => 1, 'role_slug' => 'warga', 'role_name' => 'Warga', 'name' => 'Yotam Wamena', 'username' => 'warga', 'email' => 'warga@demo.local', 'phone' => '081234567890')),
-            2 => array_merge($scope, array('id' => 2, 'role_id' => 2, 'role_slug' => 'sekdes', 'role_name' => 'Sekretaris Kampung', 'name' => 'Markus Huby', 'username' => 'sekdes', 'email' => 'sekdes@demo.local', 'phone' => '081234567891')),
-            3 => array_merge($scope, array('id' => 3, 'role_id' => 3, 'role_slug' => 'kepala-desa', 'role_name' => 'Kepala Kampung', 'name' => 'Yulius Wenda', 'username' => 'kades', 'email' => 'kades@demo.local', 'phone' => '081234567892'))
+            2 => array_merge($scope, array('id' => 2, 'role_id' => 2, 'role_slug' => 'sekdes', 'role_name' => 'Sekretaris ' . $institution, 'name' => 'Markus Huby', 'username' => 'sekdes', 'email' => 'sekdes@demo.local', 'phone' => '081234567891')),
+            3 => array_merge($scope, array('id' => 3, 'role_id' => 3, 'role_slug' => 'kepala-desa', 'role_name' => 'Kepala ' . $institution, 'name' => 'Yulius Wenda', 'username' => 'kades', 'email' => 'kades@demo.local', 'phone' => '081234567892'))
         );
     }
 
@@ -451,7 +475,8 @@ class Auth_model extends CI_Model
             $empty['kk'] = '950103••••••0001';
             $empty['birth_date'] = '1992-06-12';
             $empty['gender'] = 'Laki-laki';
-            $empty['address'] = 'Kampung Araboda, Distrik Asologaima';
+            $empty['address'] = $this->branding_region_label('bentuk_lembaga', 'Desa') . ' Araboda, '
+                . $this->branding_region_label('bentuk_kecamatan', 'Kecamatan') . ' Asologaima';
             $empty['verification_status'] = 'verified';
             $empty['identity_stored'] = TRUE;
             $empty['identity_note'] = 'Data identitas pada mode demo disamarkan.';
@@ -518,7 +543,7 @@ class Auth_model extends CI_Model
             return array('success' => FALSE, 'message' => 'Wilayah yang dipilih tidak termasuk layanan kabupaten ini.');
         }
         if ($districtCode !== '' && strtoupper(trim((string) $village['district_code'])) !== $districtCode) {
-            return array('success' => FALSE, 'message' => 'Pilihan distrik dan wilayah tidak sesuai. Silakan pilih ulang.');
+            return array('success' => FALSE, 'message' => 'Pilihan wilayah induk dan wilayah layanan tidak sesuai. Silakan pilih ulang.');
         }
         if ($this->registration_is_throttled($contactIdentity, $nik, $villageCode)) {
             return array('success' => FALSE, 'message' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 15 menit lalu coba lagi.');

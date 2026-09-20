@@ -13,16 +13,17 @@ $registrationValidationErrors = validation_errors('<span class="warga-auth-error
 $registrationErrorHtml = !empty($error)
     ? '<span class="warga-auth-error-item">' . e($error) . '</span>'
     : $registrationValidationErrors;
-$registerInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
-$registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
 $branding = isset($branding) && is_array($branding) ? $branding : array();
+$registerInstitution = trim((string) ($institutionLabel ?? ($branding['bentuk_lembaga'] ?? 'Desa'))) ?: 'Desa';
+$registerDistrictLabel = trim((string) ($districtLabel ?? ($branding['bentuk_kecamatan'] ?? 'Kecamatan'))) ?: 'Kecamatan';
+$registerArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
 $registerBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 $registerTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 $registerShareTitle = $registerBrand . ' ' . $registerArea . ' — ' . $registerTagline;
 $registerShareDescription = 'Akses layanan surat, info, pengaduan, pemberitahuan, dan Pasar Dapulik dalam satu aplikasi.';
 $registerShareUrl = base_url();
 $registerShareImage = warga_asset_url('assets/pwa/share-preview.png');
-$registerFooterVillage = array('name' => $registerArea, 'institution' => $registerInstitution, 'contact' => array());
+$registerFooterVillage = array('name' => $registerArea, 'institution' => $registerInstitution, 'district_label' => $registerDistrictLabel, 'contact' => array());
 ?>
 <!DOCTYPE HTML>
 <html lang="id">
@@ -76,13 +77,13 @@ $registerFooterVillage = array('name' => $registerArea, 'institution' => $regist
                 <div class="input-style no-borders has-icon validate-field warga-region-field">
                     <i class="fa fa-map-marker-alt"></i>
                     <select class="form-select registration-cascade-select warga-region-select" id="register-district" name="district_code" required>
-                        <option value="">Pilih distrik/kecamatan</option>
+                        <option value="">Pilih <?= e(strtolower($registerDistrictLabel)) ?></option>
                         <?php foreach ($registrationDistricts as $districtCode => $districtName): ?>
                             <option value="<?= e($districtCode) ?>" <?= old('district_code') === $districtCode ? 'selected' : '' ?>><?= e($districtName) ?></option>
                         <?php endforeach; ?>
                     </select>
                     <i class="fa fa-times disabled invalid color-red-dark"></i><i class="fa fa-check disabled valid color-green-dark"></i>
-                    <label for="register-district" class="color-highlight">Distrik/Kecamatan</label><em>*</em>
+                    <label for="register-district" class="color-highlight"><?= e($registerDistrictLabel) ?></label><em>*</em>
                 </div>
                 <div class="input-style no-borders has-icon validate-field warga-region-field">
                     <i class="fa fa-home"></i>

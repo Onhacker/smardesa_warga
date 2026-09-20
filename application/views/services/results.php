@@ -26,7 +26,7 @@
     <div class="warga-service-empty">
         <i class="fa <?= $hasSearch ? 'fa-search' : 'fa-folder-open' ?>" aria-hidden="true"></i>
         <strong><?= $hasSearch ? 'Surat tidak ditemukan' : 'Belum ada surat yang tersedia' ?></strong>
-        <span><?= $hasSearch ? 'Coba gunakan nama atau kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh pemerintah kampung.' ?></span>
+        <span><?= $hasSearch ? 'Coba gunakan nama atau kata pencarian lainnya.' : 'Katalog layanan akan tampil setelah diterbitkan oleh pemerintah ' . e($institutionLower ?? 'wilayah') . '.' ?></span>
     </div>
 <?php endif; ?>
 <?php $this->load->view('layouts/list_pagination'); ?>

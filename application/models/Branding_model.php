@@ -19,7 +19,9 @@ class Branding_model extends CI_Model
             'tenant_name' => '',
             'nama_sistem' => $this->fallback('WARGA_SYSTEM_NAME', 'PUBLIC_SYSTEM_NAME', 'SIDAPULIK'),
             'kepanjangan' => $this->fallback('WARGA_SYSTEM_EXPANSION', 'PUBLIC_SYSTEM_EXPANSION', ''),
-            'tagline' => $this->fallback('WARGA_SYSTEM_TAGLINE', 'PUBLIC_SYSTEM_TAGLINE', 'Bersama Membangun Kampung Digital')
+            'tagline' => $this->fallback('WARGA_SYSTEM_TAGLINE', 'PUBLIC_SYSTEM_TAGLINE', 'Bersama Membangun Kampung Digital'),
+            'bentuk_lembaga' => $this->fallback('WARGA_INSTITUTION_LABEL', 'PUBLIC_INSTITUTION_LABEL', 'Desa'),
+            'bentuk_kecamatan' => $this->fallback('WARGA_DISTRICT_LABEL', 'PUBLIC_DISTRICT_LABEL', 'Kecamatan')
         );
 
         // CodeIgniter exposes the database through CI_Model's magic getter;
@@ -30,7 +32,7 @@ class Branding_model extends CI_Model
         }
 
         $fields = array();
-        foreach (array('tenant_code', 'tenant_name', 'nama_sistem', 'kepanjangan', 'tagline') as $field) {
+        foreach (array('tenant_code', 'tenant_name', 'nama_sistem', 'kepanjangan', 'tagline', 'bentuk_lembaga', 'bentuk_kecamatan') as $field) {
             if ($db->field_exists($field, 'app_public_branding')) {
                 $fields[] = $field;
             }
@@ -74,7 +76,9 @@ class Branding_model extends CI_Model
             'tenant_name' => $this->clean($branding['tenant_name'] ?? '', 120, ''),
             'nama_sistem' => $this->clean($branding['nama_sistem'] ?? 'SIDAPULIK', 100, 'SIDAPULIK'),
             'kepanjangan' => $this->clean($branding['kepanjangan'] ?? '', 180, ''),
-            'tagline' => $this->clean($branding['tagline'] ?? '', 255, 'Bersama Membangun Kampung Digital')
+            'tagline' => $this->clean($branding['tagline'] ?? '', 255, 'Bersama Membangun Kampung Digital'),
+            'bentuk_lembaga' => $this->label($branding['bentuk_lembaga'] ?? '', 'Desa'),
+            'bentuk_kecamatan' => $this->label($branding['bentuk_kecamatan'] ?? '', 'Kecamatan')
         );
     }
 
@@ -88,5 +92,13 @@ class Branding_model extends CI_Model
             $value = substr($value, 0, (int) $length);
         }
         return trim((string) $value) !== '' ? trim((string) $value) : $fallback;
+    }
+
+    private function label($value, $fallback)
+    {
+        $value = $this->clean($value, 100, $fallback);
+        return function_exists('mb_convert_case')
+            ? mb_convert_case(mb_strtolower($value, 'UTF-8'), MB_CASE_TITLE, 'UTF-8')
+            : ucwords(strtolower($value));
     }
 }

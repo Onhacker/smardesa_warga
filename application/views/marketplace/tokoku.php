@@ -49,7 +49,7 @@ $imageFor = static function (array $product) use ($marketUrl) {
             <a class="market-tokoku-add" href="<?= site_url('pasar/buat') ?>"><i class="fa fa-plus color-white" aria-hidden="true"></i><span class="color-white">Jual produk</span></a>
         </div>
         <?php if (!$products): ?>
-            <div class="market-empty-state"><span class="market-empty-icon"><i class="fa fa-box-open" aria-hidden="true"></i></span><h3>Etalase masih kosong</h3><p>Tambahkan produk pertama Anda agar bisa dilihat warga dari seluruh kampung.</p><a href="<?= site_url('pasar/buat') ?>" class="btn btn-s bg-blue-dark color-white rounded-s"><i class="fa fa-plus color-white" aria-hidden="true"></i><span class="color-white">Tambah produk</span></a></div>
+            <div class="market-empty-state"><span class="market-empty-icon"><i class="fa fa-box-open" aria-hidden="true"></i></span><h3>Etalase masih kosong</h3><p>Tambahkan produk pertama Anda agar bisa dilihat warga dari seluruh <?= e($institutionLower ?? 'wilayah') ?>.</p><a href="<?= site_url('pasar/buat') ?>" class="btn btn-s bg-blue-dark color-white rounded-s"><i class="fa fa-plus color-white" aria-hidden="true"></i><span class="color-white">Tambah produk</span></a></div>
         <?php else: ?>
             <div class="market-product-grid market-tokoku-grid">
                 <?php foreach ($products as $product): ?>

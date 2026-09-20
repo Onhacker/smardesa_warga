@@ -5,6 +5,7 @@ class MY_Controller extends CI_Controller
 {
     protected $currentUser = NULL;
     protected $institutionLabel = '';
+    protected $districtLabel = '';
     protected $branding = array();
 
     public function __construct()
@@ -18,6 +19,11 @@ class MY_Controller extends CI_Controller
             ? (string) $this->currentUser['regency_code']
             : warga_tenant_code('default');
         $this->branding = $this->Branding_model->current($tenantCode);
+        if (is_array($this->currentUser)) {
+            $roleSlug = strtolower(trim((string) ($this->currentUser['role_slug'] ?? '')));
+            if ($roleSlug === 'sekdes') $this->currentUser['role_name'] = 'Sekretaris ' . $this->institution_label();
+            if ($roleSlug === 'kepala-desa') $this->currentUser['role_name'] = 'Kepala ' . $this->institution_label();
+        }
     }
 
     /**
@@ -46,17 +52,21 @@ class MY_Controller extends CI_Controller
     protected function institution_label()
     {
         if ($this->institutionLabel !== '') return $this->institutionLabel;
-        if (!$this->currentUser) {
-            $this->institutionLabel = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
-            return $this->institutionLabel;
+        $this->institutionLabel = trim((string) ($this->branding['bentuk_lembaga'] ?? ''));
+        if ($this->institutionLabel === '') {
+            $this->institutionLabel = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Desa')) ?: 'Desa';
         }
-        $this->load->model('Community_model');
-        $village = $this->Community_model->village(
-            $this->currentUser['village_id'] ?? '',
-            $this->currentUser['village_name'] ?? ''
-        );
-        $this->institutionLabel = trim((string) ($village['institution'] ?? 'Desa')) ?: 'Desa';
         return $this->institutionLabel;
+    }
+
+    protected function district_label()
+    {
+        if ($this->districtLabel !== '') return $this->districtLabel;
+        $this->districtLabel = trim((string) ($this->branding['bentuk_kecamatan'] ?? ''));
+        if ($this->districtLabel === '') {
+            $this->districtLabel = trim((string) (getenv('PUBLIC_DISTRICT_LABEL') ?: 'Kecamatan')) ?: 'Kecamatan';
+        }
+        return $this->districtLabel;
     }
 
     protected function institution_label_lower()
@@ -82,7 +92,10 @@ class MY_Controller extends CI_Controller
                 'contact' => array()
             );
         }
+        $contactVillage['institution'] = $this->institution_label();
+        $contactVillage['district_label'] = $this->district_label();
         $data['institutionLabel'] = $this->institution_label();
+        $data['districtLabel'] = $this->district_label();
         $data['institutionLower'] = function_exists('mb_strtolower')
             ? mb_strtolower($data['institutionLabel'], 'UTF-8')
             : strtolower($data['institutionLabel']);
@@ -94,7 +107,7 @@ class MY_Controller extends CI_Controller
         // buttons, while the page views remain responsible for their own data.
         $data['footerVillage'] = $contactVillage;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : $this->branding['nama_sistem'];
-        $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+        $publicInstitution = $this->institution_label();
         $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         $shareInstitution = trim((string) ($contactVillage['institution'] ?? '')) ?: $publicInstitution;
         $shareArea = trim((string) ($contactVillage['name'] ?? '')) ?: $publicArea;
@@ -298,6 +311,47 @@ class MY_Controller extends CI_Controller
             ->set_header('X-Content-Type-Options: nosniff')
             ->set_header("Content-Security-Policy: default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'")
             ->set_output($body);
+        return TRUE;
+    }
+
+    /**
+     * Convert a validated private HTML letter snapshot to a downloadable PDF.
+     * This is intentionally separate from stream_private_html(): the existing
+     * HTML preview must keep its exact response and rendering behaviour.
+     */
+    protected function stream_private_html_pdf($path, $originalName = '', $expectedSha256 = '')
+    {
+        $configured = trim((string) getenv('PRIVATE_STORAGE_PATH'));
+        if (ENVIRONMENT === 'production' && $configured === '') return FALSE;
+        $root = realpath($configured !== '' ? $configured : FCPATH . 'storage');
+        $real = realpath((string) $path);
+        $prefix = $root !== FALSE ? rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : '';
+        if ($root === FALSE || !is_dir($root) || !is_readable($root)
+            || $real === FALSE || !is_file($real) || !is_readable($real)
+            || ($real !== $root && strpos($real, $prefix) !== 0) || is_link((string) $path)) return FALSE;
+        $size = @filesize($real);
+        if ($size === FALSE || $size < 1 || $size > 8 * 1024 * 1024) return FALSE;
+        $body = @file_get_contents($real);
+        if (!is_string($body) || $body === '') return FALSE;
+        if ($expectedSha256 !== '' && (!preg_match('/^[a-f0-9]{64}$/', (string) $expectedSha256)
+            || !hash_equals((string) $expectedSha256, hash('sha256', $body)))) return FALSE;
+
+        require_once APPPATH . 'libraries/Official_letter_pdf.php';
+        try {
+            $pdf = Official_letter_pdf::render($body, $root);
+        } catch (Throwable $exception) {
+            log_message('error', 'Official letter PDF render failed: ' . $exception->getMessage());
+            return FALSE;
+        }
+        if (!is_string($pdf) || strlen($pdf) < 64 || strlen($pdf) > 32 * 1024 * 1024) return FALSE;
+        $name = $this->private_file_name($originalName, 'pdf', $real);
+        $this->output->set_status_header(200)->set_content_type('application/pdf')
+            ->set_header('Content-Disposition: attachment; filename="' . $name . '"')
+            ->set_header('Content-Length: ' . (int) strlen($pdf))
+            ->set_header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private')
+            ->set_header('Pragma: no-cache')
+            ->set_header('X-Content-Type-Options: nosniff')
+            ->set_output($pdf);
         return TRUE;
     }
 

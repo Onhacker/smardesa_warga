@@ -104,7 +104,7 @@ $relatedProducts = isset($related) && is_array($related) ? array_slice(array_val
                     <span class="market-rating-stars market-review-summary-stars" data-market-rating-stars aria-label="<?= e(number_format($ratingAverage, 1, ',', '.') . ' dari 5 bintang') ?>"><?php for ($star = 1; $star <= 5; $star++): ?><i class="fa fa-star <?= $star <= $ratingRounded ? 'is-filled' : 'is-empty' ?>" aria-hidden="true"></i><?php endfor; ?></span>
                     <small data-market-rating-count><?= $ratingCount ? e($ratingCount . ' ulasan') : 'Belum ada ulasan' ?></small>
                 </div>
-                <button type="button" class="market-review-open-button" data-market-review-open data-review-url="<?= e(site_url('pasar/produk/' . rawurlencode($productId) . '/rating')) ?>" data-review-product-id="<?= e($productId) ?>" data-review-product-name="<?= e($product['name'] ?? 'Produk warga') ?>"><i class="fa fa-star" aria-hidden="true"></i><span>Beri rating</span></button>
+                <button type="button" class="market-review-open-button" data-market-review-open data-review-url="<?= e(site_url('pasar/produk/' . rawurlencode($productId) . '/rating')) ?>" data-review-product-id="<?= e($productId) ?>" data-review-product-name="<?= e($product['name'] ?? 'Produk warga') ?>"><i class="fa fa-star" aria-hidden="true"></i><span>Beri Komentar/Rating</span></button>
             </div>
             <div class="market-review-list" data-market-review-list>
                 <?php if ($reviews): ?>

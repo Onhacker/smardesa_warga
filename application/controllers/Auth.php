@@ -6,7 +6,7 @@ class Auth extends Public_Controller
     public function login()
     {
         if ($this->currentUser) redirect('dashboard');
-        $publicInstitution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+        $publicInstitution = $this->institution_label();
         $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         // The login screen is rendered outside the authenticated app layout,
         // but it still uses the same public tenant identity as the shared
@@ -21,6 +21,7 @@ class Auth extends Public_Controller
             'isAuthenticated' => FALSE,
             'staffMode' => FALSE,
             'institutionLabel' => $publicInstitution,
+            'districtLabel' => $this->district_label(),
             'footerVillage' => array(
                 'name' => $publicArea,
                 'institution' => $publicInstitution,
@@ -59,7 +60,9 @@ class Auth extends Public_Controller
             'pageTitle' => 'Daftar Akun | ' . $this->branding['nama_sistem'],
             'branding' => $this->branding,
             'demoMode' => warga_demo_mode(),
-            'registrationRegions' => $this->Auth_model->registration_regions()
+            'registrationRegions' => $this->Auth_model->registration_regions(),
+            'institutionLabel' => $this->institution_label(),
+            'districtLabel' => $this->district_label()
         );
         if ($this->input->method(TRUE) === 'POST') {
             $this->form_validation->set_rules('name', 'Nama lengkap', 'trim|required|min_length[3]|max_length[120]');
@@ -67,7 +70,7 @@ class Auth extends Public_Controller
             $this->form_validation->set_rules('kk', 'No. KK', 'trim|required|max_length[25]');
             $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|max_length[160]');
             $this->form_validation->set_rules('phone', 'Nomor telepon', 'trim|max_length[30]');
-            $this->form_validation->set_rules('district_code', 'Distrik/Kecamatan', 'trim|required|max_length[20]');
+            $this->form_validation->set_rules('district_code', $this->district_label(), 'trim|required|max_length[20]');
             $this->form_validation->set_rules('village_code', 'Wilayah', 'trim|required|max_length[30]');
             $this->form_validation->set_rules('password', 'Kata sandi', 'required|min_length[8]|max_length[200]');
             $this->form_validation->set_rules('password_confirm', 'Konfirmasi kata sandi', 'required|matches[password]');
@@ -229,7 +232,7 @@ class Auth extends Public_Controller
 
     private function public_auth_data($page_title)
     {
-        $institution = trim((string) (getenv('PUBLIC_INSTITUTION_LABEL') ?: 'Kampung')) ?: 'Kampung';
+        $institution = $this->institution_label();
         $area = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
         return array(
             'pageTitle' => $page_title,
@@ -239,6 +242,7 @@ class Auth extends Public_Controller
             'isAuthenticated' => FALSE,
             'staffMode' => FALSE,
             'institutionLabel' => $institution,
+            'districtLabel' => $this->district_label(),
             'footerVillage' => array('name' => $area, 'institution' => $institution, 'contact' => array())
         );
     }

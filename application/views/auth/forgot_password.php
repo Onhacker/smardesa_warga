@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-$resetInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Kampung')));
-if ($resetInstitution === '') $resetInstitution = 'Kampung';
+$resetInstitution = trim((string) ($institutionLabel ?? ($footerVillage['institution'] ?? 'Desa')));
+if ($resetInstitution === '') $resetInstitution = 'Desa';
 $branding = isset($branding) && is_array($branding) ? $branding : array();
 $resetBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 $resetTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';

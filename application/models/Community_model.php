@@ -91,6 +91,15 @@ class Community_model extends CI_Model
         if ($institutionName === '') {
             $institutionName = trim((string) $fallbackName);
         }
+        try {
+            $this->load->model('Branding_model', 'communityBranding');
+            $branding = $this->communityBranding->current($row['regency_code'] ?? warga_tenant_code('default'));
+            $configuredInstitution = trim((string) ($branding['bentuk_lembaga'] ?? ''));
+            if ($configuredInstitution !== '') $institution = $configuredInstitution;
+            $row['district_label'] = trim((string) ($branding['bentuk_kecamatan'] ?? '')) ?: 'Kecamatan';
+        } catch (Throwable $e) {
+            $row['district_label'] = 'Kecamatan';
+        }
         if ($institution === '') $institution = warga_institution_label($institutionName, 'Desa');
         $row['institution'] = $institution !== '' ? $institution : 'Desa';
         return $row;

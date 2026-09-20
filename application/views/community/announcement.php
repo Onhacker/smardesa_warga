@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 <?php
 $announcementArea = trim((string) ($currentUser['village_name'] ?? $item['village_name'] ?? ''));
-$announcementInstitutionLabel = trim((string) ($institutionLabel ?? $institutionLower ?? 'Kampung')) ?: 'Kampung';
+$announcementInstitutionLabel = trim((string) ($institutionLabel ?? $institutionLower ?? 'Desa')) ?: 'Desa';
 $announcementArea = trim((string) preg_replace('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', '', $announcementArea, 1));
 if ($announcementArea === '') $announcementArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
 $announcementScope = trim($announcementInstitutionLabel . ' ' . $announcementArea);

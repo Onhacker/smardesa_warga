@@ -53,7 +53,7 @@ if (!function_exists('warga_replace_institution')) {
     {
         $institution = trim((string) $institution);
         if ($institution === '') return (string) $text;
-        return preg_replace_callback('/\bdesa\b/iu', static function ($match) use ($institution) {
+        return preg_replace_callback('/\b(?:desa|kampung|gampong|kelurahan|nagari)\b/iu', static function ($match) use ($institution) {
             $source = (string) $match[0];
             if ($source === strtoupper($source)) return strtoupper($institution);
             if ($source === strtolower($source)) {

@@ -8,7 +8,10 @@ $footerSystemName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 
 $footerSystemExpansion = trim((string) ($branding['kepanjangan'] ?? ''));
 if ($footerSystemExpansion === '') $footerSystemExpansion = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga')) ?: 'Layanan Digital Warga';
 $footerVillageName = trim((string) ($footerVillage['name'] ?? ($footerUser['village_name'] ?? '')));
-$footerInstitution = trim((string) ($footerContact['institution'] ?? ($footerVillage['institution'] ?? '')));
+$configuredFooterInstitution = trim((string) ($branding['bentuk_lembaga'] ?? ''));
+$footerInstitution = $configuredFooterInstitution !== ''
+    ? $configuredFooterInstitution
+    : trim((string) ($footerContact['institution'] ?? ($footerVillage['institution'] ?? '')));
 $hasExplicitInstitution = $footerInstitution !== '';
 $institutionPrefixPattern = '/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu';
 

@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-$pwaInstitution = trim((string) ($institutionLabel ?? 'Kampung'));
-if ($pwaInstitution === '') $pwaInstitution = 'Kampung';
+$pwaInstitution = trim((string) ($institutionLabel ?? 'Desa'));
+if ($pwaInstitution === '') $pwaInstitution = 'Desa';
 $pwaBranding = isset($branding) && is_array($branding) ? $branding : array();
 $pwaBrand = trim((string) ($pwaBranding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 ?>

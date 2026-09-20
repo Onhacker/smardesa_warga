@@ -57,6 +57,7 @@ $route['permohonan/(:any)/perbaiki'] = 'permohonan/edit/$1';
 $route['permohonan/simpan'] = 'permohonan/store';
 $route['permohonan/(:any)/surat'] = 'permohonan/document/$1';
 $route['permohonan/(:any)/surat-html'] = 'permohonan/document_html/$1';
+$route['permohonan/(:any)/surat-pdf'] = 'permohonan/document_pdf/$1';
 $route['permohonan/(:any)'] = 'permohonan/show/$1';
 $route['petugas'] = 'petugas/index';
 $route['petugas/permohonan/(:any)/tindakan'] = 'petugas/action/$1';

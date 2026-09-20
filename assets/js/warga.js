@@ -770,7 +770,11 @@
     var activeOpener = null;
     var currentHtml = '';
     var currentName = 'surat-resmi.html';
+    var currentPdfUrl = '';
+    var currentPdfName = 'surat-resmi.pdf';
     var controller = null;
+    var downloadController = null;
+    var downloadInProgress = false;
     var sequence = 0;
     var pageContent = document.getElementById('page');
     var pageWasInert = false;
@@ -803,6 +807,82 @@
       status.classList.toggle('is-error', Boolean(isError));
       if (statusText) statusText.textContent = message;
       if (statusSpinner) statusSpinner.hidden = Boolean(isError);
+    }
+
+    function resetDownloadButton() {
+      if (!download) return;
+      var icon = download.querySelector('i');
+      var label = download.querySelector('span');
+      if (icon) icon.className = 'fa fa-download';
+      if (label) label.textContent = 'Unduh Surat';
+      download.removeAttribute('aria-busy');
+      download.removeAttribute('title');
+      download.disabled = !currentHtml || !currentPdfUrl || downloadInProgress;
+    }
+
+    function setDownloadLoading(loading) {
+      if (!download) return;
+      var icon = download.querySelector('i');
+      var label = download.querySelector('span');
+      downloadInProgress = Boolean(loading);
+      if (loading) {
+        if (icon) icon.className = 'fa fa-spinner fa-spin';
+        if (label) label.textContent = 'Membuat PDF…';
+        download.removeAttribute('title');
+        download.setAttribute('aria-busy', 'true');
+        download.disabled = true;
+      } else {
+        resetDownloadButton();
+      }
+    }
+
+    function downloadPdf() {
+      if (!currentHtml || !currentPdfUrl || !download || downloadInProgress) return;
+      var requestNumber = sequence;
+      var url = currentPdfUrl;
+      setDownloadLoading(true);
+      if (downloadController) downloadController.abort();
+      downloadController = window.AbortController ? new AbortController() : null;
+      var options = {
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/pdf' }
+      };
+      if (downloadController) options.signal = downloadController.signal;
+      fetch(url, options).then(function (response) {
+        if (response.redirected || response.status === 401 || response.status === 403) {
+          throw new Error('Sesi Anda telah berakhir. Silakan masuk kembali.');
+        }
+        var contentType = (response.headers.get('Content-Type') || '').toLowerCase();
+        if (!response.ok || contentType.indexOf('application/pdf') === -1) {
+          throw new Error('PDF surat belum dapat dibuat.');
+        }
+        return response.blob();
+      }).then(function (blob) {
+        if (requestNumber !== sequence || modal.hidden) return;
+        if (!blob || blob.size < 64) throw new Error('PDF surat kosong.');
+        var blobUrl = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = currentPdfName;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
+        if (requestNumber === sequence && !modal.hidden) {
+          downloadController = null;
+          setDownloadLoading(false);
+        }
+      }).catch(function (error) {
+        if (error.name === 'AbortError' || requestNumber !== sequence || modal.hidden) return;
+        downloadController = null;
+        setDownloadLoading(false);
+        var message = error.message || 'PDF belum dapat diunduh. Coba lagi.';
+        var label = download.querySelector('span');
+        if (label) label.textContent = 'Coba Unduh Lagi';
+        download.title = message;
+      });
     }
 
     function setCanvasScale(value, focus) {
@@ -985,6 +1065,9 @@
       sequence++;
       if (controller) controller.abort();
       controller = null;
+      if (downloadController) downloadController.abort();
+      downloadController = null;
+      downloadInProgress = false;
       frameRequestNumber = 0;
       stopFrameObserver();
       contentHeight = baseHeight;
@@ -1001,7 +1084,9 @@
       panStart = null;
       pinchStart = null;
       currentHtml = '';
-      if (download) download.disabled = true;
+      currentPdfUrl = '';
+      currentPdfName = 'surat-resmi.pdf';
+      resetDownloadButton();
       if (activeOpener && typeof activeOpener.focus === 'function') activeOpener.focus();
       activeOpener = null;
     }
@@ -1015,6 +1100,17 @@
       currentHtml = '';
       currentName = (button.getAttribute('data-html-name') || 'surat-resmi.html').replace(/[\\/:*?"<>|]+/g, '-');
       if (!/\.html?$/i.test(currentName)) currentName += '.html';
+      currentPdfUrl = button.getAttribute('data-pdf-url') || '';
+      if (currentPdfUrl) {
+        try {
+          var parsedPdfUrl = new URL(currentPdfUrl, window.location.href);
+          currentPdfUrl = parsedPdfUrl.origin === window.location.origin ? parsedPdfUrl.href : '';
+        } catch (ignore) {
+          currentPdfUrl = '';
+        }
+      }
+      currentPdfName = (button.getAttribute('data-pdf-name') || currentName.replace(/\.html?$/i, '.pdf')).replace(/[\\/:*?"<>|]+/g, '-');
+      if (!/\.pdf$/i.test(currentPdfName)) currentPdfName += '.pdf';
       pointers = {};
       panStart = null;
       pinchStart = null;
@@ -1037,7 +1133,8 @@
       if (zoomHint) zoomHint.hidden = true;
       status.classList.remove('is-error');
       setLetterStatus('Menyiapkan surat…', false);
-      if (download) download.disabled = true;
+      downloadInProgress = false;
+      resetDownloadButton();
       if (controller) controller.abort();
       controller = window.AbortController ? new AbortController() : null;
       var options = { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'text/html' } };
@@ -1071,7 +1168,7 @@
         if (zoomControls) zoomControls.hidden = false;
         if (zoomHint) zoomHint.hidden = false;
         if (status) status.hidden = true;
-        if (download) download.disabled = false;
+        resetDownloadButton();
       });
     });
 
@@ -1083,14 +1180,7 @@
       else if (button.hasAttribute('data-warga-letter-zoom-in')) { event.preventDefault(); zoomBy(1.2); }
       else if (button.hasAttribute('data-warga-letter-zoom-out')) { event.preventDefault(); zoomBy(1 / 1.2); }
       else if (button.hasAttribute('data-warga-letter-zoom-reset')) { event.preventDefault(); resetZoom(); }
-      else if (button.hasAttribute('data-warga-letter-download') && currentHtml) {
-        event.preventDefault();
-        var blobUrl = URL.createObjectURL(new Blob([currentHtml], { type: 'text/html;charset=utf-8' }));
-        var link = document.createElement('a');
-        link.href = blobUrl; link.download = currentName; link.rel = 'noopener';
-        document.body.appendChild(link); link.click(); link.remove();
-        window.setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 1000);
-      }
+      else if (button.hasAttribute('data-warga-letter-download')) { event.preventDefault(); downloadPdf(); }
     });
     document.addEventListener('keydown', function (event) {
       if (event.key === 'Escape' && !modal.hidden) { event.preventDefault(); close(); }

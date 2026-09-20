@@ -176,6 +176,27 @@ class Permohonan extends Citizen_Controller
         if (!$this->stream_private_html($document['document_path'], 'surat-' . (string) $document['local_reference'], $disposition, (string) $document['document_sha256'])) show_404();
     }
 
+    /**
+     * Download an HTML-issued letter as a generated PDF. The HTML preview
+     * endpoint above remains unchanged so residents can still view the exact
+     * official snapshot in the existing modal.
+     */
+    public function document_pdf($id)
+    {
+        $this->output->set_header('X-Robots-Tag: noindex, nofollow, noarchive');
+        $this->load->model('Request_model');
+        $document = $this->Request_model->official_html_for_user($id, $this->currentUser['id']);
+        if (!$document || empty($document['document_path'])) show_404();
+        $name = 'surat-' . (string) ($document['local_reference'] ?? 'resmi') . '.pdf';
+        if (!$this->stream_private_html_pdf(
+            $document['document_path'],
+            $name,
+            (string) ($document['document_sha256'] ?? '')
+        )) {
+            show_error('PDF surat belum dapat dibuat. Silakan coba lagi.', 503);
+        }
+    }
+
     public function document($id)
     {
         $this->load->model('Request_model');
