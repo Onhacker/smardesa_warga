@@ -12,19 +12,13 @@ $configuredFooterInstitution = trim((string) ($branding['bentuk_lembaga'] ?? '')
 $footerInstitution = $configuredFooterInstitution !== ''
     ? $configuredFooterInstitution
     : trim((string) ($footerContact['institution'] ?? ($footerVillage['institution'] ?? '')));
-$hasExplicitInstitution = $footerInstitution !== '';
 $institutionPrefixPattern = '/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu';
 
 // The central tenant keeps the village name separately from the institution
 // type.  Remove a repeated prefix so the brand reads, for example, “Smart
 // Kampung Araboda”, instead of “Smart Kampung Kampung Araboda”.
-if (preg_match($institutionPrefixPattern, $footerVillageName, $prefixMatch)) {
+if (preg_match($institutionPrefixPattern, $footerVillageName)) {
     $nameWithoutPrefix = trim((string) preg_replace($institutionPrefixPattern, '', $footerVillageName, 1));
-    if (!$hasExplicitInstitution || (strtolower($footerInstitution) === 'desa' && strtolower($prefixMatch[1]) !== 'desa')) {
-        $footerInstitution = function_exists('mb_convert_case')
-            ? mb_convert_case($prefixMatch[1], MB_CASE_TITLE, 'UTF-8')
-            : ucfirst(strtolower($prefixMatch[1]));
-    }
     $footerVillageName = $nameWithoutPrefix !== '' ? $nameWithoutPrefix : $footerVillageName;
 }
 if ($footerInstitution === '') $footerInstitution = 'Desa';

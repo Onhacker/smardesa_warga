@@ -14,14 +14,17 @@ class Branding_model extends CI_Model
             $tenantCode !== '' ? $tenantCode : warga_tenant_code('default'),
             'default'
         );
+        $institutionEnv = $this->fallback('WARGA_INSTITUTION_LABEL', 'PUBLIC_INSTITUTION_LABEL', '');
+        $districtEnv = $this->fallback('WARGA_DISTRICT_LABEL', 'PUBLIC_DISTRICT_LABEL', '');
         $branding = array(
             'tenant_code' => $tenantCode,
             'tenant_name' => '',
             'nama_sistem' => $this->fallback('WARGA_SYSTEM_NAME', 'PUBLIC_SYSTEM_NAME', 'SIDAPULIK'),
             'kepanjangan' => $this->fallback('WARGA_SYSTEM_EXPANSION', 'PUBLIC_SYSTEM_EXPANSION', ''),
             'tagline' => $this->fallback('WARGA_SYSTEM_TAGLINE', 'PUBLIC_SYSTEM_TAGLINE', 'Bersama Membangun Kampung Digital'),
-            'bentuk_lembaga' => $this->fallback('WARGA_INSTITUTION_LABEL', 'PUBLIC_INSTITUTION_LABEL', 'Desa'),
-            'bentuk_kecamatan' => $this->fallback('WARGA_DISTRICT_LABEL', 'PUBLIC_DISTRICT_LABEL', 'Kecamatan')
+            'bentuk_lembaga' => $institutionEnv !== '' ? $institutionEnv : 'Desa',
+            'bentuk_kecamatan' => $districtEnv !== '' ? $districtEnv : 'Kecamatan',
+            'region_labels_managed' => ($institutionEnv !== '' || $districtEnv !== '') ? 1 : 0
         );
 
         // CodeIgniter exposes the database through CI_Model's magic getter;
@@ -32,7 +35,7 @@ class Branding_model extends CI_Model
         }
 
         $fields = array();
-        foreach (array('tenant_code', 'tenant_name', 'nama_sistem', 'kepanjangan', 'tagline', 'bentuk_lembaga', 'bentuk_kecamatan') as $field) {
+        foreach (array('tenant_code', 'tenant_name', 'nama_sistem', 'kepanjangan', 'tagline', 'bentuk_lembaga', 'bentuk_kecamatan', 'region_labels_managed') as $field) {
             if ($db->field_exists($field, 'app_public_branding')) {
                 $fields[] = $field;
             }
@@ -52,7 +55,7 @@ class Branding_model extends CI_Model
         if (is_array($row)) {
             foreach ($fields as $field) {
                 if (isset($row[$field]) && trim((string) $row[$field]) !== '') {
-                    $branding[$field] = $row[$field];
+                    $branding[$field] = $field === 'region_labels_managed' ? (int) $row[$field] : $row[$field];
                 }
             }
         }
@@ -78,7 +81,8 @@ class Branding_model extends CI_Model
             'kepanjangan' => $this->clean($branding['kepanjangan'] ?? '', 180, ''),
             'tagline' => $this->clean($branding['tagline'] ?? '', 255, 'Bersama Membangun Kampung Digital'),
             'bentuk_lembaga' => $this->label($branding['bentuk_lembaga'] ?? '', 'Desa'),
-            'bentuk_kecamatan' => $this->label($branding['bentuk_kecamatan'] ?? '', 'Kecamatan')
+            'bentuk_kecamatan' => $this->label($branding['bentuk_kecamatan'] ?? '', 'Kecamatan'),
+            'region_labels_managed' => !empty($branding['region_labels_managed']) ? 1 : 0
         );
     }
 

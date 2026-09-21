@@ -92,15 +92,11 @@ class MY_Controller extends CI_Controller
                 'contact' => array()
             );
         }
-        // Preserve the village-specific label supplied by Community_model.
-        // The tenant branding value is only a fallback for public/legacy
-        // contexts where no village contact identity is available.
-        if (trim((string) ($contactVillage['institution'] ?? '')) === '') {
-            $contactVillage['institution'] = $this->institution_label();
-        }
-        if (trim((string) ($contactVillage['district_label'] ?? '')) === '') {
-            $contactVillage['district_label'] = $this->district_label();
-        }
+        // Region terminology is configured per regency. Contact details stay
+        // village-specific, while the institution labels always follow the
+        // tenant branding immediately after publication.
+        $contactVillage['institution'] = $this->institution_label();
+        $contactVillage['district_label'] = $this->district_label();
         $data['institutionLabel'] = $this->institution_label();
         $data['districtLabel'] = $this->district_label();
         $data['institutionLower'] = function_exists('mb_strtolower')
@@ -114,17 +110,10 @@ class MY_Controller extends CI_Controller
         // buttons, while the page views remain responsible for their own data.
         $data['footerVillage'] = $contactVillage;
         $data['pageTitle'] = isset($data['pageTitle']) ? $data['pageTitle'] : $this->branding['nama_sistem'];
-        $publicInstitution = $this->institution_label();
         $publicArea = trim((string) (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya')) ?: 'Jayawijaya';
-        $shareInstitution = trim((string) ($contactVillage['institution'] ?? '')) ?: $publicInstitution;
         $shareArea = trim((string) ($contactVillage['name'] ?? '')) ?: $publicArea;
-        if (preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', $shareArea, $sharePrefixMatch)) {
+        if (preg_match('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', $shareArea)) {
             $shareAreaWithoutPrefix = trim((string) preg_replace('/^(desa|kampung|kelurahan|nagari|gampong)\s+/iu', '', $shareArea, 1));
-            if ($shareInstitution === '' || (strtolower($shareInstitution) === 'desa' && strtolower($sharePrefixMatch[1]) !== 'desa')) {
-                $shareInstitution = function_exists('mb_convert_case')
-                    ? mb_convert_case($sharePrefixMatch[1], MB_CASE_TITLE, 'UTF-8')
-                    : ucfirst(strtolower($sharePrefixMatch[1]));
-            }
             if ($shareAreaWithoutPrefix !== '') $shareArea = $shareAreaWithoutPrefix;
         }
         $publicBrand = trim($this->branding['nama_sistem'] . ($shareArea !== '' ? ' ' . $shareArea : ''));

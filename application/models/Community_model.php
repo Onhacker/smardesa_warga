@@ -95,10 +95,17 @@ class Community_model extends CI_Model
             $this->load->model('Branding_model', 'communityBranding');
             $branding = $this->communityBranding->current($row['regency_code'] ?? warga_tenant_code('default'));
             $configuredInstitution = trim((string) ($branding['bentuk_lembaga'] ?? ''));
-            // A village's synced contact.institution is the most specific
-            // value. Only use tenant branding when the village has no label.
-            if ($institution === '' && $configuredInstitution !== '') $institution = $configuredInstitution;
-            $row['district_label'] = trim((string) ($branding['bentuk_kecamatan'] ?? '')) ?: 'Kecamatan';
+            $managedLabels = !empty($branding['region_labels_managed']);
+            // Institution terminology is managed per regency. A village
+            // snapshot may still contain an older label, so central branding
+            // must win as soon as it has been published. Before that point,
+            // preserve the label carried by older village snapshots.
+            if ($managedLabels && $configuredInstitution !== '') $institution = $configuredInstitution;
+            $existingDistrictLabel = trim((string) ($row['contact']['district_label']
+                ?? ($row['settings']['bentuk_kecamatan'] ?? '')));
+            $row['district_label'] = $managedLabels
+                ? (trim((string) ($branding['bentuk_kecamatan'] ?? '')) ?: 'Kecamatan')
+                : ($existingDistrictLabel !== '' ? $existingDistrictLabel : 'Kecamatan');
         } catch (Throwable $e) {
             $row['district_label'] = 'Kecamatan';
         }
@@ -344,6 +351,19 @@ class Community_model extends CI_Model
             if (is_dir($directory)) @rmdir($directory);
         }
         return true;
+    }
+
+    /**
+     * Backward-compatible name retained for older integrations. The current
+     * UI uses delete_announcement(), while old callers still expect a
+     * reversible archive that keeps the notification history intact.
+     */
+    public function archive_announcement($id, array $user)
+    {
+        if (!$this->can_manage($user) || !$this->ready()) return false;
+        return (bool) $this->db
+            ->where(array('id' => $id, 'village_id' => $user['village_id']))
+            ->update('warga_announcements', array('status' => 'archived'));
     }
 
     private function prepare_announcement_attachment($announcementId, array $upload)
