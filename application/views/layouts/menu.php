@@ -1,12 +1,13 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-$menuInstitution = trim((string) ($institutionLabel ?? 'Desa'));
-if ($menuInstitution === '') $menuInstitution = 'Desa';
 $branding = isset($branding) && is_array($branding) ? $branding : array();
 $menuBrand = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPULIK';
 $menuTagline = trim((string) ($branding['tagline'] ?? 'Bersama Membangun Kampung Digital')) ?: 'Bersama Membangun Kampung Digital';
 $menuIsAuthenticated = !empty($currentUser) && is_array($currentUser);
 $menuCanManageMarketplace = !empty($canManageMarketplace);
 $menuFooterVillage = isset($footerVillage) && is_array($footerVillage) ? $footerVillage : array();
+$menuInstitution = trim((string) ($menuFooterVillage['institution'] ?? ''));
+if ($menuInstitution === '') $menuInstitution = trim((string) ($institutionLabel ?? 'Desa'));
+if ($menuInstitution === '') $menuInstitution = 'Desa';
 $menuArea = trim((string) ($menuIsAuthenticated
     ? ($currentUser['village_name'] ?? '')
     : ($menuFooterVillage['name'] ?? (getenv('PUBLIC_AREA_NAME') ?: 'Jayawijaya'))));
