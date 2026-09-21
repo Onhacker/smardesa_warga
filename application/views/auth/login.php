@@ -34,6 +34,7 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/warga-auth.min.css') ?>">
     <link rel="stylesheet" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
+    <link rel="stylesheet" href="<?= warga_asset_url('assets/css/passkey.css') ?>">
     <link rel="manifest" href="<?= site_url('manifest') ?>">
     <link rel="icon" href="<?= warga_asset_url('assets/pwa/icon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= warga_asset_url('assets/pwa/icon-180.png') ?>">
@@ -75,6 +76,16 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
                     <div class="warga-auth-forgot"><a href="<?= site_url('lupa-password') ?>">Lupa kata sandi?</a></div>
                     <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
                 </form>
+                <button type="button" class="btn btn-full btn-m rounded-s warga-passkey-login" data-passkey-login hidden><i class="fa fa-user-shield" aria-hidden="true"></i>Masuk dengan sidik jari/wajah</button>
+                <button type="button" class="btn btn-full btn-m border-blue-dark color-blue-dark rounded-s warga-pin-login-toggle" data-pin-login-toggle aria-expanded="false" aria-controls="warga-pin-login-panel"><i class="fa fa-key" aria-hidden="true"></i>Masuk dengan PIN</button>
+                <div class="warga-pin-login-panel" id="warga-pin-login-panel" data-pin-login-panel hidden>
+                    <form data-pin-login-form autocomplete="off">
+                        <label class="small-text" for="login-pin">PIN 6 angka</label>
+                        <input type="password" id="login-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" placeholder="Masukkan PIN" required>
+                        <button type="submit" class="btn btn-full btn-s bg-blue-dark color-white rounded-s"><i class="fa fa-lock" aria-hidden="true"></i>Masuk dengan PIN</button>
+                    </form>
+                </div>
+                <div class="warga-login-auth-message" data-login-auth-message role="status" aria-live="polite" hidden></div>
                 <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>
                 <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="warga-auth-switch-link" href="<?= site_url('register') ?>">Daftar Warga</a></p>
             </div>
@@ -83,8 +94,9 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl, 'branding' => $branding)); ?>
     </main>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($loginBrand) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($loginBrand) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,passkeyEndpoints:<?= json_encode(array('loginOptions'=>site_url('passkey/login/options'),'login'=>site_url('passkey/login'),'pinLogin'=>site_url('passkey/pin/login'))) ?>};</script>
 <script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>
+<script src="<?= warga_asset_url('assets/js/passkey.js') ?>"></script>
 <script>window.SDW.footerActionsUrl=<?= json_encode(warga_asset_url('assets/js/footer-actions.js')) ?>;</script>
 <script src="<?= warga_asset_url('assets/js/footer-actions-loader.min.js') ?>"></script>
 </body>

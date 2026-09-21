@@ -23,7 +23,7 @@ class Auth_model extends CI_Model
 
     private function is_login_throttled($identity)
     {
-        if (warga_demo_mode() || !warga_database_available()) return FALSE;
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('login_failures')) return FALSE;
         $since = date('Y-m-d H:i:s', time() - 900);
         $identityCount = $this->db->where('identity_hash', $this->login_identity_hash($identity))->where('attempted_at >=', $since)->count_all_results('login_failures');
         $ipCount = $this->db->where('ip_address', $this->client_ip())->where('attempted_at >=', $since)->count_all_results('login_failures');
@@ -32,15 +32,31 @@ class Auth_model extends CI_Model
 
     private function record_login_failure($identity)
     {
-        if (warga_demo_mode() || !warga_database_available()) return;
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('login_failures')) return;
         if (mt_rand(1, 20) === 1) $this->db->where('attempted_at <', date('Y-m-d H:i:s', time() - 86400))->delete('login_failures');
         $this->db->insert('login_failures', array('identity_hash' => $this->login_identity_hash($identity), 'ip_address' => $this->client_ip()));
     }
 
     private function clear_login_failures($identity)
     {
-        if (warga_demo_mode() || !warga_database_available()) return;
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('login_failures')) return;
         $this->db->where('identity_hash', $this->login_identity_hash($identity))->delete('login_failures');
+    }
+
+    /** Limited public wrappers for the Passkey/PIN controller. */
+    public function login_is_throttled($identity)
+    {
+        return $this->is_login_throttled($identity);
+    }
+
+    public function note_login_failure($identity)
+    {
+        $this->record_login_failure($identity);
+    }
+
+    public function clear_login_failure($identity)
+    {
+        $this->clear_login_failures($identity);
     }
 
     private function session_version_ready()
@@ -108,6 +124,170 @@ class Auth_model extends CI_Model
         $data = array('warga_logged_in' => TRUE, 'warga_user_id' => (int) $user['id']);
         if ($this->session_version_ready()) $data['warga_session_version'] = max(1, (int) ($user['session_version'] ?? 1));
         $this->session->set_userdata($data);
+    }
+
+    /**
+     * A normal CI session remains short-lived. Passkey/PIN sign-ins receive a
+     * separate, revocable trusted-device cookie so returning users can
+     * be restored for up to one year without making every anonymous session
+     * immortal. Only a selector and a one-way token hash are stored server-side.
+     */
+    private function trusted_cookie_name()
+    {
+        return 'sdw_trusted_device';
+    }
+
+    private function trusted_cookie_value()
+    {
+        $name = $this->trusted_cookie_name();
+        return isset($_COOKIE[$name]) ? trim((string) $_COOKIE[$name]) : '';
+    }
+
+    private function trusted_token_hash($secret)
+    {
+        return hash_hmac('sha256', (string) $secret, (string) $this->config->item('encryption_key'));
+    }
+
+    private function trusted_device_ttl()
+    {
+        // Keep the remembered-device window bounded even if a deployment
+        // accidentally supplies an excessive value. The default is one year,
+        // while a shorter value can be selected for stricter environments.
+        $configured = (int) (getenv('WARGA_TRUSTED_DEVICE_TTL') ?: 31536000);
+        return max(86400, min(31536000, $configured));
+    }
+
+    private function write_trusted_cookie($value, $expires)
+    {
+        $appUrl = parse_url(trim((string) getenv('APP_URL')));
+        $secure = ENVIRONMENT === 'production'
+            || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (is_array($appUrl) && strtolower((string) ($appUrl['scheme'] ?? '')) === 'https');
+        $options = array(
+            // Keep a past timestamp when revoking; clamping it to zero would
+            // turn the deletion response into a new session cookie in some
+            // browsers instead of replacing the one-year persistent cookie.
+            'expires' => (int) $expires,
+            'path' => '/',
+            'secure' => $secure,
+            'httponly' => TRUE,
+            'samesite' => 'Lax'
+        );
+        setcookie($this->trusted_cookie_name(), (string) $value, $options);
+        if ((int) $expires <= time()) unset($_COOKIE[$this->trusted_cookie_name()]);
+        else $_COOKIE[$this->trusted_cookie_name()] = (string) $value;
+    }
+
+    /** Restore a trusted passkey/PIN device before current_user() is checked. */
+    public function restore_trusted_session()
+    {
+        if ($this->session->userdata('warga_logged_in') || warga_demo_mode() || !warga_database_available()) return FALSE;
+        $cookie = $this->trusted_cookie_value();
+        // Avoid a metadata query for every anonymous request. Most visitors
+        // have no remembered-device cookie at all.
+        if ($cookie === '' || !$this->db->table_exists('warga_login_tokens')
+            || !$this->db->field_exists('session_version', 'users')
+            || !$this->db->field_exists('session_version', 'warga_login_tokens')) return FALSE;
+        if (!preg_match('/^([A-Za-z0-9_-]{20,40})\.([A-Za-z0-9_-]{30,80})$/', $cookie, $match)) return FALSE;
+        $selector = $match[1];
+        $secret = $match[2];
+        $row = $this->db->select('t.*,u.id AS user_id,u.session_version AS current_session_version,u.is_active,u.role_id,r.slug AS role_slug,v.regency_code')
+            ->from('warga_login_tokens t')
+            ->join('users u', 'u.id=t.user_id')
+            ->join('roles r', 'r.id=u.role_id')
+            ->join('village_tenants v', 'v.id=u.village_id', 'left')
+            ->where(array('t.selector' => $selector, 't.revoked_at' => NULL))
+            ->limit(1)->get()->row_array();
+        $expired = !$row || empty($row['expires_at']) || strtotime((string) $row['expires_at']) <= time();
+        $valid = !$expired && (int) ($row['session_version'] ?? 1) === max(1, (int) ($row['current_session_version'] ?? 1))
+            && hash_equals((string) $row['token_hash'], $this->trusted_token_hash($secret))
+            && (int) ($row['is_active'] ?? 0) === 1
+            && warga_role_is_allowed($row['role_slug'] ?? '');
+        if ($valid && function_exists('warga_tenant_code')) {
+            $tenant = warga_normalize_tenant_code(warga_tenant_code(''), '');
+            $region = warga_normalize_tenant_code($row['regency_code'] ?? '', '');
+            if ($tenant !== '' && strtolower($tenant) !== 'default' && ($region === '' || !hash_equals($tenant, $region))) $valid = FALSE;
+        }
+        if (!$valid) {
+            if ($row) $this->db->where('selector', $selector)->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+            $this->write_trusted_cookie('', time() - 3600);
+            return FALSE;
+        }
+        $this->session->sess_regenerate(TRUE);
+        $this->session->set_userdata(array(
+            'warga_logged_in' => TRUE,
+            'warga_user_id' => (int) $row['user_id'],
+            'warga_session_version' => max(1, (int) ($row['current_session_version'] ?? 1))
+        ));
+        // Keep the device secret stable during the token lifetime. Rotating it
+        // on every request is unsafe for a PWA: several HTML/CSS/API requests
+        // can arrive concurrently with the same cookie, and a later request
+        // carrying the old value would otherwise revoke the freshly rotated
+        // token. The selector is still individually revocable, the secret is
+        // HttpOnly, and the session-version check invalidates every token after
+        // a password/security change.
+        $this->db->where('selector', $selector)->update('warga_login_tokens', array(
+            'last_used_at' => date('Y-m-d H:i:s')
+        ));
+        return TRUE;
+    }
+
+    /** Create a one-year trusted-device token after a verified Passkey/PIN login. */
+    public function authenticate_with_trusted_device(array $user, $method)
+    {
+        $this->session->sess_regenerate(TRUE);
+        $this->set_authenticated_session($user);
+        $this->issue_trusted_device((int) $user['id'], (string) $method, max(1, (int) ($user['session_version'] ?? 1)));
+        if (warga_database_available() && isset($user['id'])) {
+            $this->db->where('id', (int) $user['id'])->update('users', array('last_login_at' => date('Y-m-d H:i:s')));
+        }
+    }
+
+    private function issue_trusted_device($userId, $method, $sessionVersion = 1)
+    {
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('warga_login_tokens')) return FALSE;
+        $method = in_array((string) $method, array('passkey', 'pin'), TRUE) ? (string) $method : 'passkey';
+        $selector = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+        $secret = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $expires = time() + $this->trusted_device_ttl();
+        $this->db->where('user_id', (int) $userId)->where('expires_at <', date('Y-m-d H:i:s'))->delete('warga_login_tokens');
+        $existing = $this->db->select('selector')->where('user_id', (int) $userId)->where('revoked_at', NULL)->order_by('created_at', 'DESC')->get('warga_login_tokens')->result_array();
+        if (count($existing) >= 5) {
+            foreach (array_slice($existing, 4) as $old) {
+                if (!empty($old['selector'])) $this->db->where('selector', (string) $old['selector'])->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+            }
+        }
+        $this->db->insert('warga_login_tokens', array(
+            'selector' => $selector,
+            'user_id' => (int) $userId,
+            'session_version' => max(1, (int) $sessionVersion),
+            'token_hash' => $this->trusted_token_hash($secret),
+            'auth_method' => $method,
+            'expires_at' => date('Y-m-d H:i:s', $expires),
+            'last_used_at' => date('Y-m-d H:i:s'),
+            'user_agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+            'ip_address' => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45)
+        ));
+        if (!$this->db->affected_rows()) return FALSE;
+        $this->write_trusted_cookie($selector . '.' . $secret, $expires);
+        return TRUE;
+    }
+
+    public function revoke_trusted_devices($userId, $method = NULL)
+    {
+        if (!warga_database_available() || !$this->db->table_exists('warga_login_tokens')) return;
+        $this->db->where('user_id', (int) $userId)->where('revoked_at', NULL);
+        if ($method !== NULL) $this->db->where('auth_method', (string) $method);
+        $this->db->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+    }
+
+    public function revoke_current_trusted_device()
+    {
+        $cookie = $this->trusted_cookie_value();
+        if (preg_match('/^([A-Za-z0-9_-]{20,40})\./', $cookie, $match) && warga_database_available() && $this->db->table_exists('warga_login_tokens')) {
+            $this->db->where('selector', $match[1])->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+        }
+        $this->write_trusted_cookie('', time() - 3600);
     }
 
     public function error()
@@ -858,6 +1038,7 @@ class Auth_model extends CI_Model
 
     public function logout()
     {
+        $this->revoke_current_trusted_device();
         $this->session->unset_userdata(array('warga_logged_in', 'warga_user_id', 'warga_session_version', 'intended_url'));
         $this->session->sess_regenerate(TRUE);
     }

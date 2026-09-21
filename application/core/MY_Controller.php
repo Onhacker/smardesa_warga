@@ -13,6 +13,11 @@ class MY_Controller extends CI_Controller
         parent::__construct();
         $this->apply_security_headers();
         $this->load->model('Auth_model');
+        // Restore a verified Passkey/PIN trusted-device token before any
+        // controller decides whether the visitor is authenticated. The
+        // ordinary CI session remains short-lived; this token is separately
+        // revocable and expires after one year.
+        $this->Auth_model->restore_trusted_session();
         $this->currentUser = $this->Auth_model->current_user();
         $this->load->model('Branding_model');
         $tenantCode = is_array($this->currentUser) && !empty($this->currentUser['regency_code'])
@@ -167,6 +172,9 @@ class MY_Controller extends CI_Controller
         $data['loadComplaintPaginationScript'] = array_key_exists('loadComplaintPaginationScript', $data)
             ? (bool) $data['loadComplaintPaginationScript']
             : ($view === 'community/complaints');
+        $data['loadPasskeyScript'] = array_key_exists('loadPasskeyScript', $data)
+            ? (bool) $data['loadPasskeyScript']
+            : ($view === 'account/index');
         $data['loadMarketplaceAssets'] = array_key_exists('loadMarketplaceAssets', $data)
             ? (bool) $data['loadMarketplaceAssets']
             : (strpos($view, 'marketplace/') === 0 || $view === 'community/home');

@@ -106,7 +106,7 @@ smartdesa-warga/database/seed.sql
 
 Jika database sudah pernah dibuat, impor berkas pada `database/migrations` sesuai urutan dan
 catat migration yang sudah pernah dijalankan. Jangan mengimpor ulang migration lama yang tidak
-idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `024_*.sql` dan
+idempoten. Rangkaian yang relevan saat ini berjalan dari `001_*.sql` sampai `028_*.sql` dan
 menambahkan autentikasi sinkron,
 seluruh wilayah Jayawijaya, aktivasi otomatis, katalog Master Surat, direktori penduduk,
 pengaman satu akun per penduduk, metadata PDF resmi, kunci snapshot sepanjang 120 karakter,
@@ -122,6 +122,10 @@ diterbitkan SmartDesa pusat. Karena API dan PWA memakai database yang sama, migr
 cukup dijalankan satu kali. `023_security_hardening.sql` menambahkan pencabutan session
 terpusat dan pembatasan percobaan pendaftaran; jalankan sekali setelah `022`.
 `024_password_reset.sql` menambahkan OTP lupa kata sandi PWA; jalankan sekali setelah `023`.
+`025_account_security_branding.sql`, `026_multi_tenant_branding.sql`, dan
+`027_institution_labels.sql` menyelesaikan OTP perubahan akun serta branding per wilayah.
+`028_passkey_pin_devices.sql` menambahkan credential Passkey, PIN enam angka, dan token
+perangkat tepercaya yang dapat memulihkan login hingga satu tahun.
 
 Migration `023` menargetkan MariaDB Hostinger dan memakai `ADD ... IF NOT EXISTS`. Periksa versi
 database lebih dahulu dan buat backup tepat sebelum DDL dijalankan. Contoh menjalankan migration
@@ -153,10 +157,18 @@ mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" 
   < "$REPO/database/migrations/023_security_hardening.sql"
 mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
   < "$REPO/database/migrations/024_password_reset.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/025_account_security_branding.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/026_multi_tenant_branding.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/027_institution_labels.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/028_passkey_pin_devices.sql"
 
-# Verifikasi kolom, indeks, dan tabel reset password
+# Verifikasi kolom, tabel reset password, serta perangkat tepercaya
 mysql -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
-  -e 'SHOW CREATE TABLE users\G SHOW CREATE TABLE registration_attempts\G SHOW CREATE TABLE warga_password_reset_requests\G'
+  -e 'SHOW CREATE TABLE users\G SHOW CREATE TABLE registration_attempts\G SHOW CREATE TABLE warga_password_reset_requests\G SHOW CREATE TABLE warga_passkey_credentials\G SHOW CREATE TABLE warga_login_tokens\G'
 ```
 
 Kode aplikasi tidak lagi menjalankan `CREATE TABLE` atau `ALTER TABLE` pada request. Beberapa
@@ -199,7 +211,8 @@ server PHP 8.0 menginstal dependency yang tidak bisa dijalankan.
 `check_runtime.php` hanya membaca daftar konfigurasi yang dibutuhkan dan tidak menampilkan
 nilainya. `--env` harus menunjuk `.env` milik domain yang sedang diuji. Opsi `--strict-env`
 membuat pemeriksaan gagal bila mode production, URL HTTPS, APP_KEY, private storage, URL API,
-mode demo, folder session privat, atau mode CSP belum valid; status `WARN` tanpa opsi tersebut
+mode demo, folder session privat, CSP, TTL perangkat tepercaya, konfigurasi WebAuthn, library
+Composer Passkey, atau relasi `assetlinks.json` belum valid; status `WARN` tanpa opsi tersebut
 bukan tanda bahwa production sudah siap. Pengecekan CLI tidak menggantikan pemilihan versi PHP
 domain di hPanel, jadi uji juga halaman staging melalui HTTPS.
 
@@ -208,6 +221,12 @@ Pengaturan keamanan runtime yang disarankan pada `.env` production:
 ```text
 WARGA_SESSION_EXPIRATION=604800
 WARGA_SESSION_SAVE_PATH=/home/USER/smartdesa-private/sessions
+WARGA_TRUSTED_DEVICE_TTL=31536000
+WARGA_WEBAUTHN_RP_ID=warga-smartdesa.mediaverse.co.id
+WARGA_WEBAUTHN_RP_NAME=SI DAPULIK
+WARGA_WEBAUTHN_ANDROID_PACKAGE=id.co.mediaverse.smartkampung
+# Optional extra base64url APK certificate hashes; assetlinks is read automatically.
+WARGA_WEBAUTHN_ANDROID_KEY_HASHES=
 WARGA_CSP_ENFORCE=0
 ```
 
@@ -252,6 +271,16 @@ chmod 750 "$HOME/smartdesa-private/sessions"
 # atau mysqldump sebelum melanjutkan. Setelah backup terverifikasi:
 mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
   < "$REPO/database/migrations/023_security_hardening.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/024_password_reset.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/025_account_security_branding.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/026_multi_tenant_branding.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/027_institution_labels.sql"
+mysql --default-character-set=utf8mb4 -h "$DB_HOST" -u "$DB_USER" -p "$DB_NAME" \
+  < "$REPO/database/migrations/028_passkey_pin_devices.sql"
 
 "$PHP_BIN" "$REPO/tools/check_runtime.php" --minimum=8.3 --strict-env --env="$PWA_ROOT/.env"
 "$PHP_BIN" "$REPO/tools/tests/image_optimizer.php"
@@ -270,6 +299,9 @@ rsync -a --delete \
 mkdir -p "$PWA_ROOT/.well-known"
 cp "$REPO/.well-known/assetlinks.json" "$PWA_ROOT/.well-known/assetlinks.json"
 chmod 644 "$PWA_ROOT/.well-known/assetlinks.json"
+curl -fsS "https://warga-smartdesa.mediaverse.co.id/.well-known/assetlinks.json" \
+  | grep -q 'common.get_login_creds' \
+  || { echo 'assetlinks.json belum aktif/relasi Passkey belum tersedia'; exit 1; }
 ```
 
 Lakukan smoke test HTTPS untuk login, pendaftaran, unggah gambar, unggah PDF, Pasar Dapulik,
@@ -398,10 +430,12 @@ Tool provisioning dan kode sekali pakai hanya dipakai sebagai pemulihan instalas
 - Nilai `PRIVATE_STORAGE_PATH` API dan PWA sama persis dan writable oleh kedua aplikasi.
 - Database API dan PWA terhubung, tetapi user database tetap terpisah bila memungkinkan.
 - Migration prasyarat `001` sampai `015` sudah selesai; `016` dan `017` sudah dijalankan untuk
-  Pasar Dapulik; `018` sampai `023` sudah diterapkan sesuai urutan.
+  Pasar Dapulik; `018` sampai `028` sudah diterapkan sesuai urutan.
 - Binary CLI yang dipakai saat tes sama dengan PHP 8.3/8.4 yang dipilih untuk domain di hPanel;
   runtime check, GD WebP, dan seluruh tes hardening berstatus `OK`.
 - `WARGA_SESSION_SAVE_PATH` menunjuk folder privat yang writable di luar `public_html`.
+- `WARGA_TRUSTED_DEVICE_TTL` tidak melebihi 31536000; `WARGA_WEBAUTHN_RP_ID` cocok dengan
+  host HTTPS PWA dan `.well-known/assetlinks.json` dapat dibaca publik untuk TWA.
 - CSP tetap report-only (`WARGA_CSP_ENFORCE=0`) selama QA dan hanya dienforce setelah laporan
   pelanggaran resource sah sudah bersih.
 - Akun demo tidak digunakan di produksi.

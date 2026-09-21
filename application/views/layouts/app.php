@@ -35,6 +35,7 @@ $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPU
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
+    <?php if (!empty($loadPasskeyScript)): ?><link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/passkey.css') ?>"><?php endif; ?>
     <link rel="stylesheet" data-lazy-style="notification-core" href="<?= warga_asset_url('assets/css/warga-notification-core.min.css') ?>">
     <?php if (!empty($loadCommunityStyles)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/community.min.css') ?>"><?php endif; ?>
     <?php if (!empty($loadNotificationStyles)): ?><link rel="stylesheet" data-lazy-style="notification-center" href="<?= warga_asset_url('assets/css/warga-notifications.min.css') ?>"><?php endif; ?>
@@ -111,7 +112,7 @@ $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPU
     <?php if (!empty($isAuthenticated)): ?><?php $this->load->view('layouts/notification_center'); ?><?php endif; ?>
     <?php $this->load->view('layouts/notification_onboarding'); ?>
 </div>
-<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($brandName) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>};</script>
+<script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($brandName) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,isAuthenticated:<?= !empty($isAuthenticated) ? 'true' : 'false' ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,passkeyEndpoints:<?= json_encode(array('status'=>site_url('passkey/status'),'registerOptions'=>site_url('passkey/register/options'),'register'=>site_url('passkey/register'),'revoke'=>site_url('passkey/revoke'),'pinEnable'=>site_url('passkey/pin/enable'),'pinDisable'=>site_url('passkey/pin/disable'),'loginOptions'=>site_url('passkey/login/options'),'login'=>site_url('passkey/login'),'pinLogin'=>site_url('passkey/pin/login'))) ?>};</script>
 <script>window.SDW.vapidPublicKey=<?= json_encode(trim((string)getenv('WARGA_VAPID_PUBLIC_KEY'))) ?>;</script>
 <script src="<?= warga_asset_url('assets/v22/scripts/appkit-core.min.js') ?>"></script>
 <script src="<?= warga_asset_url('assets/v22/scripts/custom.min.js') ?>"></script>
@@ -123,6 +124,7 @@ $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPU
 <?php endif; ?>
 <?php if (!empty($loadMarketplaceScript)): ?><script src="<?= warga_asset_url('assets/js/market.js') ?>"></script><?php endif; ?>
 <?php if (!empty($loadComplaintPaginationScript)): ?><script src="<?= warga_asset_url('assets/js/complaint-pagination.min.js') ?>"></script><?php endif; ?>
+<?php if (!empty($loadPasskeyScript)): ?><script src="<?= warga_asset_url('assets/js/passkey.js') ?>"></script><?php endif; ?>
 <script>
 (function () {
     'use strict';

@@ -166,8 +166,15 @@ function warga_complaint_status($status)
 if (!function_exists('warga_database_available')) {
     function warga_database_available()
     {
+        // Demo/local pages intentionally do not autoload the database. Avoid
+        // touching the overloaded CI property in that case: CI emits an
+        // "Undefined property ...::$db" warning before `isset()` can short
+        // circuit, which pollutes JSON endpoints and browser consoles.
+        if (function_exists('warga_demo_mode') && warga_demo_mode()) return FALSE;
         $CI =& get_instance();
-        return isset($CI->db) && is_object($CI->db) && !empty($CI->db->conn_id);
+        $properties = is_object($CI) ? get_object_vars($CI) : array();
+        if (!array_key_exists('db', $properties) || !is_object($properties['db'])) return FALSE;
+        return !empty($properties['db']->conn_id);
     }
 }
 

@@ -28,7 +28,9 @@ $envReal = is_readable($envFile) ? realpath($envFile) : FALSE;
 $publicRoot = $envReal !== FALSE ? dirname($envReal) : $projectRoot;
 $envLoadError = '';
 $envKeys = array('APP_ENV', 'APP_URL', 'APP_KEY', 'PRIVATE_STORAGE_PATH', 'WARGA_DEMO_MODE',
-    'WARGA_CENTRAL_API_URL', 'WARGA_SESSION_SAVE_PATH', 'WARGA_CSP_ENFORCE');
+    'WARGA_CENTRAL_API_URL', 'WARGA_SESSION_SAVE_PATH', 'WARGA_CSP_ENFORCE',
+    'WARGA_TRUSTED_DEVICE_TTL', 'WARGA_WEBAUTHN_RP_ID', 'WARGA_WEBAUTHN_RP_NAME',
+    'WARGA_WEBAUTHN_ANDROID_PACKAGE', 'WARGA_WEBAUTHN_ANDROID_KEY_HASHES');
 $envAllowlist = array_fill_keys($envKeys, TRUE);
 if ($explicitEnvFile !== '') {
     // --env means "validate this file", not a mixture of this file and stale
@@ -104,8 +106,27 @@ $demoMode = trim((string) getenv('WARGA_DEMO_MODE'));
 $centralUrl = trim((string) getenv('WARGA_CENTRAL_API_URL'));
 $sessionPath = trim((string) getenv('WARGA_SESSION_SAVE_PATH'));
 $cspEnforce = trim((string) getenv('WARGA_CSP_ENFORCE'));
+$trustedTtlRaw = trim((string) getenv('WARGA_TRUSTED_DEVICE_TTL'));
+$trustedTtl = $trustedTtlRaw === '' ? 31536000 : filter_var($trustedTtlRaw, FILTER_VALIDATE_INT);
+$webauthnRpId = strtolower(trim((string) getenv('WARGA_WEBAUTHN_RP_ID')));
+$webauthnRpName = trim((string) getenv('WARGA_WEBAUTHN_RP_NAME'));
+$androidPackage = trim((string) getenv('WARGA_WEBAUTHN_ANDROID_PACKAGE')) ?: 'id.co.mediaverse.smartkampung';
+$androidHashes = trim((string) getenv('WARGA_WEBAUTHN_ANDROID_KEY_HASHES'));
 $appParts = parse_url($appUrl);
 $centralParts = parse_url($centralUrl);
+$rpIdOk = $webauthnRpId === '' || $webauthnRpId === 'localhost'
+    || (bool) preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)*[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/', $webauthnRpId);
+$rpNameOk = $webauthnRpName === '' || (function_exists('mb_strlen') ? mb_strlen($webauthnRpName, 'UTF-8') : strlen($webauthnRpName)) <= 120;
+$packageOk = $androidPackage === '' || (bool) preg_match('/^[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$/', $androidPackage);
+$hashesOk = TRUE;
+if ($androidHashes !== '') {
+    foreach (preg_split('/[,\s]+/', $androidHashes) as $hash) {
+        if ($hash !== '' && !preg_match('/^[A-Za-z0-9_-]{20,100}$/', $hash)) {
+            $hashesOk = FALSE;
+            break;
+        }
+    }
+}
 $checks = array(
     'APP_ENV:' => $appEnv === 'production',
     'APP_URL:' => is_array($appParts) && strtolower((string) ($appParts['scheme'] ?? '')) === 'https' && !empty($appParts['host']),
@@ -116,12 +137,55 @@ $checks = array(
         && !empty($centralParts['host']) && rtrim((string) ($centralParts['path'] ?? ''), '/') === '/v1',
     'WARGA_SESSION_SAVE_PATH:' => $sessionPath !== '' && runtime_absolute_path($sessionPath) && is_dir($sessionPath)
         && is_readable($sessionPath) && is_writable($sessionPath) && runtime_outside_root($sessionPath, $publicRoot),
-    'WARGA_CSP_ENFORCE:' => in_array($cspEnforce, array('0', '1'), TRUE)
+    'WARGA_CSP_ENFORCE:' => in_array($cspEnforce, array('0', '1'), TRUE),
+    'WARGA_TRUSTED_DEVICE_TTL:' => $trustedTtl !== FALSE && $trustedTtl >= 86400 && $trustedTtl <= 31536000,
+    'WARGA_WEBAUTHN_RP_ID:' => $rpIdOk,
+    'WARGA_WEBAUTHN_RP_NAME:' => $rpNameOk,
+    'WARGA_WEBAUTHN_ANDROID_PACKAGE:' => $packageOk,
+    'WARGA_WEBAUTHN_ANDROID_KEY_HASHES:' => $hashesOk
 );
 foreach ($checks as $label => $ok) {
     printf("env %-26s %s\n", $label, $ok ? 'OK' : ($strictEnv ? 'FAIL' : 'WARN'));
     if (!$ok && $strictEnv) $errors++;
 }
+
+// Passkey support is intentionally checked here, rather than discovered on a
+// user request. This catches a partial rsync (new PHP code without Composer's
+// dependency) before the feature is exposed in the account screen.
+$autoloadPath = $projectRoot . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+$passkeyLibraryOk = is_readable($autoloadPath);
+if ($passkeyLibraryOk) {
+    require_once $autoloadPath;
+    $passkeyLibraryOk = class_exists('lbuchs\\WebAuthn\\WebAuthn');
+}
+printf("Passkey Composer library: %s\n", $passkeyLibraryOk ? 'OK' : ($strictEnv ? 'FAIL' : 'WARN'));
+if (!$passkeyLibraryOk && $strictEnv) $errors++;
+
+// A TWA deployment must publish the same asset-link relation used to derive
+// Android APK key hashes. Browser-only/local deployments may omit this file.
+$assetlinksPath = $publicRoot . DIRECTORY_SEPARATOR . '.well-known' . DIRECTORY_SEPARATOR . 'assetlinks.json';
+$assetlinksOk = TRUE;
+if ($appEnv === 'production' && $androidPackage !== '') {
+    $assetlinksOk = is_readable($assetlinksPath) && filesize($assetlinksPath) <= 65536;
+    if ($assetlinksOk) {
+        $assetlinksData = json_decode((string) file_get_contents($assetlinksPath), TRUE);
+        $assetlinksOk = is_array($assetlinksData);
+        $relationFound = FALSE;
+        if ($assetlinksOk) foreach ($assetlinksData as $statement) {
+            $target = is_array($statement['target'] ?? NULL) ? $statement['target'] : array();
+            $relations = is_array($statement['relation'] ?? NULL) ? $statement['relation'] : array();
+            if (($target['namespace'] ?? '') === 'android_app'
+                && ($target['package_name'] ?? '') === $androidPackage
+                && in_array('delegate_permission/common.get_login_creds', $relations, TRUE)) {
+                $relationFound = TRUE;
+                break;
+            }
+        }
+        $assetlinksOk = $assetlinksOk && $relationFound;
+    }
+}
+printf("assetlinks Passkey relation: %s\n", $assetlinksOk ? 'OK' : ($strictEnv ? 'FAIL' : 'WARN'));
+if (!$assetlinksOk && $strictEnv) $errors++;
 
 if ($errors > 0) {
     fwrite(STDERR, "Runtime belum memenuhi syarat staging.\n");

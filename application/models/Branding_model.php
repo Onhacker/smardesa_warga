@@ -27,8 +27,10 @@ class Branding_model extends CI_Model
             'region_labels_managed' => ($institutionEnv !== '' || $districtEnv !== '') ? 1 : 0
         );
 
-        // CodeIgniter exposes the database through CI_Model's magic getter;
-        // isset($this->db) therefore reports false even when the connection is ready.
+        // Demo/local pages may intentionally run without the database library.
+        // Guard before touching CI_Model's overloaded `$this->db` property so
+        // public JSON responses stay clean instead of emitting a PHP warning.
+        if (!warga_database_available()) return $this->normalise($branding);
         $db = $this->db;
         if (!is_object($db) || !$db->table_exists('app_public_branding')) {
             return $this->normalise($branding);

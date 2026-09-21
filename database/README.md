@@ -55,9 +55,34 @@ memakai satu konfigurasi SMTP pada halaman Pengaturan Notifikasi SmartDesa pusat
 kredensial SMTP di PWA. Karena API dan PWA berbagi database, migration ini cukup dijalankan sekali.
 
 Jalankan `migrations/025_account_security_branding.sql` untuk OTP perubahan akun dan branding
-publik, lalu `migrations/026_multi_tenant_branding.sql` agar branding tersimpan per kabupaten.
+publik, lalu `migrations/026_multi_tenant_branding.sql` agar branding tersimpan per kabupaten,
+dan `migrations/027_institution_labels.sql` agar label bentuk lembaga/kecamatan dapat dikelola
+per tenant.
 Setiap deployment/domain PWA mengisi `WARGA_TENANT_CODE` dengan kode kabupaten, misalnya
 `95.01`; deployment lama yang kosong tetap memakai branding `default`.
+
+Jalankan `migrations/028_passkey_pin_devices.sql` untuk mengaktifkan login Passkey (sidik jari,
+Face ID, atau PIN/pola keamanan perangkat), PIN login enam angka, dan token perangkat tepercaya.
+Token perangkat disimpan sebagai hash, memakai cookie `HttpOnly`/`Secure`, dan berlaku maksimal
+satu tahun (dapat dipersingkat melalui `WARGA_TRUSTED_DEVICE_TTL`). Sesi CI biasa tetap mengikuti
+`WARGA_SESSION_EXPIRATION`; token satu tahun tidak menggantikan pencabutan sesi terpusat.
+Migrasi ini idempoten. Jalankan backup terlebih dahulu, lalu verifikasi:
+
+```sql
+SHOW COLUMNS FROM users LIKE 'login_pin%';
+SHOW TABLES LIKE 'warga_passkey_credentials';
+SHOW TABLES LIKE 'warga_login_tokens';
+SELECT COUNT(*) AS perangkat_tepercaya_aktif
+FROM warga_login_tokens
+WHERE revoked_at IS NULL AND expires_at > NOW();
+```
+
+Untuk Android Trusted Web Activity, origin WebAuthn yang berbentuk `android:apk-key-hash:*`
+divalidasi dari fingerprint penandatangan yang sudah terdaftar pada
+`.well-known/assetlinks.json`. `WARGA_WEBAUTHN_ANDROID_KEY_HASHES` hanya diperlukan untuk
+menambahkan hash base64url di luar daftar tersebut. Browser HTTPS biasa cukup memakai
+`WARGA_WEBAUTHN_RP_ID` sesuai host PWA. Kunci privat biometrik tidak pernah dikirim ke server;
+server hanya menyimpan kunci publik passkey.
 
 Katalog produk berstatus `published` dapat dilihat publik lintas kampung tanpa login. Pengguna yang sudah memiliki hak kelola mengatur identitas toko dan etalasenya melalui halaman `Tokoku`; akses pembuatan, pengeditan, dan pengarsipan tetap memerlukan sesi login.
 

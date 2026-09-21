@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(180) NULL UNIQUE,
   phone VARCHAR(30) NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
+  login_pin_hash VARCHAR(255) NULL,
+  login_pin_failed_count TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  login_pin_locked_until DATETIME NULL,
   session_version BIGINT UNSIGNED NOT NULL DEFAULT 1,
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   last_login_at DATETIME NULL,
@@ -48,6 +51,41 @@ CREATE TABLE IF NOT EXISTS users (
   KEY idx_users_scope (village_id, role_id, is_active),
   CONSTRAINT fk_warga_users_role FOREIGN KEY (role_id) REFERENCES roles(id),
   CONSTRAINT fk_warga_users_village FOREIGN KEY (village_id) REFERENCES village_tenants(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS warga_passkey_credentials (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  credential_id VARCHAR(1024) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  public_key_pem TEXT NOT NULL,
+  signature_counter BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  aaguid CHAR(32) NULL,
+  label VARCHAR(120) NOT NULL DEFAULT '',
+  transports VARCHAR(120) NULL,
+  last_used_at DATETIME NULL,
+  revoked_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_warga_passkey_credential (credential_id),
+  KEY idx_warga_passkey_user (user_id, revoked_at),
+  CONSTRAINT fk_warga_passkey_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS warga_login_tokens (
+  selector CHAR(24) CHARACTER SET ascii COLLATE ascii_bin NOT NULL PRIMARY KEY,
+  user_id BIGINT UNSIGNED NOT NULL,
+  session_version BIGINT UNSIGNED NOT NULL DEFAULT 1,
+  token_hash CHAR(64) NOT NULL,
+  auth_method VARCHAR(20) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  last_used_at DATETIME NULL,
+  revoked_at DATETIME NULL,
+  user_agent VARCHAR(255) NULL,
+  ip_address VARCHAR(45) NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_warga_login_token_user (user_id, revoked_at, expires_at),
+  KEY idx_warga_login_token_expiry (expires_at),
+  CONSTRAINT fk_warga_login_token_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS citizen_profiles (

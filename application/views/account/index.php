@@ -168,6 +168,49 @@ $identityNote = isset($accountProfile['identity_note']) ? trim((string) $account
         </div>
     </section>
 
+    <section class="card card-style warga-account-card warga-passkey-security-card" data-passkey-security aria-labelledby="warga-security-title">
+        <div class="content">
+            <header class="warga-account-card-title">
+                <div>
+                    <p>KEAMANAN LOGIN</p>
+                    <h2 id="warga-security-title">Biometrik &amp; PIN</h2>
+                </div>
+                <span aria-hidden="true"><i class="fa fa-user-shield"></i></span>
+            </header>
+            <div class="warga-security-input">
+                <label for="security-current-password">Kata sandi saat ini</label>
+                <input type="password" id="security-current-password" data-security-current-password autocomplete="current-password" placeholder="Masukkan untuk mengubah keamanan login">
+                <small>Untuk mengaktifkan atau mencabut biometrik/PIN, kata sandi diperlukan sebagai verifikasi tambahan.</small>
+            </div>
+            <div class="warga-security-row">
+                <span class="warga-security-icon" aria-hidden="true"><i class="fa fa-user-shield"></i></span>
+                <div class="warga-security-copy">
+                    <strong>Login dengan sidik jari atau wajah</strong>
+                    <small>Perangkat akan memilih sidik jari, Face ID, PIN, atau pola sesuai pengaturan keamanan perangkat.</small>
+                    <span class="warga-security-status" data-passkey-status role="status" aria-live="polite">Memeriksa perangkat…</span>
+                    <div class="warga-security-actions"><button type="button" class="btn btn-s bg-blue-dark color-white" data-passkey-register hidden><i class="fa fa-plus" aria-hidden="true"></i>Aktifkan biometrik</button></div>
+                    <div class="warga-security-message" data-passkey-message role="status" aria-live="polite" hidden></div>
+                    <div class="warga-passkey-devices" data-passkey-devices></div>
+                </div>
+            </div>
+            <div class="warga-security-row">
+                <span class="warga-security-icon is-pin" aria-hidden="true"><i class="fa fa-key"></i></span>
+                <div class="warga-security-copy">
+                    <strong>Login dengan PIN</strong>
+                    <small>Gunakan PIN 6 angka sebagai pilihan lain saat biometrik tidak tersedia.</small>
+                    <span class="warga-security-status" data-pin-status role="status" aria-live="polite">Memeriksa status PIN…</span>
+                    <form data-pin-form autocomplete="off">
+                        <div class="warga-security-input"><label for="security-pin">PIN baru</label><input type="password" id="security-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" placeholder="6 angka" required></div>
+                        <div class="warga-security-input"><label for="security-pin-confirm">Ulangi PIN</label><input type="password" id="security-pin-confirm" name="pin_confirm" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="new-password" placeholder="Ulangi 6 angka" required></div>
+                        <div class="warga-security-actions"><button type="submit" class="btn btn-s bg-blue-dark color-white"><i class="fa fa-save" aria-hidden="true"></i>Simpan PIN</button><button type="button" class="btn btn-s border-red-dark color-red-dark" data-pin-disable hidden><i class="fa fa-times" aria-hidden="true"></i>Nonaktifkan PIN</button></div>
+                    </form>
+                    <div class="warga-security-message" data-pin-message role="status" aria-live="polite" hidden></div>
+                </div>
+            </div>
+            <p class="warga-resident-note"><i class="fa fa-shield-alt" aria-hidden="true"></i>Data sidik jari/wajah tidak dikirim ke SI DAPULIK. Server hanya menyimpan kunci publik untuk memverifikasi perangkat. Setelah verifikasi PIN atau biometrik, perangkat dapat masuk kembali hingga 1 tahun dan dapat dicabut kapan saja.</p>
+        </div>
+    </section>
+
     <section class="card card-style warga-install-card" data-pwa-install-container aria-hidden="false"><div class="content"><?php $this->load->view('layouts/pwa_install'); ?></div></section>
 
     <form method="post" action="<?= site_url('logout') ?>" class="content warga-account-logout" data-logout-form>
