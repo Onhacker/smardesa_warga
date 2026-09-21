@@ -95,7 +95,9 @@ class Community_model extends CI_Model
             $this->load->model('Branding_model', 'communityBranding');
             $branding = $this->communityBranding->current($row['regency_code'] ?? warga_tenant_code('default'));
             $configuredInstitution = trim((string) ($branding['bentuk_lembaga'] ?? ''));
-            if ($configuredInstitution !== '') $institution = $configuredInstitution;
+            // A village's synced contact.institution is the most specific
+            // value. Only use tenant branding when the village has no label.
+            if ($institution === '' && $configuredInstitution !== '') $institution = $configuredInstitution;
             $row['district_label'] = trim((string) ($branding['bentuk_kecamatan'] ?? '')) ?: 'Kecamatan';
         } catch (Throwable $e) {
             $row['district_label'] = 'Kecamatan';

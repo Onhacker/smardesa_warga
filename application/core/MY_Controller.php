@@ -92,8 +92,15 @@ class MY_Controller extends CI_Controller
                 'contact' => array()
             );
         }
-        $contactVillage['institution'] = $this->institution_label();
-        $contactVillage['district_label'] = $this->district_label();
+        // Preserve the village-specific label supplied by Community_model.
+        // The tenant branding value is only a fallback for public/legacy
+        // contexts where no village contact identity is available.
+        if (trim((string) ($contactVillage['institution'] ?? '')) === '') {
+            $contactVillage['institution'] = $this->institution_label();
+        }
+        if (trim((string) ($contactVillage['district_label'] ?? '')) === '') {
+            $contactVillage['district_label'] = $this->district_label();
+        }
         $data['institutionLabel'] = $this->institution_label();
         $data['districtLabel'] = $this->district_label();
         $data['institutionLower'] = function_exists('mb_strtolower')

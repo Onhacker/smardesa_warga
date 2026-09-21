@@ -1,7 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 $contact = isset($village['contact']) && is_array($village['contact']) ? $village['contact'] : array();
-$institution = trim((string) ($institutionLabel ?? ($village['institution'] ?? 'Desa'))) ?: 'Desa';
+$institution = trim((string) ($village['institution'] ?? ''))
+    ?: trim((string) ($institutionLabel ?? 'Desa'));
+$institution = $institution !== '' ? $institution : 'Desa';
 $contactDistrictLabel = trim((string) ($districtLabel ?? ($village['district_label'] ?? 'Kecamatan'))) ?: 'Kecamatan';
 $areaName = trim((string) ($village['name'] ?? ($currentUser['village_name'] ?? '')));
 
