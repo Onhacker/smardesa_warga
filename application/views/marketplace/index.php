@@ -9,7 +9,7 @@ $listingFilters = isset($listing['filters']) && is_array($listing['filters']) ? 
 $search = trim((string) ($listingFilters['q'] ?? ''));
 $selectedCategoryValue = (int) ($listingFilters['category_id'] ?? 0);
 $selectedCategory = $selectedCategoryValue > 0 ? (string) $selectedCategoryValue : '';
-$selectedSort = (string) ($listingFilters['sort'] ?? 'newest');
+$selectedSort = (string) ($listingFilters['sort'] ?? 'random');
 $categoryName = function ($category) {
     return trim((string) ($category['name'] ?? ($category['label'] ?? '')));
 };
@@ -92,7 +92,7 @@ $activeRegencyUpper = function_exists('mb_strtoupper') ? mb_strtoupper($activeRe
                     </label>
                     <label class="market-field" for="market-sort">
                         <span>Urutkan</span>
-                        <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" data-market-auto-filter><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
+                        <span class="market-input-wrap"><i class="fa fa-sort-amount-down" aria-hidden="true"></i><select id="market-sort" data-market-auto-filter><option value="random" <?= $selectedSort === 'random' ? 'selected' : '' ?>>Acak</option><option value="newest" <?= $selectedSort === 'newest' ? 'selected' : '' ?>>Terbaru</option><option value="price_low" <?= $selectedSort === 'price_low' ? 'selected' : '' ?>>Harga terendah</option><option value="price_high" <?= $selectedSort === 'price_high' ? 'selected' : '' ?>>Harga tertinggi</option><option value="name" <?= $selectedSort === 'name' ? 'selected' : '' ?>>Nama A–Z</option></select></span>
                     </label>
                 </div>
                 <label class="market-field" for="market-search-input">

@@ -148,13 +148,37 @@
     var liveSearch = null;
     if (!list || !endpoint) return;
 
+    function sanitizeRandomSeed(value) {
+      return String(value || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64);
+    }
+
+    function createRandomSeed() {
+      // A new seed per page visit gives the catalogue a fresh discovery order.
+      // The same value is reused for every AJAX page so infinite scroll keeps
+      // one deterministic order, just like /ausi/produk.
+      try {
+        if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+          var values = new Uint32Array(2);
+          window.crypto.getRandomValues(values);
+          return String(values[0]) + '-' + String(values[1]);
+        }
+      } catch (error) { /* Fall back below on older WebViews. */ }
+      return String(Date.now()) + '-' + String(Math.floor(Math.random() * 1000000000));
+    }
+
+    var randomSeed = '';
+    try {
+      if (typeof window.URL === 'function') randomSeed = sanitizeRandomSeed(new URL(window.location.href).searchParams.get('seed'));
+    } catch (error) { randomSeed = ''; }
+    if (!randomSeed) randomSeed = createRandomSeed();
     var state = {
       page: Math.max(1, parseInt(root.getAttribute('data-market-page') || '1', 10) || 1),
       pages: Math.max(1, parseInt(root.getAttribute('data-market-pages') || '1', 10) || 1),
       perPage: Math.max(1, parseInt(root.getAttribute('data-market-per-page') || '12', 10) || 12),
       query: searchInput ? searchInput.value.trim() : (queryField ? queryField.value.trim() : ''),
       category: categorySelect ? categorySelect.value : '',
-      sort: sortSelect ? sortSelect.value : 'newest',
+      sort: sortSelect ? sortSelect.value : 'random',
+      randomSeed: randomSeed,
       loading: false,
       hasMore: false,
       sequence: 0,
@@ -446,10 +470,11 @@
       if (!window.history || !window.history.replaceState || typeof window.URL !== 'function') return;
       try {
         var url = new URL(window.location.href);
-        ['q', 'category_id', 'sort', 'page', 'per_page'].forEach(function (key) { url.searchParams.delete(key); });
+        ['q', 'category_id', 'sort', 'seed', 'page', 'per_page'].forEach(function (key) { url.searchParams.delete(key); });
         if (state.query) url.searchParams.set('q', state.query);
         if (state.category) url.searchParams.set('category_id', state.category);
-        if (state.sort && state.sort !== 'newest') url.searchParams.set('sort', state.sort);
+        if (state.sort && state.sort !== 'random') url.searchParams.set('sort', state.sort);
+        if (state.sort === 'random' && state.randomSeed) url.searchParams.set('seed', state.randomSeed);
         if (state.page > 1) url.searchParams.set('page', String(state.page));
         window.history.replaceState({}, '', url.pathname + (url.search ? url.search : '') + url.hash);
       } catch (error) { /* Keep the server-rendered URL when History API is unavailable. */ }
@@ -492,6 +517,7 @@
       if (state.query) params.set('q', state.query);
       if (state.category) params.set('category_id', state.category);
       if (state.sort) params.set('sort', state.sort);
+      if (state.sort === 'random' && state.randomSeed) params.set('seed', state.randomSeed);
       var requestUrl = endpoint + (endpoint.indexOf('?') === -1 ? '?' : '&') + params.toString();
       var options = { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } };
       if (state.controller) options.signal = state.controller.signal;
@@ -513,6 +539,9 @@
         state.page = Math.max(1, parseInt(data.page, 10) || page);
         state.pages = Math.max(1, parseInt(data.pages, 10) || state.page);
         state.perPage = Math.max(1, parseInt(data.per_page, 10) || state.perPage);
+        if (data.filters && typeof data.filters.seed === 'string' && data.filters.seed.trim() !== '') {
+          state.randomSeed = sanitizeRandomSeed(data.filters.seed);
+        }
         state.hasMore = data.has_more === true || state.page < state.pages;
         updateCount(data.count);
         syncStatus();
@@ -583,8 +612,10 @@
     });
     root.querySelectorAll('[data-market-auto-filter]').forEach(function (select) {
       select.addEventListener('change', function () {
+        var previousSort = state.sort;
         state.category = categorySelect ? categorySelect.value : '';
-        state.sort = sortSelect ? sortSelect.value : 'newest';
+        state.sort = sortSelect ? sortSelect.value : 'random';
+        if (state.sort === 'random' && previousSort !== 'random') state.randomSeed = createRandomSeed();
         syncStatus();
         syncCategoryTitle();
         syncQuickCategories();
@@ -597,9 +628,10 @@
         if (liveSearch) liveSearch.cancel();
         state.query = '';
         state.category = '';
-        state.sort = 'newest';
+        state.sort = 'random';
+        state.randomSeed = createRandomSeed();
         if (categorySelect) categorySelect.value = '';
-        if (sortSelect) sortSelect.value = 'newest';
+        if (sortSelect) sortSelect.value = 'random';
         syncStatus();
         syncCategoryTitle();
         syncQuickCategories();
@@ -613,9 +645,10 @@
         if (liveSearch) liveSearch.cancel();
         state.query = '';
         state.category = '';
-        state.sort = 'newest';
+        state.sort = 'random';
+        state.randomSeed = createRandomSeed();
         if (categorySelect) categorySelect.value = '';
-        if (sortSelect) sortSelect.value = 'newest';
+        if (sortSelect) sortSelect.value = 'random';
         syncStatus();
         syncCategoryTitle();
         syncQuickCategories();

@@ -20,6 +20,7 @@ class Marketplace extends Public_Controller
             'q' => $this->input->get('q', TRUE),
             'category_id' => $this->input->get('category_id', TRUE),
             'sort' => $this->input->get('sort', TRUE),
+            'seed' => $this->input->get('seed', TRUE),
             'page' => $this->input->get('page', TRUE),
             'per_page' => 12
         );
@@ -37,7 +38,8 @@ class Marketplace extends Public_Controller
             'filters' => array(
                 'q' => trim((string) ($filters['q'] ?? '')),
                 'category_id' => max(0, (int) ($filters['category_id'] ?? 0)),
-                'sort' => trim((string) ($filters['sort'] ?? 'newest')) ?: 'newest'
+                'sort' => trim((string) ($filters['sort'] ?? 'random')) ?: 'random',
+                'seed' => trim((string) ($filters['seed'] ?? ''))
             ),
             'ready' => $this->marketplace->is_ready()
         );
@@ -62,7 +64,11 @@ class Marketplace extends Public_Controller
         $filters = array(
             'q' => $this->input->get('q', TRUE),
             'category_id' => $this->input->get('category_id', TRUE),
-            'sort' => $this->input->get('sort', TRUE),
+            // Pasar memakai urutan acak sebagai default, seperti /ausi/produk.
+            // Seed dikirim ulang pada setiap halaman agar infinite scroll tetap
+            // memakai satu urutan yang sama dan tidak menggandakan produk.
+            'sort' => trim((string) ($this->input->get('sort', TRUE) ?: 'random')),
+            'seed' => $this->input->get('seed', TRUE),
             'page' => $this->input->get('page', TRUE),
             'per_page' => $this->input->get('per_page', TRUE) ?: 12,
             'public_all' => TRUE

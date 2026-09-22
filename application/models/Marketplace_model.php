@@ -192,7 +192,17 @@ class Marketplace_model extends CI_Model
         $q = trim((string) ($filters['q'] ?? ''));
         $category = (int) ($filters['category_id'] ?? 0);
         $sort = trim((string) ($filters['sort'] ?? 'newest'));
-        if (!in_array($sort, array('newest', 'price_low', 'price_high', 'name'), TRUE)) $sort = 'newest';
+        if (!in_array($sort, array('random', 'newest', 'price_low', 'price_high', 'name'), TRUE)) $sort = 'newest';
+        // Seperti /ausi/produk, urutan acak memakai seed yang sama untuk
+        // seluruh halaman. Hash deterministik mencegah item berpindah atau
+        // terduplikasi ketika pengguna melanjutkan infinite scroll.
+        $randomSeed = '';
+        if ($sort === 'random') {
+            $randomSeed = trim((string) ($filters['seed'] ?? ($filters['rand_seed'] ?? ($filters['random_seed'] ?? ''))));
+            $randomSeed = preg_replace('/[^A-Za-z0-9_-]/', '', $randomSeed);
+            if ($randomSeed === '') $randomSeed = date('Ymd');
+            $randomSeed = substr($randomSeed, 0, 64);
+        }
         $publicAll = !empty($filters['public_all']);
         $onlyOwn = !empty($filters['only_own']);
         $storeId = trim((string) ($filters['store_id'] ?? ''));
@@ -210,12 +220,19 @@ class Marketplace_model extends CI_Model
                 if ($q !== '' && stripos((string) ($row['name'] . ' ' . ($row['description'] ?? '') . ' ' . ($row['category_name'] ?? '')), $q) === FALSE) return FALSE;
                 return TRUE;
             }));
-            usort($rows, function ($a, $b) use ($sort) {
+            usort($rows, function ($a, $b) use ($sort, $randomSeed) {
                 if ($sort === 'price_low' || $sort === 'price_high') {
                     $compare = ((float) ($a['price'] ?? 0)) <=> ((float) ($b['price'] ?? 0));
                     return $sort === 'price_high' ? -$compare : $compare;
                 }
                 if ($sort === 'name') return strcasecmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+                if ($sort === 'random') {
+                    $aKey = md5((string) ($a['id'] ?? '') . '-' . $randomSeed);
+                    $bKey = md5((string) ($b['id'] ?? '') . '-' . $randomSeed);
+                    $compare = strcmp($aKey, $bKey);
+                    if ($compare !== 0) return $compare;
+                    return strcmp((string) ($a['id'] ?? ''), (string) ($b['id'] ?? ''));
+                }
                 return strcmp((string) ($b['updated_at'] ?? ''), (string) ($a['updated_at'] ?? ''));
             });
             $items = array_slice($rows, ($page - 1) * $perPage, $perPage);
@@ -223,11 +240,12 @@ class Marketplace_model extends CI_Model
             $total = $skipTotal ? count($items) : count($rows);
             return array('items' => array_map(array($this, 'decorate_product'), $items), 'total' => $total,
                 'page' => $page, 'pages' => $skipTotal ? 1 : max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
-                'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort));
+                'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort, 'seed' => $randomSeed));
         }
         if (!$this->ready()) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage,
-            'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => FALSE);
-        if ($villageId === '' && !$publicAll) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage, 'filters' => array('q' => $q, 'category_id' => $category));
+            'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort, 'seed' => $randomSeed), 'ready' => FALSE);
+        if ($villageId === '' && !$publicAll) return array('items' => array(), 'total' => 0, 'page' => 1, 'pages' => 1, 'per_page' => $perPage,
+            'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort, 'seed' => $randomSeed));
         $total = 0;
         if (!$skipTotal) {
             $this->db->from('marketplace_products p')->join('marketplace_categories c', 'c.id=p.category_id')
@@ -253,14 +271,23 @@ class Marketplace_model extends CI_Model
         if ($sort === 'price_low') $this->db->order_by('p.price', 'ASC');
         elseif ($sort === 'price_high') $this->db->order_by('p.price', 'DESC');
         elseif ($sort === 'name') $this->db->order_by('p.name', 'ASC');
+        elseif ($sort === 'random') {
+            $seedSql = $this->db->escape($randomSeed);
+            $this->db->order_by("MD5(CONCAT(p.id, '-', {$seedSql}))", 'ASC', FALSE);
+            $this->db->order_by('p.id', 'ASC');
+        }
         else $this->db->order_by('p.updated_at', 'DESC');
-        $rows = $this->db->order_by('p.name', 'ASC')->limit($perPage, ($page - 1) * $perPage)->get()->result_array();
+        // Keep a deterministic tie-breaker for the non-random sorts as well;
+        // random already adds p.id above and therefore does not need name as
+        // a secondary key (which would undo the intended order).
+        if ($sort !== 'random') $this->db->order_by('p.name', 'ASC');
+        $rows = $this->db->limit($perPage, ($page - 1) * $perPage)->get()->result_array();
         $rows = $this->attach_images($rows);
         $rows = $this->attach_review_summaries($rows);
         if ($skipTotal) $total = count($rows);
         return array('items' => array_map(array($this, 'decorate_product'), $rows), 'total' => $total,
             'page' => $page, 'pages' => $skipTotal ? 1 : max(1, (int) ceil($total / $perPage)), 'per_page' => $perPage,
-            'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort), 'ready' => TRUE);
+            'filters' => array('q' => $q, 'category_id' => $category, 'sort' => $sort, 'seed' => $randomSeed), 'ready' => TRUE);
     }
 
     /**
