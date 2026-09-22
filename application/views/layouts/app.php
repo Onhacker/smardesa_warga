@@ -35,7 +35,7 @@ $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPU
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/simp-v22.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/warga.min.css') ?>">
     <link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/footer-share.css') ?>">
-    <?php if (!empty($loadPasskeyScript)): ?><link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/passkey.css') ?>"><?php endif; ?>
+    <?php if (!empty($loadPasskeyScript)): ?><link rel="stylesheet" type="text/css" href="<?= warga_asset_url('assets/css/account-security.css') ?>"><?php endif; ?>
     <link rel="stylesheet" data-lazy-style="notification-core" href="<?= warga_asset_url('assets/css/warga-notification-core.min.css') ?>">
     <?php if (!empty($loadCommunityStyles)): ?><link rel="stylesheet" href="<?= warga_asset_url('assets/css/community.min.css') ?>"><?php endif; ?>
     <?php if (!empty($loadNotificationStyles)): ?><link rel="stylesheet" data-lazy-style="notification-center" href="<?= warga_asset_url('assets/css/warga-notifications.min.css') ?>"><?php endif; ?>

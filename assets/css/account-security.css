@@ -1,0 +1,537 @@
+/* Passkey and PIN settings are intentionally route-scoped. The account
+ * overview stays light, while this stylesheet is loaded only on the login and
+ * dedicated security pages. */
+.warga-security-page {
+  padding-bottom: 26px;
+}
+
+.warga-security-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 126px;
+  margin: 0 15px 16px;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #174f91 0%, #2d78c7 100%);
+  box-shadow: 0 10px 24px rgba(31, 88, 151, .16);
+  color: #fff;
+}
+
+.warga-security-hero::after {
+  position: absolute;
+  top: -62px;
+  right: -44px;
+  width: 168px;
+  height: 168px;
+  border: 28px solid rgba(255, 255, 255, .08);
+  border-radius: 50%;
+  content: '';
+}
+
+.warga-security-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+body #page .page-content .warga-security-hero-icon {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, .42);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .14);
+  color: #fff !important;
+  font-size: 23px;
+}
+
+body #page .page-content .warga-security-hero-icon > i {
+  color: #fff !important;
+}
+
+.warga-security-hero > div {
+  min-width: 0;
+}
+
+body #page .page-content .warga-security-hero p {
+  margin: 0 0 3px;
+  color: #d9eafd !important;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .06em;
+  line-height: 1.3;
+}
+
+#page .warga-security-hero h1 {
+  margin: 0 0 5px;
+  color: #fff !important;
+  font-size: 25px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+body #page .page-content .warga-security-hero > div > span {
+  display: block;
+  max-width: 390px;
+  color: #eef6ff !important;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+#page .warga-security-card {
+  margin-bottom: 15px;
+  border: 1px solid rgba(35, 95, 164, .09);
+  border-radius: 20px;
+  box-shadow: 0 7px 20px rgba(34, 64, 92, .08);
+}
+
+#page .warga-security-card .content {
+  margin: 0;
+  padding: 18px;
+}
+
+.warga-security-card-head {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(35, 95, 164, .12);
+}
+
+.warga-security-card-head > div {
+  min-width: 0;
+}
+
+body #page .page-content .warga-security-card-head p {
+  margin: 0 0 2px;
+  color: #286bb5 !important;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .055em;
+  line-height: 1.3;
+}
+
+#page .warga-security-card-head h2 {
+  margin: 0;
+  color: #172335 !important;
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+body #page .page-content .warga-security-icon {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  background: #286bb5;
+  color: #fff !important;
+  font-size: 19px;
+  line-height: 1;
+  box-shadow: 0 6px 14px rgba(40, 107, 181, .18);
+}
+
+body #page .page-content .warga-security-icon.is-pin {
+  background: #7450be;
+  box-shadow: 0 6px 14px rgba(116, 80, 190, .2);
+}
+
+body #page .page-content .warga-security-icon.is-password {
+  background: #2d8a58;
+  box-shadow: 0 6px 14px rgba(45, 138, 88, .18);
+}
+
+body #page .page-content .warga-security-icon > i {
+  color: #fff !important;
+}
+
+.warga-security-copy {
+  padding-top: 15px;
+}
+
+body #page .page-content .warga-security-copy > small {
+  display: block;
+  margin: 0;
+  color: #5f6d7d !important;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+body #page .page-content .warga-security-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 29px;
+  margin-top: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef3f8;
+  color: #536274 !important;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+body #page .page-content .warga-security-status.is-success {
+  background: #e4f4e9;
+  color: #237245 !important;
+}
+
+.warga-security-input {
+  margin-top: 15px;
+}
+
+body #page .page-content .warga-security-input label {
+  display: block;
+  margin: 0 0 7px;
+  color: #29394b !important;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+#page .warga-security-input input {
+  display: block;
+  width: 100%;
+  min-height: 54px;
+  box-sizing: border-box;
+  border: 1px solid #c5d3e2;
+  border-radius: 13px;
+  outline: 0;
+  background: #fff;
+  color: #172335;
+  padding: 12px 14px;
+  font-size: 17px;
+  line-height: 1.4;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+#page .warga-security-input input:focus {
+  border-color: #2c70ba;
+  box-shadow: 0 0 0 3px rgba(44, 112, 186, .14);
+}
+
+#page .warga-security-input input::placeholder {
+  color: #8a96a4;
+  opacity: 1;
+}
+
+body #page .page-content .warga-security-input > small {
+  display: block;
+  margin-top: 8px;
+  color: #697789 !important;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.warga-security-pin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.warga-security-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 14px;
+}
+
+#page .warga-security-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  margin: 0 !important;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+body #page .page-content .warga-security-actions .bg-blue-dark,
+body #page .page-content .warga-security-actions .bg-blue-dark > i,
+body #page .page-content .warga-security-actions .bg-blue-dark > span {
+  color: #fff !important;
+}
+
+.warga-security-actions [aria-busy="true"] {
+  cursor: wait;
+  opacity: .82;
+}
+
+body #page .page-content .warga-security-message {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e7f5eb;
+  color: #247b47 !important;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+body #page .page-content .warga-security-message.is-error {
+  background: #fff0f1;
+  color: #a82f39 !important;
+}
+
+.warga-security-message[hidden] {
+  display: none !important;
+}
+
+.warga-passkey-devices {
+  margin-top: 12px;
+}
+
+.warga-passkey-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 11px 0;
+  border-top: 1px dashed rgba(35, 95, 164, .2);
+}
+
+.warga-passkey-device > span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+body #page .page-content .warga-passkey-device > span > i {
+  color: #286bb5 !important;
+  font-size: 18px;
+}
+
+.warga-passkey-device-copy {
+  display: block;
+  min-width: 0;
+}
+
+#page .warga-passkey-device strong,
+body #page .page-content .warga-passkey-device small {
+  display: block;
+}
+
+#page .warga-passkey-device strong {
+  color: #172335;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+body #page .page-content .warga-passkey-device small {
+  margin-top: 2px;
+  color: #6d7b8c !important;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.warga-passkey-device button {
+  flex: 0 0 auto;
+  min-height: 40px;
+  margin: 0 !important;
+  font-size: 14px;
+}
+
+.warga-security-privacy {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  margin: 2px 15px 28px;
+  padding: 15px;
+  border: 1px solid #c7dfce;
+  border-radius: 16px;
+  background: #eef8f1;
+}
+
+body #page .page-content .warga-security-privacy > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 13px;
+  background: #2d8a58;
+  color: #fff !important;
+}
+
+body #page .page-content .warga-security-privacy > span > i {
+  color: #fff !important;
+}
+
+body #page .page-content .warga-security-privacy p {
+  align-self: center;
+  margin: 0;
+  color: #345444 !important;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#page .warga-security-privacy strong {
+  color: #1f6f42;
+  font-weight: 900;
+}
+
+body.theme-dark #page .warga-security-card {
+  border-color: #34444e;
+  background: #1d272e;
+}
+
+body.theme-dark #page .warga-security-card-head {
+  border-bottom-color: #34444e;
+}
+
+body.theme-dark #page .warga-security-card-head h2,
+body.theme-dark #page .warga-passkey-device strong,
+body.theme-dark #page .page-content .warga-security-input label {
+  color: #f1f5f7 !important;
+}
+
+body.theme-dark #page .page-content .warga-security-copy > small,
+body.theme-dark #page .page-content .warga-security-input > small,
+body.theme-dark #page .page-content .warga-passkey-device small {
+  color: #aeb9c2 !important;
+}
+
+body.theme-dark #page .warga-security-input input {
+  border-color: #45525e;
+  background: #202a31;
+  color: #f1f5f7;
+}
+
+body.theme-dark #page .page-content .warga-security-status {
+  background: #2a353d;
+  color: #c0cad2 !important;
+}
+
+body.theme-dark #page .page-content .warga-security-status.is-success {
+  background: #214b34;
+  color: #b9e2c6 !important;
+}
+
+body.theme-dark .warga-security-privacy {
+  border-color: #315f46;
+  background: #1e382a;
+}
+
+body.theme-dark #page .page-content .warga-security-privacy p,
+body.theme-dark #page .warga-security-privacy strong {
+  color: #c7e7d1 !important;
+}
+
+@media (max-width: 575px) {
+  .warga-security-pin-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+@media (max-width: 410px) {
+  .warga-security-hero {
+    min-height: 116px;
+    gap: 13px;
+    padding: 17px;
+  }
+
+  body #page .page-content .warga-security-hero-icon {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
+  }
+
+  #page .warga-security-hero h1 {
+    font-size: 22px;
+  }
+
+  body #page .page-content .warga-security-hero > div > span {
+    font-size: 13px;
+  }
+
+  #page .warga-security-card .content {
+    padding: 16px;
+  }
+
+  .warga-security-card-head {
+    gap: 11px;
+  }
+
+  body #page .page-content .warga-security-icon {
+    flex-basis: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  #page .warga-security-card-head h2 {
+    font-size: 18px;
+  }
+
+  #page .warga-security-actions .btn {
+    width: 100%;
+  }
+
+  .warga-passkey-device {
+    align-items: flex-start;
+  }
+}
+
+/* SIMP's light-theme compatibility layer deliberately forces generic text
+ * elements to #111. These route-scoped selectors preserve the intended
+ * contrast on coloured security surfaces without weakening that global rule. */
+body.theme-light #page .page-content .warga-security-page .warga-security-hero p {
+  color: #d9eafd !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-hero > div > span {
+  color: #eef6ff !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-card-head p {
+  color: #286bb5 !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-copy > small {
+  color: #5f6d7d !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-status {
+  color: #536274 !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-status.is-success {
+  color: #237245 !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-input label {
+  color: #29394b !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-input > small {
+  color: #697789 !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-passkey-device small {
+  color: #6d7b8c !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-privacy p {
+  color: #345444 !important;
+}
+
+body.theme-light #page .page-content .warga-security-page .warga-security-privacy strong {
+  color: #1f6f42 !important;
+}
+
+body #page .page-content .warga-security-page .warga-security-input input {
+  font-size: 17px !important;
+}

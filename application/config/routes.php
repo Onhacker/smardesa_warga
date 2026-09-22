@@ -74,6 +74,7 @@ $route['petugas/permohonan/(:any)'] = 'petugas/show/$1';
 $route['petugas/berkas/(:any)'] = 'petugas/document/$1';
 $route['notifikasi'] = 'notifications/index';
 $route['akun'] = 'account/index';
+$route['akun/keamanan'] = 'account/security';
 $route['akun/edit'] = 'account/edit';
 $route['akun/ganti-password'] = 'account/password';
 $route['kebijakan-privasi'] = 'community/privacy';

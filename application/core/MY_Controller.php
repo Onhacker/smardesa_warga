@@ -174,7 +174,7 @@ class MY_Controller extends CI_Controller
             : ($view === 'community/complaints');
         $data['loadPasskeyScript'] = array_key_exists('loadPasskeyScript', $data)
             ? (bool) $data['loadPasskeyScript']
-            : ($view === 'account/index');
+            : ($view === 'account/security');
         $data['loadMarketplaceAssets'] = array_key_exists('loadMarketplaceAssets', $data)
             ? (bool) $data['loadMarketplaceAssets']
             : (strpos($view, 'marketplace/') === 0 || $view === 'community/home');

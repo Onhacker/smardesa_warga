@@ -1,8 +1,78 @@
-.warga-passkey-security-card .content{padding-bottom:18px}
-.warga-passkey-security-card .warga-security-row{display:flex;align-items:flex-start;gap:13px;padding:13px 0;border-bottom:1px solid rgba(35,95,164,.12)}
-.warga-passkey-security-card .warga-security-row:last-child{border-bottom:0}
-.warga-security-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex:0 0 42px;color:#fff;background:#286bb5;font-size:18px}
-.warga-security-icon.is-pin{background:#7d55c7}.warga-security-copy{flex:1;min-width:0}.warga-security-copy strong{display:block;font-size:16px;color:#172335}.warga-security-copy small{display:block;color:#6c7788;line-height:1.45;margin-top:3px}.warga-security-status{display:block;font-size:12px;color:#68778c;margin-top:5px}.warga-security-status.is-success{color:#25834a;font-weight:600}
-.warga-security-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.warga-security-actions .btn{margin:0!important;min-height:36px;padding:8px 12px;font-size:13px}.warga-security-input{margin-top:10px}.warga-security-input label{display:block;font-size:12px;color:#5e6d81;margin-bottom:5px}.warga-security-input input{width:100%;border:1px solid #cbd7e5;border-radius:9px;padding:9px 11px;font-size:15px;background:#fff}.warga-security-message{font-size:13px;margin:10px 0 0;color:#247b47}.warga-security-message.is-error{color:#b3343d}.warga-security-message[hidden]{display:none}.warga-passkey-devices{margin-top:9px}.warga-passkey-device{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed rgba(35,95,164,.16)}.warga-passkey-device>span{display:flex;align-items:center;gap:8px;min-width:0}.warga-passkey-device>span>i{color:#286bb5}.warga-passkey-device-copy{display:block;min-width:0}.warga-passkey-device strong,.warga-passkey-device small{display:block}.warga-passkey-device strong{font-size:13px}.warga-passkey-device small{font-size:11px;color:#728096}.warga-passkey-device button{flex:0 0 auto}.warga-passkey-login{margin-top:10px;border:1px solid rgba(35,95,164,.28);background:#eef5ff;color:#235fa4}.warga-passkey-login i,.warga-pin-login-toggle i{margin-right:7px}.warga-pin-login-toggle{margin-top:8px}.warga-pin-login-panel{margin-top:10px;padding:12px;border-radius:10px;background:#f3f6fa}.warga-pin-login-panel[hidden]{display:none}.warga-pin-login-panel input{display:block;width:100%;box-sizing:border-box;border:1px solid #cbd7e5;border-radius:9px;padding:10px 12px;letter-spacing:.28em;text-align:center;font-size:18px;background:#fff}.warga-pin-login-panel button{margin-top:9px}.warga-login-auth-message{font-size:13px;text-align:center;margin-top:10px}.warga-login-auth-message.is-error{color:#b3343d}.warga-login-auth-message.is-success{color:#247b47}.warga-login-auth-message[hidden]{display:none}
-.theme-dark .warga-security-copy strong{color:#f1f5f7}.theme-dark .warga-security-copy small,.theme-dark .warga-security-status,.theme-dark .warga-passkey-device small{color:#aeb9c2}.theme-dark .warga-security-input label{color:#c4ced7}.theme-dark .warga-security-input input,.theme-dark .warga-pin-login-panel input{border-color:#45525e;background:#202a31;color:#f1f5f7}.theme-dark .warga-pin-login-panel{background:#202a31}.theme-dark .warga-passkey-login{border-color:#5579a5;background:#172f51;color:#b9d8ff}
-@media (min-width:576px){.warga-security-input{max-width:420px}}
+/* Lightweight login-only Passkey and PIN controls. */
+.warga-passkey-login {
+  margin-top: 10px;
+  border: 1px solid rgba(35, 95, 164, .28);
+  background: #eef5ff;
+  color: #235fa4;
+}
+
+.warga-passkey-login i,
+.warga-pin-login-toggle i {
+  margin-right: 7px;
+}
+
+.warga-pin-login-toggle {
+  margin-top: 8px;
+}
+
+.warga-pin-login-panel {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f3f6fa;
+}
+
+.warga-pin-login-panel[hidden] {
+  display: none;
+}
+
+.warga-pin-login-panel input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd7e5;
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: #fff;
+  font-size: 18px !important;
+  letter-spacing: .28em;
+  text-align: center;
+}
+
+.warga-pin-login-panel button {
+  margin-top: 9px;
+}
+
+.warga-login-auth-message {
+  margin-top: 10px;
+  font-size: 13px;
+  text-align: center;
+}
+
+.warga-login-auth-message.is-error {
+  color: #b3343d;
+}
+
+.warga-login-auth-message.is-success {
+  color: #247b47;
+}
+
+.warga-login-auth-message[hidden] {
+  display: none;
+}
+
+body.theme-dark .warga-pin-login-panel input {
+  border-color: #45525e;
+  background: #202a31;
+  color: #f1f5f7;
+}
+
+body.theme-dark .warga-pin-login-panel {
+  background: #202a31;
+}
+
+body.theme-dark .warga-passkey-login {
+  border-color: #5579a5;
+  background: #172f51;
+  color: #b9d8ff;
+}

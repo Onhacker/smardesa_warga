@@ -24,6 +24,23 @@ class Account extends App_Controller
         ));
     }
 
+    /**
+     * Keep sensitive login controls on their own no-store page.  Besides
+     * making the account screen easier to scan, this prevents the Passkey
+     * runtime from being loaded until the resident explicitly opens the
+     * security settings.
+     */
+    public function security()
+    {
+        $this->no_store();
+        $this->render('account/security', array(
+            'pageTitle' => 'Biometrik & PIN',
+            'showBackButton' => TRUE,
+            'backUrl' => site_url('akun'),
+            'loadPasskeyScript' => TRUE
+        ));
+    }
+
     public function edit()
     {
         $this->no_store();
