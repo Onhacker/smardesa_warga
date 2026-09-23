@@ -264,6 +264,8 @@ class Passkey_model extends CI_Model
             if ($username === '') $username = 'warga-' . (int) $user['id'];
             $displayName = trim((string) ($user['name'] ?? 'Warga')) ?: 'Warga';
             $webauthn = $this->webauthn();
+            // Resident credentials are required so a registered device can
+            // authenticate without asking the user to type an email/phone.
             $options = $webauthn->getCreateArgs($this->user_bytes($user['id']), $username, $displayName, 240, 'required', 'required', FALSE, $ids);
             $this->session->set_userdata('warga_passkey_challenge', $this->challenge_state('register', $user['id'], $this->buffer_binary($webauthn->getChallenge())));
             return array('success' => TRUE, 'options' => $options);
@@ -319,21 +321,28 @@ class Passkey_model extends CI_Model
     {
         $this->lastError = '';
         if (!$this->available()) return array('success' => FALSE, 'message' => 'Login biometrik belum tersedia.');
-        $user = $this->user_for_identity($identity);
-        if (!$user) return array('success' => FALSE, 'message' => 'Akun atau login biometrik tidak ditemukan.');
-        $credentials = $this->db->select('credential_id')->where(array('user_id' => (int) $user['id'], 'revoked_at' => NULL))->get('warga_passkey_credentials')->result_array();
-        if (!$credentials) return array('success' => FALSE, 'message' => 'Akun atau login biometrik tidak ditemukan.');
+        $identity = trim((string) $identity);
+        $user = $identity !== '' ? $this->user_for_identity($identity) : NULL;
+        if ($identity !== '' && !$user) return array('success' => FALSE, 'message' => 'Akun atau login biometrik tidak ditemukan.');
+        $credentials = $identity !== ''
+            ? $this->db->select('credential_id')->where(array('user_id' => (int) $user['id'], 'revoked_at' => NULL))->get('warga_passkey_credentials')->result_array()
+            : array();
+        // An empty allowCredentials list invokes the discoverable credential
+        // flow. Let the authenticator decide whether this device has a usable
+        // credential; querying global credential counts would disclose server
+        // state and adds work without improving authentication safety.
+        if ($identity !== '' && !$credentials) return array('success' => FALSE, 'message' => 'Akun atau login biometrik tidak ditemukan.');
         try {
             $ids = array();
             foreach ($credentials as $row) {
                 $decoded = $this->base64url_decode($row['credential_id'] ?? '');
                 if ($decoded !== FALSE) $ids[] = $decoded;
             }
-            if (!$ids) return array('success' => FALSE, 'message' => 'Credential perangkat tidak valid.');
+            if ($identity !== '' && !$ids) return array('success' => FALSE, 'message' => 'Credential perangkat tidak valid.');
             $webauthn = $this->webauthn();
             $options = $webauthn->getGetArgs($ids, 240, FALSE, FALSE, FALSE, TRUE, TRUE, 'required');
-            $state = $this->challenge_state('login', $user['id'], $this->buffer_binary($webauthn->getChallenge()));
-            $state['identity'] = substr(trim((string) $identity), 0, 180);
+            $state = $this->challenge_state('login', $user ? $user['id'] : 0, $this->buffer_binary($webauthn->getChallenge()));
+            $state['identity'] = substr($identity, 0, 180);
             $this->session->set_userdata('warga_passkey_challenge', $state);
             $this->session->set_userdata('warga_passkey_identity', $state['identity']);
             return array('success' => TRUE, 'options' => $options);
@@ -346,7 +355,11 @@ class Passkey_model extends CI_Model
     public function verify_login(array $payload)
     {
         $state = $this->session->userdata('warga_passkey_challenge');
-        if (!is_array($state) || (string) ($state['action'] ?? '') !== 'login' || empty($state['user_id']) || (int) ($state['created_at'] ?? 0) < time() - 300) return array('success' => FALSE, 'message' => 'Sesi login biometrik sudah kedaluwarsa.');
+        if (!is_array($state) || (string) ($state['action'] ?? '') !== 'login'
+            || !array_key_exists('user_id', $state) || (int) ($state['user_id'] ?? -1) < 0
+            || empty($state['challenge']) || (int) ($state['created_at'] ?? 0) < time() - 300) {
+            return array('success' => FALSE, 'message' => 'Sesi login biometrik sudah kedaluwarsa.');
+        }
         $challenge = $this->base64url_decode($state['challenge'] ?? '');
         if ($challenge === FALSE) return array('success' => FALSE, 'message' => 'Sesi login biometrik tidak valid.');
         $response = isset($payload['response']) && is_array($payload['response']) ? $payload['response'] : array();
@@ -359,12 +372,16 @@ class Passkey_model extends CI_Model
         $this->session->unset_userdata('warga_passkey_challenge');
         if (!$this->valid_client_origin($clientData)) return array('success' => FALSE, 'message' => 'Origin perangkat tidak diizinkan. Mulai ulang login biometrik.');
         $encodedId = $this->base64url_encode($credentialId);
-        $credential = $this->db->where(array('user_id' => (int) $state['user_id'], 'credential_id' => $encodedId, 'revoked_at' => NULL))->limit(1)->get('warga_passkey_credentials')->row_array();
+        $credentialQuery = $this->db->where(array('credential_id' => $encodedId, 'revoked_at' => NULL));
+        if ((int) $state['user_id'] > 0) $credentialQuery->where('user_id', (int) $state['user_id']);
+        $credential = $credentialQuery->limit(1)->get('warga_passkey_credentials')->row_array();
         if (!$credential) return array('success' => FALSE, 'message' => 'Credential perangkat tidak dikenali.');
+        $user = $this->user_by_id((int) $credential['user_id']);
+        if (!$user) return array('success' => FALSE, 'message' => 'Akun tidak aktif.');
         $userHandle = $response['userHandle'] ?? '';
         if ($userHandle !== '') {
             $decodedHandle = $this->base64url_decode($userHandle);
-            if ($decodedHandle === FALSE || !hash_equals($this->user_bytes($state['user_id']), $decodedHandle)) return array('success' => FALSE, 'message' => 'Akun perangkat tidak sesuai.');
+            if ($decodedHandle === FALSE || !hash_equals($this->user_bytes($user['id']), $decodedHandle)) return array('success' => FALSE, 'message' => 'Akun perangkat tidak sesuai.');
         }
         try {
             $webauthn = $this->webauthn();
@@ -373,7 +390,6 @@ class Passkey_model extends CI_Model
             $updates = array('last_used_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s'));
             if ($newCounter > (int) $credential['signature_counter']) $updates['signature_counter'] = $newCounter;
             $this->db->where('id', (int) $credential['id'])->update('warga_passkey_credentials', $updates);
-            $user = $this->user_by_id($state['user_id']);
             $this->session->unset_userdata('warga_passkey_identity');
             return $user ? array('success' => TRUE, 'user' => $user, 'identity' => (string) ($state['identity'] ?? '')) : array('success' => FALSE, 'message' => 'Akun tidak aktif.');
         } catch (Throwable $exception) {
@@ -406,11 +422,28 @@ class Passkey_model extends CI_Model
         return $ok ? array('success' => TRUE, 'message' => 'PIN login dinonaktifkan.') : array('success' => FALSE, 'message' => 'PIN belum dapat dinonaktifkan.');
     }
 
-    public function verify_pin($identity, $pin)
+    public function verify_pin($identity, $pin, $boundUser = NULL)
     {
         if (!$this->available()) return array('success' => FALSE, 'message' => 'Login PIN belum tersedia pada server.');
-        $user = $this->user_for_identity($identity);
-        if (!$user) return array('success' => FALSE, 'message' => 'Identitas atau PIN tidak sesuai.');
+        $identity = trim((string) $identity);
+        if ($identity === '') {
+            // The HttpOnly binding identifies the account, while the PIN
+            // remains the proof of possession. Never use the cookie alone to
+            // create a logged-in session.
+            if (is_array($boundUser) && !empty($boundUser['id'])) {
+                $user = $boundUser;
+            } else {
+                $this->load->model('Auth_model');
+                $user = $this->Auth_model->pin_device_user();
+            }
+        } else {
+            $user = $this->user_for_identity($identity);
+        }
+        if (!$user) {
+            return array('success' => FALSE, 'message' => $identity === ''
+                ? 'Perangkat ini belum terhubung ke akun PIN. Masuk sekali dengan email dan kata sandi, lalu aktifkan PIN pada menu Biometrik & PIN.'
+                : 'Identitas atau PIN tidak sesuai.');
+        }
         $this->db->trans_begin();
         // Lock the account row while reading/updating the failure counter so
         // concurrent guesses cannot bypass the five-attempt lockout.

@@ -76,15 +76,8 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
                     <div class="warga-auth-forgot"><a href="<?= site_url('lupa-password') ?>">Lupa kata sandi?</a></div>
                     <button class="btn btn-full btn-l font-600 bg-teal-dark color-white rounded-s" type="submit"><span>Masuk</span><i class="fa fa-arrow-right ms-2"></i></button>
                 </form>
-                <button type="button" class="btn btn-full btn-m rounded-s warga-passkey-login" data-passkey-login hidden><i class="fa fa-user-shield" aria-hidden="true"></i>Masuk dengan sidik jari/wajah</button>
-                <button type="button" class="btn btn-full btn-m border-blue-dark color-blue-dark rounded-s warga-pin-login-toggle" data-pin-login-toggle aria-expanded="false" aria-controls="warga-pin-login-panel"><i class="fa fa-key" aria-hidden="true"></i>Masuk dengan PIN</button>
-                <div class="warga-pin-login-panel" id="warga-pin-login-panel" data-pin-login-panel hidden>
-                    <form data-pin-login-form autocomplete="off">
-                        <label class="small-text" for="login-pin">PIN 6 angka</label>
-                        <input type="password" id="login-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" placeholder="Masukkan PIN" required>
-                        <button type="submit" class="btn btn-full btn-s bg-blue-dark color-white rounded-s"><i class="fa fa-lock" aria-hidden="true"></i>Masuk dengan PIN</button>
-                    </form>
-                </div>
+                <button type="button" class="btn btn-full btn-m rounded-s warga-passkey-login" data-passkey-login hidden><i class="fa fa-user-shield" aria-hidden="true"></i><span>Masuk dengan sidik jari/wajah</span></button>
+                <button type="button" class="btn btn-full btn-m rounded-s warga-pin-login-toggle" data-pin-login-toggle aria-expanded="false" aria-controls="warga-pin-login-modal"><i class="fa fa-key" aria-hidden="true"></i><span>Masuk dengan PIN</span></button>
                 <div class="warga-login-auth-message" data-login-auth-message role="status" aria-live="polite" hidden></div>
                 <?php if ($demoMode): ?><div class="warga-demo-credentials"><i class="fa fa-flask"></i><span>Demo: <strong>warga</strong>, <strong>sekdes</strong>, atau <strong>kades</strong> · sandi <strong>demo12345</strong></span></div><?php endif; ?>
                 <p class="text-center mt-4 mb-0">Belum memiliki akun? <a class="warga-auth-switch-link" href="<?= site_url('register') ?>">Daftar Warga</a></p>
@@ -93,6 +86,26 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
         <div class="card card-style warga-auth-install" data-pwa-install-container aria-hidden="false"><?php $this->load->view('layouts/pwa_install', array('branding' => $branding)); ?></div>
         <?php $this->load->view('layouts/site_footer', array('footerVillage' => $footerVillage, 'currentUser' => $currentUser, 'shareTitle' => $shareTitle, 'shareDescription' => $shareDescription, 'shareUrl' => $shareUrl, 'branding' => $branding)); ?>
     </main>
+</div>
+<div class="warga-pin-login-modal" id="warga-pin-login-modal" data-pin-login-panel hidden aria-hidden="true">
+    <button type="button" class="warga-pin-login-backdrop" data-pin-login-close tabindex="-1" aria-label="Tutup login dengan PIN"></button>
+    <section class="warga-pin-login-dialog" role="dialog" aria-modal="true" aria-labelledby="warga-pin-login-title" aria-describedby="warga-pin-login-description">
+        <header class="warga-pin-login-header">
+            <span class="warga-pin-login-icon" aria-hidden="true"><i class="fa fa-key"></i></span>
+            <div>
+                <p>Login cepat</p>
+                <h2 id="warga-pin-login-title">Masuk dengan PIN</h2>
+            </div>
+            <button type="button" class="warga-pin-login-close" data-pin-login-close aria-label="Tutup"><i class="fa fa-times" aria-hidden="true"></i></button>
+        </header>
+        <p class="warga-pin-login-description" id="warga-pin-login-description">Masukkan PIN 6 angka. Email tidak diperlukan pada perangkat yang sudah terhubung.</p>
+        <form data-pin-login-form autocomplete="off">
+            <label for="login-pin">PIN 6 angka</label>
+            <input type="password" id="login-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" aria-describedby="warga-pin-login-description" placeholder="Masukkan 6 angka" required>
+            <p class="warga-pin-login-error" data-pin-login-error role="alert" hidden></p>
+            <button type="submit" class="btn btn-full btn-s warga-pin-login-submit"><i class="fa fa-lock" aria-hidden="true"></i><span>Masuk dengan PIN</span></button>
+        </form>
+    </section>
 </div>
 <script>window.SDW={baseUrl:<?= json_encode(base_url()) ?>,brandName:<?= json_encode($loginBrand) ?>,csrfName:<?= json_encode($this->security->get_csrf_token_name()) ?>,csrfHash:<?= json_encode($this->security->get_csrf_hash()) ?>,serviceWorkerUrl:<?= json_encode(warga_asset_url('service-worker.js')) ?>,serviceWorkerScope:<?= json_encode(base_url()) ?>,passkeyEndpoints:<?= json_encode(array('loginOptions'=>site_url('passkey/login/options'),'login'=>site_url('passkey/login'),'pinLogin'=>site_url('passkey/pin/login'))) ?>};</script>
 <script src="<?= warga_asset_url('assets/js/warga.min.js') ?>"></script>

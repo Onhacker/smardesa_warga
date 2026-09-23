@@ -241,20 +241,65 @@
     var pinToggle = document.querySelector('[data-pin-login-toggle]');
     var pinPanel = document.querySelector('[data-pin-login-panel]');
     var pinForm = document.querySelector('[data-pin-login-form]');
-    var identityInput = document.querySelector('#login-identity');
     if (!passkeyButton && !pinToggle && !pinForm) return;
     platformAvailable().then(function (available) { if (passkeyButton) passkeyButton.hidden = !available; });
-    if (pinToggle && pinPanel) pinToggle.addEventListener('click', function () {
-      pinPanel.hidden = !pinPanel.hidden;
-      pinToggle.setAttribute('aria-expanded', pinPanel.hidden ? 'false' : 'true');
-      if (!pinPanel.hidden) { var input = pinPanel.querySelector('input[name="pin"]'); if (input) input.focus(); }
+    var previousFocus = null;
+    function pinModalButtons() {
+      if (!pinPanel) return [];
+      return Array.prototype.slice.call(pinPanel.querySelectorAll('button:not([disabled]), input:not([disabled])')).filter(function (element) {
+        return !element.hidden && element.offsetParent !== null && element.getAttribute('tabindex') !== '-1';
+      });
+    }
+    function closePinModal(restoreFocus) {
+      if (!pinPanel || pinPanel.hidden) return;
+      pinPanel.hidden = true;
+      pinPanel.setAttribute('aria-hidden', 'true');
+      if (pinToggle) pinToggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('warga-dialog-open');
+      var focusTarget = previousFocus;
+      previousFocus = null;
+      if (restoreFocus !== false && focusTarget && typeof focusTarget.focus === 'function') focusTarget.focus();
+    }
+    function openPinModal() {
+      if (!pinPanel) return;
+      previousFocus = document.activeElement;
+      pinPanel.hidden = false;
+      pinPanel.setAttribute('aria-hidden', 'false');
+      if (pinToggle) pinToggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('warga-dialog-open');
+      var error = pinPanel.querySelector('[data-pin-login-error]');
+      if (error) { error.textContent = ''; error.hidden = true; }
+      var input = pinPanel.querySelector('input[name="pin"]');
+      if (input) {
+        input.value = '';
+        window.setTimeout(function () { if (!pinPanel.hidden) input.focus(); }, 30);
+      }
+    }
+    if (pinToggle && pinPanel) pinToggle.addEventListener('click', function (event) {
+      event.preventDefault();
+      if (pinPanel.hidden) openPinModal(); else closePinModal(true);
     });
+    if (pinPanel) {
+      pinPanel.addEventListener('click', function (event) {
+        var close = event.target.closest('[data-pin-login-close]');
+        if (close) { event.preventDefault(); closePinModal(true); }
+      });
+      document.addEventListener('keydown', function (event) {
+        if (!pinPanel || pinPanel.hidden) return;
+        if (event.key === 'Escape') { event.preventDefault(); closePinModal(true); return; }
+        if (event.key !== 'Tab') return;
+        var focusable = pinModalButtons();
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      });
+    }
     if (passkeyButton) passkeyButton.addEventListener('click', function () {
-      var identity = identityInput ? identityInput.value.trim() : '';
-      if (!identity) { setMessage('[data-login-auth-message]', 'Masukkan email atau nomor telepon terlebih dahulu.', true); if (identityInput) identityInput.focus(); return; }
       setBusy(passkeyButton, true, 'Menunggu…');
       setMessage('[data-login-auth-message]', '', false);
-      post(endpoints.loginOptions, {identity: identity})
+      post(endpoints.loginOptions, {identity: ''})
         .then(function (body) { return navigator.credentials.get({publicKey: prepareRequest(body.options)}); })
         .then(function (credential) { return post(endpoints.login, {credential: JSON.stringify(credentialPayload(credential))}); })
         .then(redirectAfterLogin)
@@ -265,14 +310,13 @@
       event.preventDefault();
       var submit = pinForm.querySelector('button[type="submit"]');
       var pinInput = pinForm.querySelector('input[name="pin"]');
-      var identity = identityInput ? identityInput.value.trim() : '';
-      if (!identity) {
-        setMessage('[data-login-auth-message]', 'Masukkan email atau nomor telepon terlebih dahulu.', true);
-        if (identityInput) identityInput.focus();
-        return;
-      }
       setBusy(submit, true, 'Memeriksa…');
-      post(endpoints.pinLogin, {identity: identity, pin: pinInput ? pinInput.value : ''}).then(redirectAfterLogin).catch(function (error) { setMessage('[data-login-auth-message]', error.message || 'Login PIN belum berhasil.', true); }).finally(function () { setBusy(submit, false); });
+      var pinError = pinForm.querySelector('[data-pin-login-error]');
+      if (pinError) { pinError.textContent = ''; pinError.hidden = true; }
+      post(endpoints.pinLogin, {identity: '', pin: pinInput ? pinInput.value : ''}).then(redirectAfterLogin).catch(function (error) {
+        var message = error.message || 'Login PIN belum berhasil.';
+        if (pinError) { pinError.textContent = message; pinError.hidden = false; }
+      }).finally(function () { setBusy(submit, false); });
     });
   }
 

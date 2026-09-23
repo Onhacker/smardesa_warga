@@ -159,6 +159,14 @@ class Auth_model extends CI_Model
 
     private function write_trusted_cookie($value, $expires)
     {
+        $this->write_device_cookie($this->trusted_cookie_name(), $value, $expires);
+    }
+
+    /** Write one of the server-issued HttpOnly device cookies. */
+    private function write_device_cookie($name, $value, $expires)
+    {
+        $name = preg_replace('/[^A-Za-z0-9_]/', '', (string) $name);
+        if ($name === '') return;
         $appUrl = parse_url(trim((string) getenv('APP_URL')));
         $secure = ENVIRONMENT === 'production'
             || (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
@@ -173,9 +181,116 @@ class Auth_model extends CI_Model
             'httponly' => TRUE,
             'samesite' => 'Lax'
         );
-        setcookie($this->trusted_cookie_name(), (string) $value, $options);
-        if ((int) $expires <= time()) unset($_COOKIE[$this->trusted_cookie_name()]);
-        else $_COOKIE[$this->trusted_cookie_name()] = (string) $value;
+        setcookie($name, (string) $value, $options);
+        if ((int) $expires <= time()) unset($_COOKIE[$name]);
+        else $_COOKIE[$name] = (string) $value;
+    }
+
+    private function pin_device_cookie_name()
+    {
+        return 'sdw_pin_device';
+    }
+
+    private function pin_device_cookie_value()
+    {
+        $name = $this->pin_device_cookie_name();
+        return isset($_COOKIE[$name]) ? trim((string) $_COOKIE[$name]) : '';
+    }
+
+    /**
+     * Issue a separate device binding for PIN login. It identifies the account
+     * only; the PIN is still required for every sign-in. The binding survives
+     * an ordinary sign-out so the account can be identified without email,
+     * while PIN disable and session-version changes still invalidate it.
+     */
+    public function issue_pin_device_binding(array $user)
+    {
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('warga_login_tokens')
+            || !$this->db->field_exists('session_version', 'users') || !$this->db->field_exists('session_version', 'warga_login_tokens')) return FALSE;
+        $userId = (int) ($user['id'] ?? 0);
+        if ($userId < 1) return FALSE;
+        $version = max(1, (int) ($user['session_version'] ?? 1));
+        // Rotate only the binding currently held by this browser; other
+        // devices remain independently revocable and session-version bound.
+        $this->revoke_pin_device_binding();
+        $selector = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
+        $secret = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $expires = time() + $this->trusted_device_ttl();
+        $this->db->where('user_id', $userId)->where('auth_method', 'pin_binding')
+            ->where('expires_at <', date('Y-m-d H:i:s'))->delete('warga_login_tokens');
+        $bindings = $this->db->select('selector')->where('user_id', $userId)
+            ->where('auth_method', 'pin_binding')->where('revoked_at', NULL)
+            ->order_by('created_at', 'DESC')->get('warga_login_tokens')->result_array();
+        if (count($bindings) >= 8) {
+            foreach (array_slice($bindings, 7) as $old) {
+                if (!empty($old['selector'])) {
+                    $this->db->where('selector', (string) $old['selector'])
+                        ->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+                }
+            }
+        }
+        $ok = $this->db->insert('warga_login_tokens', array(
+            'selector' => $selector,
+            'user_id' => $userId,
+            'session_version' => $version,
+            'token_hash' => $this->trusted_token_hash($secret),
+            'auth_method' => 'pin_binding',
+            'expires_at' => date('Y-m-d H:i:s', $expires),
+            'last_used_at' => date('Y-m-d H:i:s'),
+            'user_agent' => substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
+            'ip_address' => substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45)
+        ));
+        if (!$ok || !$this->db->affected_rows()) return FALSE;
+        $this->write_device_cookie($this->pin_device_cookie_name(), $selector . '.' . $secret, $expires);
+        return TRUE;
+    }
+
+    /** Resolve the account bound to the PIN device cookie, without logging in. */
+    public function pin_device_user()
+    {
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('warga_login_tokens')
+            || !$this->db->field_exists('session_version', 'users') || !$this->db->field_exists('session_version', 'warga_login_tokens')) return NULL;
+        $cookie = $this->pin_device_cookie_value();
+        if (!preg_match('/^([A-Za-z0-9_-]{20,40})\.([A-Za-z0-9_-]{30,80})$/', $cookie, $match)) return NULL;
+        $selector = $match[1];
+        $secret = $match[2];
+        $row = $this->db->select('t.*,u.id AS user_id,u.session_version AS current_session_version,u.name,u.username,u.email,u.phone,u.is_active,u.role_id,r.name AS role_name,r.slug AS role_slug,v.village_code,v.name AS village_name,v.district_name,v.regency_code,v.regency_name')
+            ->from('warga_login_tokens t')
+            ->join('users u', 'u.id=t.user_id')
+            ->join('roles r', 'r.id=u.role_id')
+            ->join('village_tenants v', 'v.id=u.village_id', 'left')
+            ->where(array('t.selector' => $selector, 't.auth_method' => 'pin_binding', 't.revoked_at' => NULL))
+            ->limit(1)->get()->row_array();
+        $valid = is_array($row) && !empty($row['expires_at']) && strtotime((string) $row['expires_at']) > time()
+            && (int) ($row['session_version'] ?? 1) === max(1, (int) ($row['current_session_version'] ?? 1))
+            && hash_equals((string) ($row['token_hash'] ?? ''), $this->trusted_token_hash($secret))
+            && (int) ($row['is_active'] ?? 0) === 1 && warga_role_is_allowed($row['role_slug'] ?? '');
+        if ($valid && function_exists('warga_tenant_code')) {
+            $tenant = warga_normalize_tenant_code(warga_tenant_code(''), '');
+            $region = warga_normalize_tenant_code($row['regency_code'] ?? '', '');
+            if ($tenant !== '' && strtolower($tenant) !== 'default' && ($region === '' || !hash_equals($tenant, $region))) $valid = FALSE;
+        }
+        if (!$valid) {
+            if ($row) $this->db->where('selector', $selector)->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+            $this->write_device_cookie($this->pin_device_cookie_name(), '', time() - 3600);
+            return NULL;
+        }
+        $this->db->where('selector', $selector)->update('warga_login_tokens', array('last_used_at' => date('Y-m-d H:i:s')));
+        $row['id'] = (int) $row['user_id'];
+        return $row;
+    }
+
+    public function revoke_pin_device_binding($userId = NULL)
+    {
+        $cookie = $this->pin_device_cookie_value();
+        if (preg_match('/^([A-Za-z0-9_-]{20,40})\./', $cookie, $match)
+            && warga_database_available() && $this->db->table_exists('warga_login_tokens')) {
+            $this->db->where('selector', $match[1])->where('auth_method', 'pin_binding')->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+        }
+        if ($userId !== NULL && warga_database_available() && $this->db->table_exists('warga_login_tokens')) {
+            $this->db->where('user_id', (int) $userId)->where('auth_method', 'pin_binding')->where('revoked_at', NULL)->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
+        }
+        $this->write_device_cookie($this->pin_device_cookie_name(), '', time() - 3600);
     }
 
     /** Restore a trusted passkey/PIN device before current_user() is checked. */
@@ -197,6 +312,7 @@ class Auth_model extends CI_Model
             ->join('roles r', 'r.id=u.role_id')
             ->join('village_tenants v', 'v.id=u.village_id', 'left')
             ->where(array('t.selector' => $selector, 't.revoked_at' => NULL))
+            ->where_in('t.auth_method', array('passkey', 'pin'))
             ->limit(1)->get()->row_array();
         $expired = !$row || empty($row['expires_at']) || strtotime((string) $row['expires_at']) <= time();
         $valid = !$expired && (int) ($row['session_version'] ?? 1) === max(1, (int) ($row['current_session_version'] ?? 1))
@@ -251,7 +367,9 @@ class Auth_model extends CI_Model
         $secret = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
         $expires = time() + $this->trusted_device_ttl();
         $this->db->where('user_id', (int) $userId)->where('expires_at <', date('Y-m-d H:i:s'))->delete('warga_login_tokens');
-        $existing = $this->db->select('selector')->where('user_id', (int) $userId)->where('revoked_at', NULL)->order_by('created_at', 'DESC')->get('warga_login_tokens')->result_array();
+        $existing = $this->db->select('selector')->where('user_id', (int) $userId)
+            ->where_in('auth_method', array('passkey', 'pin'))->where('revoked_at', NULL)
+            ->order_by('created_at', 'DESC')->get('warga_login_tokens')->result_array();
         if (count($existing) >= 5) {
             foreach (array_slice($existing, 4) as $old) {
                 if (!empty($old['selector'])) $this->db->where('selector', (string) $old['selector'])->update('warga_login_tokens', array('revoked_at' => date('Y-m-d H:i:s')));
@@ -457,6 +575,10 @@ class Auth_model extends CI_Model
         $this->clear_login_failures($identity);
         $this->session->sess_regenerate(TRUE);
         $this->set_authenticated_session($user);
+        // A successful password login safely establishes which account owns
+        // this browser. If the user already enabled PIN, bind this device so
+        // the next PIN login can identify the account without an email field.
+        if (!empty($user['login_pin_hash'])) $this->issue_pin_device_binding($user);
         $this->db->where('id', $user['id'])->update('users', array('last_login_at' => date('Y-m-d H:i:s')));
         return $user;
     }
