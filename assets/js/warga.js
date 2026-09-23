@@ -364,8 +364,60 @@
       return Array.isArray(schema.fields) ? schema.fields : [];
     }
 
+    function fieldIsRequired(field) {
+      if (!field || typeof field !== 'object') return false;
+      return field.required === true || field.required === 1 || String(field.required).toLowerCase() === 'true' || String(field.required) === '1';
+    }
+
+    function servicePreparationItems(service) {
+      var items = [];
+      var seen = Object.create(null);
+
+      function requirementText(value) {
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+          var keys = ['label', 'name', 'title', 'requirement', 'text'];
+          for (var index = 0; index < keys.length; index++) {
+            var candidate = value[keys[index]];
+            if (typeof candidate === 'string' || typeof candidate === 'number') return String(candidate);
+          }
+          return '';
+        }
+        return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+      }
+
+      function append(value) {
+        var label = requirementText(value).replace(/\s+/g, ' ').trim();
+        if (!label) return;
+        var canonical = label
+          .replace(/^berkas\s*:\s*/i, '')
+          .replace(/\s*\((?:opsional|optional)\)\s*$/i, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLocaleLowerCase('id');
+        if (!canonical || seen[canonical]) return;
+        seen[canonical] = true;
+        items.push(label);
+      }
+
+      (service && Array.isArray(service.requirements) ? service.requirements : []).forEach(append);
+      serviceFields(service).forEach(function (field) {
+        if (!field || typeof field !== 'object') return;
+        var type = String(field.type || 'text').toLowerCase();
+        var required = fieldIsRequired(field);
+        if (type !== 'file' && !required) return;
+        var label = requirementText(field.label).replace(/\s+/g, ' ').trim();
+        if (!label) return;
+        if (type === 'file') {
+          if (!/^berkas\s*:/i.test(label)) label = 'Berkas: ' + label;
+          if (!required && !/\((?:opsional|optional)\)\s*$/i.test(label)) label += ' (opsional)';
+        }
+        append(label);
+      });
+      return items;
+    }
+
     function updateRequirements(service) {
-      var requirements = service && Array.isArray(service.requirements) ? service.requirements.slice(0) : [];
+      var requirements = servicePreparationItems(service);
       if (!requirementList || !requirementBox) return;
       requirementList.textContent = '';
       requirements.forEach(function (requirement) {
@@ -401,7 +453,7 @@
       control.id = id;
       control.name = 'warga_fields[' + String(field.key || '') + ']';
       control.className = 'form-control';
-      control.required = !!field.required;
+      control.required = fieldIsRequired(field);
       if (field.placeholder && field.type !== 'select') control.placeholder = String(field.placeholder);
       if (field.max_length && field.type !== 'date' && field.type !== 'number' && field.type !== 'select') {
         control.maxLength = Math.max(1, Math.min(5000, Number(field.max_length) || 500));
@@ -439,7 +491,7 @@
       // A revision may retain an existing required file. The server still
       // validates the requirement; the browser should not force a needless
       // re-upload unless the citizen chooses to replace it.
-      input.required = !!field.required && existingForField.length === 0;
+      input.required = fieldIsRequired(field) && existingForField.length === 0;
       input.setAttribute('data-dynamic-file-input', '');
       input.setAttribute('data-max-files', field.multiple ? '5' : '1');
       input.setAttribute('data-max-size-mb', String(Math.max(1, Math.min(10, Number(field.max_size_mb) || 5))));
@@ -470,7 +522,7 @@
         var label = document.createElement('label');
         label.htmlFor = id;
         label.textContent = String(field.label);
-        if (field.required) {
+        if (fieldIsRequired(field)) {
           var required = document.createElement('em');
           required.textContent = '*';
           label.appendChild(required);

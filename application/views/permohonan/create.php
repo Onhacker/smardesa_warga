@@ -3,15 +3,7 @@
 <?php $selectedServiceRow = isset($selected_service) && is_array($selected_service) ? $selected_service : array(); ?>
 <?php $selectedService = isset($selectedServiceRow['slug']) ? (string) $selectedServiceRow['slug'] : ''; ?>
 <?php $selectedServiceIcon = warga_service_icon($selectedServiceRow); ?>
-<?php
-$serviceRequirements = array();
-if (isset($selectedServiceRow['requirements']) && is_array($selectedServiceRow['requirements'])) {
-    foreach ($selectedServiceRow['requirements'] as $requirement) {
-        $requirement = trim((string) $requirement);
-        if ($requirement !== '') $serviceRequirements[] = $requirement;
-    }
-}
-?>
+<?php $serviceRequirements = warga_service_preparation_items($selectedServiceRow); ?>
 <?php $initialFields = $editMode && isset($request['form_data']) && is_array($request['form_data']) ? $request['form_data'] : array(); ?>
 <?php $existingDocuments = $editMode && isset($request['documents']) && is_array($request['documents']) ? $request['documents'] : array(); ?>
 <div class="warga-request-create">

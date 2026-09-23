@@ -404,6 +404,82 @@ if (!function_exists('warga_request_service_icon')) {
     }
 }
 
+if (!function_exists('warga_service_preparation_items')) {
+    /**
+     * Build the preparation checklist shown before a citizen fills a request.
+     *
+     * Older catalogue payloads only populated `requirements`, while newer
+     * services can define required data and uploads in `form_schema.fields`.
+     * Merge both sources so a file input can never be missing from the
+     * checklist. Optional uploads remain visible, but are labelled clearly.
+     */
+    function warga_service_preparation_items(array $service)
+    {
+        $items = array();
+        $seen = array();
+
+        $append = static function ($value) use (&$items, &$seen) {
+            if (is_array($value)) {
+                $resolved = '';
+                foreach (array('label', 'name', 'title', 'requirement', 'text') as $key) {
+                    if (isset($value[$key]) && is_scalar($value[$key])) {
+                        $resolved = (string) $value[$key];
+                        break;
+                    }
+                }
+                $value = $resolved;
+            }
+            if (!is_scalar($value)) return;
+
+            $label = trim(preg_replace('/\s+/u', ' ', (string) $value));
+            if ($label === '') return;
+
+            $canonical = preg_replace('/^berkas\s*:\s*/iu', '', $label);
+            $canonical = preg_replace('/\s*\((?:opsional|optional)\)\s*$/iu', '', (string) $canonical);
+            $canonical = trim(preg_replace('/\s+/u', ' ', (string) $canonical));
+            $canonical = function_exists('mb_strtolower')
+                ? mb_strtolower($canonical, 'UTF-8')
+                : strtolower($canonical);
+            if ($canonical === '' || isset($seen[$canonical])) return;
+
+            $seen[$canonical] = TRUE;
+            $items[] = $label;
+        };
+
+        $requirements = isset($service['requirements']) && is_array($service['requirements'])
+            ? $service['requirements']
+            : array();
+        foreach ($requirements as $requirement) $append($requirement);
+
+        $schema = isset($service['form_schema']) && is_array($service['form_schema'])
+            ? $service['form_schema']
+            : array();
+        $fields = isset($schema['fields']) && is_array($schema['fields'])
+            ? $schema['fields']
+            : array();
+        foreach ($fields as $field) {
+            if (!is_array($field)) continue;
+            $type = strtolower(trim((string) (isset($field['type']) ? $field['type'] : 'text')));
+            $required = filter_var(isset($field['required']) ? $field['required'] : FALSE, FILTER_VALIDATE_BOOLEAN);
+            if ($type !== 'file' && !$required) continue;
+
+            $label = isset($field['label']) && is_scalar($field['label'])
+                ? trim((string) $field['label'])
+                : '';
+            if ($label === '') continue;
+            if ($type === 'file') {
+                if (!preg_match('/^berkas\s*:/iu', $label)) $label = 'Berkas: ' . $label;
+                if (!$required && !preg_match('/\((?:opsional|optional)\)\s*$/iu', $label)) {
+                    $label .= ' (opsional)';
+                }
+            }
+            $append($label);
+        }
+
+        return $items;
+    }
+}
+
 if (!function_exists('warga_notification_icon')) {
     /**
      * Resolve a notification to a small, semantic icon catalogue.
