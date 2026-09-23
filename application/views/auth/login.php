@@ -101,8 +101,13 @@ $loginTagline = trim((string) ($branding['tagline'] ?? 'Layanan Digital Warga'))
         <p class="warga-pin-login-description" id="warga-pin-login-description">Masukkan PIN 6 angka. Email tidak diperlukan pada perangkat yang sudah terhubung.</p>
         <form data-pin-login-form autocomplete="off">
             <label for="login-pin">PIN 6 angka</label>
-            <input type="password" id="login-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" aria-describedby="warga-pin-login-description" placeholder="Masukkan 6 angka" required>
-            <p class="warga-pin-login-error" data-pin-login-error role="alert" hidden></p>
+            <div class="warga-pin-code" data-pin-code>
+                <div class="warga-pin-code-boxes" aria-hidden="true">
+                    <?php for ($pinDigit = 0; $pinDigit < 6; $pinDigit++): ?><span class="warga-pin-digit-box" data-pin-digit-box></span><?php endfor; ?>
+                </div>
+                <input type="password" id="login-pin" name="pin" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" aria-label="PIN 6 angka" aria-describedby="warga-pin-login-description warga-pin-login-error" data-pin-input required>
+            </div>
+            <p class="warga-pin-login-error" id="warga-pin-login-error" data-pin-login-error role="alert" hidden></p>
             <button type="submit" class="btn btn-full btn-s warga-pin-login-submit"><i class="fa fa-lock" aria-hidden="true"></i><span>Masuk dengan PIN</span></button>
         </form>
     </section>

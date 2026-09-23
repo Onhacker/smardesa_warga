@@ -241,9 +241,44 @@
     var pinToggle = document.querySelector('[data-pin-login-toggle]');
     var pinPanel = document.querySelector('[data-pin-login-panel]');
     var pinForm = document.querySelector('[data-pin-login-form]');
+    var pinInput = pinForm ? pinForm.querySelector('[data-pin-input]') : null;
+    var pinCode = pinForm ? pinForm.querySelector('[data-pin-code]') : null;
+    var pinBoxes = pinCode ? Array.prototype.slice.call(pinCode.querySelectorAll('[data-pin-digit-box]')) : [];
     if (!passkeyButton && !pinToggle && !pinForm) return;
     platformAvailable().then(function (available) { if (passkeyButton) passkeyButton.hidden = !available; });
     var previousFocus = null;
+    function syncPinCode() {
+      if (!pinInput) return '';
+      var digits = String(pinInput.value || '').replace(/\D/g, '').slice(0, 6);
+      if (pinInput.value !== digits) pinInput.value = digits;
+      var focused = document.activeElement === pinInput;
+      pinBoxes.forEach(function (box, index) {
+        var filled = index < digits.length;
+        box.textContent = filled ? '\u2022' : '';
+        box.classList.toggle('is-filled', filled);
+        box.classList.toggle('is-active', focused && digits.length < 6 && index === digits.length);
+      });
+      if (pinCode) pinCode.classList.toggle('is-complete', digits.length === 6);
+      return digits;
+    }
+    function clearPinError() {
+      if (!pinForm) return;
+      var error = pinForm.querySelector('[data-pin-login-error]');
+      if (error) { error.textContent = ''; error.hidden = true; }
+      if (pinInput) pinInput.removeAttribute('aria-invalid');
+    }
+    if (pinInput) {
+      pinInput.addEventListener('input', function () { clearPinError(); syncPinCode(); });
+      pinInput.addEventListener('focus', syncPinCode);
+      pinInput.addEventListener('blur', syncPinCode);
+      pinInput.addEventListener('paste', function () {
+        window.setTimeout(function () {
+          syncPinCode();
+          if (typeof pinInput.setSelectionRange === 'function') pinInput.setSelectionRange(pinInput.value.length, pinInput.value.length);
+        }, 0);
+      });
+      syncPinCode();
+    }
     function pinModalButtons() {
       if (!pinPanel) return [];
       return Array.prototype.slice.call(pinPanel.querySelectorAll('button:not([disabled]), input:not([disabled])')).filter(function (element) {
@@ -267,12 +302,11 @@
       pinPanel.setAttribute('aria-hidden', 'false');
       if (pinToggle) pinToggle.setAttribute('aria-expanded', 'true');
       document.body.classList.add('warga-dialog-open');
-      var error = pinPanel.querySelector('[data-pin-login-error]');
-      if (error) { error.textContent = ''; error.hidden = true; }
-      var input = pinPanel.querySelector('input[name="pin"]');
-      if (input) {
-        input.value = '';
-        window.setTimeout(function () { if (!pinPanel.hidden) input.focus(); }, 30);
+      clearPinError();
+      if (pinInput) {
+        pinInput.value = '';
+        syncPinCode();
+        window.setTimeout(function () { if (!pinPanel.hidden) { pinInput.focus(); syncPinCode(); } }, 30);
       }
     }
     if (pinToggle && pinPanel) pinToggle.addEventListener('click', function (event) {
@@ -309,13 +343,25 @@
     if (pinForm) pinForm.addEventListener('submit', function (event) {
       event.preventDefault();
       var submit = pinForm.querySelector('button[type="submit"]');
-      var pinInput = pinForm.querySelector('input[name="pin"]');
+      var digits = syncPinCode();
+      if (digits.length !== 6) {
+        var incompleteError = pinForm.querySelector('[data-pin-login-error]');
+        if (incompleteError) { incompleteError.textContent = 'Lengkapi keenam angka PIN.'; incompleteError.hidden = false; }
+        if (pinInput) { pinInput.setAttribute('aria-invalid', 'true'); pinInput.focus(); }
+        return;
+      }
       setBusy(submit, true, 'Memeriksa…');
       var pinError = pinForm.querySelector('[data-pin-login-error]');
       if (pinError) { pinError.textContent = ''; pinError.hidden = true; }
-      post(endpoints.pinLogin, {identity: '', pin: pinInput ? pinInput.value : ''}).then(redirectAfterLogin).catch(function (error) {
+      post(endpoints.pinLogin, {identity: '', pin: digits}).then(redirectAfterLogin).catch(function (error) {
         var message = error.message || 'Login PIN belum berhasil.';
         if (pinError) { pinError.textContent = message; pinError.hidden = false; }
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.setAttribute('aria-invalid', 'true');
+          pinInput.focus();
+          syncPinCode();
+        }
       }).finally(function () { setBusy(submit, false); });
     });
   }
