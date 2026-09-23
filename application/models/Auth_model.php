@@ -1160,6 +1160,24 @@ class Auth_model extends CI_Model
 
     public function logout()
     {
+        // Detach the current browser endpoint before destroying the session.
+        // Keep the browser PushSubscription alive so a later login can bind it
+        // to the new account; never remove another account's endpoint.
+        $userId = (int) $this->session->userdata('warga_user_id');
+        $endpointHash = trim((string) $this->session->userdata('warga_push_endpoint_hash'));
+        if ($userId > 0 && $endpointHash !== '' && warga_database_available()) {
+            try {
+                if ($this->db->table_exists('warga_push_subscriptions')
+                    && preg_match('/^[a-f0-9]{64}$/i', $endpointHash)) {
+                    $this->db->where(array('user_id' => $userId,
+                        'endpoint_hash' => strtolower($endpointHash)))->delete('warga_push_subscriptions');
+                }
+            } catch (Throwable $e) {
+                // Logout must still complete if the optional push table is
+                // unavailable or the database is temporarily read-only.
+            }
+        }
+        $this->session->unset_userdata('warga_push_endpoint_hash');
         $this->revoke_current_trusted_device();
         $this->session->unset_userdata(array('warga_logged_in', 'warga_user_id', 'warga_session_version', 'intended_url'));
         $this->session->sess_regenerate(TRUE);

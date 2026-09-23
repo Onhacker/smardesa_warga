@@ -38,18 +38,39 @@ class Push_worker extends CI_Controller
                 JOIN users u ON u.id=n.user_id
                 WHERE u.is_active=1 AND n.read_at IS NULL AND n.created_at>=s.created_at
                 AND n.created_at>=DATE_SUB(NOW(),INTERVAL 7 DAY)");
+            // Re-check ownership while selecting the actual send queue. The
+            // delivery insert above is scoped too, but this second predicate
+            // prevents a stale/manual delivery row from crossing accounts if
+            // a subscription was reassigned after queue creation.
             $rows = $this->db->select('d.*,s.endpoint,s.endpoint_hash,s.public_key,s.auth_token,n.user_id,n.request_id,t.target_path,r.slug AS role_slug')
                 ->from('warga_push_deliveries d')->join('warga_push_subscriptions s','s.id=d.subscription_id')
-                ->join('notifications n','n.id=d.notification_id')->join('users u','u.id=n.user_id')
+                ->join('notifications n','n.id=d.notification_id AND n.user_id=s.user_id')
+                ->join('users u','u.id=n.user_id')
                 ->join('roles r','r.id=u.role_id')->join('warga_notification_targets t','t.notification_id=n.id','left')
                 ->where(array('d.status'=>'pending','u.is_active'=>1))->where('n.read_at',null)
                 ->where('d.next_attempt_at <=',date('Y-m-d H:i:s'))->where('d.attempts <',5)
-                ->where('n.created_at >=',date('Y-m-d H:i:s',time()-7*86400))->order_by('n.created_at','ASC')->limit(40)->get()->result_array();
+                ->where('n.created_at >=',date('Y-m-d H:i:s',time()-7*86400))
+                ->where('n.created_at >= s.created_at',NULL,FALSE)
+                ->order_by('n.created_at','ASC')->limit(40)->get()->result_array();
             $sent=0; $failed=0; $expired=0; $invalid=0; $started=microtime(true); $unreadCounts=array();
             if ($verbose) fwrite(STDOUT, "Push worker: prioritas={$urgency}, antrean=" . count($rows) . "\n");
             foreach ($rows as $row) {
                 if (microtime(true)-$started>45) break;
                 $key=array('notification_id'=>$row['notification_id'],'subscription_id'=>$row['subscription_id']);
+                // The account can be switched while this batch is being
+                // processed. Re-read ownership immediately before sending so
+                // a subscription removed/rebound after queue selection is not
+                // used for the previous account's notification.
+                $owner = $this->db->select('s.user_id AS subscription_user_id,n.user_id AS notification_user_id')
+                    ->from('warga_push_deliveries d')
+                    ->join('warga_push_subscriptions s','s.id=d.subscription_id')
+                    ->join('notifications n','n.id=d.notification_id')
+                    ->where($key)->limit(1)->get()->row_array();
+                if (!$owner || (int) $owner['subscription_user_id'] !== (int) $owner['notification_user_id']) {
+                    $this->db->where($key)->delete('warga_push_deliveries');
+                    if ($verbose) fwrite(STDERR, 'Push dilewati: kepemilikan subscription berubah untuk notification=' . $row['notification_id'] . "\n");
+                    continue;
+                }
                 if (!$this->Notification_model->valid_endpoint($row['endpoint'])) {
                     $invalid++;
                     if ($verbose) fwrite(STDERR, 'Push endpoint tidak valid: subscription=' . (int)$row['subscription_id'] . ' hash=' . substr((string)$row['endpoint_hash'], -8) . "\n");

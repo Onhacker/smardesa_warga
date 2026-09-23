@@ -126,6 +126,11 @@ class Notifications extends Public_Controller
         $raw = $this->input->post('subscription');
         $data = is_string($raw) && strlen($raw) < 5000 ? json_decode($raw,true) : null;
         $ok = is_array($data) && $this->Notification_model->subscribe($this->currentUser['id'],$data);
+        if ($ok && is_array($data) && is_string($data['endpoint'] ?? NULL)) {
+            // Keep a scoped hash in the login session so server-side logout
+            // can detach this browser even when JavaScript is unavailable.
+            $this->session->set_userdata('warga_push_endpoint_hash', hash('sha256', $data['endpoint']));
+        }
         return $this->json(array('success'=>$ok), $ok ? 200 : 422);
     }
 
@@ -134,10 +139,9 @@ class Notifications extends Public_Controller
         if (!$this->require_json_authentication()) return;
         $this->require_post();
         $this->load->model('Notification_model');
-        if ($this->Notification_model->ready()) {
-            $this->db->where(array('user_id'=>$this->currentUser['id'],
-                'endpoint_hash'=>hash('sha256',(string)$this->input->post('endpoint'))))->delete('warga_push_subscriptions');
-        }
+        $endpoint = (string) $this->input->post('endpoint');
+        $this->Notification_model->remove_subscription($this->currentUser['id'], $endpoint);
+        $this->session->unset_userdata('warga_push_endpoint_hash');
         return $this->json(array('success'=>true));
     }
 

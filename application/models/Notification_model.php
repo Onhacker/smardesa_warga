@@ -131,7 +131,7 @@ class Notification_model extends CI_Model
 
     public function subscribe($userId, array $data)
     {
-        if (!$this->ready()) return false;
+        if (!$this->ready() || !$this->db->table_exists('warga_push_subscriptions')) return false;
         $endpoint = (string)($data['endpoint'] ?? '');
         if (!$this->valid_endpoint($endpoint)) return false;
         $key = $data['keys']['p256dh'] ?? ''; $auth = $data['keys']['auth'] ?? '';
@@ -147,6 +147,22 @@ class Notification_model extends CI_Model
         if ($existing) return $this->db->where('id',$existing['id'])->update('warga_push_subscriptions',$row);
         if ($this->db->where('user_id',$userId)->count_all_results('warga_push_subscriptions') >= 10) return false;
         return $this->db->insert('warga_push_subscriptions',$row);
+    }
+
+    /**
+     * Remove one browser endpoint association without revoking the browser
+     * subscription itself. A later authenticated login can bind it again.
+     */
+    public function remove_subscription($userId, $endpoint)
+    {
+        // Logout cleanup must still work if an older installation has the
+        // push table but has not yet created the notification-target table.
+        if (!warga_database_available() || !$this->db->table_exists('warga_push_subscriptions')) return false;
+        if (!is_string($endpoint) || !$this->valid_endpoint($endpoint)) return false;
+        return $this->db->where(array(
+            'user_id' => (int) $userId,
+            'endpoint_hash' => hash('sha256', $endpoint)
+        ))->delete('warga_push_subscriptions');
     }
 
     public function valid_endpoint($endpoint)

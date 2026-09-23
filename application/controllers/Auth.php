@@ -226,6 +226,19 @@ class Auth extends Public_Controller
     public function logout()
     {
         $this->require_post();
+        // The form supplies the current browser endpoint when available. The
+        // Auth_model also removes the session-scoped hash as a no-JavaScript
+        // fallback, and both operations are restricted to the current user.
+        $endpoint = $this->input->post('push_endpoint');
+        if ($this->currentUser && !empty($this->currentUser['id'])
+            && is_string($endpoint) && $endpoint !== '' && strlen($endpoint) <= 2048) {
+            try {
+                $this->load->model('Notification_model');
+                $this->Notification_model->remove_subscription($this->currentUser['id'], $endpoint);
+            } catch (Throwable $e) {
+                // Push cleanup is best effort and must never block logout.
+            }
+        }
         $this->Auth_model->logout();
         redirect('login');
     }

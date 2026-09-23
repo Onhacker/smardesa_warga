@@ -122,6 +122,38 @@ $brandName = trim((string) ($branding['nama_sistem'] ?? 'SIDAPULIK')) ?: 'SIDAPU
 <?php else: ?>
 <script src="<?= warga_asset_url('assets/js/notifications.min.js') ?>"></script>
 <?php endif; ?>
+<script>
+(function () {
+    'use strict';
+    // Pass the current browser endpoint through the confirmed logout form.
+    // The endpoint is removed from the account server-side, while the browser
+    // subscription remains available for the next authenticated account.
+    var config = window.SDW || {};
+    if (!config.isAuthenticated || !('serviceWorker' in navigator)) return;
+    function syncLogoutEndpoint() {
+        navigator.serviceWorker.ready.then(function (registration) {
+            return registration.pushManager ? registration.pushManager.getSubscription() : null;
+        }).then(function (subscription) {
+            if (!subscription || !subscription.endpoint) return;
+            document.querySelectorAll('form[data-logout-form]').forEach(function (form) {
+                var input = form.querySelector('input[name="push_endpoint"]');
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'push_endpoint';
+                    form.appendChild(input);
+                }
+                input.value = subscription.endpoint;
+            });
+        }).catch(function () {});
+    }
+    syncLogoutEndpoint();
+    window.addEventListener('pageshow', syncLogoutEndpoint);
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) syncLogoutEndpoint();
+    });
+}());
+</script>
 <?php if (!empty($loadMarketplaceScript)): ?><script src="<?= warga_asset_url('assets/js/market.js') ?>"></script><?php endif; ?>
 <?php if (!empty($loadComplaintPaginationScript)): ?><script src="<?= warga_asset_url('assets/js/complaint-pagination.min.js') ?>"></script><?php endif; ?>
 <?php if (!empty($loadPasskeyScript)): ?><script src="<?= warga_asset_url('assets/js/passkey.js') ?>"></script><?php endif; ?>
