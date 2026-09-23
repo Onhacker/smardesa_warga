@@ -454,11 +454,22 @@
       control.name = 'warga_fields[' + String(field.key || '') + ']';
       control.className = 'form-control';
       control.required = fieldIsRequired(field);
-      if (field.placeholder && field.type !== 'select') control.placeholder = String(field.placeholder);
       if (field.max_length && field.type !== 'date' && field.type !== 'number' && field.type !== 'select') {
         control.maxLength = Math.max(1, Math.min(5000, Number(field.max_length) || 500));
       }
       return control;
+    }
+
+    function fieldHintText(field) {
+      if (!field || typeof field !== 'object') return '';
+      var hints = [];
+      [field.placeholder, field.help].forEach(function (value) {
+        if (typeof value !== 'string' && typeof value !== 'number') return;
+        var hint = String(value).replace(/\s+/g, ' ').trim();
+        if (!hint || hints.indexOf(hint) !== -1) return;
+        hints.push(hint);
+      });
+      return hints.join(' · ');
     }
 
     function createFileControl(field, id) {
@@ -534,9 +545,14 @@
           && control && typeof control.value !== 'undefined') {
           control.value = String(initialFields[field.key] == null ? '' : initialFields[field.key]);
         }
-        if (field.help) {
+        var fieldHint = fieldHintText(field);
+        if (fieldHint) {
           var help = document.createElement('small');
-          help.textContent = String(field.help);
+          help.id = id + '-help';
+          help.textContent = fieldHint;
+          if (field.type !== 'file') {
+            control.setAttribute('aria-describedby', help.id);
+          }
           wrapper.appendChild(help);
         }
         dynamicFields.appendChild(wrapper);
