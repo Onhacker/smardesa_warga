@@ -1590,6 +1590,65 @@ class Request_model extends CI_Model
         );
     }
 
+    /**
+     * Verify a letter issued directly by a village installation. Only the
+     * public metadata queued by SmartDesa is exposed; the local HTML/PDF and
+     * all personal identity values remain on the issuing device.
+     */
+    public function public_local_verification($publicId)
+    {
+        $publicId = strtolower(trim((string) $publicId));
+        if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/', $publicId)) {
+            return NULL;
+        }
+        if (warga_demo_mode() || !warga_database_available()
+            || !$this->db->table_exists('local_letter_verifications')
+            || !$this->db->table_exists('village_tenants')) {
+            return NULL;
+        }
+
+        $row = $this->db->select(
+            'l.public_id, l.service_slug, l.service_name, l.letter_number, l.issued_at, '
+            . 'l.metadata_fingerprint, v.name AS village_name, v.district_name, '
+            . 'v.regency_code, v.regency_name'
+        )->from('local_letter_verifications l')
+            ->join('village_tenants v', 'v.id = l.village_id', 'inner')
+            ->where(array('l.public_id' => $publicId, 'v.status' => 'active'))
+            ->limit(1)->get()->row_array();
+        if (!is_array($row)) {
+            return NULL;
+        }
+
+        $fingerprint = strtolower(trim((string) ($row['metadata_fingerprint'] ?? '')));
+        if (!preg_match('/^[a-f0-9]{64}$/', $fingerprint)) {
+            return NULL;
+        }
+        $serviceSlug = strtolower(trim((string) ($row['service_slug'] ?? '')));
+        $serviceName = trim((string) ($row['service_name'] ?? ''));
+        $letterNumber = trim((string) ($row['letter_number'] ?? ''));
+        $issuedAt = trim((string) ($row['issued_at'] ?? ''));
+        $expectedFingerprint = hash('sha256', implode('|', array(
+            $publicId, $serviceSlug, $serviceName, $letterNumber, $issuedAt
+        )));
+        if (!hash_equals($expectedFingerprint, $fingerprint)) {
+            return NULL;
+        }
+        return array(
+            'request_code' => 'LOCAL-' . strtoupper(substr($publicId, 0, 8)),
+            'local_reference' => substr($this->public_text($letterNumber, 160), 0, 160),
+            'service_name' => substr($this->public_text($serviceName, 180), 0, 180),
+            'village_name' => substr($this->public_text($row['village_name'] ?? '', 160), 0, 160),
+            'district_name' => substr($this->public_text($row['district_name'] ?? '', 120), 0, 120),
+            'regency_code' => substr($this->public_text($row['regency_code'] ?? '', 20), 0, 20),
+            'regency_name' => substr($this->public_text($row['regency_name'] ?? '', 120), 0, 120),
+            'issued_at' => $issuedAt,
+            'document_format' => '',
+            'document_fingerprint' => strtoupper(substr($fingerprint, 0, 12) . '-' . substr($fingerprint, -12)),
+            'verification_type' => 'local',
+            'public_id' => $publicId
+        );
+    }
+
     private function public_text($value, $length)
     {
         $value = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) $value)));

@@ -1,5 +1,9 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
-<?php $verified = is_array($verification); ?>
+<?php
+$verified = is_array($verification);
+$is_local = $verified && isset($verification['verification_type'])
+    && (string) $verification['verification_type'] === 'local';
+?>
 <style>
     .warga-verification { max-width: 760px; margin: 0 auto; padding: 8px 0 28px; }
     .warga-verification-hero { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid <?= $verified ? '#b7dfc3' : '#f1b8b8' ?>; border-radius: 8px; background: <?= $verified ? '#f1fbf4' : '#fff5f5' ?>; }
@@ -21,8 +25,12 @@
     <header class="warga-verification-hero">
         <div class="warga-verification-icon" aria-hidden="true"><i class="fa fa-<?= $verified ? 'check' : 'exclamation' ?>"></i></div>
         <div>
-            <h1 id="verification-title"><?= $verified ? 'Dokumen resmi terverifikasi' : 'Dokumen tidak dapat diverifikasi' ?></h1>
-            <p><?= $verified ? 'Data surat cocok dengan catatan penerbit dan berkas resminya.' : 'Tautan atau data surat tidak ditemukan pada layanan pusat.' ?></p>
+            <h1 id="verification-title"><?= $verified ? 'Surat resmi terverifikasi' : 'Dokumen tidak dapat diverifikasi' ?></h1>
+            <p><?= $verified
+                ? ($is_local
+                    ? 'Data surat cocok dengan catatan penerbit yang diterima layanan pusat.'
+                    : 'Data surat cocok dengan catatan penerbit dan berkas resminya.')
+                : 'Tautan atau data surat tidak ditemukan pada layanan pusat.' ?></p>
         </div>
     </header>
 
@@ -39,10 +47,11 @@
             </dl>
         </section>
         <section class="warga-verification-section">
-            <h2>Keaslian berkas</h2>
-            <p class="warga-verification-note">Sidik digital berkas resmi cocok dengan catatan penerbit. Pemeriksaan ini hanya menampilkan metadata publik dan tidak membuka data pribadi pemohon.</p>
+            <h2><?= $is_local ? 'Keaslian catatan surat' : 'Keaslian berkas' ?></h2>
+            <p class="warga-verification-note"><?= $is_local
+                ? 'Catatan surat lokal cocok dengan metadata yang diterima layanan pusat. Pemeriksaan ini tidak membuka HTML, PDF, lampiran, atau data pribadi pemohon.'
+                : 'Sidik digital berkas resmi cocok dengan catatan penerbit. Pemeriksaan ini hanya menampilkan metadata publik dan tidak membuka data pribadi pemohon.' ?></p>
             <dl class="warga-verification-grid">
-                <div><dt>Format dokumen</dt><dd><?= e(strtoupper($verification['document_format'])) ?></dd></div>
                 <div><dt>Sidik digital</dt><dd><?= e($verification['document_fingerprint']) ?></dd></div>
             </dl>
         </section>
