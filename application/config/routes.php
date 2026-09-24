@@ -52,6 +52,7 @@ $route['pasar/produk/(:any)/arsipkan'] = 'marketplace/archive/$1';
 $route['pasar/produk/(:any)/hapus'] = 'marketplace/delete_product/$1';
 $route['pasar/produk/(:any)/rating'] = 'marketplace/rating/$1';
 $route['pasar/produk/(:any)'] = 'marketplace/show/$1';
+$route['verifikasi-surat/(:any)'] = 'verifikasi_surat/index/$1';
 $route['notifikasi/ringkasan'] = 'notifications/summary';
 $route['notifikasi/belum-dibaca'] = 'notifications/unread';
 $route['notifikasi/buka/(:any)'] = 'notifications/open/$1';

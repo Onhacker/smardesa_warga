@@ -1499,6 +1499,104 @@ class Request_model extends CI_Model
         return $row;
     }
 
+    /**
+     * Return only non-personal metadata for a publicly verifiable issued
+     * letter. The document must still exist in private storage and match the
+     * hash recorded at publication time; a database row alone is not enough.
+     */
+    public function public_verification($requestId)
+    {
+        $requestId = strtolower(trim((string) $requestId));
+        if (!preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/', $requestId)) {
+            return NULL;
+        }
+        if (warga_demo_mode() || !warga_database_available() || !$this->db->table_exists('service_requests')) {
+            return NULL;
+        }
+        if (!$this->request_document_fields_available(array('document_path', 'document_sha256', 'local_reference', 'status', 'updated_at'))) {
+            return NULL;
+        }
+
+        $hasSize = $this->request_document_fields_available(array('document_size'));
+        $hasFormat = $this->request_document_fields_available(array('document_format'));
+        $hasSyncedAt = $this->request_document_fields_available(array('local_synced_at'));
+        $hasCatalog = $this->db->table_exists('village_service_catalog')
+            && $this->request_document_fields_available(array('catalog_service_id'));
+        $select = 'r.id, r.request_code, r.status, r.local_reference, r.document_path, '
+            . 'r.document_sha256, r.updated_at, '
+            . ($hasSize ? 'r.document_size, ' : '')
+            . ($hasFormat ? 'r.document_format, ' : '')
+            . ($hasSyncedAt ? 'r.local_synced_at, ' : '')
+            . 'st.name AS service_name, v.name AS village_name, '
+            . 'v.district_name, v.regency_code, v.regency_name';
+        $query = $this->db->select($select, FALSE)
+            ->from('service_requests r')
+            ->join('service_types st', 'st.id = r.service_type_id', 'left')
+            ->join('village_tenants v', 'v.id = r.village_id', 'left');
+        if ($hasCatalog) {
+            $query->select('vc.name AS catalog_service_name', FALSE)
+                ->join('village_service_catalog vc', 'vc.id = r.catalog_service_id AND vc.village_id = r.village_id', 'left', FALSE);
+        }
+        $row = $query->where(array('r.id' => $requestId, 'r.status' => 'issued'))
+            ->limit(1)->get()->row_array();
+        if (!is_array($row)) return NULL;
+
+        $reference = trim((string) ($row['local_reference'] ?? ''));
+        $storedHash = strtolower(trim((string) ($row['document_sha256'] ?? '')));
+        $path = trim((string) ($row['document_path'] ?? ''));
+        if ($reference === '' || $path === '' || !preg_match('/^[a-f0-9]{64}$/', $storedHash)) return NULL;
+
+        $format = $hasFormat ? strtolower(trim((string) ($row['document_format'] ?? ''))) : '';
+        if (!in_array($format, array('html', 'pdf'), TRUE)) {
+            $extension = strtolower((string) pathinfo($path, PATHINFO_EXTENSION));
+            $format = in_array($extension, array('html', 'htm'), TRUE) ? 'html' : ($extension === 'pdf' ? 'pdf' : '');
+        }
+        if ($format === '') return NULL;
+
+        $root = $this->private_storage_path();
+        if ($root === NULL) return NULL;
+        $candidate = $path;
+        if (!preg_match('/^(?:[A-Za-z]:[\\\\\/]|[\\\\\/])/', $candidate)) {
+            $candidate = $root . DIRECTORY_SEPARATOR . ltrim(str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $candidate), DIRECTORY_SEPARATOR);
+        }
+        $real = realpath($candidate);
+        $rootPrefix = rtrim($root, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        if ($real === FALSE || !is_file($real) || !is_readable($real) || is_link($candidate)
+            || ($real !== $root && strpos($real, $rootPrefix) !== 0)) {
+            return NULL;
+        }
+        $size = @filesize($real);
+        if ($size === FALSE || $size < 1 || $size > 8 * 1024 * 1024) return NULL;
+        if ($hasSize && (int) ($row['document_size'] ?? 0) > 0 && (int) $row['document_size'] !== (int) $size) return NULL;
+        $actualHash = @hash_file('sha256', $real);
+        if (!is_string($actualHash) || !hash_equals($storedHash, strtolower($actualHash))) return NULL;
+
+        $serviceName = trim((string) ($row['catalog_service_name'] ?? ''));
+        if ($serviceName === '') $serviceName = trim((string) ($row['service_name'] ?? ''));
+        if ($serviceName === '') return NULL;
+
+        return array(
+            'request_code' => substr($this->public_text($row['request_code'] ?? '', 80), 0, 80),
+            'local_reference' => substr($this->public_text($reference, 160), 0, 160),
+            'service_name' => substr($this->public_text($serviceName, 180), 0, 180),
+            'village_name' => substr($this->public_text($row['village_name'] ?? '', 160), 0, 160),
+            'district_name' => substr($this->public_text($row['district_name'] ?? '', 120), 0, 120),
+            'regency_code' => substr($this->public_text($row['regency_code'] ?? '', 20), 0, 20),
+            'regency_name' => substr($this->public_text($row['regency_name'] ?? '', 120), 0, 120),
+            'issued_at' => (string) (($hasSyncedAt && !empty($row['local_synced_at']))
+                ? $row['local_synced_at'] : ($row['updated_at'] ?? '')),
+            'document_format' => $format,
+            'document_fingerprint' => strtoupper(substr($storedHash, 0, 12) . '-' . substr($storedHash, -12)),
+        );
+    }
+
+    private function public_text($value, $length)
+    {
+        $value = trim((string) preg_replace('/\s+/u', ' ', strip_tags((string) $value)));
+        if (function_exists('mb_substr')) return (string) mb_substr($value, 0, (int) $length, 'UTF-8');
+        return substr($value, 0, (int) $length);
+    }
+
     public function official_html_for_user($requestId, $userId)
     {
         $document = $this->official_document_for_user($requestId, $userId);
