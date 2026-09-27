@@ -125,7 +125,7 @@ $pictureUrl = static function ($name) {
         <header class="community-v22-section-head">
             <div>
                 <p class="community-v22-eyebrow">Pasar Dapulik</p>
-                <h2 id="community-market-preview-title">Produk terbaru</h2>
+                <h2 id="community-market-preview-title">Produk</h2>
             </div>
             <a href="<?= site_url('pasar') ?>" class="community-v22-section-action">Lihat semua <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
         </header>

@@ -291,8 +291,8 @@ class Marketplace_model extends CI_Model
     }
 
     /**
-     * Lightweight home-page catalogue. A short file cache prevents the same
-     * four-row query (and its review aggregate) from running on every visit.
+     * Lightweight newest-product preview retained for compatibility with
+     * callers that explicitly need chronological ordering.
      */
     public function latest_public_products($limit = 4)
     {
@@ -309,6 +309,33 @@ class Marketplace_model extends CI_Model
         $listing = $this->products(array(), array('public_all' => TRUE, 'sort' => 'newest', 'page' => 1, 'per_page' => $limit, 'skip_total' => TRUE));
         if ($cache && !empty($listing['ready'])) $cache->save($key, $listing, 45);
         return $listing;
+    }
+
+    /**
+     * Random home-page preview using the same seeded ordering as Pasar. A new
+     * seed is generated on every page request, while skip_total keeps the
+     * four-card query light by avoiding a separate catalogue count.
+     */
+    public function random_public_products($limit = 4)
+    {
+        $limit = max(1, min(12, (int) $limit));
+        return $this->products(array(), array(
+            'public_all' => TRUE,
+            'sort' => 'random',
+            'seed' => $this->public_preview_random_seed(),
+            'page' => 1,
+            'per_page' => $limit,
+            'skip_total' => TRUE
+        ));
+    }
+
+    private function public_preview_random_seed()
+    {
+        try {
+            return bin2hex(random_bytes(12));
+        } catch (Throwable $exception) {
+            return sha1(uniqid('', TRUE) . '-' . mt_rand());
+        }
     }
 
     private function preview_cache_driver()
