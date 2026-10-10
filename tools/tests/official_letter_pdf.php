@@ -7,17 +7,27 @@ require $root . '/vendor/autoload.php';
 require APPPATH . 'libraries/Official_letter_html.php';
 require APPPATH . 'libraries/Official_letter_pdf.php';
 
+putenv('APP_URL=https://warga.example.test/');
 $policy = Official_letter_html::POLICY;
+$verificationUrl = 'https://warga.example.test/verifikasi-surat/123e4567-e89b-42d3-a456-426614174000';
 $html = '<!doctype html><html lang="id"><head><meta charset="utf-8">'
     . '<meta http-equiv="Content-Security-Policy" content="' . $policy . '">'
     . '<title>Surat Resmi</title><style>@page{size:A4 portrait;margin:18mm}'
     . 'body{font-family:Arial,sans-serif;font-size:12pt;color:#111}h1{text-align:center}'
     . 'table{width:100%;border-collapse:collapse}td{padding:4px;border:1px solid #333}</style>'
     . '</head><body><main><h1>Surat Keterangan</h1><p>Dokumen uji SI DAPULIK.</p>'
-    . '<table><tr><td>Nomor</td><td>001/TEST/2026</td></tr></table></main></body></html>';
+    . '<table><tr><td>Nomor</td><td>001/TEST/2026</td></tr></table>'
+    . '<a href="' . $verificationUrl . '" aria-label="Buka verifikasi surat">Verifikasi surat</a>'
+    . '</main></body></html>';
 
 if (!Official_letter_html::valid($html)) {
     fwrite(STDERR, "FAIL: HTML uji tidak lolos validasi.\n");
+    exit(1);
+}
+
+if (Official_letter_html::valid(str_replace('warga.example.test', 'evil.example.test', $html))
+    || Official_letter_html::valid(str_replace('Buka verifikasi surat', 'Tautan lain', $html))) {
+    fwrite(STDERR, "FAIL: Tautan verifikasi yang tidak tepercaya lolos validasi.\n");
     exit(1);
 }
 
